@@ -1,0 +1,30 @@
+form(name="person", action="./person_profile.json", method="post")
+  input(type="hidden", name="id", value="#{person.id}")
+  table.editor(cellpadding="0", cellspacing="0")
+    tr.editor
+      td.editor_label Old Password
+      td.editor
+        input(type="password", name="old_password", placeholder="Old Password")
+    tr.editor
+      td.editor_label New Password
+      td.editor
+        input(type="password", name="new_password", placeholder="New Password", disabled)
+    tr.editor
+      td.editor_label Verify New Password
+      td.editor
+        input(type="password", name="verify_new_password", placeholder="Verify New Password", disabled)
+    tr.editor
+      td.editor_label User Name
+      td.editor
+        input(type="text", name="name", value="#{person.name}", disabled)
+    tr.editor
+      td.editor_label Full Name
+      td.editor
+        input(type="text", name="full_name", value="#{person.full_name}", disabled)
+    tr.editor
+      td.editor_label E-Mail
+      td.editor
+        input(type="email", name="email", value="#{person.email}", disabled)
+
+  input(type="submit", value="Save Changes", disabled)
+  input(type="reset", value="Defaults");

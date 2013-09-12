@@ -1,0 +1,38 @@
+table(cellpadding="0", cellspacing="0")
+  tr
+    th Song Name
+    th Artist Name
+    th Song Status
+    th Personal Rating
+    th Average Rating
+
+  each band_song in band_songs
+    tr(band_song_id="#{band_song.band_song_id}")
+      td #{band_song.name}
+      td #{band_song.artist_name}
+      td
+        select(name="song_status")
+          option(value="-2") Retired
+          option(value="-1") Proposed
+          option(value="0") New
+          option(value="1") Learning
+          option(value="2") Run Through
+          option(value="3") Ready
+          option(value="4") Standard 
+      td
+        select(name="song_rating")
+          option(value="1") &#x2605;
+          option(value="2") &#x2605;&#x2605;
+          option(value="3") &#x2605;&#x2605;&#x2605;
+          option(value="4") &#x2605;&#x2605;&#x2605;&#x2605;
+          option(value="5") &#x2605;&#x2605;&#x2605;&#x2605;&#x2605;
+      td
+        | &#x2605;
+        if band_song.avg_rating >= 2
+          | &#x2605;
+        if band_song.avg_rating >= 3
+          | &#x2605;
+        if band_song.avg_rating >= 4
+          | &#x2605;
+        if band_song.avg_rating >= 5
+          | &#x2605;

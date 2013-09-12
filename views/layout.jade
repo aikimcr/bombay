@@ -1,0 +1,16 @@
+doctype 5
+html
+  head
+    title= title
+    link(rel='stylesheet', href='/stylesheets/style.css')
+    block scripts
+      script(src='./templates.js')
+      script(src='./javascripts/util.js')
+      script(src='./javascripts/dialog.js')
+      script(src='./javascripts/service.js')
+      script(src='./javascripts/service/generic.js')
+      script(src='./javascripts/app_context.js')
+      script(src='./javascripts/startup.js')
+
+  body(onload='app_start()')
+    block content

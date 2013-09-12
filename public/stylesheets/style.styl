@@ -1,0 +1,235 @@
+container-width = 1000px
+container-height = 700px
+
+body
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif
+  background-color: #aa7
+
+.navigation
+  background-color: #cc9
+  padding: 5px 10px 5px 10px
+  border: 1px solid black
+  display: inline-block
+  border-radius: 10px 0 0 10px
+  width: 190px
+  vertical-align:top
+  margin-top: 29px
+  div
+    display: block
+    text-align: left
+
+.band_selector
+  padding-bottom: 10px
+  div
+    padding: 5px
+  div, a
+    padding: 5px
+
+.app_container
+  width: container-width
+  height: container-height
+  position: relative
+  display: inline-block
+
+// app_context styles
+.app_context
+  position: relative
+
+.app_context > a
+  text-decoration: none
+  color: black
+  float: left
+  padding: 5px 10px 5px 10px
+  border: 1px solid black
+  margin-right: 10px
+  position: static
+  border-radius: 10px 10px 0 0
+
+.app_context:not(:target) > a
+  background-color: #aa7
+  z-index: 0
+
+.app_context:target > a
+  background-color: #cc9
+  border-bottom-color: #cc9
+  z-index: 0
+
+.app_context > div
+  background-color: #cc9
+  z-index: 2
+  left: 0
+  top: 29px
+  bottom: 0
+  right: 0
+  padding: 20px
+  border 1px solid black
+  position: absolute
+  overflow: hidden
+  height: 640px
+  border-radius: 0 10px 10px 10px
+
+.app_context:not(:target) > div
+  z-index: -1
+
+.app_context:target > div
+  z-index: 0
+
+// app_context_item styles
+.app_context_item
+  padding: 10px
+
+.app_context_item > div
+  position: absolute
+  top: 10px
+
+.app_context_item > .form
+  left: 10px
+
+.app_context_item > .table
+  right 10px
+
+.app_context_item .creator
+  margin-bottom: 10px
+
+.app_context_item .display
+  font-size: 120%
+
+//
+.container > input[id*="creator"]:checked ~ div.creator
+  display: block
+
+.container > input[id*="creator"]:not(:checked) ~ div.creator
+  display: none
+
+.container > input[id*="display"]:checked ~ div.display
+  display: block
+
+.container > input[id*="display"]:not(:checked) ~ div.display
+  display: none
+
+.container > input[id*="creator"]:checked ~ div.display >div.list
+  height: 550px
+
+.container > input[id*="creator"]:not(:checked) ~ div.display >div.list
+  height: 630px
+  
+//
+.creator
+  overflow: auto
+  width: 900px
+  height:50px
+
+  div > div:first-of-type
+    display: block
+
+  div > div:last-of-type
+    display: none
+
+  input:checked ~ div:first-of-type
+    display: none
+
+   input:checked ~ div:last-of-type
+    display: block
+
+.display
+  width: 860px
+
+  .list
+    overflow: auto
+    width: 840px
+  
+    table
+      border-style: solid
+      border-color: black
+      border-width: 1px;
+  
+    tr:nth-child(even)
+      background-color: #eeb
+  
+    tr:nth-child(odd)
+      background-color: #ffc
+  
+    th
+      padding: 5px 5px 0 10px
+      border-style none solid solid none
+      border-width 0 1px 5px 0
+      background-color: #885
+  
+    td
+      padding: 10px 5px 0 10px
+      border-style: none solid none none
+      border-width: 0 1px 0 0
+  
+    th, td
+      text-align: left
+  
+    th:last-child, td:last-child
+      text-align: left
+      border-right-style: none
+      border-right-width: 0
+
+#band_members .creator input[name="name"]
+  width: 100px
+
+#band_members .creator input[name="full_name"]
+  width: 300px
+
+#band_members .creator input[type="submit"]
+  width: 50px
+
+#band_members .list_table th:nth-child(1), .band_member .list table td:nth-child(1)
+  width: 100px;
+
+#band_members .list_table th:nth-child(2), .band_member .list table td:nth-child(2)
+  width: 300px;
+
+#band_members .list_table th:nth-child(3), .band_member .list table td:nth-child(3)
+  width: 50px;
+
+
+// Dialog classes
+.dialog_background
+  width: container-width
+  height: container-height
+  top: 0
+  left: 0
+  position: absolute
+  z-index: 100
+
+  .dialog_box
+    width: 300px;
+    height: 300px;
+    top: (container-height / 2) - @height
+    left: (container-width / 2) - (@width / 2)
+    position: absolute
+    background-color: #ffa
+    border-style: solid
+    border-color: black
+    border-radius: 10px
+    padding: 20px
+
+    .dialog_message
+       width: 260px
+       height: 220px
+       background-color: #aa7
+       border-radius: 10px
+       padding: 20px
+       margin-bottom: 10px
+
+    .dialog_buttons
+       width: 300px
+       height: 30px
+
+       .dialog_button
+          display: inline-block
+          width: 75px
+          height: 20px
+          background-color: #aa7
+          border-style: solid
+          border-color: black
+          border-radius: 5px
+          padding: 10px
+
+       .dialog_button:first-child
+          margin-left: 10px
+          margin-right: 40px

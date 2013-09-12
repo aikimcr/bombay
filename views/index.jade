@@ -1,0 +1,15 @@
+extends layout
+
+block content
+  div.messages #{messages}
+  div.navigation
+    div.band_selector
+      div Current Band
+      div
+        select(name="band")
+          each band in bands
+            option(value=band.id)= band.name
+    div.band_selector
+      a(href="./logout") Logout
+
+  div.app_container

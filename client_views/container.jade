@@ -1,0 +1,14 @@
+div.container
+  if sections.editor
+    div.editor
+
+  if sections.creator
+    input(type="checkbox", id="show_#{tab_id}_creator")
+    label(for="show_#{tab_id}_creator") Add
+    div.creator
+
+  if sections.display
+    input(type="checkbox", id="show_#{tab_id}_display", checked)
+    label(for="show_#{tab_id}_display")
+      Show List
+    div.display

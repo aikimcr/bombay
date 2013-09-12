@@ -1,0 +1,23 @@
+extends layout
+
+block content
+  div.error_msg #{errors}
+  form(action="./login", method="post")
+    table
+      tr
+        td
+          | Name:
+
+        td
+          input(type="text", name="username")
+
+      tr
+        td
+          | Pass:
+
+        td
+          input(type="password", name="password")
+
+      tr
+        td
+          input(type="submit", value="Login");
