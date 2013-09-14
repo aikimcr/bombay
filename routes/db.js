@@ -5,7 +5,7 @@
 
 var sqlite3 = require('sqlite3');
 var flow = require('flow');
-var db_name = './db/bombay.db';
+var db_name = '/opt/allnightmusic/db/band/bombay.db';
 
 /* Special Selects */
 exports.getMemberBands = function(id, callback) {
