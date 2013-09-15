@@ -27,3 +27,8 @@ service.generic.prototype.set = function(data) {
   });
   this.service_.send(buffer.join('&'));
 };
+
+service.generic.prototype.delete = function() {
+  this.service_.open('DELETE', this.url);
+  this.service_.send();
+};

@@ -92,6 +92,7 @@ app.get('/', requireLogin, routes.index);
 // member_band handlers
 app.get('/member_bands.json', requireLogin, db.memberBands);
 app.post('/member_bands.json', requireLogin, db.createBand);
+app.delete('/member_bands.json', requireLogin, db.removeBand);
 
 // band_member handlers
 app.get('/band_members.json', requireLogin, db.bandPersons);

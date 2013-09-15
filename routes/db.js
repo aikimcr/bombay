@@ -675,3 +675,28 @@ exports.updateSongStatus = function(req, res) {
 
   db.close();
 };
+
+// Deletes
+exports.removeBand = function(req, res) {
+  var person_id = req.session.passport.user;
+  var band_id = getBandId(req);
+
+  var db = new sqlite3.Database(db_name);
+
+  var sql_text = 'BEGIN TRANSACTION; ' +
+   'DELETE FROM song_rating WHERE band_song_id IN (SELECT id FROM band_song WHERE band_id = ' + band_id + '); ' +
+   'DELETE FROM band_song WHERE band_id = ' + band_id + '; ' +
+   'DELETE FROM band_member WHERE band_id = ' + band_id + '; ' +
+   'COMMIT; ';
+
+  var sql_values = [];
+
+  db.exec(sql_text, function(err) {
+    if (err) {
+      logError(err, sql_text, sql_values);
+      res.json({err: err});
+    } else {
+      res.json({});
+    }
+  });
+};

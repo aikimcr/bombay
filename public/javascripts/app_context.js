@@ -207,9 +207,13 @@ app_context.MemberBand.prototype.handleDelete = function(e) {
   var band_id = row.attributes.item('band_id').value;
 
   var confirm_delete = new dialog('Delete band ' + band_id + '?');
-  confirm_delete.show(function(result) {
-    window.console.log("You said " + result);
-  });
+  confirm_delete.show(util.bind(function(result) {
+    if (result) {
+      this.service = new service.generic('./member_bands.json?band_id=' + band_id,
+        util.bind(function(result) { this.redraw(); }, this));
+      this.service.delete();
+    }
+  }, this));
 };
 
 // Band Member App Object
