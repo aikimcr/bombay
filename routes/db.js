@@ -103,6 +103,20 @@ getLoginPermissions = function(db, person_id, band_id, callback) {
   getPerms(callback);
 };
 
+getBand = function(db, band_id, callback) {
+  var sql_text = 'SELECT * FROM band WHERE id = $1';
+  var sql_values = [band_id];
+
+  db.get(sql_text, sql_values, function(err, row) {
+    if (err) {
+      logError(err, sql_text, sql_values);
+      callback({err: err});
+    } else {
+      callback({band: row});
+    }
+  });
+};
+
 getMemberBands = function(db, member_id, callback) {
   var sql_text = "SELECT band.* FROM band, band_member " +
     "WHERE band.id = band_member.band_id " +
@@ -122,7 +136,11 @@ getMemberBands = function(db, member_id, callback) {
 };
 
 getArtists = function(db, callback) {
-  var sql_text = 'SELECT * FROM artist ORDER BY name';
+  var sql_text = 'SELECT artist.*, count(song.id) AS song_count ' +
+    '  FROM artist ' +
+    ' LEFT OUTER JOIN song ON (artist_id = artist.id) ' +
+    ' GROUP BY artist.id ORDER BY artist.name';
+
   var sql_values = [];
 
   db.all(sql_text, sql_values, function(err, rows) {
@@ -237,10 +255,12 @@ exports.bandPersons = function(req, res) {
 
   var db = new sqlite3.Database(db_name);
 
-  var member_sql_text = "SELECT person.full_name, person.email, person.system_admin FROM person, band_member " +
-    "WHERE person.id = band_member.person_id " +
-    "AND band_member.band_id = $1 " +
-    "ORDER BY person.full_name, person.name";
+  var member_sql_text = 'SELECT person.id, person.full_name, person.email, ' +
+    ' person.system_admin, band_member.band_admin' +
+    '  FROM person, band_member ' +
+    ' WHERE person.id = band_member.person_id ' +
+    '   AND band_member.band_id = $1 ' +
+    ' ORDER BY person.full_name, person.name';
 
   var member_sql_values = [band_id];
 
@@ -273,11 +293,19 @@ exports.bandPersons = function(req, res) {
         logError(err, non_member_sql_text, non_member_sql_values);
         res.json({err: err});
       } else {
+        this.non_members = rows;
+        getBand(db, band_id, this);
+      }
+    }, function(result) {
+      if (result.err) {
+        res.json(result);
+      } else {
         res.json({
           permissions: this.permissions,
           band_id: band_id,
+          band: result.band,
           members: this.members,
-          non_members: rows
+          non_members: this.non_members
         });
       }
     }
@@ -296,26 +324,18 @@ exports.artists = function(req, res) {
 
   var getArtistList = flow.define(
     function() {
-      console.log('Get permissions for artists');
       getLoginPermissions(db, person_id, null, this);
     }, function(result) {
-      console.log('got artist permissions?');
       if (result.err) {
-        console.log('No. There was an error');
         res.json(result);
       } else {
-        console.log('Yes.');
         this.permissions = result;
-        console.log('Get Artists');
         getArtists(db, this);
       }
     }, function(result) {
-      console.log('Got the artists?');
       if (result.err) {
-        console.log('No. There was an error.');
         res.json(result);
       } else {
-        console.log('Yes!  Success?');
         result.permissions = this.permissions;
         res.json(result);
       }
@@ -677,6 +697,17 @@ exports.updateSongStatus = function(req, res) {
 };
 
 // Deletes
+getSongRatingDeleteSql = function(person_id, band_id) {
+  return 'DELETE FROM song_rating WHERE person_id = ' + person_id + 
+    ' AND band_song_id IN ' +
+    '(SELECT id FROM band_song WHERE band_id = ' + band_id + '); ';
+};
+
+getBandMemberDeleteSql = function(person_id, band_id) {
+  return 'DELETE FROM band_member WHERE person_id = ' + person_id +
+    ' AND band_id = ' + band_id + '; ';
+}
+
 exports.removeBand = function(req, res) {
   var person_id = req.session.passport.user;
   var band_id = getBandId(req);
@@ -684,10 +715,76 @@ exports.removeBand = function(req, res) {
   var db = new sqlite3.Database(db_name);
 
   var sql_text = 'BEGIN TRANSACTION; ' +
-   'DELETE FROM song_rating WHERE band_song_id IN (SELECT id FROM band_song WHERE band_id = ' + band_id + '); ' +
-   'DELETE FROM band_song WHERE band_id = ' + band_id + '; ' +
-   'DELETE FROM band_member WHERE band_id = ' + band_id + '; ' +
-   'COMMIT; ';
+    getSongRatingDeleteSql(person_id, band_id) +
+    getBandMemberDeleteSql(person_id, band_id) +
+    'COMMIT; ';
+
+  var sql_values = [];
+
+  db.exec(sql_text, function(err) {
+    if (err) {
+      logError(err, sql_text, sql_values);
+      res.json({err: err});
+    } else {
+      res.json({});
+    }
+  });
+};
+
+exports.removeMember = function(req, res) {
+  var person_id = req.session.passport.user;
+  var band_id = getBandId(req);
+  var member_id = req.query.member_id;
+
+  var db = new sqlite3.Database(db_name);
+
+  var sql_text = 'BEGIN TRANSACTION; ' +
+    getSongRatingDeleteSql(member_id, band_id) +
+    getBandMemberDeleteSql(member_id, band_id) +
+    'COMMIT; ';
+
+  var sql_values = [];
+
+  db.exec(sql_text, function(err) {
+    if (err) {
+      logError(err, sql_text, sql_values);
+      res.json({err: err});
+    } else {
+      res.json({});
+    }
+  });
+};
+
+exports.deleteArtist = function(req, res) {
+  var artist_id = req.query.artist_id;
+
+  var db = new sqlite3.Database(db_name);
+
+  var sql_text = 'BEGIN TRANSACTION; ' +
+    'DELETE FROM artist WHERE id = ' + artist_id + '; ' +
+    'COMMIT; ';
+
+  var sql_values = [];
+
+  db.exec(sql_text, function(err) {
+    if (err) {
+      logError(err, sql_text, sql_values);
+      res.json({err: err});
+    } else {
+      res.json({});
+    }
+  });
+};
+
+exports.removeSong = function(req, res) {
+  var band_song_id = req.query.band_song_id;
+
+  var db = new sqlite3.Database(db_name);
+
+  var sql_text = 'BEGIN TRANSACTION; ' +
+    'DELETE FROM song_rating WHERE band_song_id = ' + band_song_id + '; ' +
+    'DELETE FROM band_song WHERE id = ' + band_song_id + '; ' +
+    'COMMIT; ';
 
   var sql_values = [];
 

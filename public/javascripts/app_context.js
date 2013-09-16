@@ -182,6 +182,16 @@ app_context.MemberBand.prototype.handleAPIReturn = function(data) {
   for(var button_idx = 0; button_idx < delete_buttons.length; button_idx++) {
     delete_buttons[button_idx].addEventListener('click', button_handler);
   }
+
+  var band_selector = util.getBandSelector();
+  util.removeAllChildren(band_selector);
+
+  this.model.member_bands.forEach(function(band) {
+    var new_option = document.createElement('option');
+    new_option.innerHTML = band.name;
+    new_option.value = band.id;
+    band_selector.appendChild(new_option);
+  });
 };
 
 app_context.MemberBand.prototype.handleCreateSubmit = function(e) {
@@ -205,15 +215,22 @@ app_context.MemberBand.prototype.handleDelete = function(e) {
 
   var row = e.target.parentElement;
   var band_id = row.attributes.item('band_id').value;
+  var band = this.model.member_bands.filter(function (mb) { return mb.id == band_id })[0];
 
-  var confirm_delete = new dialog('Delete band ' + band_id + '?');
+  var confirm_delete = new dialog('Quit band ' + band.name + '?');
   confirm_delete.show(util.bind(function(result) {
     if (result) {
       this.service = new service.generic('./member_bands.json?band_id=' + band_id,
-        util.bind(function(result) { this.redraw(); }, this));
+        util.bind(function(result) {
+          this.redraw();
+        }, this));
       this.service.delete();
+    } else {
+      this.redraw();
     }
   }, this));
+
+  return true;
 };
 
 // Band Member App Object
@@ -262,6 +279,13 @@ app_context.BandMember.prototype.handleAPIReturn = function(data) {
 
   var new_form = document.querySelector('#' + this.tab_id + ' .creator div.new form');
   new_form.addEventListener('submit', util.bind(this.handleNewSubmit, this));
+
+  var delete_buttons = document.querySelectorAll('#' + this.tab_id + ' .display .list td.delete');
+  var button_handler = util.bind(this.handleDelete, this);
+
+  for(var button_idx = 0; button_idx < delete_buttons.length; button_idx++) {
+    delete_buttons[button_idx].addEventListener('click', button_handler);
+  }
 };
 
 app_context.BandMember.prototype.handleAddSubmit = function(e) {
@@ -293,6 +317,39 @@ app_context.BandMember.prototype.handleNewSubmit = function(e) {
 
 app_context.BandMember.prototype.handleAdd = function(data) {
   this.redraw();
+  app.context_list.forEach(function(context) {
+    if (context.tab_id == 'band_songs') {
+      context.redraw();
+    }
+  });
+};
+
+app_context.BandMember.prototype.handleDelete = function(e) {
+  window.console.log("Do the delete?" + e);
+
+  var row = e.target.parentElement;
+  var member_id = row.attributes.item('member_id').value;
+  var member = this.model.members.filter(function (mem) { return mem.id == member_id })[0];
+
+  var confirm_delete = new dialog('Remove ' + member.full_name + ' from ' + this.model.band.name + '?');
+  confirm_delete.show(util.bind(function(result) {
+    if (result) {
+      var url = './band_members.json?member_id=' + member_id + '&band_id=' + this.model.band.id;
+      this.service = new service.generic(url, util.bind(function(result) {
+        this.redraw();
+        app.context_list.forEach(function(context) {
+          if (context.tab_id == 'band_songs') {
+            context.redraw();
+          }
+        });
+      }, this));
+      this.service.delete();
+    } else {
+      this.redraw();
+    }
+  }, this));
+
+  return true;
 };
 
 // Artist App Object
@@ -337,6 +394,13 @@ app_context.Artist.prototype.handleAPIReturn = function(data) {
 
   var form = document.querySelector('#' + this.tab_id + ' .creator form');
   form.addEventListener('submit', util.bind(this.handleCreateSubmit, this));
+
+  var delete_buttons = document.querySelectorAll('#' + this.tab_id + ' .display .list td.delete');
+  var button_handler = util.bind(this.handleDelete, this);
+
+  for(var button_idx = 0; button_idx < delete_buttons.length; button_idx++) {
+    delete_buttons[button_idx].addEventListener('click', button_handler);
+  }
 };
 
 app_context.Artist.prototype.handleCreateSubmit = function(e) {
@@ -353,6 +417,39 @@ app_context.Artist.prototype.handleCreateSubmit = function(e) {
 
 app_context.Artist.prototype.handleAdd = function(data) {
   this.redraw();
+  app.context_list.forEach(function(context) {
+    if (context.tab_id == 'band_songs') {
+      context.redraw();
+    }
+  });
+};
+
+app_context.Artist.prototype.handleDelete = function(e) {
+  window.console.log("Do the delete?" + e);
+
+  var row = e.target.parentElement;
+  var artist_id = row.attributes.item('artist_id').value;
+  var artist = this.model.artists.filter(function (art) { return art.id == artist_id })[0];
+
+  var confirm_delete = new dialog('Remove ' + artist.name + '?');
+  confirm_delete.show(util.bind(function(result) {
+    if (result) {
+      var url = './artists.json?artist_id=' + artist_id;
+      this.service = new service.generic(url, util.bind(function(result) {
+        this.redraw();
+        app.context_list.forEach(function(context) {
+          if (context.tab_id == 'band_songs') {
+            context.redraw();
+          }
+        });
+      }, this));
+      this.service.delete();
+    } else {
+      this.redraw();
+    }
+  }, this));
+
+  return true;
 };
 
 // BandSong App Object
@@ -419,6 +516,13 @@ app_context.BandSong.prototype.handleAPIReturn = function(data) {
 
   var new_form = document.querySelector('#' + this.tab_id + ' .creator div.new form');
   new_form.addEventListener('submit', util.bind(this.handleNewSubmit, this));
+
+  var delete_buttons = document.querySelectorAll('#' + this.tab_id + ' .display .list td.delete');
+  var button_handler = util.bind(this.handleDelete, this);
+
+  for(var button_idx = 0; button_idx < delete_buttons.length; button_idx++) {
+    delete_buttons[button_idx].addEventListener('click', button_handler);
+  }
 };
 
 app_context.BandSong.prototype.handleAddSubmit = function(e) {
@@ -494,5 +598,26 @@ app_context.BandSong.prototype.statusChangeHandler = function(e) {
     input.disabled = false;
   });
   this.service.set(data);
+  return true;
+};
+
+app_context.BandSong.prototype.handleDelete = function(e) {
+  window.console.log("Do the delete?" + e);
+
+  var row = e.target.parentElement;
+  var band_song_id = row.attributes.item('band_song_id').value;
+  var band_song = this.model.band_songs.filter(function (song) { return song.band_song_id == band_song_id })[0];
+
+  var confirm_delete = new dialog('Remove ' + band_song.name + '?');
+  confirm_delete.show(util.bind(function(result) {
+    if (result) {
+      var url = './songs.json?band_song_id=' + band_song_id;
+      this.service = new service.generic(url, util.bind(function(result) { this.redraw(); }, this));
+      this.service.delete();
+    } else {
+      this.redraw();
+    }
+  }, this));
+
   return true;
 };

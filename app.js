@@ -89,6 +89,13 @@ if ('development' == app.get('env')) {
 
 app.get('/', requireLogin, routes.index);
 
+// Persons master list
+app.post('/persons.json', requireLogin, db.createPerson);
+
+// person_profile handlers
+app.get('/person_profile.json', requireLogin, db.personProfile);
+app.post('/person_profile.json', requireLogin, db.updatePersonProfile);
+
 // member_band handlers
 app.get('/member_bands.json', requireLogin, db.memberBands);
 app.post('/member_bands.json', requireLogin, db.createBand);
@@ -97,20 +104,20 @@ app.delete('/member_bands.json', requireLogin, db.removeBand);
 // band_member handlers
 app.get('/band_members.json', requireLogin, db.bandPersons);
 app.post('/band_members.json', requireLogin, db.addMember);
-app.post('/persons.json', requireLogin, db.createPerson);
-
-// person_profile handlers
-app.get('/person_profile.json', requireLogin, db.personProfile);
-app.post('/person_profile.json', requireLogin, db.updatePersonProfile);
+app.delete('/band_members.json', requireLogin, db.removeMember);
 
 // artist handlers
 app.get('/artists.json', requireLogin, db.artists);
 app.post('/artists.json', requireLogin, db.createArtist);
+app.delete('/artists.json', requireLogin, db.deleteArtist);
+
+// Song master handlers
+app.post('/song_master.json', requireLogin, db.createSong);
 
 // song handlers
 app.get('/songs.json', requireLogin, db.bandSongs);
 app.post('/songs.json', requireLogin, db.addSong);
-app.post('/song_master.json', requireLogin, db.createSong);
+app.delete('/songs.json', requireLogin, db.removeSong);
 app.post('/song_rating.json', requireLogin, db.updateSongRating);
 app.post('/song_status.json', requireLogin, db.updateSongStatus);
 
