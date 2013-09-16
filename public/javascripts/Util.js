@@ -1,12 +1,12 @@
-util = function() {};
+Util = function() {};
 
-util.removeAllChildren = function(element) {
+Util.removeAllChildren = function(element) {
   while(element.children.length > 0) {
     element.removeChild(element.firstChild);
   }
 };
 
-util.appendTextElement = function(parent, element_text) {
+Util.appendTextElement = function(parent, element_text) {
   if (parent) {
     var tmp = document.createElement('div');
     tmp.innerHTML = element_text;
@@ -20,17 +20,17 @@ util.appendTextElement = function(parent, element_text) {
   }
 };
 
-util.getBandSelector = function() {
+Util.getBandSelector = function() {
   return band_selector = document.querySelector('.band_selector select[name="band"]');
 };
 
-util.getBandId = function() {
-  var band_selector = util.getBandSelector();
+Util.getBandId = function() {
+  var band_selector = Util.getBandSelector();
   if (band_selector) { return band_selector.value; }
   return null;
 };
 
-util.bind = function() {
+Util.bind = function() {
   var fargs = [];
 
   for(var i=0;i<arguments.length;i++) {
