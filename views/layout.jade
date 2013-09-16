@@ -5,12 +5,11 @@ html
     link(rel='stylesheet', href='/stylesheets/style.css')
     block scripts
       script(src='./templates.js')
-      script(src='./javascripts/util.js')
-      script(src='./javascripts/dialog.js')
-      script(src='./javascripts/service.js')
-      script(src='./javascripts/service/generic.js')
-      script(src='./javascripts/app_context.js')
-      script(src='./javascripts/startup.js')
+      script(src='./javascripts/Util.js')
+      script(src='./javascripts/Dialog.js')
+      script(src='./javascripts/Service.js')
+      script(src='./javascripts/AppContext.js')
+      script(src='./javascripts/AppStart.js')
 
-  body(onload='app_start()')
+  body(onload='AppStart()')
     block content
