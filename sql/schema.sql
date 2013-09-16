@@ -1,20 +1,14 @@
 DROP TABLE IF EXISTS band;
 DROP TABLE IF EXISTS person;
 DROP TABLE IF EXISTS band_member;
-DROP TABLE IF EXISTS band_x_band_member;
 DROP TABLE IF EXISTS artist;
 DROP TABLE IF EXISTS song;
 DROP TABLE IF EXISTS band_song;
-DROP TABLE IF EXISTS band_x_song;
 DROP TABLE IF EXISTS song_rating;
 DROP TABLE IF EXISTS setlist;
 DROP TABLE IF EXISTS setlist_set;
 DROP TABLE IF EXISTS setlist_song;
 DROP TABLE IF EXISTS schema_change;
-DROP VIEW IF EXISTS band_member_master_view;
-DROP VIEW IF EXISTS song_master_view;
-DROP VIEW IF EXISTS song_view;
-DROP VIEW IF EXISTS average_song_rating;
 
 CREATE TABLE band (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
