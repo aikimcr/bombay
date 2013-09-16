@@ -378,21 +378,25 @@ app_context.Artist.prototype.render = function(app_container) {
 };
 
 app_context.Artist.prototype.redraw = function() {
-  this.service = new service.generic(this.url, util.bind(this.handleAPIReturn, this));
+  var band_id = util.getBandId();
+  var url = this.url + '?band_id=' + band_id;
+  this.service = new service.generic(url, util.bind(this.handleAPIReturn, this));
   this.service.get();
 };
 
 app_context.Artist.prototype.handleAPIReturn = function(data) {
   this.model = data;
+
+  this.model.band_admin = data.permissions.is_band_admin || data.permissions.is_sysadmin;
   util.removeAllChildren(this.context_item);
 
   var container_text = Templates['container']({
-    sections: {creator: this.model.permissions.is_sysadmin, display: 1},
+    sections: {creator: this.model.band_admin, display: 1},
     tab_id: this.tab_id
   });
   util.appendTextElement(this.context_item, container_text);
 
-  if (this.model.permissions.is_sysadmin) {
+  if (this.model.band_admin) {
     var creator = document.querySelector('#' + this.tab_id + ' .creator');
     var creator_text = Templates['artist/creator'](this.model);
     util.appendTextElement(creator, creator_text);
@@ -406,10 +410,12 @@ app_context.Artist.prototype.handleAPIReturn = function(data) {
   var list_text = Templates['artist/display/list'](this.model);
   util.appendTextElement(list, list_text);
 
-  if (this.model.permissions.is_sysadmin) {
+  if (this.model.band_admin) {
     var form = document.querySelector('#' + this.tab_id + ' .creator form');
     form.addEventListener('submit', util.bind(this.handleCreateSubmit, this));
+  }
 
+  if (this.model.permissions.is_sysadmin) {
     var delete_buttons = document.querySelectorAll('#' + this.tab_id + ' .display .list td.delete');
     var button_handler = util.bind(this.handleDelete, this);
 

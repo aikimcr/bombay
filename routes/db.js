@@ -318,6 +318,7 @@ exports.bandPersons = function(req, res) {
 
 exports.artists = function(req, res) {
   var person_id = req.session.passport.user;
+  var band_id = getBandId(req);
   var sql_text = "SELECT artist.* FROM artist ORDER BY artist.name";
   var sql_values = [];
   
@@ -325,7 +326,7 @@ exports.artists = function(req, res) {
 
   var getArtistList = flow.define(
     function() {
-      getLoginPermissions(db, person_id, null, this);
+      getLoginPermissions(db, person_id, band_id, this);
     }, function(result) {
       if (result.err) {
         res.json(result);
