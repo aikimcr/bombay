@@ -2,9 +2,14 @@ table(cellpadding="0", cellspacing="0")
   tr
     th Full Name
     th Email
-    th
+
+    if band_admin
+      th
+
   each member in members
     tr.display(member_id="#{member.id}")
       td #{member.full_name}
       td #{member.email}
-      td.delete &#x2327;
+
+      if band_admin
+        td.delete &#x2327;

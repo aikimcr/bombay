@@ -257,34 +257,43 @@ app_context.BandMember.prototype.redraw = function() {
 
 app_context.BandMember.prototype.handleAPIReturn = function(data) {
   this.model = data;
+
+  this.model.band_admin = data.permissions.is_band_admin || data.permissions.is_sysadmin;
   util.removeAllChildren(this.context_item);
 
-  var container_text = Templates['container']({sections: {creator: 1, display: 1}, tab_id: this.tab_id});
+  var container_text = Templates['container']({
+    sections: {creator: this.model.band_admin, display: true},
+    tab_id: this.tab_id
+  });
   util.appendTextElement(this.context_item, container_text);
 
-  var creator = document.querySelector('#' + this.tab_id + ' .creator');
-  var creator_text = Templates['member/creator'](data);
-  util.appendTextElement(creator, creator_text);
+  if (this.model.band_admin) {
+    var creator = document.querySelector('#' + this.tab_id + ' .creator');
+    var creator_text = Templates['member/creator'](this.model);
+    util.appendTextElement(creator, creator_text);
+  }
 
   var display = document.querySelector('#' + this.tab_id + ' .display');
-  var display_text = Templates['member/display'](data);
+  var display_text = Templates['member/display'](this.model);
   util.appendTextElement(display, display_text);
 
   var list = document.querySelector('#' + this.tab_id + ' .display .list');
-  var list_text = Templates['member/display/list'](data);
+  var list_text = Templates['member/display/list'](this.model);
   util.appendTextElement(list, list_text);
 
-  var add_form = document.querySelector('#' + this.tab_id + ' .creator div.add form');
-  add_form.addEventListener('submit', util.bind(this.handleAddSubmit, this));
+  if (this.model.band_admin) {
+    var add_form = document.querySelector('#' + this.tab_id + ' .creator div.add form');
+    add_form.addEventListener('submit', util.bind(this.handleAddSubmit, this));
 
-  var new_form = document.querySelector('#' + this.tab_id + ' .creator div.new form');
-  new_form.addEventListener('submit', util.bind(this.handleNewSubmit, this));
+    var new_form = document.querySelector('#' + this.tab_id + ' .creator div.new form');
+    new_form.addEventListener('submit', util.bind(this.handleNewSubmit, this));
 
-  var delete_buttons = document.querySelectorAll('#' + this.tab_id + ' .display .list td.delete');
-  var button_handler = util.bind(this.handleDelete, this);
+    var delete_buttons = document.querySelectorAll('#' + this.tab_id + ' .display .list td.delete');
+    var button_handler = util.bind(this.handleDelete, this);
 
-  for(var button_idx = 0; button_idx < delete_buttons.length; button_idx++) {
-    delete_buttons[button_idx].addEventListener('click', button_handler);
+    for(var button_idx = 0; button_idx < delete_buttons.length; button_idx++) {
+      delete_buttons[button_idx].addEventListener('click', button_handler);
+    }
   }
 };
 
@@ -377,29 +386,36 @@ app_context.Artist.prototype.handleAPIReturn = function(data) {
   this.model = data;
   util.removeAllChildren(this.context_item);
 
-  var container_text = Templates['container']({sections: {creator: 1, display: 1}, tab_id: this.tab_id});
+  var container_text = Templates['container']({
+    sections: {creator: this.model.permissions.is_sysadmin, display: 1},
+    tab_id: this.tab_id
+  });
   util.appendTextElement(this.context_item, container_text);
 
-  var creator = document.querySelector('#' + this.tab_id + ' .creator');
-  var creator_text = Templates['artist/creator'](data);
-  util.appendTextElement(creator, creator_text);
+  if (this.model.permissions.is_sysadmin) {
+    var creator = document.querySelector('#' + this.tab_id + ' .creator');
+    var creator_text = Templates['artist/creator'](this.model);
+    util.appendTextElement(creator, creator_text);
+  }
 
   var display = document.querySelector('#' + this.tab_id + ' .display');
-  var display_text = Templates['artist/display'](data);
+  var display_text = Templates['artist/display'](this.model);
   util.appendTextElement(display, display_text);
 
   var list = document.querySelector('#' + this.tab_id + ' .display .list');
-  var list_text = Templates['artist/display/list'](data);
+  var list_text = Templates['artist/display/list'](this.model);
   util.appendTextElement(list, list_text);
 
-  var form = document.querySelector('#' + this.tab_id + ' .creator form');
-  form.addEventListener('submit', util.bind(this.handleCreateSubmit, this));
+  if (this.model.permissions.is_sysadmin) {
+    var form = document.querySelector('#' + this.tab_id + ' .creator form');
+    form.addEventListener('submit', util.bind(this.handleCreateSubmit, this));
 
-  var delete_buttons = document.querySelectorAll('#' + this.tab_id + ' .display .list td.delete');
-  var button_handler = util.bind(this.handleDelete, this);
+    var delete_buttons = document.querySelectorAll('#' + this.tab_id + ' .display .list td.delete');
+    var button_handler = util.bind(this.handleDelete, this);
 
-  for(var button_idx = 0; button_idx < delete_buttons.length; button_idx++) {
-    delete_buttons[button_idx].addEventListener('click', button_handler);
+    for(var button_idx = 0; button_idx < delete_buttons.length; button_idx++) {
+      delete_buttons[button_idx].addEventListener('click', button_handler);
+    }
   }
 };
 
@@ -478,21 +494,28 @@ app_context.BandSong.prototype.redraw = function() {
 
 app_context.BandSong.prototype.handleAPIReturn = function(data) {
   this.model = data;
+
+  this.model.band_admin = data.permissions.is_band_admin || data.permissions.is_sysadmin;
   util.removeAllChildren(this.context_item);
 
-  var container_text = Templates['container']({sections: {creator: 1, display: 1}, tab_id: this.tab_id});
+  var container_text = Templates['container']({
+    sections: {creator: this.model.band_admin, display: 1},
+    tab_id: this.tab_id
+  });
   util.appendTextElement(this.context_item, container_text);
 
-  var creator = document.querySelector('#' + this.tab_id + ' .creator');
-  var creator_text = Templates['song/creator'](data);
-  util.appendTextElement(creator, creator_text);
+  if (this.model.band_admin) {
+    var creator = document.querySelector('#' + this.tab_id + ' .creator');
+    var creator_text = Templates['song/creator'](this.model);
+    util.appendTextElement(creator, creator_text);
+  }
 
   var display = document.querySelector('#' + this.tab_id + ' .display');
-  var display_text = Templates['song/display'](data);
+  var display_text = Templates['song/display'](this.model);
   util.appendTextElement(display, display_text);
 
   var list = document.querySelector('#' + this.tab_id + ' .display .list');
-  var list_text = Templates['song/display/list'](data);
+  var list_text = Templates['song/display/list'](this.model);
   util.appendTextElement(list, list_text);
 
   this.model.band_songs.forEach(function(band_song) {
@@ -502,7 +525,11 @@ app_context.BandSong.prototype.handleAPIReturn = function(data) {
 
     var status = document.querySelector('tr[band_song_id="' + band_song.band_song_id + '"] td select[name="song_status"]');
     status.value = band_song.song_status;
-    status.addEventListener('change', util.bind(this.statusChangeHandler, this));
+    if (this.model.band_admin) {
+      status.addEventListener('change', util.bind(this.statusChangeHandler, this));
+    } else {
+      status.disabled = true;
+    }
   }, this);
 
   //XXX Why is this here?
@@ -511,17 +538,19 @@ app_context.BandSong.prototype.handleAPIReturn = function(data) {
     return false;
   });
 
-  var add_form = document.querySelector('#' + this.tab_id + ' .creator div.add form');
-  add_form.addEventListener('submit', util.bind(this.handleAddSubmit, this));
+  if (this.model.band_admin) {
+    var add_form = document.querySelector('#' + this.tab_id + ' .creator div.add form');
+    add_form.addEventListener('submit', util.bind(this.handleAddSubmit, this));
 
-  var new_form = document.querySelector('#' + this.tab_id + ' .creator div.new form');
-  new_form.addEventListener('submit', util.bind(this.handleNewSubmit, this));
+    var new_form = document.querySelector('#' + this.tab_id + ' .creator div.new form');
+    new_form.addEventListener('submit', util.bind(this.handleNewSubmit, this));
 
-  var delete_buttons = document.querySelectorAll('#' + this.tab_id + ' .display .list td.delete');
-  var button_handler = util.bind(this.handleDelete, this);
+    var delete_buttons = document.querySelectorAll('#' + this.tab_id + ' .display .list td.delete');
+    var button_handler = util.bind(this.handleDelete, this);
 
-  for(var button_idx = 0; button_idx < delete_buttons.length; button_idx++) {
-    delete_buttons[button_idx].addEventListener('click', button_handler);
+    for(var button_idx = 0; button_idx < delete_buttons.length; button_idx++) {
+      delete_buttons[button_idx].addEventListener('click', button_handler);
+    }
   }
 };
 

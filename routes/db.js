@@ -87,13 +87,13 @@ getLoginPermissions = function(db, person_id, band_id, callback) {
       } else {
         var result = {
           person_id: this.person_id,
-          is_sysadmin: this.is_sysadmin,
+          is_sysadmin: this.is_sysadmin == 1,
           band_id: null,
           is_band_admin: null
         };
         if (row) {
           result.band_id = this.band_id;
-          result.is_band_admin = row.band_admin;
+          result.is_band_admin = row.band_admin == 1;
         }
         this.callback(result);
       }
@@ -273,11 +273,12 @@ exports.bandPersons = function(req, res) {
   //console.log('SQL:' + member_sql_text + ', ' + member_sql_values);
   var get_list = flow.define(
     function() {
-      getLoginPermissions(db, person_id, null, this);
+      getLoginPermissions(db, person_id, band_id, this);
     }, function(result) {
       if (result.err) {
         res.json(result);
       } else {
+        this.permissions = result;
         db.all(member_sql_text, member_sql_values, this);
       }
     }, function(err, rows) {

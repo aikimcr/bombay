@@ -5,7 +5,9 @@ table(cellpadding="0", cellspacing="0")
     th Song Status
     th Personal Rating
     th Average Rating
-    th
+
+    if band_admin
+      th
 
   each band_song in band_songs
     tr(band_song_id="#{band_song.band_song_id}")
@@ -38,4 +40,5 @@ table(cellpadding="0", cellspacing="0")
         if band_song.avg_rating >= 5
           | &#x2605;
 
-      td.delete &#x2327;
+      if band_admin
+        td.delete &#x2327;

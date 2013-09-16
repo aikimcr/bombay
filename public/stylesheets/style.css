@@ -134,6 +134,7 @@ body {
 .display .list {
   overflow: auto;
   width: 840px;
+  height: 630px;
 }
 .display .list table {
   border-style: solid;
