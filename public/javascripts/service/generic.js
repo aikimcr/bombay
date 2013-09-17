@@ -1,4 +1,4 @@
-Service = function(url, callback) {
+service.generic = function(url, callback) {
   this.url = url;
   this.service_ = new XMLHttpRequest();
   this.service_.onreadystatechange = function() {
@@ -13,12 +13,12 @@ Service = function(url, callback) {
   };
 };
 
-Service.prototype.get = function() {
+service.generic.prototype.get = function() {
   this.service_.open('GET', this.url);
   this.service_.send();
 };
 
-Service.prototype.set = function(data) {
+service.generic.prototype.set = function(data) {
   this.service_.open('POST', this.url);
   this.service_.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
   var buffer = [];
@@ -28,7 +28,7 @@ Service.prototype.set = function(data) {
   this.service_.send(buffer.join('&'));
 };
 
-Service.prototype.delete = function() {
+service.generic.prototype.delete = function() {
   this.service_.open('DELETE', this.url);
   this.service_.send();
 };

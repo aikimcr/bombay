@@ -1,6 +1,6 @@
-var app = {};
+var app;
 
-function AppStart() {
+app_start = function() {
   var window_hash = window.location.hash;
 
   if (window_hash) {
@@ -10,7 +10,7 @@ function AppStart() {
     }
   }
 
-  var band_selector = Util.getBandSelector();
+  var band_selector = util.getBandSelector();
   var search = document.location.search;
   var parsed_search = {};
 
@@ -22,14 +22,14 @@ function AppStart() {
     });
   }
 
-  if (parsed_search.band_id) band_selector.value = parsed_search.band_id;
+  if (parsed_search['band_id']) band_selector.value = parsed_search['band_id'];
 
-  app = new AppContext();
+  app = new app_context();
   app.render();
 
   var url_hash = document.location.hash;
   if (!url_hash) url_hash = "#person_profile";
-  var target_link = document.querySelector('a[href="' + url_hash + '"]');
+  target_link = document.querySelector('a[href="' + url_hash + '"]');
   if (target_link) target_link.click();
 
   if (band_selector) {

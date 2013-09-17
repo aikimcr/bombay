@@ -1,8 +1,8 @@
-Dialog = function(message) {
+dialog = function(message) {
   this.message_ = message;
 };
 
-Dialog.prototype.show = function(callback) {
+dialog.prototype.show = function(callback) {
   var dialog_text = Templates['dialog']({message: this.message_});
   util.appendTextElement(document.body, dialog_text);
 
@@ -14,7 +14,7 @@ Dialog.prototype.show = function(callback) {
   }
 };
 
-Dialog.prototype.handleButtonPress = function(callback, event) {
+dialog.prototype.handleButtonPress = function(callback, event) {
   window.console.log(event);
 
   var result = event.target.attributes.item('name').value;
