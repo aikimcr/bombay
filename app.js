@@ -57,6 +57,8 @@ var jade_asset = new rack.JadeAsset({
   dirname: './client_views',
 });
 
+db.setDbPath();
+
 var app = express();
 
 // all environments

@@ -5,7 +5,21 @@
 
 var sqlite3 = require('sqlite3');
 var flow = require('flow');
-var db_name = process.env.DB || '/opt/allnightmusic/db/band/bombay.db';
+var fs = require('fs');
+var db_name = null;
+
+exports.setDbPath = function() {
+  var path_list = [
+    '/opt/allnightmusic/db/band/bombay.db',
+    './bombay.db'
+  ];
+  
+  path_list.forEach(function(path) {
+    if (fs.existsSync(path)) {
+      db_name = path;
+    }
+  })
+};
 
 /* Special Selects */
 exports.getBandsForMenu = function(id, callback) {
