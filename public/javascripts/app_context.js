@@ -184,6 +184,7 @@ app_context.MemberBand.prototype.handleAPIReturn = function(data) {
   }
 
   var band_selector = util.getBandSelector();
+  var current_band_id = util.getBandId();
   util.removeAllChildren(band_selector);
 
   this.model.member_bands.forEach(function(band) {
@@ -191,6 +192,7 @@ app_context.MemberBand.prototype.handleAPIReturn = function(data) {
     new_option.innerHTML = band.name;
     new_option.value = band.id;
     band_selector.appendChild(new_option);
+    band_selector.value = current_band_id;
   });
 };
 
