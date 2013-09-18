@@ -538,6 +538,11 @@ app_context.BandSong.prototype.handleAPIReturn = function(data) {
     } else {
       status.disabled = true;
     }
+
+    var avg_rating = document.querySelector('tr[band_song_id="' + band_song.band_song_id + '"] [name="avg_rating"] div');
+    var max_width = avg_rating.offsetWidth - 14; // Subtract font width
+    avg_rating.style.overflow = 'hidden';
+    avg_rating.style.width = parseInt(max_width * (band_song.avg_rating / 5)) + 'px';
   }, this);
 
   //XXX Why is this here?
@@ -608,10 +613,10 @@ app_context.BandSong.prototype.ratingChangeHandler = function(e) {
     var input = row.querySelector('select[name="song_rating"]');
     input.value = data.song_rating.rating;
     input.disabled = false;
-    row.lastChild.innerHTML = '';
-    for(var i=0;i<data.song_rating.average_rating;i++) {
-      row.lastChild.innerHTML += '&#x2605';
-    }
+    var avg_rating = row.querySelector('[name=avg_rating] div');
+    var max_width = avg_rating.offsetWidth - 14; // Subtract font width
+    avg_rating.style.overflow = 'hidden';
+    avg_rating.offsetWidth = parseInt(max_width * (data.song_rating.average_rating / 5));
   });
   this.service.set(data);
   return true;
