@@ -540,7 +540,7 @@ app_context.BandSong.prototype.handleAPIReturn = function(data) {
     }
 
     var avg_rating = document.querySelector('tr[band_song_id="' + band_song.band_song_id + '"] [name="avg_rating"] div');
-    var max_width = avg_rating.offsetWidth - 14; // Subtract font width
+    var max_width = 100;
     avg_rating.style.overflow = 'hidden';
     avg_rating.style.width = parseInt(max_width * (band_song.avg_rating / 5)) + 'px';
   }, this);
@@ -614,7 +614,7 @@ app_context.BandSong.prototype.ratingChangeHandler = function(e) {
     input.value = data.song_rating.rating;
     input.disabled = false;
     var avg_rating = row.querySelector('[name=avg_rating] div');
-    var max_width = avg_rating.offsetWidth - 14; // Subtract font width
+    var max_width = 100;
     avg_rating.style.overflow = 'hidden';
     avg_rating.offsetWidth = parseInt(max_width * (data.song_rating.average_rating / 5));
   });
