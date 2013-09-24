@@ -149,6 +149,23 @@ getMemberBands = function(db, member_id, callback) {
   });
 };
 
+getOtherBands = function(db, member_id, callback) {
+  var sql_text = "SELECT band.* FROM band " +
+    "WHERE band.id NOT IN (SELECT band_id FROM band_member " +
+    "WHERE band_member.id = $1)";
+  
+  var sql_values = [member_id];
+  
+  db.all(sql_text, sql_values, function(err, rows) {
+    if (err) {
+      logError(err, sql_text, sql_values);
+      callback({err: err});
+    } else {
+      callback({other_bands: rows});
+    }
+  });
+};
+
 getArtists = function(db, callback) {
   var sql_text = 'SELECT artist.*, count(song.id) AS song_count ' +
     '  FROM artist ' +
@@ -250,10 +267,18 @@ exports.memberBands = function(req, res) {
       if (result.err) {
         res.json(result);
       } else {
+        this.member_bands = result.member_bands;
+        getOtherBands(db, person_id, this)
+      }
+    }, function(result) {
+      if (result.err) {
+        res.json(result);
+      } else {
         res.json({
           permissions: this.permissions,
           member_id: person_id,
-          member_bands: result.member_bands
+          member_bands: this.member_bands,
+          other_bands: result.other_bands
         });
       }
     }
@@ -417,89 +442,61 @@ exports.createBand = function(req, res) {
   var person_id = req.session.passport.user;
   var band_name = req.body.band_name;
 
-  var band_sql_text = 'INSERT INTO band (name) VALUES ($1)';
-  var band_sql_values = [band_name];
-  var member_sql_text = 'INSERT INTO band_member ' +
-    '("band_id", "person_id") VALUES (' +
-    '(SELECT "id" FROM "band" WHERE "name" == $1),' +
-    '$2)';
-  //console.log(member_sql_text);
-  var member_sql_values = [band_name, person_id];
-  //console.log(member_sql_values);
+  var created_band_id = 'SELECT id FROM band WHERE name = \'' + band_name + '\'';
+  var sql_text_list = [
+    'BEGIN TRANSACTION;',
+    'INSERT INTO band (name) VALUES (\'' + band_name + '\');',
+    'INSERT INTO band_member (band_id, person_id, band_admin) VALUES (' +
+      '(' + created_band_id + '), ' + person_id + ', 1);',
+    'INSERT INTO song_rating (person_id, band_song_id) '+
+    'SELECT person.id as person_id, band_song.id as band_song_id FROM person, band_song ' +
+    ' WHERE person.id = \'' + person_id + '\' AND band_song.band_id = (' + created_band_id + ');',
+    'COMMIT;'
+  ];
 
+  var sql_text = sql_text_list.join('\n');
+  
   var db = new sqlite3.Database(db_name);
 
-  var do_update = flow.define(
-    function() {
-      db.run(band_sql_text, band_sql_values, this);
-    }, function(err, rows) {
-      if (err) {
-        console.log('Error: '  + err);
-        console.log(err);
-        console.log(band_sql_text);
-        console.log(band_sql_values);
-        res.json({err: err});
-      } else {
-        db.run(member_sql_text, member_sql_values, this);
-      }
-    }, function(err, rows) {
-      if (err) {
-        console.log('Error: '  + err);
-        console.log(err);
-        console.log(member_sql_text);
-        console.log(member_sql_values);
-        res.json({err: err});
-      } else {
-        res.json({});
-      }
+  db.exec(sql_text, function(err) {
+    if (err) {
+      logError(err, sql_text, []);
+      res.json({err: err});
     }
-  );
+    else {
+      res.json({});
+    }
+  });
 
-  do_update();
   db.close();
 };
 
 exports.addMember = function(req, res) {
   var data = req.body;
 
-  var band_sql_text = 'INSERT INTO band_member (band_id, person_id) VALUES ($1, $2)';
+  var sql_text_list = [
+    'BEGIN TRANSACTION;',
+    'INSERT INTO band_member (band_id, person_id) VALUES (' + data.band_id + ', ' + data.person_id + ');',
+    'INSERT INTO song_rating (person_id, band_song_id) ' +
+      'SELECT person.id as person_id, band_song.id as band_song_id FROM person, band_song ' +
+      ' WHERE person.id = ' + data.person_id + ' AND band_song.band_id = ' + data.band_id + ';',
+    'COMMIT;'
+  ];
+  
+  var sql_text = sql_text_list.join('\n');
 
-  var band_sql_values = [data.band_id, data.person_id];
-
-  var rating_sql_text = 'INSERT INTO song_rating (person_id, band_song_id) '+
-    'SELECT person.id as person_id, band_song.id as band_song_id FROM person, band_song ' +
-    ' WHERE person.id = $1 AND band_song.band_id = $2';
-
-  var rating_sql_values = [data.person_id, data.band_id];
   var db = new sqlite3.Database(db_name);
 
-  var doUpdate = flow.define(
-    function() {
-      db.run(band_sql_text, band_sql_values, this);
-    }, function(err, rows) {
-      if (err) {
-        console.log("Error: " + err);
-        console.log(err);
-        console.log(band_sql_text);
-        console.log(band_sql_values);
-        res.json({err: err});
-      } else {
-        db.run(rating_sql_text, rating_sql_values, this);
-      }
-    }, function(err, rows) {
-      if (err) {
-        console.log("Error: " + err);
-        console.log(err);
-        console.log(rating_sql_text);
-        console.log(rating_sql_values);
-        res.json({err: err});
-      } else {
-        res.json({});
-      }
+  db.exec(sql_text, function(err) {
+    if (err) {
+      logError(err, sql_text, []);
+      res.json({err: err});
     }
-  );
+    else {
+      res.json({});
+    }
+  });
 
-  doUpdate();
   db.close();
 };
 

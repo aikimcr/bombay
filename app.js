@@ -98,9 +98,12 @@ app.post('/persons.json', requireLogin, db.createPerson);
 app.get('/person_profile.json', requireLogin, db.personProfile);
 app.post('/person_profile.json', requireLogin, db.updatePersonProfile);
 
+// band master handlers
+app.post('/bands.json', requireLogin, db.createBand);
+
 // member_band handlers
 app.get('/member_bands.json', requireLogin, db.memberBands);
-app.post('/member_bands.json', requireLogin, db.createBand);
+app.post('/member_bands.json', requireLogin, db.addMember);
 app.delete('/member_bands.json', requireLogin, db.removeBand);
 
 // band_member handlers

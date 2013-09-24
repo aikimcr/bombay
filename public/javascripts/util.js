@@ -1,4 +1,4 @@
-util = function() {};
+function util() {}
 
 util.removeAllChildren = function(element) {
   while(element.children.length > 0) {
@@ -15,13 +15,11 @@ util.appendTextElement = function(parent, element_text) {
       var element = tmp.removeChild(tmp.firstChild);
       parent.appendChild(element);
     }
-
-    delete(tmp);
   }
 };
 
 util.getBandSelector = function() {
-  return band_selector = document.querySelector('.band_selector select[name="band"]');
+  return document.querySelector('.band_selector select[name="band"]');
 };
 
 util.getBandId = function() {
@@ -44,5 +42,5 @@ util.bind = function() {
       fargs.push(arguments[i]);
     }
     f.apply(thisObject, fargs, arguments);
-  }
+  };
 };

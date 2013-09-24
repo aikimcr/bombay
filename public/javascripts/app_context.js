@@ -1,6 +1,6 @@
-app_context = function() {
+function app_context() {
   this.context_list = [];
-};
+}
 
 app_context.prototype.render = function() {
   var app_container = document.querySelector('.app_container');
@@ -79,7 +79,7 @@ app_context.Person.prototype.setupTabOrder_ = function() {
     var field = edit.firstChild;
     var field_name = field.attributes.name.value;
     this.fields[field_name] = field;
-  };
+  }
 
   this.submit_button = this.form.querySelector('[type="submit"]');
 };
@@ -126,7 +126,7 @@ app_context.Person.prototype.validateForm = function(e) {
       this.fields.old_password.disabled = false;
       this.fields.new_password.disabled = false;
       this.fields.verify_new_password.disabled = false;
-      this.fields.verify_new_password.focus()
+      this.fields.verify_new_password.focus();
     }
   } else {
     this.fields.old_password.focus();
@@ -135,10 +135,10 @@ app_context.Person.prototype.validateForm = function(e) {
 
 // Member Band App Object
 app_context.MemberBand = function() {
-  this.tab_id = 'member_bands',
-  this.tab_text = 'Bands',
-  this.url = './member_bands.json',
-  this.template = 'member_bands'
+  this.tab_id = 'member_bands';
+  this.tab_text = 'Bands';
+  this.url = './member_bands.json';
+  this.template = 'member_bands';
 };
 
 app_context.MemberBand.prototype.render = function(app_container) {
@@ -173,8 +173,11 @@ app_context.MemberBand.prototype.handleAPIReturn = function(data) {
   var list_text = Templates['band/display/list'](data);
   util.appendTextElement(list, list_text);
 
-  var form = document.querySelector('#' + this.tab_id + ' .creator form');
-  form.addEventListener('submit', util.bind(this.handleCreateSubmit, this));
+  var add_form = document.querySelector('#' + this.tab_id + ' .creator div.add form');
+  add_form.addEventListener('submit', util.bind(this.handleAddSubmit, this));
+
+  var new_form = document.querySelector('#' + this.tab_id + ' .creator div.new form');
+  new_form.addEventListener('submit', util.bind(this.handleNewSubmit, this));
 
   var delete_buttons = document.querySelectorAll('#' + this.tab_id + ' .display .list td.delete');
   var button_handler = util.bind(this.handleDelete, this);
@@ -196,16 +199,31 @@ app_context.MemberBand.prototype.handleAPIReturn = function(data) {
   });
 };
 
-app_context.MemberBand.prototype.handleCreateSubmit = function(e) {
+app_context.MemberBand.prototype.handleNewSubmit = function(e) {
   var form = e.target;
   var data = {
-    band_name: form.firstChild.value
+    band_name: form.querySelector('[name="band_name"]').value,
+    person_id: form.querySelector('[name="person_id"]').value
+  };
+
+  this.service = new service.generic('./bands.json', util.bind(this.handleAdd, this));
+  this.service.set(data);
+  e.preventDefault();
+  return false;
+};
+
+app_context.MemberBand.prototype.handleAddSubmit = function(e) {
+  var form = e.target;
+  var data = {
+    band_id: form.querySelector('[name="band_id"]').value,
+    person_id: form.querySelector('[name="person_id"]').value
   };
 
   this.service = new service.generic('./member_bands.json', util.bind(this.handleAdd, this));
   this.service.set(data);
   e.preventDefault();
   return false;
+  
 };
 
 app_context.MemberBand.prototype.handleAdd = function(data) {

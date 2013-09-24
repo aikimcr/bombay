@@ -1,4 +1,16 @@
 div
-  form
-    input(type="text", name="band_name", placeholder="New Band Name")
-    input(type="submit", value="New")
+  input(type="checkbox", id="show_band_create_new")
+  label(for="show_band_create_new") Create A New Band in Master List
+  div.add
+    form
+      input(type="hidden", name="person_id", value="#{permissions.person_id}")
+      select(name="band_id")
+        each band in other_bands
+          option(value="#{band.id}") #{band.name}
+      input(type="submit", value="Join")
+
+  div.new
+    form
+      input(type="hidden", name="person_id", value="#{permissions.person_id}")
+      input(type="text", name="band_name", placeholder="New Band Name")
+      input(type="submit", value="New")
