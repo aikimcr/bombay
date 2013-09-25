@@ -184,7 +184,7 @@ getArtists = function(db, callback) {
   });
 };
 
-getBandSongs = function(db, person_id, band_id, callback) {
+getBandSongs = function(db, person_id, band_id, sort_type, callback) {
   var sql_text = 'SELECT song.name, artist.name AS artist_name, ' +
    'band_song.id as band_song_id, ' +
    'band_song.song_status, a.rating, avg(b.rating) as avg_rating ' +
@@ -192,8 +192,18 @@ getBandSongs = function(db, person_id, band_id, callback) {
    ' WHERE band_song.song_id = song.id AND song.artist_id = artist.id ' +
    '   AND a.band_song_id = band_song.id AND b.band_song_id = a.band_song_id ' +
    '   AND a.person_id = $1 AND band_song.band_id = $2 ' +
-   ' GROUP BY a.band_song_id ORDER BY song.name, artist.name';
+   ' GROUP BY a.band_song_id ';
+  
+  var sort_types = { 
+    'song_name': 'ORDER BY song.name, artist.name',
+    'song_name_rev': 'ORDER BY song.name desc, artist.name desc',
+    'artist_name': 'ORDER BY artist.name, song.name',
+    'artist_name_rev': 'ORDER BY artist.name desc, song.name desc',
+    'average_rating': 'ORDER BY avg_rating, a.rating',
+    'average_rating_rev': 'ORDER BY avg_rating desc, a.rating desc'
+  };
 
+  sql_text += sort_types[sort_type];
   var sql_values = [person_id, band_id];
 
   db.all(sql_text, sql_values, function(err, rows) {
@@ -201,7 +211,10 @@ getBandSongs = function(db, person_id, band_id, callback) {
       logError(err, sql_text, sql_values);
       callback({err: err});
     } else {
-      callback({band_songs: rows});
+      callback({
+        band_songs: rows,
+        sort_type: sort_type
+      });
     }
   });
 };
@@ -390,6 +403,7 @@ exports.artists = function(req, res) {
 exports.bandSongs = function(req, res) {
   var person_id = req.session.passport.user;
   var band_id = getBandId(req);
+  var sort_type = req.query.sort_type;
 
   var db = new sqlite3.Database(db_name);
 
@@ -401,7 +415,7 @@ exports.bandSongs = function(req, res) {
         res.json(result);
       } else {
         this.permissions = result;
-        getBandSongs(db, person_id, band_id, this);
+        getBandSongs(db, person_id, band_id, sort_type, this);
       }
     }, function(result) {
       if (result.err) {
@@ -427,7 +441,8 @@ exports.bandSongs = function(req, res) {
           person_id: person_id,
           band_songs: this.band_songs,
           artists: this.artists,
-          unused_songs: result.unused_songs
+          unused_songs: result.unused_songs,
+          sort_type: sort_type
         });
       }
     }

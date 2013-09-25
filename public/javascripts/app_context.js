@@ -513,7 +513,11 @@ app_context.BandSong.prototype.render = function(app_container) {
 };
 
 app_context.BandSong.prototype.redraw = function() {
-  var service_url = this.url + '?band_id=' + util.getBandId();
+  var sort_selector = document.querySelector('#' + this.tab_id + ' .app_context_item .display .filters [name="sort_type"]');
+  
+  var service_url = this.url + '?band_id=' + util.getBandId() + '&sort_type=';
+  service_url += sort_selector ? sort_selector.value : 'song_name';
+
   this.service = new service.generic(service_url, util.bind(this.handleAPIReturn, this));
   this.service.get();
 };
@@ -540,10 +544,18 @@ app_context.BandSong.prototype.handleAPIReturn = function(data) {
   var display_text = Templates['song/display'](this.model);
   util.appendTextElement(display, display_text);
 
+  var filters = document.querySelector('#' + this.tab_id + ' .display .filters');
+  var filter_text = Templates['song/display/filters'](this.model);
+  util.appendTextElement(filters, filter_text);
+
+  var sort_selector = filters.querySelector('[name="sort_type"');
+  sort_selector.addEventListener('change', util.bind(function() { this.redraw(); }, this));
+  sort_selector.value = this.model.sort_type;
+  
   var list = document.querySelector('#' + this.tab_id + ' .display .list');
   var list_text = Templates['song/display/list'](this.model);
   util.appendTextElement(list, list_text);
-
+  
   this.model.band_songs.forEach(function(band_song) {
     var rating = document.querySelector('tr[band_song_id="' + band_song.band_song_id + '"] td select[name="song_rating"]');
     rating.value = band_song.rating;
@@ -626,16 +638,9 @@ app_context.BandSong.prototype.ratingChangeHandler = function(e) {
   };
 
   input.disabled = true;
-  this.service = new service.generic('./song_rating.json', function(data) {
-    var row = document.querySelector('#band_songs .list tr[band_song_id="' + data.band_song_id + '"]');
-    var input = row.querySelector('select[name="song_rating"]');
-    input.value = data.song_rating.rating;
-    input.disabled = false;
-    var avg_rating = row.querySelector('[name=avg_rating] div');
-    var max_width = 100;
-    avg_rating.style.overflow = 'hidden';
-    avg_rating.offsetWidth = parseInt(max_width * (data.song_rating.average_rating / 5));
-  });
+  this.service = new service.generic('./song_rating.json', util.bind(function(data) { 
+    this.redraw();
+  }, this));
   this.service.set(data);
   return true;
 };
