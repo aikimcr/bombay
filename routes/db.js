@@ -184,15 +184,24 @@ getArtists = function(db, callback) {
   });
 };
 
-getBandSongs = function(db, person_id, band_id, sort_type, callback) {
+getBandSongs = function(db, person_id, band_id, sort_type, filters, callback) {
   var sql_text = 'SELECT song.name, artist.name AS artist_name, ' +
    'band_song.id as band_song_id, ' +
    'band_song.song_status, a.rating, avg(b.rating) as avg_rating ' +
    '  FROM song, artist, song_rating a, song_rating b, band_song ' +
    ' WHERE band_song.song_id = song.id AND song.artist_id = artist.id ' +
    '   AND a.band_song_id = band_song.id AND b.band_song_id = a.band_song_id ' +
-   '   AND a.person_id = $1 AND band_song.band_id = $2 ' +
-   ' GROUP BY a.band_song_id ';
+   '   AND a.person_id = $1 AND band_song.band_id = $2 ';
+  
+  if (filters.song_name) {
+    sql_text += ' AND song.name LIKE \'%' + filters.song_name + '%\'';
+  }
+  
+  if (filters.artist_id) {
+    sql_text += ' AND song.artist_id = ' + filters.artist_id;
+  }
+  
+  sql_text += ' GROUP BY a.band_song_id ';
   
   var sort_types = { 
     'song_name': 'ORDER BY song.name, artist.name',
@@ -213,7 +222,8 @@ getBandSongs = function(db, person_id, band_id, sort_type, callback) {
     } else {
       callback({
         band_songs: rows,
-        sort_type: sort_type
+        sort_type: sort_type,
+        filters: filters
       });
     }
   });
@@ -404,6 +414,8 @@ exports.bandSongs = function(req, res) {
   var person_id = req.session.passport.user;
   var band_id = getBandId(req);
   var sort_type = req.query.sort_type;
+  var filters_json = req.query.filters;
+  var filters = filters_json ? JSON.parse(filters_json) : [];
 
   var db = new sqlite3.Database(db_name);
 
@@ -415,7 +427,7 @@ exports.bandSongs = function(req, res) {
         res.json(result);
       } else {
         this.permissions = result;
-        getBandSongs(db, person_id, band_id, sort_type, this);
+        getBandSongs(db, person_id, band_id, sort_type, filters, this);
       }
     }, function(result) {
       if (result.err) {
@@ -442,7 +454,8 @@ exports.bandSongs = function(req, res) {
           band_songs: this.band_songs,
           artists: this.artists,
           unused_songs: result.unused_songs,
-          sort_type: sort_type
+          sort_type: sort_type,
+          filters: filters
         });
       }
     }

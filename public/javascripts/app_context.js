@@ -518,6 +518,19 @@ app_context.BandSong.prototype.redraw = function() {
   var service_url = this.url + '?band_id=' + util.getBandId() + '&sort_type=';
   service_url += sort_selector ? sort_selector.value : 'song_name';
 
+  var filters = {};
+  var song_filter = document.querySelector('#' + this.tab_id + ' .app_context_item .display .filters [name="song_filter"]');
+  if (song_filter && song_filter.value) {
+    filters.song_name = song_filter.value;
+  }
+  
+  var artist_filter = document.querySelector('#' + this.tab_id + ' .app_context_item .display .filters [name="artist_filter"]');
+  if (artist_filter && artist_filter.value > 0) {
+    filters.artist_id = artist_filter.value;
+  }
+  
+  service_url += '&filters=' + JSON.stringify(filters);
+  
   this.service = new service.generic(service_url, util.bind(this.handleAPIReturn, this));
   this.service.get();
 };
@@ -551,6 +564,14 @@ app_context.BandSong.prototype.handleAPIReturn = function(data) {
   var sort_selector = filters.querySelector('[name="sort_type"');
   sort_selector.addEventListener('change', util.bind(function() { this.redraw(); }, this));
   sort_selector.value = this.model.sort_type;
+  
+  var song_filter = filters.querySelector('[name="song_filter"]');
+  song_filter.addEventListener('change', util.bind(function() { this.redraw(); }, this));
+  song_filter.value = this.model.filters.song_name ? this.model.filters.song_name : null;
+  
+  var artist_filter = filters.querySelector('[name="artist_filter"]');
+  artist_filter.addEventListener('change', util.bind(function() { this.redraw(); }, this));
+  artist_filter.value = this.model.filters.artist_id ? this.model.filters.artist_id : -1;
   
   var list = document.querySelector('#' + this.tab_id + ' .display .list');
   var list_text = Templates['song/display/list'](this.model);

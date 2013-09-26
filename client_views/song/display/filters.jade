@@ -1,4 +1,5 @@
 div.sort
+  label(for="sort_type") Sort
   select(name="sort_type")
     option(value="song_name") Song Name (A-Z)
     option(value="song_name_rev") Song Name (Z-A)
@@ -6,3 +7,14 @@ div.sort
     option(value="artist_name_rev") Artist Name (Z-A)
     option(value="average_rating") Average Rating (Low-High)
     option(value="average_rating_rev") Average Rating (High-Low)
+
+div.filter
+  label(for="song_filter") By Name
+  input(name="song_filter", type="text")
+  
+div.filter
+  label(for="artist_filter") For Artist
+  select(name="artist_filter")
+    option(value=-1) --All Artists--
+    each artist in artists
+      option(value="#{artist.id}") #{artist.name}
