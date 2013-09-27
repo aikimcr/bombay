@@ -19,16 +19,11 @@ app_context.prototype.redraw = function() {
   this.context_list.forEach(function(context) { context.redraw(); }, this);
 };
 
-// Person App App Object
-app_context.Person = function() {
-  this.tab_id = 'person_profile',
-  this.tab_text = 'Profile',
-  this.url = './person_profile.json',
-  this.template = 'person_profile',
+app_context.Base = function() {
   this.fields = null;
 };
 
-app_context.Person.prototype.render = function(app_container) {
+app_context.Base.prototype.render = function(app_container) {
   var pane_text = Templates['app_context']({tab_id: this.tab_id, tab_text: this.tab_text});
   util.appendTextElement(app_container, pane_text);
   this.context = document.querySelector('#' + this.tab_id);
@@ -36,10 +31,26 @@ app_context.Person.prototype.render = function(app_container) {
   this.redraw();
 };
 
-app_context.Person.prototype.redraw = function() {
-  this.service = new service.generic(this.url, util.bind(this.handleAPIReturn, this));
+app_context.Base.prototype.getDrawUrl = function() {
+  return this.url;
+};
+
+app_context.Base.prototype.redraw = function() {
+  var service_url = this.getDrawUrl();
+  this.service = new service.generic(service_url, util.bind(this.handleAPIReturn, this));
   this.service.get();
 };
+
+// Person App App Object
+app_context.Person = function() {
+  this.tab_id = 'person_profile',
+  this.tab_text = 'Profile',
+  this.url = './person_profile.json',
+  this.template = 'person_profile',
+  app_context.Base(this);
+};
+
+app_context.Person.prototype = new app_context.Base();
 
 app_context.Person.prototype.handleAPIReturn = function(data) {
   this.model = data;
@@ -139,20 +150,10 @@ app_context.MemberBand = function() {
   this.tab_text = 'Bands';
   this.url = './member_bands.json';
   this.template = 'member_bands';
+  app_context.Base(this);
 };
 
-app_context.MemberBand.prototype.render = function(app_container) {
-  var pane_text = Templates['app_context']({tab_id: this.tab_id, tab_text: this.tab_text});
-  util.appendTextElement(app_container, pane_text);
-  this.context = document.querySelector('#' + this.tab_id);
-  this.context_item = document.querySelector('#' + this.tab_id + ' .app_context_item');
-  this.redraw();
-};
-
-app_context.MemberBand.prototype.redraw = function() {
-  this.service = new service.generic(this.url, util.bind(this.handleAPIReturn, this));
-  this.service.get();
-};
+app_context.MemberBand.prototype = new app_context.Base();
 
 app_context.MemberBand.prototype.handleAPIReturn = function(data) {
   this.model = data;
@@ -255,24 +256,17 @@ app_context.MemberBand.prototype.handleDelete = function(e) {
 
 // Band Member App Object
 app_context.BandMember = function() {
-  this.tab_id = 'band_members',
-  this.tab_text = 'Band Members',
-  this.url = './band_members.json',
-  this.template = 'band_members'
+  this.tab_id = 'band_members';
+  this.tab_text = 'Band Members';
+  this.url = './band_members.json';
+  this.template = 'band_members';
+  app_context.Base(this);
 };
 
-app_context.BandMember.prototype.render = function(app_container) {
-  var pane_text = Templates['app_context']({tab_id: this.tab_id, tab_text: this.tab_text});
-  util.appendTextElement(app_container, pane_text);
-  this.context = document.querySelector('#' + this.tab_id);
-  this.context_item = document.querySelector('#' + this.tab_id + ' .app_context_item');
-  this.redraw();
-};
+app_context.BandMember.prototype = new app_context.Base();
 
-app_context.BandMember.prototype.redraw = function() {
-  var service_url = this.url + '?band_id=' + util.getBandId();
-  this.service = new service.generic(service_url, util.bind(this.handleAPIReturn, this));
-  this.service.get();
+app_context.BandMember.prototype.getDrawUrl = function() {
+  return this.url + '?band_id=' + util.getBandId();
 };
 
 app_context.BandMember.prototype.handleAPIReturn = function(data) {
@@ -383,25 +377,17 @@ app_context.BandMember.prototype.handleDelete = function(e) {
 
 // Artist App Object
 app_context.Artist = function() {
-  this.tab_id = 'artists',
-  this.tab_text = 'Artists',
-  this.url = './artists.json',
-  this.template = 'artists'
+  this.tab_id = 'artists';
+  this.tab_text = 'Artists';
+  this.url = './artists.json';
+  this.template = 'artists';
+  app_context.Base(this);
 };
 
-app_context.Artist.prototype.render = function(app_container) {
-  var pane_text = Templates['app_context']({tab_id: this.tab_id, tab_text: this.tab_text});
-  util.appendTextElement(app_container, pane_text);
-  this.context = document.querySelector('#' + this.tab_id);
-  this.context_item = document.querySelector('#' + this.tab_id + ' .app_context_item');
-  this.redraw();
-};
+app_context.Artist.prototype = new app_context.Base();
 
-app_context.Artist.prototype.redraw = function() {
-  var band_id = util.getBandId();
-  var url = this.url + '?band_id=' + band_id;
-  this.service = new service.generic(url, util.bind(this.handleAPIReturn, this));
-  this.service.get();
+app_context.Artist.prototype.getDrawUrl = function() {
+  return this.url + '?band_id=' + util.getBandId();
 };
 
 app_context.Artist.prototype.handleAPIReturn = function(data) {
@@ -502,17 +488,12 @@ app_context.BandSong = function() {
   this.template = 'songs';
   this.context = null;
   this.model = null;
+  app_context.Base(this);
 };
 
-app_context.BandSong.prototype.render = function(app_container) {
-  var pane_text = Templates['app_context']({tab_id: this.tab_id, tab_text: this.tab_text});
-  util.appendTextElement(app_container, pane_text);
-  this.context = document.querySelector('#' + this.tab_id);
-  this.context_item = document.querySelector('#' + this.tab_id + ' .app_context_item');
-  this.redraw();
-};
+app_context.BandSong.prototype = new app_context.Base();
 
-app_context.BandSong.prototype.redraw = function() {
+app_context.BandSong.prototype.getDrawUrl = function() {
   var sort_selector = document.querySelector('#' + this.tab_id + ' .app_context_item .display .filters [name="sort_type"]');
   
   var service_url = this.url + '?band_id=' + util.getBandId() + '&sort_type=';
@@ -529,10 +510,7 @@ app_context.BandSong.prototype.redraw = function() {
     filters.artist_id = artist_filter.value;
   }
   
-  service_url += '&filters=' + JSON.stringify(filters);
-  
-  this.service = new service.generic(service_url, util.bind(this.handleAPIReturn, this));
-  this.service.get();
+  return service_url + '&filters=' + JSON.stringify(filters);
 };
 
 app_context.BandSong.prototype.handleAPIReturn = function(data) {
