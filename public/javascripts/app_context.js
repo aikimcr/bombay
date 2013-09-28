@@ -552,7 +552,7 @@ app_context.BandSong.prototype.handleAPIReturn = function(data) {
   var filter_text = Templates['song/display/filters'](this.model);
   util.appendTextElement(filters, filter_text);
 
-  var sort_selector = filters.querySelector('[name="sort_type"');
+  var sort_selector = filters.querySelector('[name="sort_type"]');
   sort_selector.addEventListener('change', util.bind(function() { this.redraw(); }, this));
   sort_selector.value = this.model.sort_type;
   
