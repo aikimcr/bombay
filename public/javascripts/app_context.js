@@ -41,6 +41,19 @@ app_context.Base.prototype.redraw = function() {
   this.service.get();
 };
 
+app_context.Base.prototype.getContextArgs = function() {
+  return {};
+};
+
+app_context.Base.prototype.handleAPIReturn = function(data) {
+  this.model = data;
+  util.removeAllChildren(this.context_item);
+
+  var container_text = Templates['container'](this.getContextArgs());
+  util.appendTextElement(this.context_item, container_text);
+
+};
+
 // Person App App Object
 app_context.Person = function() {
   this.tab_id = 'person_profile',
@@ -52,12 +65,12 @@ app_context.Person = function() {
 
 app_context.Person.prototype = new app_context.Base();
 
-app_context.Person.prototype.handleAPIReturn = function(data) {
-  this.model = data;
-  util.removeAllChildren(this.context_item);
+app_context.Person.prototype.getContextArgs = function() {
+  return {sections: {editor: 1}};
+};
 
-  var container_text = Templates['container']({sections: {editor: 1}});
-  util.appendTextElement(this.context_item, container_text);
+app_context.Person.prototype.handleAPIReturn = function(data) {
+  app_context.Base.prototype.handleAPIReturn.call(this, data);
 
   var editor = document.querySelector('#' + this.tab_id + ' .editor');
   var editor_text = Templates['person/editor'](this.model);
@@ -155,12 +168,12 @@ app_context.MemberBand = function() {
 
 app_context.MemberBand.prototype = new app_context.Base();
 
-app_context.MemberBand.prototype.handleAPIReturn = function(data) {
-  this.model = data;
-  util.removeAllChildren(this.context_item);
+app_context.MemberBand.prototype.getContextArgs = function() {
+  return {sections: {creator: 1, display: 1}, tab_id: this.tab_id};
+};
 
-  var container_text = Templates['container']({sections: {creator: 1, display: 1}, tab_id: this.tab_id});
-  util.appendTextElement(this.context_item, container_text);
+app_context.MemberBand.prototype.handleAPIReturn = function(data) {
+  app_context.Base.prototype.handleAPIReturn.call(this, data);
 
   var creator = document.querySelector('#' + this.tab_id + ' .creator');
   var creator_text = Templates['band/creator'](data);
@@ -269,17 +282,17 @@ app_context.BandMember.prototype.getDrawUrl = function() {
   return this.url + '?band_id=' + util.getBandId();
 };
 
-app_context.BandMember.prototype.handleAPIReturn = function(data) {
-  this.model = data;
-
-  this.model.band_admin = data.permissions.is_band_admin || data.permissions.is_sysadmin;
-  util.removeAllChildren(this.context_item);
-
-  var container_text = Templates['container']({
+app_context.BandMember.prototype.getContextArgs = function() {
+  this.model.band_admin = this.model.permissions.is_band_admin || this.model.permissions.is_sysadmin;
+  
+  return {
     sections: {creator: this.model.band_admin, display: true},
     tab_id: this.tab_id
-  });
-  util.appendTextElement(this.context_item, container_text);
+  };
+};
+
+app_context.BandMember.prototype.handleAPIReturn = function(data) {
+  app_context.Base.prototype.handleAPIReturn.call(this, data);
 
   if (this.model.band_admin) {
     var creator = document.querySelector('#' + this.tab_id + ' .creator');
@@ -390,17 +403,17 @@ app_context.Artist.prototype.getDrawUrl = function() {
   return this.url + '?band_id=' + util.getBandId();
 };
 
-app_context.Artist.prototype.handleAPIReturn = function(data) {
-  this.model = data;
+app_context.Artist.prototype.getContextArgs = function() {
+  this.model.band_admin = this.model.permissions.is_band_admin || this.model.permissions.is_sysadmin;
 
-  this.model.band_admin = data.permissions.is_band_admin || data.permissions.is_sysadmin;
-  util.removeAllChildren(this.context_item);
-
-  var container_text = Templates['container']({
+  return {
     sections: {creator: this.model.band_admin, display: 1},
     tab_id: this.tab_id
-  });
-  util.appendTextElement(this.context_item, container_text);
+  }
+};
+
+app_context.Artist.prototype.handleAPIReturn = function(data) {
+  app_context.Base.prototype.handleAPIReturn.call(this, data);
 
   if (this.model.band_admin) {
     var creator = document.querySelector('#' + this.tab_id + ' .creator');
@@ -513,17 +526,17 @@ app_context.BandSong.prototype.getDrawUrl = function() {
   return service_url + '&filters=' + JSON.stringify(filters);
 };
 
-app_context.BandSong.prototype.handleAPIReturn = function(data) {
-  this.model = data;
+app_context.BandSong.prototype.getContextArgs = function() {
+  this.model.band_admin = this.model.permissions.is_band_admin || this.model.permissions.is_sysadmin;
 
-  this.model.band_admin = data.permissions.is_band_admin || data.permissions.is_sysadmin;
-  util.removeAllChildren(this.context_item);
-
-  var container_text = Templates['container']({
+  return {
     sections: {creator: this.model.band_admin, display: 1},
     tab_id: this.tab_id
-  });
-  util.appendTextElement(this.context_item, container_text);
+  };
+};
+
+app_context.BandSong.prototype.handleAPIReturn = function(data) {
+  app_context.Base.prototype.handleAPIReturn.call(this, data);
 
   if (this.model.band_admin) {
     var creator = document.querySelector('#' + this.tab_id + ' .creator');
