@@ -54,6 +54,26 @@ app_context.Base.prototype.handleAPIReturn = function(data) {
 
 };
 
+app_context.Base.prototype.otherChangeTabs = function() {
+  return [];
+};
+
+app_context.Base.prototype.handleAfterChange = function() {
+  this.redraw();
+  var other_change_tabs = this.otherChangeTabs();
+  other_change_tabs.forEach(function(tab_name) {
+    app.context_list.forEach(function(context) {
+      if (context.tab_id == tab_name) {
+        context.redraw();
+      }
+    });
+  });
+};
+
+app_context.Base.prototype.handleAdd = function() {
+  this.handleAfterChange();
+};
+
 // Person App App Object
 app_context.Person = function() {
   this.tab_id = 'person_profile',
@@ -240,10 +260,6 @@ app_context.MemberBand.prototype.handleAddSubmit = function(e) {
   
 };
 
-app_context.MemberBand.prototype.handleAdd = function(data) {
-  this.redraw();
-};
-
 app_context.MemberBand.prototype.handleDelete = function(e) {
   window.console.log("Do the delete?" + e);
 
@@ -255,12 +271,10 @@ app_context.MemberBand.prototype.handleDelete = function(e) {
   confirm_delete.show(util.bind(function(result) {
     if (result) {
       this.service = new service.generic('./member_bands.json?band_id=' + band_id,
-        util.bind(function(result) {
-          this.redraw();
-        }, this));
+        util.bind(this.handleAfterChange, this));
       this.service.delete();
     } else {
-      this.redraw();
+      this.handleAfterChange();
     }
   }, this));
 
@@ -351,13 +365,8 @@ app_context.BandMember.prototype.handleNewSubmit = function(e) {
   return false;
 };
 
-app_context.BandMember.prototype.handleAdd = function(data) {
-  this.redraw();
-  app.context_list.forEach(function(context) {
-    if (context.tab_id == 'band_songs') {
-      context.redraw();
-    }
-  });
+app_context.BandMember.prototype.otherChangeTabs = function() {
+  return ['band_songs'];
 };
 
 app_context.BandMember.prototype.handleDelete = function(e) {
@@ -371,17 +380,10 @@ app_context.BandMember.prototype.handleDelete = function(e) {
   confirm_delete.show(util.bind(function(result) {
     if (result) {
       var url = './band_members.json?member_id=' + member_id + '&band_id=' + this.model.band.id;
-      this.service = new service.generic(url, util.bind(function(result) {
-        this.redraw();
-        app.context_list.forEach(function(context) {
-          if (context.tab_id == 'band_songs') {
-            context.redraw();
-          }
-        });
-      }, this));
+      this.service = new service.generic(url, util.bind(this.handleAfterChange, this));
       this.service.delete();
     } else {
-      this.redraw();
+      this.handleAfterChange();
     }
   }, this));
 
@@ -456,13 +458,8 @@ app_context.Artist.prototype.handleCreateSubmit = function(e) {
   return false;
 };
 
-app_context.Artist.prototype.handleAdd = function(data) {
-  this.redraw();
-  app.context_list.forEach(function(context) {
-    if (context.tab_id == 'band_songs') {
-      context.redraw();
-    }
-  });
+app_context.Artist.prototype.otherChangeTabs = function() {
+  return ['band_songs'];
 };
 
 app_context.Artist.prototype.handleDelete = function(e) {
@@ -476,17 +473,10 @@ app_context.Artist.prototype.handleDelete = function(e) {
   confirm_delete.show(util.bind(function(result) {
     if (result) {
       var url = './artists.json?artist_id=' + artist_id;
-      this.service = new service.generic(url, util.bind(function(result) {
-        this.redraw();
-        app.context_list.forEach(function(context) {
-          if (context.tab_id == 'band_songs') {
-            context.redraw();
-          }
-        });
-      }, this));
+      this.service = new service.generic(url, util.bind(this.handleAfterChange, this));
       this.service.delete();
     } else {
-      this.redraw();
+      this.handleAfterChange();
     }
   }, this));
 
@@ -635,10 +625,6 @@ app_context.BandSong.prototype.handleNewSubmit = function(e) {
   return false;
 };
 
-app_context.BandSong.prototype.handleAdd = function(data) {
-  this.redraw();
-};
-
 app_context.BandSong.prototype.ratingChangeHandler = function(e) {
   var input = e.target;
   var row = input.parentElement.parentElement;
@@ -689,10 +675,10 @@ app_context.BandSong.prototype.handleDelete = function(e) {
   confirm_delete.show(util.bind(function(result) {
     if (result) {
       var url = './songs.json?band_song_id=' + band_song_id;
-      this.service = new service.generic(url, util.bind(function(result) { this.redraw(); }, this));
+      this.service = new service.generic(url, util.bind(this.handleAfterChange, this));
       this.service.delete();
     } else {
-      this.redraw();
+      this.handleAfterChange();
     }
   }, this));
 
