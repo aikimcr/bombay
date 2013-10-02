@@ -152,7 +152,7 @@ getMemberBands = function(db, member_id, callback) {
 getOtherBands = function(db, member_id, callback) {
   var sql_text = "SELECT band.* FROM band " +
     "WHERE band.id NOT IN (SELECT band_id FROM band_member " +
-    "WHERE band_member.id = $1)";
+    "WHERE band_member.person_id = $1)";
   
   var sql_values = [member_id];
   
