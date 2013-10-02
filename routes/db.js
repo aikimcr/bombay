@@ -8,6 +8,10 @@ var flow = require('flow');
 var fs = require('fs');
 var db_name = null;
 
+exports.getDbPath = function() {
+  return db_name;
+};
+
 exports.setDbPath = function() {
   var path_list = [
     '/opt/allnightmusic/db/band/bombay.db',
