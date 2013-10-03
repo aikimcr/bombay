@@ -1,5 +1,7 @@
 var should = require("should");
 var db = require("../routes/db");
+var sqlite3 = require("sqlite3");
+var fs = require("fs");
 
 describe('db', function() {
   describe('#pathNotSet', function() {
@@ -26,20 +28,40 @@ describe('db', function() {
       path.should.eql('./bombay.db');
       done();
     });
+    
+    it("Should set the path to the value passed in", function(done) {
+      db.setDbPath('./bombay_test.db');
+      var path = db.getDbPath();
+      path.should.eql('./bombay_test.db');
+      done();
+    });
   });
-});
-
-/*
-describe('getBandsForMenu', function() {
-  describe('getEm', function() {
-    db.setDbPath();
-    db.getBandsForMenu(1, function(result) {
-      it("Should return a structure with all bands in it", function() {
-        should.deepEqual(result, [
-          {id: 1, name: 'All Night Music'},
-        ]);
+  
+  describe('#getBandsForMenu', function(){
+    before(function(done) {
+      db.setDbPath('./bombay_test.db');
+      var sql = fs.readFileSync('./sql/schema.sql', 'utf8');
+      var dbh = new sqlite3.Database(db.getDbPath());
+      dbh.exec(sql, done);
+      dbh.close();
+    });
+    
+    before(function(done) {
+      var sql = fs.readFileSync('./test/support/addBands.sql', 'utf8');
+      var dbh = new sqlite3.Database(db.getDbPath());
+      dbh.exec(sql, done);
+      dbh.close();
+    });
+    
+    it("should get bands", function(done) {
+      db.getBandsForMenu(1, function(result) {
+        result.should.eql([{
+          id: 1, name: 'band1'
+        }, {
+          id: 2, name: 'band2'
+        }]);
+        done();
       });
     });
   });
 });
-*/

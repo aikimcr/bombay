@@ -12,17 +12,21 @@ exports.getDbPath = function() {
   return db_name;
 };
 
-exports.setDbPath = function() {
-  var path_list = [
-    '/opt/allnightmusic/db/band/bombay.db',
-    './bombay.db'
-  ];
-  
-  path_list.forEach(function(path) {
-    if (fs.existsSync(path)) {
-      db_name = path;
-    }
-  })
+exports.setDbPath = function(opt_path) {
+  if (opt_path) {
+    db_name = opt_path;
+  } else {
+    var path_list = [
+        '/opt/allnightmusic/db/band/bombay.db',
+        './bombay.db'
+      ];
+      
+    path_list.forEach(function(path) {
+        if (fs.existsSync(path)) {
+          db_name = path;
+        }
+    });
+  }
 };
 
 /* Special Selects */
@@ -37,7 +41,7 @@ exports.getBandsForMenu = function(id, callback) {
     }
   });
 
-  db.close()
+  db.close();
 };
 
 exports.getPersonByName = function(name, callback) {
