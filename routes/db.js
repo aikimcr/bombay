@@ -33,7 +33,7 @@ exports.setDbPath = function(opt_path) {
 exports.getBandsForMenu = function(id, callback) {
   var db = new sqlite3.Database(db_name);
 
-  getMemberBands(db, id, function(result) {
+  exports.getMemberBands(db, id, function(result) {
     if (result.err) {
       throw result.err;
     } else {
@@ -139,7 +139,7 @@ getBand = function(db, band_id, callback) {
   });
 };
 
-getMemberBands = function(db, member_id, callback) {
+exports.getMemberBands = function(db, member_id, callback) {
   var sql_text = "SELECT band.* FROM band, band_member " +
     "WHERE band.id = band_member.band_id " +
     "AND band_member.person_id = $1 " +
@@ -157,7 +157,7 @@ getMemberBands = function(db, member_id, callback) {
   });
 };
 
-getOtherBands = function(db, member_id, callback) {
+exports.getOtherBands = function(db, member_id, callback) {
   var sql_text = "SELECT band.* FROM band " +
     "WHERE band.id NOT IN (SELECT band_id FROM band_member " +
     "WHERE band_member.person_id = $1)";
@@ -292,14 +292,14 @@ exports.memberBands = function(req, res) {
         res.json(result);
       } else {
         this.permissions = result;
-        getMemberBands(db, person_id, this);
+        exports.getMemberBands(db, person_id, this);
       }
     }, function(result) {
       if (result.err) {
         res.json(result);
       } else {
         this.member_bands = result.member_bands;
-        getOtherBands(db, person_id, this)
+        exports.getOtherBands(db, person_id, this)
       }
     }, function(result) {
       if (result.err) {

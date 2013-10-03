@@ -53,7 +53,37 @@ describe('db', function() {
       dbh.close();
     });
     
-    it("should get bands", function(done) {
+    it("should get member bands", function(done) {
+      var dbh = new sqlite3.Database(db.getDbPath());
+      db.getMemberBands(dbh, 1, function(result) {
+        result.should.eql({
+          member_bands: [{
+            id: 1, name: 'band1'
+          }, {
+            id: 2, name: 'band2'
+          }]
+        });
+        done();
+      });
+      dbh.close();
+    });
+    
+    it("should get other bands", function(done) {
+      var dbh = new sqlite3.Database(db.getDbPath());
+      db.getOtherBands(dbh, 1, function(result) {
+        result.should.eql({
+          other_bands: [{
+            id: 3, name: 'band3'
+          }, {
+            id: 4, name: 'band4'
+          }]
+        });
+        done();
+      });
+      dbh.close();      
+    });
+    
+    it("should get bands for menu", function(done) {
       db.getBandsForMenu(1, function(result) {
         result.should.eql([{
           id: 1, name: 'band1'
