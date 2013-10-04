@@ -6,6 +6,7 @@
 var sqlite3 = require('sqlite3');
 var flow = require('flow');
 var fs = require('fs');
+var util = require('../routes/util');
 var db_name = null;
 
 exports.getDbPath = function() {
@@ -300,32 +301,29 @@ exports.memberBands = function(req, res) {
 
   var getBands = flow.define(
     function() {
+      this.result = {member_id: person_id};
       exports.getLoginPermissions(db, person_id, null, this);
     }, function(result) {
       if (result.err) {
         res.json(result);
       } else {
-        this.permissions = result;
+        this.result = util.obj_merge(this.result, {permissions: result});
         exports.getMemberBands(db, person_id, this);
       }
     }, function(result) {
       if (result.err) {
         res.json(result);
       } else {
-        this.member_bands = result.member_bands;
-        exports.getOtherBands(db, person_id, this)
+        this.result = util.obj_merge(this.result, result);
+        exports.getOtherBands(db, person_id, this);
       }
     }, function(result) {
       if (result.err) {
         res.json(result);
       } else {
-        res.json({
-          permissions: this.permissions,
-          member_id: person_id,
-          member_bands: this.member_bands,
-          other_bands: result.other_bands
-        });
-      }
+        this.result = util.obj_merge(this.result, result);
+        res.json(this.result);
+     }
     }
   );
 
