@@ -1,6 +1,6 @@
 
 /*
- * GET artist list
+ * Database manipulation methods.
  */
 
 var sqlite3 = require('sqlite3');
@@ -59,7 +59,7 @@ exports.getPersonByName = function(name, callback) {
 };
 
 /* Internal Utilities */
-logError = function(err, sql_text, sql_values) {
+exports.logDbError = function(err, sql_text, sql_values) {
   console.log("Error " + err);
   console.log(err);
   console.log(sql_text);
@@ -74,7 +74,7 @@ getBandId = function(req) {
   return band_id;
 };
 
-getLoginPermissions = function(db, person_id, band_id, callback) {
+exports.getLoginPermissions = function(db, person_id, band_id, callback) {
   var person_sql_text = 'SELECT system_admin FROM person WHERE id = $1';
   var person_sql_values = [person_id];
 
@@ -90,7 +90,7 @@ getLoginPermissions = function(db, person_id, band_id, callback) {
       db.get(person_sql_text, person_sql_values, this);
     }, function(err, row) {
       if (err) {
-        logError(err, person_sql_text, person_sql_values);
+        exports.logDbError(err, person_sql_text, person_sql_values);
         this.callback({err: err})
       } else {
         this.person_id = person_id;
@@ -104,7 +104,7 @@ getLoginPermissions = function(db, person_id, band_id, callback) {
       }
     }, function(err, row) {
       if (err) {
-        logError(err, member_sql_text, member_sql_values)
+        exports.logDbError(err, member_sql_text, member_sql_values)
         this.callback({err: err});
       } else {
         var result = {
@@ -125,13 +125,13 @@ getLoginPermissions = function(db, person_id, band_id, callback) {
   getPerms(callback);
 };
 
-getBand = function(db, band_id, callback) {
+exports.getBand = function(db, band_id, callback) {
   var sql_text = 'SELECT * FROM band WHERE id = $1';
   var sql_values = [band_id];
 
   db.get(sql_text, sql_values, function(err, row) {
     if (err) {
-      logError(err, sql_text, sql_values);
+      exports.logDbError(err, sql_text, sql_values);
       callback({err: err});
     } else {
       callback({band: row});
@@ -149,7 +149,7 @@ exports.getMemberBands = function(db, member_id, callback) {
 
   db.all(sql_text, sql_values, function(err, rows) {
     if (err) {
-      logError(err, sql_text, sql_values);
+      exports.logDbError(err, sql_text, sql_values);
       callback({err: err});
     } else {
       callback({member_bands: rows});
@@ -166,12 +166,26 @@ exports.getOtherBands = function(db, member_id, callback) {
   
   db.all(sql_text, sql_values, function(err, rows) {
     if (err) {
-      logError(err, sql_text, sql_values);
+      exports.logDbError(err, sql_text, sql_values);
       callback({err: err});
     } else {
       callback({other_bands: rows});
     }
   });
+};
+
+exports.getAllBands = function(db, callback) {
+  var sql_text = "SELECT * FROM band";
+  var sql_values = [];
+  
+  db.all(sql_text, sql_values, function(err, rows) {
+    if (err) {
+      exports.logDbError(err, sql_text, sql_values);
+      callback({err: err});
+    } else {
+      callback({all_bands: rows});
+    }
+  })
 };
 
 getArtists = function(db, callback) {
@@ -184,7 +198,7 @@ getArtists = function(db, callback) {
 
   db.all(sql_text, sql_values, function(err, rows) {
     if (err) {
-      logError(err, sql_text, sql_values);
+      exports.logDbError(err, sql_text, sql_values);
       callback({err: err});
     } else {
       callback({artists: rows});
@@ -225,7 +239,7 @@ getBandSongs = function(db, person_id, band_id, sort_type, filters, callback) {
 
   db.all(sql_text, sql_values, function(err, rows) {
     if (err) {
-      logError(err, sql_text, sql_values);
+      exports.logDbError(err, sql_text, sql_values);
       callback({err: err});
     } else {
       callback({
@@ -249,7 +263,7 @@ getUnusedSongs = function(db, band_id, callback) {
 
   db.all(sql_text, sql_values, function(err, rows) {
     if (err) {
-      logError(err, sql_text, sql_values);
+      exports.logDbError(err, sql_text, sql_values);
       callback({err: err});
     } else {
       callback({unused_songs: rows});
@@ -286,7 +300,7 @@ exports.memberBands = function(req, res) {
 
   var getBands = flow.define(
     function() {
-      getLoginPermissions(db, person_id, null, this);
+      exports.getLoginPermissions(db, person_id, null, this);
     }, function(result) {
       if (result.err) {
         res.json(result);
@@ -343,7 +357,7 @@ exports.bandPersons = function(req, res) {
   //console.log('SQL:' + member_sql_text + ', ' + member_sql_values);
   var get_list = flow.define(
     function() {
-      getLoginPermissions(db, person_id, band_id, this);
+      exports.getLoginPermissions(db, person_id, band_id, this);
     }, function(result) {
       if (result.err) {
         res.json(result);
@@ -353,7 +367,7 @@ exports.bandPersons = function(req, res) {
       }
     }, function(err, rows) {
        if (err) {
-         logError(err, member_sql_text, member_sql_values);
+         exports.logDbError(err, member_sql_text, member_sql_values);
          res.json({err: err});
        } else {
          this.members = rows;
@@ -361,11 +375,11 @@ exports.bandPersons = function(req, res) {
        }
     }, function(err, rows) {
       if (err) {
-        logError(err, non_member_sql_text, non_member_sql_values);
+        exports.logDbError(err, non_member_sql_text, non_member_sql_values);
         res.json({err: err});
       } else {
         this.non_members = rows;
-        getBand(db, band_id, this);
+        exports.getBand(db, band_id, this);
       }
     }, function(result) {
       if (result.err) {
@@ -396,7 +410,7 @@ exports.artists = function(req, res) {
 
   var getArtistList = flow.define(
     function() {
-      getLoginPermissions(db, person_id, band_id, this);
+      exports.getLoginPermissions(db, person_id, band_id, this);
     }, function(result) {
       if (result.err) {
         res.json(result);
@@ -429,7 +443,7 @@ exports.bandSongs = function(req, res) {
 
   var getSongs = flow.define(
     function() {
-      getLoginPermissions(db, person_id, band_id, this);
+      exports.getLoginPermissions(db, person_id, band_id, this);
     }, function(result) {
       if (result.err) {
         res.json(result);
@@ -496,7 +510,7 @@ exports.createBand = function(req, res) {
 
   db.exec(sql_text, function(err) {
     if (err) {
-      logError(err, sql_text, []);
+      exports.logDbError(err, sql_text, []);
       res.json({err: err});
     }
     else {
@@ -525,7 +539,7 @@ exports.addMember = function(req, res) {
 
   db.exec(sql_text, function(err) {
     if (err) {
-      logError(err, sql_text, []);
+      exports.logDbError(err, sql_text, []);
       res.json({err: err});
     }
     else {
@@ -772,7 +786,7 @@ exports.removeBand = function(req, res) {
 
   db.exec(sql_text, function(err) {
     if (err) {
-      logError(err, sql_text, sql_values);
+      exports.logDbError(err, sql_text, sql_values);
       res.json({err: err});
     } else {
       res.json({});
@@ -796,7 +810,7 @@ exports.removeMember = function(req, res) {
 
   db.exec(sql_text, function(err) {
     if (err) {
-      logError(err, sql_text, sql_values);
+      exports.logDbError(err, sql_text, sql_values);
       res.json({err: err});
     } else {
       res.json({});
@@ -817,7 +831,7 @@ exports.deleteArtist = function(req, res) {
 
   db.exec(sql_text, function(err) {
     if (err) {
-      logError(err, sql_text, sql_values);
+      exports.logDbError(err, sql_text, sql_values);
       res.json({err: err});
     } else {
       res.json({});
@@ -839,7 +853,7 @@ exports.removeSong = function(req, res) {
 
   db.exec(sql_text, function(err) {
     if (err) {
-      logError(err, sql_text, sql_values);
+      exports.logDbError(err, sql_text, sql_values);
       res.json({err: err});
     } else {
       res.json({});
