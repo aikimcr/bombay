@@ -5,7 +5,7 @@ div
     form
       input(type="hidden", name="band_id", value="#{band_id}")
       select(name="person_id")
-        each person in non_members
+        each person in non_band_members
           option(value="#{person.id}") #{person.full_name}
       input(type="submit", value="Add")
   div.new
