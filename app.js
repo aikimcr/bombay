@@ -107,7 +107,7 @@ app.post('/member_bands.json', requireLogin, db.addMember);
 app.delete('/member_bands.json', requireLogin, db.removeBand);
 
 // band_member handlers
-app.get('/band_members.json', requireLogin, db.bandPersons);
+app.get('/band_members.json', requireLogin, db.bandMembers);
 app.post('/band_members.json', requireLogin, db.addMember);
 app.delete('/band_members.json', requireLogin, db.removeMember);
 

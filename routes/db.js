@@ -56,7 +56,7 @@ exports.getPersonByName = function(name, callback) {
       callback(rows[0]);
     }
   });
-  db.close()
+  db.close();
 };
 
 /* Internal Utilities */
@@ -67,58 +67,66 @@ exports.logDbError = function(err, sql_text, sql_values) {
   console.log(sql_values);
 };
 
-getBandId = function(req) {
-  //console.log('URL:' + req.url);
-  //console.log('URL Query:' + req.query);
-  var band_id = req.query.band_id;
-  //console.log('URL Band ID:' + band_id);
-  return band_id;
+exports.doSqlQuery = function(db, sql_text, sql_values, result_key, callback) {
+  db.all(sql_text, sql_values, function(err, rows) {
+    if(err) {
+      exports.logDbError(err, sql_text, sql_values);
+      callback({err: err});
+    } else {
+      var result = {};
+      result[result_key] = rows;
+      callback(result);
+    }
+  });
+};
+
+exports.doSqlGet = function(db, sql_text, sql_values, result_key, callback) {
+  db.get(sql_text, sql_values, function(err, row) {
+    if(err) {
+      exports.logDbError(err, sql_text, sql_values);
+      callback({err: err});
+    } else {
+      var result = {};
+      result[result_key] = row;
+      callback(result);
+    }
+  });
 };
 
 exports.getLoginPermissions = function(db, person_id, band_id, callback) {
-  var person_sql_text = 'SELECT system_admin FROM person WHERE id = $1';
+  var person_sql_text = 'SELECT id as person_id, system_admin as is_sysadmin FROM person WHERE id = $1';
   var person_sql_values = [person_id];
 
-  var member_sql_text = 'SELECT band_admin FROM band_member' +
+  var member_sql_text = 'SELECT id as band_id, band_admin as is_band_admin FROM band_member' +
                         ' WHERE person_id = $1 AND band_id = $2';
   var member_sql_values = [person_id, band_id];
-
-  var sql_values = [person_id, band_id];
 
   var getPerms = flow.define(
     function(callback) {
       this.callback = callback;
-      db.get(person_sql_text, person_sql_values, this);
-    }, function(err, row) {
-      if (err) {
-        exports.logDbError(err, person_sql_text, person_sql_values);
-        this.callback({err: err})
+      exports.doSqlGet(db, person_sql_text, person_sql_values, 'person', this);
+    }, function(result) {
+      if (result.err) {
+        this.callback(result)
       } else {
-        this.person_id = person_id;
-        this.is_sysadmin = row.system_admin;
+        result.person.is_sysadmin = result.person.is_sysadmin !== 0 ? true : false;
+        this.result = result.person;
         if (band_id) {
           this.band_id = band_id;
-          db.get(member_sql_text, member_sql_values, this);
+          exports.doSqlGet(db, member_sql_text, member_sql_values, 'band', this);
         } else {
-          this(null, null);
+          this({band:{band_id: null, is_band_admin: null}});
         }
       }
-    }, function(err, row) {
-      if (err) {
-        exports.logDbError(err, member_sql_text, member_sql_values)
-        this.callback({err: err});
-      } else {
-        var result = {
-          person_id: this.person_id,
-          is_sysadmin: this.is_sysadmin == 1,
-          band_id: null,
-          is_band_admin: null
-        };
-        if (row) {
-          result.band_id = this.band_id;
-          result.is_band_admin = row.band_admin == 1;
-        }
+    }, function(result) {
+      if (result.err) {
         this.callback(result);
+      } else {
+        if (result.band.is_band_admin !== null) {
+          result.band.is_band_admin = result.band.is_band_admin !== 0 ? true : false;
+        }
+        this.result = util.obj_merge(this.result, result.band);
+        this.callback(this.result);
       }
     }
   );
@@ -130,14 +138,7 @@ exports.getBand = function(db, band_id, callback) {
   var sql_text = 'SELECT * FROM band WHERE id = $1';
   var sql_values = [band_id];
 
-  db.get(sql_text, sql_values, function(err, row) {
-    if (err) {
-      exports.logDbError(err, sql_text, sql_values);
-      callback({err: err});
-    } else {
-      callback({band: row});
-    }
-  });
+  exports.doSqlGet(db, sql_text, sql_values, 'band', callback);
 };
 
 exports.getMemberBands = function(db, member_id, callback) {
@@ -148,14 +149,7 @@ exports.getMemberBands = function(db, member_id, callback) {
 
   var sql_values = [member_id];
 
-  db.all(sql_text, sql_values, function(err, rows) {
-    if (err) {
-      exports.logDbError(err, sql_text, sql_values);
-      callback({err: err});
-    } else {
-      callback({member_bands: rows});
-    }
-  });
+  exports.doSqlQuery(db, sql_text, sql_values, 'member_bands', callback);
 };
 
 exports.getOtherBands = function(db, member_id, callback) {
@@ -165,28 +159,46 @@ exports.getOtherBands = function(db, member_id, callback) {
   
   var sql_values = [member_id];
   
-  db.all(sql_text, sql_values, function(err, rows) {
-    if (err) {
-      exports.logDbError(err, sql_text, sql_values);
-      callback({err: err});
-    } else {
-      callback({other_bands: rows});
-    }
-  });
+  exports.doSqlQuery(db, sql_text, sql_values, 'other_bands', callback);
 };
 
 exports.getAllBands = function(db, callback) {
   var sql_text = "SELECT * FROM band";
   var sql_values = [];
   
-  db.all(sql_text, sql_values, function(err, rows) {
-    if (err) {
-      exports.logDbError(err, sql_text, sql_values);
-      callback({err: err});
-    } else {
-      callback({all_bands: rows});
-    }
-  })
+  exports.doSqlQuery(db, sql_text, sql_values, 'all_bands', callback);
+};
+
+exports.getBandMembers = function(db, band_id, callback) {
+  var sql_text = 'SELECT person.id, person.full_name, person.email, ' +
+    ' person.system_admin, band_member.band_admin' +
+    '  FROM person, band_member ' +
+    ' WHERE person.id = band_member.person_id ' +
+    '   AND band_member.band_id = $1 ' +
+    ' ORDER BY person.full_name, person.name';
+
+  var sql_values = [band_id];
+  
+  exports.doSqlQuery(db, sql_text, sql_values, 'band_members', callback);
+};
+
+exports.getNonBandMembers = function(db, band_id, callback) {
+  var sql_text = 'SELECT id, full_name, email FROM person ' +
+    ' WHERE id not in (SELECT person_id FROM band_member WHERE band_id = $1) ' +
+    ' ORDER BY full_name';
+    
+  var sql_values = [band_id];
+  
+  exports.doSqlQuery(db, sql_text, sql_values, 'non_band_members', callback);
+};
+
+exports.getAllPeople = function(db, callback) {
+  var sql_text = 'SELECT id, full_name, email, system_admin FROM person ' +
+    ' ORDER BY full_name';
+    
+  var sql_values = [];
+  
+  exports.doSqlQuery(db, sql_text, sql_values, 'all_people', callback);
 };
 
 getArtists = function(db, callback) {
@@ -331,28 +343,12 @@ exports.memberBands = function(req, res) {
   db.close();
 };
 
-exports.bandPersons = function(req, res) {
+exports.bandMembers = function(req, res) {
   var person_id = req.session.passport.user;
-  var band_id = getBandId(req);
+  var band_id = req.query.band_id;
 
   var db = new sqlite3.Database(db_name);
 
-  var member_sql_text = 'SELECT person.id, person.full_name, person.email, ' +
-    ' person.system_admin, band_member.band_admin' +
-    '  FROM person, band_member ' +
-    ' WHERE person.id = band_member.person_id ' +
-    '   AND band_member.band_id = $1 ' +
-    ' ORDER BY person.full_name, person.name';
-
-  var member_sql_values = [band_id];
-
-  var non_member_sql_text = 'SELECT id, full_name, email FROM person ' +
-                            ' WHERE id not in ' +
-                            '(SELECT person_id FROM band_member WHERE band_id = $1)';
-
-  var non_member_sql_values = [band_id];
-
-  //console.log('SQL:' + member_sql_text + ', ' + member_sql_values);
   var get_list = flow.define(
     function() {
       exports.getLoginPermissions(db, person_id, band_id, this);
@@ -360,36 +356,29 @@ exports.bandPersons = function(req, res) {
       if (result.err) {
         res.json(result);
       } else {
-        this.permissions = result;
-        db.all(member_sql_text, member_sql_values, this);
+        this.result = {permissions: result};
+        exports.getBandMembers(db, band_id, this);
       }
-    }, function(err, rows) {
-       if (err) {
-         exports.logDbError(err, member_sql_text, member_sql_values);
-         res.json({err: err});
+    }, function(result) {
+       if (result.err) {
+         res.json(result);
        } else {
-         this.members = rows;
-         db.all(non_member_sql_text, non_member_sql_values, this);
+         this.result = util.obj_merge(this.result, result);
+         exports.getNonBandMembers(db, band_id, this);
        }
-    }, function(err, rows) {
-      if (err) {
-        exports.logDbError(err, non_member_sql_text, non_member_sql_values);
-        res.json({err: err});
+    }, function(result) {
+      if (result.err) {
+        res.json(result);
       } else {
-        this.non_members = rows;
+        this.result = util.obj_merge(this.result, result);
         exports.getBand(db, band_id, this);
       }
     }, function(result) {
       if (result.err) {
         res.json(result);
       } else {
-        res.json({
-          permissions: this.permissions,
-          band_id: band_id,
-          band: result.band,
-          members: this.members,
-          non_members: this.non_members
-        });
+        this.result = util.obj_merge(this.result, result);
+        res.json(this.result);
       }
     }
   );
@@ -400,7 +389,7 @@ exports.bandPersons = function(req, res) {
 
 exports.artists = function(req, res) {
   var person_id = req.session.passport.user;
-  var band_id = getBandId(req);
+  var band_id = req.query.band_id;
   var sql_text = "SELECT artist.* FROM artist ORDER BY artist.name";
   var sql_values = [];
   
@@ -432,7 +421,7 @@ exports.artists = function(req, res) {
 
 exports.bandSongs = function(req, res) {
   var person_id = req.session.passport.user;
-  var band_id = getBandId(req);
+  var band_id = req.query.band_id;
   var sort_type = req.query.sort_type;
   var filters_json = req.query.filters;
   var filters = filters_json ? JSON.parse(filters_json) : [];
@@ -771,7 +760,7 @@ getBandMemberDeleteSql = function(person_id, band_id) {
 
 exports.removeBand = function(req, res) {
   var person_id = req.session.passport.user;
-  var band_id = getBandId(req);
+  var band_id = req.query.band_id;
 
   var db = new sqlite3.Database(db_name);
 
@@ -794,7 +783,7 @@ exports.removeBand = function(req, res) {
 
 exports.removeMember = function(req, res) {
   var person_id = req.session.passport.user;
-  var band_id = getBandId(req);
+  var band_id = req.query.band_id;
   var member_id = req.query.member_id;
 
   var db = new sqlite3.Database(db_name);
