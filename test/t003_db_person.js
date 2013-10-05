@@ -220,6 +220,7 @@ describe('permissions', function() {
       var res = {
         json: function(obj) {
           obj.should.eql({
+            band_id: 1,
             permissions: {
               person_id: 1,
               is_sysadmin: true,

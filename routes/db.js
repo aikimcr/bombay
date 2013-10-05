@@ -351,12 +351,13 @@ exports.bandMembers = function(req, res) {
 
   var get_list = flow.define(
     function() {
+      this.result = {band_id: band_id};
       exports.getLoginPermissions(db, person_id, band_id, this);
     }, function(result) {
       if (result.err) {
         res.json(result);
       } else {
-        this.result = {permissions: result};
+        this.result = util.obj_merge(this.result, {permissions: result});
         exports.getBandMembers(db, band_id, this);
       }
     }, function(result) {
