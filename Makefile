@@ -13,17 +13,24 @@ JADE_SRC = $(NODE_MODULES)/jade/runtime.js
 CHAI_JS = $(TEST_CLIENT_LIB)/chai.js
 CHAI_SRC = $(NODE_MODULES)/chai/chai.js
 
-MOCHA_JS = $(TEST_CLIENT_LIB/mocha.js
+MOCHA_JS = $(TEST_CLIENT_LIB)/mocha.js
 MOCHA_JS_SRC = $(NODE_MODULES)/mocha/mocha.js
-MOCHA_CSS = $(TEST_CLIENT_LIB/mocha.css
+MOCHA_CSS = $(TEST_CLIENT_LIB)/mocha.css
 MOCHA_CSS_SRC = $(NODE_MODULES)/mocha/mocha.js
+
+TEST_FILES = $(MOCHA_JS) $(MOCHA_CSS) $(CHAI_JS)
 
 SCHEMA = ./sql/schema.sql
 DATABASE = ./bombay.db
 
-install: $(NODE_MODULES) $(JADE_JS_RUNTIME) $(DATABASE)
+all: $(NODE_MODULES) $(JADE_JS_RUNTIME) $(DATABASE)
 
-test: install
+install: $(NODE_MODULES) $(JADE_JS_RUNTIME) $(DATABASE) test
+
+test_setup: $(NODE_MODULES) $(JADE_JS_RUNTIME) $(DATABASE) $(TEST_FILES)
+
+test: test_setup
+	npm test
 
 $(JADE_JS_RUNTIME): $(NODE_MODULES) $(JADE_JS_DIR)
 	cp $(JADE_SRC) $(JADE_JS_RUNTIME)

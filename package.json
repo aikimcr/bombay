@@ -8,7 +8,7 @@
   },
   "scripts": {
     "start": "node app.js",
-    "test": "./node_modules/mocha/bin/mocha --reporter tap"
+    "test": "./node_modules/mocha/bin/mocha --reporter tap --timeout 5000"
   },
   "dependencies": {
     "express": "3.3.1",
