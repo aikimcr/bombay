@@ -1,0 +1,34 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Mocha Tests</title>
+  <link rel="stylesheet" href="./lib/mocha.css" />
+</head>
+<body>
+  <div id="mocha">Client Side Mocha Tests</div>
+<!--
+  <script src="jquery.js"></script>
+  <script src="expect.js"></script>
+-->
+  <script src="./lib/chai.js"></script>
+  <script src="./lib/mocha.js"></script>
+  <script>mocha.setup('bdd')</script>
+  
+  <-- Code under Test. -->
+  <script src="../../public/javascripts/util.js"></script>
+<!--
+  <script src="test.array.js"></script>
+  <script src="test.object.js"></script>
+  <script src="test.xhr.js"></script>
+-->
+  <-- Test code. -->
+  <script src="t001.js"></script>
+  <script>
+  /*
+    mocha.checkLeaks();
+    mocha.globals(['jQuery']);
+   */
+    mocha.run();
+  </script>
+</body>
+</html>
