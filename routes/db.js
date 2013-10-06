@@ -201,7 +201,7 @@ exports.getAllPeople = function(db, callback) {
   exports.doSqlQuery(db, sql_text, sql_values, 'all_people', callback);
 };
 
-getArtists = function(db, callback) {
+exports.getArtists = function(db, callback) {
   var sql_text = 'SELECT artist.*, count(song.id) AS song_count ' +
     '  FROM artist ' +
     ' LEFT OUTER JOIN song ON (artist_id = artist.id) ' +
@@ -209,17 +209,10 @@ getArtists = function(db, callback) {
 
   var sql_values = [];
 
-  db.all(sql_text, sql_values, function(err, rows) {
-    if (err) {
-      exports.logDbError(err, sql_text, sql_values);
-      callback({err: err});
-    } else {
-      callback({artists: rows});
-    }
-  });
+  exports.doSqlQuery(db, sql_text, sql_values, 'artists', callback);
 };
 
-getBandSongs = function(db, person_id, band_id, sort_type, filters, callback) {
+exports.getBandSongs = function(db, person_id, band_id, sort_type, filters, callback) {
   var sql_text = 'SELECT song.name, artist.name AS artist_name, ' +
    'band_song.id as band_song_id, ' +
    'band_song.song_status, a.rating, avg(b.rating) as avg_rating ' +
@@ -250,21 +243,19 @@ getBandSongs = function(db, person_id, band_id, sort_type, filters, callback) {
   sql_text += sort_types[sort_type];
   var sql_values = [person_id, band_id];
 
-  db.all(sql_text, sql_values, function(err, rows) {
-    if (err) {
-      exports.logDbError(err, sql_text, sql_values);
-      callback({err: err});
+  exports.doSqlQuery(db, sql_text, sql_values, 'band_songs', function(result) {
+    if(result.err) {
+      callback(err);
     } else {
-      callback({
-        band_songs: rows,
+      callback(util.obj_merge(result, {
         sort_type: sort_type,
         filters: filters
-      });
+      }));
     }
   });
 };
 
-getUnusedSongs = function(db, band_id, callback) {
+exports.getOtherSongs = function(db, band_id, callback) {
   var sql_text = 'SELECT song.*, artist.name as artist_name, ' +
     ' song.name || \' by \' || artist.name as description ' +
     '  FROM song, artist ' +
@@ -274,14 +265,7 @@ getUnusedSongs = function(db, band_id, callback) {
 
   var sql_values = [band_id];
 
-  db.all(sql_text, sql_values, function(err, rows) {
-    if (err) {
-      exports.logDbError(err, sql_text, sql_values);
-      callback({err: err});
-    } else {
-      callback({unused_songs: rows});
-    }
-  });
+  exports.doSqlQuery(db, sql_text, sql_values, 'other_songs', callback);
 };
 
 /* JSON API Links */
@@ -403,15 +387,15 @@ exports.artists = function(req, res) {
       if (result.err) {
         res.json(result);
       } else {
-        this.permissions = result;
-        getArtists(db, this);
+        this.result = ({permissions: result});
+        exports.getArtists(db, this);
       }
     }, function(result) {
       if (result.err) {
         res.json(result);
       } else {
-        result.permissions = this.permissions;
-        res.json(result);
+        this.result = util.obj_merge(this.result, result);
+        res.json(this.result);
       }
     }
   );
@@ -431,42 +415,41 @@ exports.bandSongs = function(req, res) {
 
   var getSongs = flow.define(
     function() {
+      this.result = {
+        band_id: band_id,
+        person_id: person_id,
+        sort_type: sort_type,
+        filters: filters
+      };
+
       exports.getLoginPermissions(db, person_id, band_id, this);
     }, function(result) {
       if (result.err) {
         res.json(result);
       } else {
-        this.permissions = result;
-        getBandSongs(db, person_id, band_id, sort_type, filters, this);
+        this.result = util.obj_merge(this.result, {permissions: result});
+        exports.getBandSongs(db, person_id, band_id, sort_type, filters, this);
       }
     }, function(result) {
       if (result.err) {
         res.json(result);
       } else {
-        this.band_songs = result.band_songs;
-        getArtists(db, this);
+        this.result = util.obj_merge(this.result, result);
+        exports.getArtists(db, this);
       }
     }, function(result) {
       if (result.err) {
         res.json(result);
       } else {
-        this.artists = result.artists;
-        getUnusedSongs(db, band_id, this);
+        this.result = util.obj_merge(this.result, result);
+        exports.getOtherSongs(db, band_id, this);
       }
     }, function(result) {
       if (result.err) {
         res.json(result);
-      } else { 
-        res.json({
-          permissions: this.permissions,
-          band_id: band_id,
-          person_id: person_id,
-          band_songs: this.band_songs,
-          artists: this.artists,
-          unused_songs: result.unused_songs,
-          sort_type: sort_type,
-          filters: filters
-        });
+      } else {
+        this.result = util.obj_merge(this.result, result);
+        res.json(this.result);
       }
     }
   );
