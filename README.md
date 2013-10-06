@@ -9,6 +9,8 @@ setlist, membership and calendar management for multiple bands within a single d
 But, really, it's mostly about me learning more Javascript and Node.js stuff.
 
 ToDo:
+- Client-side tests.
+- Server-side tests for database modifications.
 - There needs to be a way for members who are not band admins to propose song choices to the band admin.
 - Adding members to a band needs to be a two-step process.  Both the band admin and new member need to be
   involved.
