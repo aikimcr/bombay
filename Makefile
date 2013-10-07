@@ -32,6 +32,8 @@ test_setup: $(NODE_MODULES) $(JADE_JS_RUNTIME) $(DATABASE) $(TEST_FILES)
 test: test_setup
 	npm test
 
+jade: $(NODE_MODULES) $(JADE_JS_RUNTIME)
+
 $(JADE_JS_RUNTIME): $(NODE_MODULES) $(JADE_JS_DIR)
 	cp $(JADE_SRC) $(JADE_JS_RUNTIME)
 
