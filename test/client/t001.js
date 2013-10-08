@@ -23,4 +23,35 @@ describe('util', function() {
       done();
     });
   });
+  
+  describe('#appendTextElement', function() {
+    var parent;
+    var html_text;
+    before(function (done) {
+      parent = document.createElement('div');
+      html_text = '<div><table><tr><td>Plover</td></tr></table></div><div>Snipe<</div>';
+      done();
+    });
+    
+    it('should create new element tree under parent from text', function(done) {
+      parent.children.length.should.equal(0);
+      util.appendTextElement(parent, html_text);
+      parent.children.length.should.equal(2);
+      parent.firstChild.children.length.should.equal(1);
+      parent.firstChild.firstChild.children.length.should.equal(1);
+      done();
+    });
+  });
+  
+  describe('#bind', function() {
+    it('should bind this to the second parameter', function(done) {
+      var plover_type = function() {};
+      var plover = new plover_type();
+      var snipe = function(done) {
+        this.should.equal(plover);
+        done();
+      };
+      util.bind(snipe, plover)(done);
+    });
+  });
 });
