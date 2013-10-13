@@ -80,7 +80,34 @@ describe('bands', function() {
       dbh.close();
     });
   });
-  
+
+  describe('#createABand', function() {
+    before(function(done) {
+      db.setDbPath('./bombay_test.db');
+      var sql = fs.readFileSync('./sql/schema.sql', 'utf8');
+      var dbh = new sqlite3.Database(db.getDbPath());
+      dbh.exec(sql, done);
+      dbh.close();
+    });
+    
+    before(function(done) {
+      var sql = fs.readFileSync('./test/support/addBands.sql', 'utf8');
+      var dbh = new sqlite3.Database(db.getDbPath());
+      dbh.exec(sql, done);
+      dbh.close();
+    });
+    
+    it('should create the band', function(done) {
+      var dbh = new sqlite3.Database(db.getDbPath());
+      db.createABand(dbh, 'Created Band', function(result) {
+        should.exist(result);
+        result.should.eql({band_id: 5});
+        done();
+      });
+      dbh.close();
+    });    
+  });
+
   describe('#server views', function() {
     before(function(done) {
       db.setDbPath('./bombay_test.db');

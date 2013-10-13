@@ -26,3 +26,5 @@ ToDo:
   - Use drag and drop.
   - Allow CSV upload.
   - "Bulk" adds.
+
+- Better handling of boolean fields from the database (system_admin, band_admin);

@@ -3,7 +3,7 @@ var should = require("should");
 var sqlite3 = require("sqlite3");
 var fs = require("fs");
 
-describe('permissions', function() {
+describe('person', function() {
   describe('#utility', function() {
     before(function(done) {
       db.setDbPath('./bombay_test.db');
@@ -186,6 +186,83 @@ describe('permissions', function() {
         done();
       });
       dbh.close();
+    });
+  });
+  
+  describe('#createAPerson', function() {
+    before(function(done) {
+      db.setDbPath('./bombay_test.db');
+      var sql = fs.readFileSync('./sql/schema.sql', 'utf8');
+      var dbh = new sqlite3.Database(db.getDbPath());
+      dbh.exec(sql, done);
+      dbh.close();
+    });
+    
+    it('should create a basic person', function(done) {
+      var dbh = new sqlite3.Database(db.getDbPath());
+      db.createAPerson(dbh, {name: 'hjones', full_name: 'Herkimer Jones'}, function(result) {
+        should.exist(result);
+        result.should.eql({person_id: 1});
+        done();
+      });
+      dbh.close();      
+    });
+    
+    it('should get the person', function(done) {
+      var dbh = new sqlite3.Database(db.getDbPath());
+      db.getPersonById(dbh, 1, function(person) {
+        should.exist(person);
+        person.should.eql({
+          band: {
+            id: 1,
+            name: 'hjones',
+            full_name: 'Herkimer Jones',
+            password: 'password',
+            email: null,
+            system_admin: 0
+        }});
+        done();
+      });
+      dbh.close();      
+    });
+  });
+  
+  describe('#addBandMember', function() {
+    before(function(done) {
+      db.setDbPath('./bombay_test.db');
+      var sql = fs.readFileSync('./sql/schema.sql', 'utf8');
+      var dbh = new sqlite3.Database(db.getDbPath());
+      dbh.exec(sql, done);
+      dbh.close();
+    });
+    
+    var person_id;
+    var band_id;
+    before(function(done) {
+      var dbh = new sqlite3.Database(db.getDbPath());
+      db.createAPerson(dbh, {name: 'bbunny', full_name: 'bugs_bunny'}, function(result) {
+        person_id = result.person_id;
+        done();
+      });
+    });
+    
+    before(function(done) {
+      var dbh = new sqlite3.Database(db.getDbPath());
+      db.createABand(dbh, 'Looney Tunes', function(result) {
+        band_id = result.band_id;
+        done();
+      });
+      dbh.close();      
+    });
+    
+    it('should add Bugs Bunny to Looney Tunes', function(done) {
+      var dbh = new sqlite3.Database(db.getDbPath());
+      db.addBandMember(dbh, band_id, person_id, false, function(result) {
+        should.exist(result);
+        result.should.eql({member_id: 1});
+        done();
+      });
+      dbh.close();      
     });
   });
   

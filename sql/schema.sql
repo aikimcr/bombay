@@ -13,24 +13,24 @@ DROP TABLE IF EXISTS schema_change;
 CREATE TABLE band (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	name VARCHAR,
-        UNIQUE (name)
+  UNIQUE (name)
 );
 
 CREATE TABLE person (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	name VARCHAR NOT NULL,
 	full_name VARCHAR,
-        password VARCHAR NOT NULL DEFAULT 'password',
-        email VARCHAR,
-        system_admin INTEGER NOT NULL DEFAULT 0,
-        UNIQUE (name)
+  password VARCHAR NOT NULL DEFAULT 'password',
+  email VARCHAR,
+  system_admin INTEGER NOT NULL DEFAULT 0,
+  UNIQUE (name)
 );
 
 CREATE TABLE band_member (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	band_id INTEGER NOT NULL,
 	person_id INTEGER NOT NULL,
-        band_admin INTEGER NOT NULL DEFAULT 0,
+  band_admin INTEGER NOT NULL DEFAULT 0,
 	FOREIGN KEY (band_id) REFERENCES band(id),
 	FOREIGN KEY (person_id) REFERENCES person(id),
 	UNIQUE (band_id, person_id)
@@ -39,7 +39,7 @@ CREATE TABLE band_member (
 CREATE TABLE artist (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	name VARCHAR NOT NULL,
-        UNIQUE (name)
+  UNIQUE (name)
 );
 
 CREATE TABLE song (
@@ -47,7 +47,7 @@ CREATE TABLE song (
 	name VARCHAR NOT NULL,
 	artist_id INTEGER NOT NULL,
 	FOREIGN KEY (artist_id) REFERENCES artist(id),
-        UNIQUE (name, artist_id)
+  UNIQUE (name, artist_id)
 );
 
 CREATE TABLE band_song (
@@ -75,15 +75,15 @@ CREATE TABLE setlist (
 	name VARCHAR,
 	band_id INTEGER NOT NULL,
 	FOREIGN KEY (band_id) REFERENCES band(id),
-        UNIQUE (name, band_id)
+  UNIQUE (name, band_id)
 );
 
 CREATE TABLE setlist_set (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	name VARCHAR,
 	setlist_id INTEGER NOT NULL,
-        FOREIGN KEY (setlist_id) REFERENCES setlist(id),
-        UNIQUE (name, setlist_id)
+  FOREIGN KEY (setlist_id) REFERENCES setlist(id),
+  UNIQUE (name, setlist_id)
 );
 
 CREATE TABLE setlist_song (

@@ -3,7 +3,7 @@ var should = require("should");
 var sqlite3 = require("sqlite3");
 var fs = require("fs");
 
-describe('bands', function() {
+describe('band_songs', function() {
   before(function(done) {
     db.setDbPath('./bombay_test.db');
     var sql = fs.readFileSync('./sql/schema.sql', 'utf8');
@@ -33,7 +33,7 @@ describe('bands', function() {
     dbh.close();
   });
 
-  describe('#band_songs', function(){
+  describe('#getBandSongs', function(){
     it("should be sorted by name, no filters", function(done) {
       var dbh = new sqlite3.Database(db.getDbPath());
       db.getBandSongs(dbh, 1, 1, 'song_name', {}, function(result) {
@@ -185,6 +185,96 @@ describe('bands', function() {
     });
   });
   
+  describe('#createASong', function() {
+    it('should create a song', function(done) {
+      var dbh = new sqlite3.Database(db.getDbPath());
+      db.createASong(dbh, 'Houses of the Holy', 3, function(result) {
+        should.exist(result);
+        should.exist(result.song_id);
+        result.song_id.should.eql(8);
+        done();
+      });
+      dbh.close();
+    });
+    
+    it('should find the song', function(done) {
+      var dbh = new sqlite3.Database(db.getDbPath());
+      db.getSongById(dbh, 8, function(song) {
+        should.exist(song);
+        song.should.eql({
+          song: {
+            id: 8,
+            name: 'Houses of the Holy',
+            artist_id: 3
+          }
+        });
+        done();
+      });
+      dbh.close();
+    });
+  });
+  
+  describe('#addBandSong', function() {
+    it('should add the song to the band', function(done) {
+      var dbh = new sqlite3.Database(db.getDbPath());
+      db.addBandSong(dbh, 4, 8, function(result) {
+        should.exist(result);
+        should.exist(result.band_song_id);
+        result.band_song_id.should.eql(6);
+        done();
+      });
+      dbh.close();
+    });
+    
+    it('should find the band song', function(done) {
+      var dbh = new sqlite3.Database(db.getDbPath());
+      db.getBandSongById(dbh, 6, function(band_song) {
+        should.exist(band_song);
+        band_song.should.eql({
+          band_song: {
+            id: 6,
+            band_id: 4,
+            song_id: 8,
+            song_status: 0
+          }
+        });
+        done();
+      });
+      dbh.close();
+    });
+  });
+});
+
+describe('songs', function() {
+  before(function(done) {
+    db.setDbPath('./bombay_test.db');
+    var sql = fs.readFileSync('./sql/schema.sql', 'utf8');
+    var dbh = new sqlite3.Database(db.getDbPath());
+    dbh.exec(sql, done);
+    dbh.close();
+  });
+  
+  before(function(done) {
+    var sql = fs.readFileSync('./test/support/addBands.sql', 'utf8');
+    var dbh = new sqlite3.Database(db.getDbPath());
+    dbh.exec(sql, done);
+    dbh.close();
+  });
+  
+  before(function(done) {
+    var sql = fs.readFileSync('./test/support/addSongs.sql', 'utf8');
+    var dbh = new sqlite3.Database(db.getDbPath());
+    dbh.exec(sql, done);
+    dbh.close();
+  });
+
+  before(function(done) {
+    var sql = fs.readFileSync('./test/support/addBandSongs.sql', 'utf8');
+    var dbh = new sqlite3.Database(db.getDbPath());
+    dbh.exec(sql, done);
+    dbh.close();
+  });
+
   describe('#other_songs', function() {
     it("should get the songs not used by this band, sorted by name with description", function(done) {
       var dbh = new sqlite3.Database(db.getDbPath());

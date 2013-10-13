@@ -30,6 +30,18 @@ exports.setDbPath = function(opt_path) {
   }
 };
 
+exports.beginTransaction = function(db, callback) {
+  db.run('BEGIN TRANSACTION', callback);
+};
+
+exports.rollback = function(db, callback) {
+  db.run('ROLLBACK', callback);
+};
+
+exports.commit = function(db, callback) {
+  db.run('COMMIT', callback);
+};
+
 /* Special Selects */
 exports.getBandsForMenu = function(id, callback) {
   var db = new sqlite3.Database(db_name);
@@ -89,6 +101,32 @@ exports.doSqlGet = function(db, sql_text, sql_values, result_key, callback) {
       var result = {};
       result[result_key] = row;
       callback(result);
+    }
+  });
+};
+
+exports.doSqlRun = function(db, sql_text, sql_values, result_key, callback) {
+  db.run(sql_text, sql_values, function(err) {
+    if(err) {
+      exports.logDbError(err, sql_text, sql_values);
+      callback({err: err});
+    } else {
+      var result = {};
+      result[result_key] = this.lastID;
+      callback(result);
+    }
+  });
+};
+
+exports.doSqlExec = function(db, sql_list, callback) {
+  var sql_text = sql_list.join('\n');
+  db.exec(sql_text, function(err) {
+    if (err) {
+      exports.logDbError(err, sql_text, []);
+      callback(err);
+    }
+    else {
+      callback();
     }
   });
 };
@@ -169,6 +207,13 @@ exports.getAllBands = function(db, callback) {
   exports.doSqlQuery(db, sql_text, sql_values, 'all_bands', callback);
 };
 
+exports.createABand = function(db, band_name, callback) {
+  var sql_text = 'INSERT INTO band (name) VALUES ($1)';
+  var sql_values = [band_name];
+
+  exports.doSqlRun(db, sql_text, sql_values, 'band_id', callback);
+};
+
 exports.getBandMembers = function(db, band_id, callback) {
   var sql_text = 'SELECT person.id, person.full_name, person.email, ' +
     ' person.system_admin, band_member.band_admin' +
@@ -192,6 +237,13 @@ exports.getNonBandMembers = function(db, band_id, callback) {
   exports.doSqlQuery(db, sql_text, sql_values, 'non_band_members', callback);
 };
 
+exports.addBandMember = function(db, band_id, person_id, band_admin, callback) {
+  var sql_text = 'INSERT INTO band_member (band_id, person_id, band_admin) VALUES ($1, $2, $3)';
+  var sql_values = [band_id, person_id, band_admin];
+  
+  exports.doSqlRun(db, sql_text, sql_values, 'member_id', callback);
+};
+
 exports.getAllPeople = function(db, callback) {
   var sql_text = 'SELECT id, full_name, email, system_admin FROM person ' +
     ' ORDER BY full_name';
@@ -199,6 +251,48 @@ exports.getAllPeople = function(db, callback) {
   var sql_values = [];
   
   exports.doSqlQuery(db, sql_text, sql_values, 'all_people', callback);
+};
+
+exports.getPersonById = function(db, id, callback) {
+  var sql_text = 'SELECT * FROM person WHERE id = $1';
+  var sql_values = [id];
+
+  exports.doSqlGet(db, sql_text, sql_values, 'band', callback);
+};
+
+exports.createAPerson = function(db, person, callback) {
+  var sql_text = 'INSERT INTO person (\'name\'';
+  var sql_values = [person.name];
+  
+  if (person.password) {
+    sql_text += ', \'password\'';
+    sql_values.push(person.password);
+  }
+  
+  if (person.full_name) {
+    sql_text += ', \'full_name\'';
+    sql_values.push(person.full_name);
+  }
+  
+  if (person.email) {
+    sql_text += ',\'email\'';
+    sql_values.push(person.email);
+  }
+  
+  if (person.system_admin) {
+    sql_text += ',\'system_admin\'';
+    sql_values.push(person.system_admin ? 1 : 0);
+  }
+  
+  var value_list = [];
+  for(var i = 0; i < sql_values.length; i++) {
+    var j = i + 1;
+    value_list.push('$' + j);
+  }
+  
+  sql_text += ') VALUES (' + value_list.join(',') + ')';
+  
+  exports.doSqlRun(db, sql_text, sql_values, 'person_id', callback);
 };
 
 exports.getArtists = function(db, callback) {
@@ -210,6 +304,13 @@ exports.getArtists = function(db, callback) {
   var sql_values = [];
 
   exports.doSqlQuery(db, sql_text, sql_values, 'artists', callback);
+};
+
+exports.getSongById = function(db, id, callback) {
+  var sql_text = 'SELECT * FROM song WHERE id = $1';
+  var sql_values = [id];
+  
+  exports.doSqlGet(db, sql_text, sql_values, 'song', callback);
 };
 
 exports.getBandSongs = function(db, person_id, band_id, sort_type, filters, callback) {
@@ -255,6 +356,27 @@ exports.getBandSongs = function(db, person_id, band_id, sort_type, filters, call
   });
 };
 
+exports.createASong = function(db, name, artist_id, callback) {
+  var sql_text = 'INSERT INTO song (name, artist_id) VALUES ($1, $2)';
+  var sql_values = [name, artist_id];
+  
+  exports.doSqlRun(db, sql_text, sql_values, 'song_id', callback);
+};
+
+exports.getBandSongById = function(db, id, callback) {
+  var sql_text = 'SELECT * FROM band_song WHERE id = $1';
+  var sql_values = [id];
+  
+  exports.doSqlGet(db, sql_text, sql_values, 'band_song', callback);
+};
+
+exports.addBandSong = function(db, band_id, song_id, callback) {
+  var sql_text = 'INSERT INTO band_song (band_id, song_id) VALUES ($1, $2)';
+  var sql_values = [band_id, song_id];
+  
+  exports.doSqlRun(db, sql_text, sql_values, 'band_song_id', callback);
+};
+
 exports.getOtherSongs = function(db, band_id, callback) {
   var sql_text = 'SELECT song.*, artist.name as artist_name, ' +
     ' song.name || \' by \' || artist.name as description ' +
@@ -266,6 +388,34 @@ exports.getOtherSongs = function(db, band_id, callback) {
   var sql_values = [band_id];
 
   exports.doSqlQuery(db, sql_text, sql_values, 'other_songs', callback);
+};
+
+exports.getSongRatingById = function(db, id, callback) {
+  var sql_text = 'SELECT * FROM song_rating WHERE id = $1';
+  var sql_values = [id];
+  
+  exports.doSqlGet(db, sql_text, sql_values, 'song_rating', callback);
+};
+
+exports.getSongRatingsForPersonId = function(db, person_id, callback) {
+  var sql_text = 'SELECT * FROM song_rating WHERE person_id = $1';
+  var sql_values = [person_id];
+  
+  exports.doSqlQuery(db, sql_text, sql_values, 'song_ratings', callback);
+};
+
+exports.addSongRating = function(db, person_id, band_song_id, callback) {
+  var sql_text = 'INSERT INTO song_rating (person_id, band_song_id) VALUES ($1, $2)';
+  var sql_values = [person_id, band_song_id];
+  
+  exports.doSqlRun(db, sql_text, sql_values, 'song_rating_id', callback);
+};
+
+exports.addSongRatings = function(db, person_id, band_id, callback) {
+  var sql_text = 'INSERT INTO song_rating (person_id, band_song_id) SELECT $1, id FROM band_song WHERE band_id = $2 ORDER BY id';
+  var sql_values = [person_id, band_id];
+  
+  exports.doSqlRun(db, sql_text, sql_values, 'last_song_rating_id', callback);
 };
 
 /* JSON API Links */
@@ -740,7 +890,7 @@ getSongRatingDeleteSql = function(person_id, band_id) {
 getBandMemberDeleteSql = function(person_id, band_id) {
   return 'DELETE FROM band_member WHERE person_id = ' + person_id +
     ' AND band_id = ' + band_id + '; ';
-}
+};
 
 exports.removeBand = function(req, res) {
   var person_id = req.session.passport.user;
