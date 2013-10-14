@@ -374,7 +374,7 @@ app_context.BandMember.prototype.handleDelete = function(e) {
 
   var row = e.target.parentElement;
   var member_id = row.attributes.item('member_id').value;
-  var member = this.model.members.filter(function (mem) { return mem.id == member_id })[0];
+  var member = this.model.band_members.filter(function (mem) { return mem.id == member_id })[0];
 
   var confirm_delete = new dialog('Remove ' + member.full_name + ' from ' + this.model.band.name + '?');
   confirm_delete.show(util.bind(function(result) {
