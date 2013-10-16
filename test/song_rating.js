@@ -142,3 +142,89 @@ describe('song_rating_table', function() {
     });
   });
 });
+
+describe('song_rating_util', function() {
+  before(function(done) {
+    db.setDbPath('./bombay_test.db');
+    dbh = new db.Handle()
+    var sql = fs.readFileSync('./sql/schema.sql', 'utf8');
+    dbh.doSqlExec([sql], done);
+  });
+
+  before(function(done) {
+    var sql = fs.readFileSync('./test/support/addBands.sql', 'utf8');
+    dbh.doSqlExec(sql, function(err) {
+      done();
+    });
+  });
+
+  before(function(done) {
+    var sql = fs.readFileSync('./test/support/addPeople.sql', 'utf8');
+    dbh.doSqlExec(sql, function(err) {
+      done();
+    });
+  });
+
+  before(function(done) {
+    var sql = fs.readFileSync('./test/support/addBandMembers.sql', 'utf8');
+    dbh.doSqlExec(sql, function(err) {
+      done();
+    });
+  });
+
+  before(function(done) {
+    var sql = fs.readFileSync('./test/support/addArtists.sql', 'utf8');
+    dbh.doSqlExec(sql, function(err) {
+      done();
+    });
+  });
+
+  before(function(done) {
+    var sql = fs.readFileSync('./test/support/addSongs.sql', 'utf8');
+    dbh.doSqlExec(sql, function(err) {
+      done();
+    });
+  });
+
+  before(function(done) {
+    var sql = fs.readFileSync('./test/support/addBandSongs.sql', 'utf8');
+    dbh.doSqlExec(sql, function(err) {
+      done();
+    });
+  });
+
+  var song_rating;
+  before(function(done) {
+    song_rating = dbh.song_rating();
+    done();
+  });
+
+  it('should add the ratings for a band member', function(done) {
+    song_rating.addForBandMember(1, 1, function(result) {
+      should.exist(result);
+      should.exist(result.last_song_rating_id);
+      should.not.exist(result.err);
+      done();
+    });
+  });
+
+  it('should get the ratings for a band member', function(done) {
+    song_rating.getForBandMember(1, 1, function(result) {
+      should.exist(result);
+      should.exist(result.member_ratings);
+      should.not.exist(result.err);
+      result.member_ratings.should.eql([{
+	id: 1, person_id: 1, band_song_id: 1, rating: 3
+      }, {
+	id: 2, person_id: 1, band_song_id: 2, rating: 3
+      }, {
+	id: 3, person_id: 1, band_song_id: 3, rating: 3
+      }, {
+	id: 4, person_id: 1, band_song_id: 4, rating: 3
+      }, {
+	id: 5, person_id: 1, band_song_id: 5, rating: 3
+      }]);
+      done();
+    });
+  });
+});

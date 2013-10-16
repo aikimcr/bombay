@@ -363,7 +363,6 @@ exports.createASong = function(db, name, artist_id, callback) {
   
   exports.doSqlRun(db, sql_text, sql_values, 'song_id', callback);
 };
-*/
 
 exports.getBandSongById = function(db, id, callback) {
   var sql_text = 'SELECT * FROM band_song WHERE id = $1';
@@ -419,6 +418,7 @@ exports.addSongRatings = function(db, person_id, band_id, callback) {
   
   exports.doSqlRun(db, sql_text, sql_values, 'last_song_rating_id', callback);
 };
+*/
 
 /* JSON API Links */
 exports.personProfile = function(req, res) {

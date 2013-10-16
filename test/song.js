@@ -303,4 +303,28 @@ describe('song_views', function() {
       });
     });
   });
+
+  describe('#other_songs', function() {
+    it("should get the songs not used by this band, sorted by name with description", function(done) {
+      song.getOtherSongs(1, function(result) {
+	should.exist(result);
+        result.should.eql({
+          other_songs: [{
+            id: 6,
+            name: 'Help',
+            artist_id: 4,
+            artist_name: 'The Beatles',
+            description: 'Help by The Beatles'
+          }, {
+            id: 7,
+            name: 'Stairway To Heaven',
+            artist_id: 3,
+            artist_name: 'Led Zeppelin',
+            description: 'Stairway To Heaven by Led Zeppelin'
+          }]
+        });
+        done();
+      });
+    });
+  });
 });
