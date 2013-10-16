@@ -37,7 +37,7 @@ test_setup: $(TEST_FILES)
 
 jade: $(NODE_MODULES) $(JADE_JS_RUNTIME)
 
-datbase: $(DATABASE)
+database: $(DATABASE)
 
 $(JADE_JS_RUNTIME): $(NODE_MODULES) $(JADE_JS_DIR)
 	cp $(JADE_SRC) $(JADE_JS_RUNTIME)
@@ -76,7 +76,7 @@ $(MOCHA_CSS): $(TEST_CLIENT_LIB) $(MOCHA_CSS_SRC)
 
 $(SHOULD_JS):
 	npm install should
-	
+
 $(TEST_CLIENT_LIB): $(TEST_CLIENT_DIR)
 	mkdir $(TEST_CLIENT_LIB)
 

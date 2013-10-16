@@ -4,12 +4,11 @@
  */
 
 var express = require('express')
-  , routes = require('./routes')
   , http = require('http')
   , path = require('path')
   , sqlite3 = require('sqlite3')
-  , db = require('./routes/db')
-  , login = require('./routes/login')
+  , db = require('routes/db')
+  , login = require('routes/login')
   , passport = require('passport')
   , LocalStrategy = require('passport-local').Strategy
   , flash = require('connect-flash')

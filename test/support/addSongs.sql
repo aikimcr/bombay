@@ -1,9 +1,3 @@
-INSERT INTO artist (id, name) VALUES (1, 'AC/DC');
-INSERT INTO artist (id, name) VALUES (2, 'ZZ Top');
-INSERT INTO artist (id, name) VALUES (3, 'Led Zeppelin');
-INSERT INTO artist (id, name) VALUES (4, 'The Beatles');
-INSERT INTO artist (id, name) VALUES (5, 'David Bowie');
-
 INSERT INTO song (id, name, artist_id) VALUES (1, 'Space Oddity', 5);
 INSERT INTO song (id, name, artist_id) VALUES (2, 'Rebel, Rebel', 5);
 INSERT INTO song (id, name, artist_id) VALUES (3, 'You Shook Me All Night Long', 1);

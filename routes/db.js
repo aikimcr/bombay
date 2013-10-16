@@ -6,7 +6,7 @@
 var sqlite3 = require('sqlite3');
 var flow = require('flow');
 var fs = require('fs');
-var util = require('../routes/util');
+var util = require('lib/util');
 var db_name = null;
 
 exports.getDbPath = function() {
