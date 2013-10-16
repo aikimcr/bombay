@@ -172,6 +172,7 @@ exports.getLoginPermissions = function(db, person_id, band_id, callback) {
   getPerms(callback);
 };
 
+/*
 exports.getBand = function(db, band_id, callback) {
   var sql_text = 'SELECT * FROM band WHERE id = $1';
   var sql_values = [band_id];
@@ -362,6 +363,7 @@ exports.createASong = function(db, name, artist_id, callback) {
   
   exports.doSqlRun(db, sql_text, sql_values, 'song_id', callback);
 };
+*/
 
 exports.getBandSongById = function(db, id, callback) {
   var sql_text = 'SELECT * FROM band_song WHERE id = $1';

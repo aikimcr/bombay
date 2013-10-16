@@ -76,3 +76,60 @@ describe('band_table', function() {
     });
   });
 });
+
+describe('band_views', function() {
+  before(function(done) {
+    db.setDbPath('./bombay_test.db');
+    dbh = new db.Handle()
+    var sql = fs.readFileSync('./sql/schema.sql', 'utf8');
+    dbh.doSqlExec([sql], done);
+  });
+
+  before(function(done) {
+    var sql = fs.readFileSync('./test/support/addBands.sql', 'utf8');
+    dbh.doSqlExec(sql, function(err) {
+      done();
+    });
+  });
+
+  before(function(done) {
+    var sql = fs.readFileSync('./test/support/addBandMembers.sql', 'utf8');
+    dbh.doSqlExec(sql, function(err) {
+      done();
+    });
+  });
+
+  var band;
+  before(function(done) {
+    band = dbh.band();
+    done();
+  });
+
+  it('should get the bands for a person', function(done) {
+    band.getsByPersonId(1, function(result) {
+      should.exist(result);
+      should.exist(result.person_bands);
+      should.not.exist(result.err);
+      result.person_bands.should.eql([{
+	id: 1, name: 'band1'
+      }, { 
+	id: 2, name: 'band2'
+      }]);
+      done();
+    });
+  });
+
+  it('should get the other bands for a person', function(done) {
+    band.getsByNotPersonId(1, function(result) {
+      should.exist(result);
+      should.exist(result.other_bands);
+      should.not.exist(result.err);
+      result.other_bands.should.eql([{
+	id: 3, name: 'band3'
+      }, { 
+	id: 4, name: 'band4'
+      }]);
+      done();
+    });
+  });
+});

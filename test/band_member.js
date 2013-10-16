@@ -100,3 +100,75 @@ describe('band_member_table', function() {
     });
   });
 });
+
+describe('band_member_views', function() {
+  before(function(done) {
+    db.setDbPath('./bombay_test.db');
+    dbh = new db.Handle()
+    var sql = fs.readFileSync('./sql/schema.sql', 'utf8');
+    dbh.doSqlExec([sql], done);
+  });
+
+  before(function(done) {
+    var sql = fs.readFileSync('./test/support/addBands.sql', 'utf8');
+    dbh.doSqlExec(sql, function(err) {
+      done();
+    });
+  });
+
+  before(function(done) {
+    var sql = fs.readFileSync('./test/support/addPeople.sql', 'utf8');
+    dbh.doSqlExec(sql, function(err) {
+      done();
+    });
+  });
+
+  before(function(done) {
+    var sql = fs.readFileSync('./test/support/addBandMembers.sql', 'utf8');
+    dbh.doSqlExec(sql, function(err) {
+      done();
+    });
+  });
+
+  var band_member;
+  before(function(done) {
+    band_member = dbh.band_member();
+    done();
+  });
+
+  it('should get the members for a band', function(done) {
+    band_member.getsByBandId(1, function(result) {
+      should.exist(result);
+      should.exist(result.band_members);
+      should.not.exist(result.err);
+      result.band_members.should.eql([{
+	id: 3,
+	full_name: 'Herkimer Jones',
+	email: null,
+	system_admin: 0,
+	band_admin: 0
+      }, {
+	id: 1,
+	full_name: 'System Admin Test User',
+	email: null,
+	system_admin: 1,
+	band_admin: 0
+      }]);
+      done();
+    });
+  });
+
+  it('should get the other people for a band', function(done) {
+    band_member.getsByNotBandId(1, function(result) {
+      should.exist(result);
+      should.exist(result.non_band_members);
+      should.not.exist(result.err);
+      result.non_band_members.should.eql([{
+	id: 4, full_name: 'Bugs Bunny', email: null
+      }, {
+	id: 2, full_name: 'Non System Admin Test User', email: null
+      }]);
+      done();
+    });
+  });
+});
