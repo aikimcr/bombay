@@ -104,3 +104,99 @@ describe('person_table', function() {
     });
   });
 });
+
+describe('person_views', function() {
+  before(function(done) {
+    db.setDbPath('./bombay_test.db');
+    dbh = new db.Handle()
+    var sql = fs.readFileSync('./sql/schema.sql', 'utf8');
+    dbh.doSqlExec([sql], done);
+  });
+
+  before(function(done) {
+    var sql = fs.readFileSync('./test/support/addBands.sql', 'utf8');
+    dbh.doSqlExec(sql, function(err) {
+      done();
+    });
+  });
+
+  before(function(done) {
+    var sql = fs.readFileSync('./test/support/addPeople.sql', 'utf8');
+    dbh.doSqlExec(sql, function(err) {
+      done();
+    });
+  });
+
+  before(function(done) {
+    var sql = fs.readFileSync('./test/support/addBandMembers.sql', 'utf8');
+    dbh.doSqlExec(sql, function(err) {
+      done();
+    });
+  });
+
+  var person;
+  before(function(done) {
+    person = dbh.person();
+    done();
+  });
+
+  it('should be sysadmin', function(done) {
+    person.getLoginPermissions(1, null, function(result) {
+      result.should.eql({
+        person_id: 1,
+        system_admin: true,
+        band_id: null,
+        band_admin: null,
+      });
+      done();
+    });
+  });
+  
+  it('should be sysadmin, not band admin',function(done) {
+    person.getLoginPermissions(1, 1, function(result) {
+      result.should.eql({
+        person_id: 1,
+        system_admin: true,
+        band_id: 1,
+        band_admin: false
+      });
+      done();
+    });
+  });
+  
+  it('should be sysadmin and band admin',function(done) {
+    person.getLoginPermissions(1, 2, function(result) {
+      result.should.eql({
+        person_id: 1,
+        system_admin: true,
+        band_id: 2,
+        band_admin: true
+      });
+      done();
+    });
+  });
+  
+  it('should be ordinary user',function(done) {
+    person.getLoginPermissions(2, 3, function(result) {
+      result.should.eql({
+        person_id: 2,
+        system_admin: false,
+        band_id: 3,
+        band_admin: false
+      });
+      done();
+    });
+  });
+  
+  it('should not be sysadmin, should be band admin',function(done) {
+    person.getLoginPermissions(2, 4, function(result) {
+      result.should.eql({
+        person_id: 2,
+        system_admin: false,
+        band_id: 4,
+        band_admin: true
+      });
+      done();
+    });
+  });
+});

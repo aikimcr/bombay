@@ -17,7 +17,6 @@ describe('song_rating_table', function() {
   before(function(done) {
     var sql = fs.readFileSync('./test/support/addBands.sql', 'utf8');
     dbh.doSqlExec(sql, function(err) {
-      should.not.exist(err);
       done();
     });
   });
@@ -25,7 +24,6 @@ describe('song_rating_table', function() {
   before(function(done) {
     var sql = fs.readFileSync('./test/support/addPeople.sql', 'utf8');
     dbh.doSqlExec(sql, function(err) {
-      should.not.exist(err);
       done();
     });
   });
@@ -33,7 +31,6 @@ describe('song_rating_table', function() {
   before(function(done) {
     var sql = fs.readFileSync('./test/support/addBandMembers.sql', 'utf8');
     dbh.doSqlExec(sql, function(err) {
-      should.not.exist(err);
       done();
     });
   });
@@ -41,7 +38,6 @@ describe('song_rating_table', function() {
   before(function(done) {
     var sql = fs.readFileSync('./test/support/addArtists.sql', 'utf8');
     dbh.doSqlExec(sql, function(err) {
-      should.not.exist(err);
       done();
     });
   });
@@ -49,7 +45,6 @@ describe('song_rating_table', function() {
   before(function(done) {
     var sql = fs.readFileSync('./test/support/addSongs.sql', 'utf8');
     dbh.doSqlExec(sql, function(err) {
-      should.not.exist(err);
       done();
     });
   });
@@ -57,7 +52,6 @@ describe('song_rating_table', function() {
   before(function(done) {
     var sql = fs.readFileSync('./test/support/addBandSongs.sql', 'utf8');
     dbh.doSqlExec(sql, function(err) {
-      should.not.exist(err);
       done();
     });
   });
