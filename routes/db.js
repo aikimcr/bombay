@@ -23,6 +23,7 @@ exports.createPerson = function(req, res) {
 };
 
 exports.updatePerson = function(req, res) {
+debugger;
   var dbh = new db.Handle();
   dbh.person().update(req.body, function(result) {
     res.json(result);
@@ -375,7 +376,6 @@ exports.addBandSong = function(req, res) {
       if (result.err) {
 	dbh.errorAndRollback(result.err, res.json);
       } else {
-debugger;
 	this.result = util.obj_merge(this.result, result);
 	dbh.song_rating().addForSong(req.body.song_id, req.body.band_id, this);
       }

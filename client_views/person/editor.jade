@@ -1,5 +1,4 @@
-form(name="person", action="./person", method="post")
-  input(type="hidden", name="id", value="#{person.id}")
+form(name="person")
   table.editor(cellpadding="0", cellspacing="0")
     tr.editor
       td.editor_label Old Password
@@ -8,7 +7,7 @@ form(name="person", action="./person", method="post")
     tr.editor
       td.editor_label New Password
       td.editor
-        input(type="password", name="new_password", placeholder="New Password", disabled)
+        input(type="password", name="new_password", placeholder="New Password")
     tr.editor
       td.editor_label Verify New Password
       td.editor
@@ -16,15 +15,15 @@ form(name="person", action="./person", method="post")
     tr.editor
       td.editor_label User Name
       td.editor
-        input(type="text", name="name", value="#{person.name}", disabled)
+        input(type="text", name="name", value="#{person.name}")
     tr.editor
       td.editor_label Full Name
       td.editor
-        input(type="text", name="full_name", value="#{person.full_name}", disabled)
+        input(type="text", name="full_name", value="#{person.full_name}")
     tr.editor
       td.editor_label E-Mail
       td.editor
-        input(type="email", name="email", value="#{person.email}", disabled)
+        input(type="email", name="email", value="#{person.email}")
 
-  input(type="submit", value="Save Changes", disabled)
+  input(type="submit", value="Save Changes")
   input(type="reset", value="Defaults");

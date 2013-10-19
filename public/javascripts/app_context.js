@@ -74,6 +74,10 @@ app_context.Base.prototype.handleAdd = function() {
   this.handleAfterChange();
 };
 
+app_context.Base.prototype.handleEdit = function() {
+  this.handleAfterChange();
+};
+
 // Person App App Object
 app_context.Person = function() {
   this.tab_id = 'person_profile',
@@ -97,52 +101,85 @@ app_context.Person.prototype.handleAPIReturn = function(data) {
   util.appendTextElement(editor, editor_text);
 
   this.form = document.querySelector('div.editor form[name="person"]');
+  this.form.addEventListener('submit', util.bind(this.handleEditSubmit, this));
+  this.form.addEventListener('change', util.bind(this.handleFormChange, this));
+
+/*
   this.setupTabOrder_();
   var validator = util.bind(this.validateForm, this);
   this.form.addEventListener('change', validator);
   this.form.addEventListener('submit', validator);
   this.form.addEventListener('reset', validator);
   this.form.addEventListener('blur', validator);
+*/
 };
 
-app_context.Person.prototype.setupTabOrder_ = function() {
-  this.tab_order = {
-    old_password: 'new_password',
-    new_password: 'verify_new_password',
-    verify_new_password: 'name',
-    name: 'full_name',
-    full_name: 'email',
-    email: null
-  };
-  var edits = this.form.querySelectorAll('td.editor');
-  this.fields = {};
-  var i;
+app_context.Person.prototype.handleFormChange = function(e) {
+  var form = e.target.form;
+  var old_password = form.querySelector('[name="old_password"]');
+  var new_password = form.querySelector('[name="new_password"]');
+  var verify_new_password = form.querySelector('[name="verify_new_password"]');
+  var submit_button = form.querySelector('[type="submit"]');
 
-  for(i = 0; i < edits.length; i++) {
-    var edit = edits[i];
-    var field = edit.firstChild;
-    var field_name = field.attributes.name.value;
-    this.fields[field_name] = field;
+  if (old_password.value != '' && old_password.value != null) {
+    if (old_password.value == this.model.person.password) {
+      verify_new_password.disabled = false;
+
+      if (new_password.value != '' && new_password.value != null) {
+	if (new_password.value == verify_new_password.value) {
+	  submit_button.disabled = false;
+	} else {
+	  submit_button.disabled = true;
+	}
+      } else {
+	submit_button.disabled = false;
+      }
+    } else {
+      verify_new_password.disabled = true;
+      submit_button.disabled = true;
+    }
+  } else {
+    verify_new_password.disabled = true;
+    submit_button.disabled = false;
   }
+}
 
-  this.submit_button = this.form.querySelector('[type="submit"]');
-};
+app_context.Person.prototype.handleEditSubmit = function(e) {
+  window.console.log(e);
+  var form = e.target;
+  var data = {
+    id: this.model.person.id,
+    name: form.querySelector('[name="name"]').value,
+    full_name: form.querySelector('[name="full_name"]').value,
+    email: form.querySelector('[name="email"]').value
+  };
 
-app_context.Person.prototype.disableFields_ = function(state) {
-  var names = Object.keys(this.fields);
-  for(var i = 0; i < names.length; i++) {
-    var name = names[i];
-    if (this.fields.hasOwnProperty(name)) {
-      this.fields[name].disabled = state;
+  var old_password = form.querySelector('[name="old_password"]').value;
+  var new_password = form.querySelector('[name="new_password"]').value;
+  var verify_new_password = form.querySelector('[name="verify_new_password"]').value;
+
+  if (old_password == this.model.person.password) {
+    if (new_password != '' && new_password != null) {
+      if (new_password == verify_new_password) {
+	data.password = new_password;
+      }
     }
   }
-  this.submit_button.disabled = state;
+
+  this.service = new service.generic(
+    './person',
+    util.bind(this.handleEdit, this)
+  );
+
+  this.service.set(data);
+  e.preventDefault();
+  return false;
 };
 
+/*
 app_context.Person.prototype.validateForm = function(e) {
   var form = e.target.tagName.toLowerCase() == 'form' ? form = e.target : form = e.target.form;
 
-  this.disableFields_(true);
   this.fields.old_password.disabled = false;
   if (e.type == 'reset') { 
     this.fields.old_password.focus();
@@ -150,8 +187,6 @@ app_context.Person.prototype.validateForm = function(e) {
   }
 
   if (this.fields.old_password.value == this.model.person.password) {
-    this.disableFields_(false);
-
     var next_field_name = this.tab_order[e.target.name];
     var next_field = this.submit_button;
 
@@ -165,7 +200,6 @@ app_context.Person.prototype.validateForm = function(e) {
       this.submit_button.disabled = false;
       next_field.focus();
     } else {
-      this.disableFields_(true);
       this.submit_button.disabled = true;
       this.fields.old_password.disabled = false;
       this.fields.new_password.disabled = false;
@@ -176,6 +210,7 @@ app_context.Person.prototype.validateForm = function(e) {
     this.fields.old_password.focus();
   }
 };
+*/
 
 // Member Band App Object
 app_context.MemberBand = function() {
