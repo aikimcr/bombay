@@ -1,5 +1,10 @@
 function util() {}
 
+util.inherits = function(target, source) {
+  for (var k in source.prototype)
+    target.prototype[k] = source.prototype[k];
+}
+
 util.removeAllChildren = function(element) {
   while(element.children.length > 0) {
     element.removeChild(element.firstChild);

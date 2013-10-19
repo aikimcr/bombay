@@ -229,4 +229,21 @@ describe('person_views', function() {
       done();
     });
   });
+
+  it('should get Herkimer', function(done) {
+    person.getByUsername('hjones', function(result) {
+      should.exist(result);
+      should.exist(result.person);
+      should.not.exist(result.err);
+      result.person.should.eql({
+	id: 3,
+	name: 'hjones',
+	full_name: 'Herkimer Jones',
+	email: null,
+	system_admin: false,
+	password: 'nerd'
+      });
+      done();
+    });
+  });
 });

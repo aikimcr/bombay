@@ -91,7 +91,7 @@ describe('routes', function() {
 	}
       };
 
-      routes.personProfile(req, res);
+      routes.getPerson(req, res);
     });
 
     var person_id;
@@ -537,7 +537,7 @@ describe('routes', function() {
 	}
       };
 
-      routes.songInfo(req, res);
+      routes.bandSongInfo(req, res);
     });
 
     var song_id;

@@ -7,7 +7,7 @@ var db = require('lib/db');
 var util = require('lib/util');
 
 /* JSON API Links */
-exports.personProfile = function(req, res) {
+exports.getPerson = function(req, res) {
   var person_id = req.session.passport.user;
   var dbh = new db.Handle();
   dbh.person().getById(person_id, function(result) {
@@ -293,7 +293,21 @@ exports.removeArtist = function(req, res) {
   });
 };
 
-exports.songInfo = function(req, res) {
+exports.createSong = function(req, res) {
+  var dbh = new db.Handle();
+  dbh.song().create(req.body, function(result) {
+    res.json(result);
+  });
+};
+
+exports.removeSong = function(req, res) {
+  var dbh = new db.Handle();
+  dbh.song().deleteById(req.query.song_id, function(result) {
+    res.json(result);
+  });
+};
+
+exports.bandSongInfo = function(req, res) {
   var person_id = req.session.passport.user;
   var band_id = req.query.band_id;
   var sort_type = req.query.sort_type;
@@ -342,13 +356,6 @@ exports.songInfo = function(req, res) {
   );
 
   getSongs();
-};
-
-exports.createSong = function(req, res) {
-  var dbh = new db.Handle();
-  dbh.song().create(req.body, function(result) {
-    res.json(result);
-  });
 };
 
 exports.addBandSong = function(req, res) {
@@ -420,47 +427,6 @@ exports.updateBandSongStatus = function(req, res) {
   updateStatus();
 };
 
-exports.updateBandSongRating = function(req, res) {
-  var dbh = new db.Handle();
-  var person_id = req.session.passport.user;
-  var band_song_id = req.body.band_song_id;
-  var rating = req.body.rating;
-
-  var updateRating = flow.define(
-    function() {
-      this.result = {band_song_id: band_song_id};
-      dbh.beginTransaction(this);
-    }, function(err) {
-      if (err) {
-	dbh.errorAndRollback(err, res.json);
-      } else {
-	dbh.song_rating().updateForPersonAndBandSong(person_id, band_song_id, rating, this);
-      }
-    }, function(result) {
-      if (result.err) {
-	errorAndRollback(result.err, res.json);
-      } else {
-	dbh.song_rating().getForPersonWithAverage(person_id, band_song_id, this);
-      }
-    }, function(result) {
-      if (result.err) {
-	errorAndRollback(result.err, res.json);
-      } else {
-	this.result = util.obj_merge(this.result, result);
-	dbh.commit(this);
-      }
-    }, function(err) {
-      if (err) {
-	errorAndRollback(err, res.json);
-      } else {
-	res.json(this.result);
-      }
-    }
-  );
-
-  updateRating();
-};
-
 exports.removeBandSong = function(req, res) {
   var dbh = new db.Handle();
   var band_song_id = req.query.band_song_id;
@@ -509,9 +475,43 @@ exports.removeBandSong = function(req, res) {
   removeSong();
 };
 
-exports.removeSong = function(req, res) {
+exports.updateBandSongRating = function(req, res) {
   var dbh = new db.Handle();
-  dbh.song().deleteById(req.query.song_id, function(result) {
-    res.json(result);
-  });
+  var person_id = req.session.passport.user;
+  var band_song_id = req.body.band_song_id;
+  var rating = req.body.rating;
+
+  var updateRating = flow.define(
+    function() {
+      this.result = {band_song_id: band_song_id};
+      dbh.beginTransaction(this);
+    }, function(err) {
+      if (err) {
+	dbh.errorAndRollback(err, res.json);
+      } else {
+	dbh.song_rating().updateForPersonAndBandSong(person_id, band_song_id, rating, this);
+      }
+    }, function(result) {
+      if (result.err) {
+	errorAndRollback(result.err, res.json);
+      } else {
+	dbh.song_rating().getForPersonWithAverage(person_id, band_song_id, this);
+      }
+    }, function(result) {
+      if (result.err) {
+	errorAndRollback(result.err, res.json);
+      } else {
+	this.result = util.obj_merge(this.result, result);
+	dbh.commit(this);
+      }
+    }, function(err) {
+      if (err) {
+	errorAndRollback(err, res.json);
+      } else {
+	res.json(this.result);
+      }
+    }
+  );
+
+  updateRating();
 };

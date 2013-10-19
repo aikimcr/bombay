@@ -78,7 +78,7 @@ app_context.Base.prototype.handleAdd = function() {
 app_context.Person = function() {
   this.tab_id = 'person_profile',
   this.tab_text = 'Profile',
-  this.url = './person_profile.json',
+  this.url = './person',
   this.template = 'person_profile',
   app_context.Base(this);
 };
@@ -181,7 +181,7 @@ app_context.Person.prototype.validateForm = function(e) {
 app_context.MemberBand = function() {
   this.tab_id = 'member_bands';
   this.tab_text = 'Bands';
-  this.url = './member_bands.json';
+  this.url = './person_band';
   this.template = 'member_bands';
   app_context.Base(this);
 };
@@ -224,7 +224,7 @@ app_context.MemberBand.prototype.handleAPIReturn = function(data) {
   var current_band_id = util.getBandId();
   util.removeAllChildren(band_selector);
 
-  this.model.member_bands.forEach(function(band) {
+  this.model.person_bands.forEach(function(band) {
     var new_option = document.createElement('option');
     new_option.innerHTML = band.name;
     new_option.value = band.id;
@@ -236,11 +236,14 @@ app_context.MemberBand.prototype.handleAPIReturn = function(data) {
 app_context.MemberBand.prototype.handleNewSubmit = function(e) {
   var form = e.target;
   var data = {
-    band_name: form.querySelector('[name="band_name"]').value,
-    person_id: form.querySelector('[name="person_id"]').value
+    name: form.querySelector('[name="band_name"]').value,
   };
 
-  this.service = new service.generic('./bands.json', util.bind(this.handleAdd, this));
+  this.service = new service.generic(
+    './band',
+    util.bind(this.handleAdd, this)
+  );
+
   this.service.set(data);
   e.preventDefault();
   return false;
@@ -253,7 +256,11 @@ app_context.MemberBand.prototype.handleAddSubmit = function(e) {
     person_id: form.querySelector('[name="person_id"]').value
   };
 
-  this.service = new service.generic('./member_bands.json', util.bind(this.handleAdd, this));
+  this.service = new service.generic(
+    './person_band',
+    util.bind(this.handleAdd, this)
+  );
+
   this.service.set(data);
   e.preventDefault();
   return false;
@@ -265,13 +272,15 @@ app_context.MemberBand.prototype.handleDelete = function(e) {
 
   var row = e.target.parentElement;
   var band_id = row.attributes.item('band_id').value;
-  var band = this.model.member_bands.filter(function (mb) { return mb.id == band_id })[0];
+  var band = this.model.person_bands.filter(function (mb) { return mb.id == band_id })[0];
 
   var confirm_delete = new dialog('Quit band ' + band.name + '?');
   confirm_delete.show(util.bind(function(result) {
     if (result) {
-      this.service = new service.generic('./member_bands.json?band_id=' + band_id,
-        util.bind(this.handleAfterChange, this));
+      this.service = new service.generic(
+	'./person_band?band_id=' + band_id + '&person_id=' + this.model.person_id,
+        util.bind(this.handleAfterChange, this)
+      );
       this.service.delete();
     } else {
       this.handleAfterChange();
@@ -285,7 +294,7 @@ app_context.MemberBand.prototype.handleDelete = function(e) {
 app_context.BandMember = function() {
   this.tab_id = 'band_members';
   this.tab_text = 'Band Members';
-  this.url = './band_members.json';
+  this.url = './band_member';
   this.template = 'band_members';
   app_context.Base(this);
 };
@@ -297,7 +306,7 @@ app_context.BandMember.prototype.getDrawUrl = function() {
 };
 
 app_context.BandMember.prototype.getContextArgs = function() {
-  this.model.band_admin = this.model.permissions.is_band_admin || this.model.permissions.is_sysadmin;
+  this.model.band_admin = this.model.band_admin || this.model.system_admin;
   
   return {
     sections: {creator: this.model.band_admin, display: true},
@@ -345,7 +354,11 @@ app_context.BandMember.prototype.handleAddSubmit = function(e) {
     person_id: form.querySelector('[name="person_id"]').value
   };
 
-  this.service = new service.generic('./band_members.json', util.bind(this.handleAdd, this));
+  this.service = new service.generic(
+    './band_member',
+    util.bind(this.handleAdd, this)
+  );
+
   this.service.set(data);
   e.preventDefault();
   return false;
@@ -354,12 +367,15 @@ app_context.BandMember.prototype.handleAddSubmit = function(e) {
 app_context.BandMember.prototype.handleNewSubmit = function(e) {
   var form = e.target;
   var data = {
-    band_id: form.querySelector('[name="band_id"]').value,
     name: form.querySelector('[name="name"]').value,
     full_name: form.querySelector('[name="full_name"]').value
   };
 
-  this.service = new service.generic('./persons.json', util.bind(this.handleAdd, this));
+  this.service = new service.generic(
+    './create_person', 
+    util.bind(this.handleAdd, this)
+  );
+
   this.service.set(data);
   e.preventDefault();
   return false;
@@ -379,8 +395,11 @@ app_context.BandMember.prototype.handleDelete = function(e) {
   var confirm_delete = new dialog('Remove ' + member.full_name + ' from ' + this.model.band.name + '?');
   confirm_delete.show(util.bind(function(result) {
     if (result) {
-      var url = './band_members.json?member_id=' + member_id + '&band_id=' + this.model.band.id;
-      this.service = new service.generic(url, util.bind(this.handleAfterChange, this));
+      var url = './band_member?person_id=' + member_id + '&band_id=' + this.model.band.id;
+      this.service = new service.generic(
+	url,
+	util.bind(this.handleAfterChange, this)
+      );
       this.service.delete();
     } else {
       this.handleAfterChange();
@@ -394,7 +413,7 @@ app_context.BandMember.prototype.handleDelete = function(e) {
 app_context.Artist = function() {
   this.tab_id = 'artists';
   this.tab_text = 'Artists';
-  this.url = './artists.json';
+  this.url = './artist';
   this.template = 'artists';
   app_context.Base(this);
 };
@@ -406,7 +425,7 @@ app_context.Artist.prototype.getDrawUrl = function() {
 };
 
 app_context.Artist.prototype.getContextArgs = function() {
-  this.model.band_admin = this.model.permissions.is_band_admin || this.model.permissions.is_sysadmin;
+  this.model.band_admin = this.model.band_admin || this.model.system_admin
 
   return {
     sections: {creator: this.model.band_admin, display: 1},
@@ -436,7 +455,7 @@ app_context.Artist.prototype.handleAPIReturn = function(data) {
     form.addEventListener('submit', util.bind(this.handleCreateSubmit, this));
   }
 
-  if (this.model.permissions.is_sysadmin) {
+  if (this.model.system_admin) {
     var delete_buttons = document.querySelectorAll('#' + this.tab_id + ' .display .list td.delete');
     var button_handler = util.bind(this.handleDelete, this);
 
@@ -449,10 +468,14 @@ app_context.Artist.prototype.handleAPIReturn = function(data) {
 app_context.Artist.prototype.handleCreateSubmit = function(e) {
   var form = e.target;
   var data = {
-    artist_name: form.firstChild.value
+    name: form.firstChild.value
   };
 
-  this.service = new service.generic('./artists.json', util.bind(this.handleAdd, this));
+  this.service = new service.generic(
+    './artist',
+    util.bind(this.handleAdd, this)
+  );
+
   this.service.set(data);
   e.preventDefault();
   return false;
@@ -472,8 +495,11 @@ app_context.Artist.prototype.handleDelete = function(e) {
   var confirm_delete = new dialog('Remove ' + artist.name + '?');
   confirm_delete.show(util.bind(function(result) {
     if (result) {
-      var url = './artists.json?artist_id=' + artist_id;
-      this.service = new service.generic(url, util.bind(this.handleAfterChange, this));
+      var url = './artist?artist_id=' + artist_id;
+      this.service = new service.generic(
+	url,
+	util.bind(this.handleAfterChange, this)
+      );
       this.service.delete();
     } else {
       this.handleAfterChange();
@@ -487,7 +513,7 @@ app_context.Artist.prototype.handleDelete = function(e) {
 app_context.BandSong = function() {
   this.tab_id = 'band_songs';
   this.tab_text = 'Songs';
-  this.url = './songs.json';
+  this.url = './band_song';
   this.template = 'songs';
   this.context = null;
   this.model = null;
@@ -517,7 +543,7 @@ app_context.BandSong.prototype.getDrawUrl = function() {
 };
 
 app_context.BandSong.prototype.getContextArgs = function() {
-  this.model.band_admin = this.model.permissions.is_band_admin || this.model.permissions.is_sysadmin;
+  this.model.band_admin = this.model.band_admin || this.model.system_admin;
 
   return {
     sections: {creator: this.model.band_admin, display: 1},
@@ -606,7 +632,11 @@ app_context.BandSong.prototype.handleAddSubmit = function(e) {
     song_id: form.querySelector('[name="song_id"]').value
   };
 
-  this.service = new service.generic('./songs.json', util.bind(this.handleAdd, this));
+  this.service = new service.generic(
+    './band_song',
+    util.bind(this.handleAdd, this)
+  );
+
   this.service.set(data);
   e.preventDefault();
   return false;
@@ -615,11 +645,15 @@ app_context.BandSong.prototype.handleAddSubmit = function(e) {
 app_context.BandSong.prototype.handleNewSubmit = function(e) {
   var form = e.target;
   var data = {
-    song_name: form.querySelector('[name="song_name"]').value,
+    name: form.querySelector('[name="song_name"]').value,
     artist_id: form.querySelector('[name="artist_id"]').value
   };
 
-  this.service = new service.generic('./song_master.json', util.bind(this.handleAdd, this));
+  this.service = new service.generic(
+    './song',
+    util.bind(this.handleAdd, this)
+  );
+
   this.service.set(data);
   e.preventDefault();
   return false;
@@ -636,9 +670,12 @@ app_context.BandSong.prototype.ratingChangeHandler = function(e) {
   };
 
   input.disabled = true;
-  this.service = new service.generic('./song_rating.json', util.bind(function(data) { 
-    this.redraw();
-  }, this));
+  this.service = new service.generic(
+    './song_rating',
+    util.bind(function(data) { 
+      this.redraw();
+    }, this)
+  );
   this.service.set(data);
   return true;
 };
@@ -654,12 +691,15 @@ app_context.BandSong.prototype.statusChangeHandler = function(e) {
   };
 
   input.disabled = true;
-  this.service = new service.generic('./song_status.json', function(data) {
-    var row = document.querySelector('#band_songs .list tr[band_song_id="' + data.band_song_id + '"]');
-    var input = row.querySelector('select[name="song_status"]');
-    input.value = data.song_status;
-    input.disabled = false;
-  });
+  this.service = new service.generic(
+    './song_status',
+    function(data) {
+      var row = document.querySelector('#band_songs .list tr[band_song_id="' + data.band_song_id + '"]');
+      var input = row.querySelector('select[name="song_status"]');
+      input.value = data.song_status;
+      input.disabled = false;
+    }
+  );
   this.service.set(data);
   return true;
 };
@@ -674,8 +714,11 @@ app_context.BandSong.prototype.handleDelete = function(e) {
   var confirm_delete = new dialog('Remove ' + band_song.name + '?');
   confirm_delete.show(util.bind(function(result) {
     if (result) {
-      var url = './songs.json?band_song_id=' + band_song_id;
-      this.service = new service.generic(url, util.bind(this.handleAfterChange, this));
+      var url = './band_song?band_song_id=' + band_song_id;
+      this.service = new service.generic(
+	url,
+	util.bind(this.handleAfterChange, this)
+      );
       this.service.delete();
     } else {
       this.handleAfterChange();

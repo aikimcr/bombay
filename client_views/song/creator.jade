@@ -1,6 +1,6 @@
 div
   input(type="checkbox", id="show_song_create_new")
-  label(for="show_song_create_new") Create A New Song in Master List
+  label(for="show_song_create_new") Create A New Song
   div.add
     form
       input(type="hidden", name="band_id", value="#{band_id}")
@@ -12,6 +12,6 @@ div
     form
       input(type="text", name="song_name", placeholder="New Song Name")
       select(name="artist_id")
-        each artist in artists
+        each artist in all_artists
           option(value="#{artist.id}") #{artist.name}
       input(type="submit", value="New")

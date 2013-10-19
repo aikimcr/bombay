@@ -2,13 +2,13 @@ table(cellpadding="0", cellspacing="0")
   tr
     th Artist Name
 
-    if permissions.is_sysadmin
+    if system_admin
       th
   each artist in artists
     tr.display(artist_id="#{artist.id}")
       td #{artist.name}
   
-      if permissions.is_sysadmin
+      if system_admin
         if artist.song_count > 0
           td #{artist.song_count}
         else

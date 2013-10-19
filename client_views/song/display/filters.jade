@@ -16,5 +16,5 @@ div.filter
   label(for="artist_filter") For Artist
   select(name="artist_filter")
     option(value=-1) --All Artists--
-    each artist in artists
+    each artist in all_artists
       option(value="#{artist.id}") #{artist.name}

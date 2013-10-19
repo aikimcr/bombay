@@ -6,8 +6,9 @@
 var express = require('express')
   , http = require('http')
   , path = require('path')
-  , sqlite3 = require('sqlite3')
-  , db = require('routes/db')
+  , db = require('lib/db')
+  , index = require('routes/index')
+  , route_db = require('routes/db')
   , login = require('routes/login')
   , passport = require('passport')
   , LocalStrategy = require('passport-local').Strategy
@@ -16,9 +17,11 @@ var express = require('express')
 
 passport.use(new LocalStrategy(
   function(username, password, done) {
+    var dbh = new db.Handle();
     //console.log(username + ', ' + password);
 
-    db.getPersonByName(username, function(person) {
+    dbh.person().getByUsername(username, function(result) {
+      var person = result.person;
       if (person) {
         if (username == person.name && password == person.password) {
           console.log(username + ' logged in');
@@ -88,42 +91,45 @@ if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
-app.get('/', requireLogin, routes.index);
+app.get('/', requireLogin, index.index);
 
-// Persons master list
-app.post('/persons.json', requireLogin, db.createPerson);
+// Person Table
+app.get('/person', requireLogin, route_db.getPerson);
+app.post('/create_person', requireLogin, route_db.createPerson);
+app.post('/person', requireLogin, route_db.updatePerson);
+app.delete('/person', requireLogin, route_db.removePerson);
 
-// person_profile handlers
-app.get('/person_profile.json', requireLogin, db.personProfile);
-app.post('/person_profile.json', requireLogin, db.updatePersonProfile);
+// Person Views
+app.get('/person_band', requireLogin, route_db.bandInfoForPerson);
+app.post('/person_band', requireLogin, route_db.addBandMember);
+app.delete('/person_band', requireLogin, route_db.removeBandMember);
 
-// band master handlers
-app.post('/bands.json', requireLogin, db.createBand);
+// Band Table
+app.post('/band', requireLogin, route_db.createBand);
+app.delete('/band', requireLogin, route_db.removeBand);
 
-// member_band handlers
-app.get('/member_bands.json', requireLogin, db.memberBands);
-app.post('/member_bands.json', requireLogin, db.addMember);
-app.delete('/member_bands.json', requireLogin, db.removeBand);
+// Band Members
+app.get('/band_member', requireLogin, route_db.bandMemberInfo);
+app.post('/band_member', requireLogin, route_db.addBandMember);
+app.delete('/band_member', requireLogin, route_db.removeBandMember);
 
-// band_member handlers
-app.get('/band_members.json', requireLogin, db.bandMembers);
-app.post('/band_members.json', requireLogin, db.addMember);
-app.delete('/band_members.json', requireLogin, db.removeMember);
+// Artist Table
+app.get('/artist', requireLogin, route_db.artistInfo);
+app.post('/artist', requireLogin, route_db.createArtist);
+app.delete('/artist', requireLogin, route_db.removeArtist);
 
-// artist handlers
-app.get('/artists.json', requireLogin, db.artists);
-app.post('/artists.json', requireLogin, db.createArtist);
-app.delete('/artists.json', requireLogin, db.deleteArtist);
+// Song Table
+app.post('/song', requireLogin, route_db.createSong);
+app.post('/song', requireLogin, route_db.removeSong);
 
-// Song master handlers
-app.post('/song_master.json', requireLogin, db.createSong);
+// Band Song Table
+app.get('/band_song', requireLogin, route_db.bandSongInfo);
+app.post('/band_song', requireLogin, route_db.addBandSong);
+app.delete('/band_song', requireLogin, route_db.removeBandSong);
+app.post('/song_status', requireLogin, route_db.updateBandSongStatus);
 
-// song handlers
-app.get('/songs.json', requireLogin, db.bandSongs);
-app.post('/songs.json', requireLogin, db.addSong);
-app.delete('/songs.json', requireLogin, db.removeSong);
-app.post('/song_rating.json', requireLogin, db.updateSongRating);
-app.post('/song_status.json', requireLogin, db.updateSongStatus);
+// Song Rating Table
+app.post('/song_rating', requireLogin, route_db.updateBandSongRating)
 
 // Authentication handlers
 app.get('/login', login.login);

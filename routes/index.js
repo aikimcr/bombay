@@ -2,16 +2,17 @@
 /*
  * GET home page.
  */
-var db = require('./db');
+var db = require('lib/db');
 var app_title = 'All Night Music Band Manager';
 
 exports.index = function(req, res){
-  var band_member_id = req.session.passport.user;
-  db.getBandsForMenu(band_member_id, function(bands) {
+  var person_id = req.session.passport.user;
+  var dbh = new db.Handle();
+  dbh.band().getsByPersonId(person_id, function(result) {
     res.render('index', {
       title: app_title,
       'messages': req.flash('info'),
-      'bands': bands
+      'bands': result.person_bands
     });
   });
 };
