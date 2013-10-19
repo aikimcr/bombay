@@ -103,6 +103,36 @@ describe('person_table', function() {
       done();
     });
   });
+
+  it('should update the person', function(done) {
+    var data = {
+      id: 4,
+      name: 'bugsy',
+      full_name: 'Bugs Bunny, ESQ',
+      password: 'lettuce',
+      email: 'bugsy@wb.com',
+      system_admin: true
+    };
+
+    person.update(data, function(result) {
+      should.exist(result);
+      should.not.exist(result.err);
+      person.getById(4, function(result) {
+	should.exist(result);
+	should.exist(result.person);
+	should.not.exist(result.err);
+	result.person.should.eql({
+	  id: 4,
+	  name: 'bugsy',
+	  full_name: 'Bugs Bunny, ESQ',
+	  password: 'lettuce',
+	  email: 'bugsy@wb.com',
+	  system_admin: true
+	});
+	done();
+      });
+    });
+  });
 });
 
 describe('person_views', function() {

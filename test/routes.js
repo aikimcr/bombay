@@ -127,6 +127,36 @@ describe('routes', function() {
       routes.createPerson(req, res);
     });
 
+    it('should update the person', function(done) {
+      req.body = {
+	id: person_id,
+	password: 'IAmTheEggDuck',
+	system_admin: true
+      };
+      var res = {
+	json: function(result) {
+	  should.exist(result);
+	  should.not.exist(result.err);
+	  dbh.person().getById(person_id, function(result) {
+	    should.exist(result);
+	    should.exist(result.person);
+	    should.not.exist(result.err);
+	    result.person.should.eql({
+	      id: person_id,
+	      name: 'dduck',
+	      full_name: 'Daffy Duck',
+	      password: 'IAmTheEggDuck',
+	      email: 'dduck@looneytunes.com',
+	      system_admin: true
+	    });
+	    done();
+	  });
+	}
+      };
+
+      routes.updatePerson(req, res);
+    });
+
     it('should delete the person', function(done) {
       req.query.person_id = person_id;
       var res = {
@@ -544,6 +574,37 @@ describe('routes', function() {
       };
 
       routes.addBandSong(req, res);
+    });
+
+    it('should update the band song status', function(done) {
+      req.body = {
+	id: band_song_id,
+	song_status: 4,
+      };
+      var res = {
+	json: function(result) {
+	  should.exist(result);
+	  should.not.exist(result.err);
+	  result.should.eql({
+	    band_song_id: band_song_id,
+	    song_status: 4
+	  });
+	  dbh.band_song().getById(band_song_id, function(result) {
+	    should.exist(result);
+	    should.exist(result.band_song);
+	    should.not.exist(result.err);
+	    result.band_song.should.eql({
+	      id: band_song_id,
+	      band_id: 1,
+	      song_id: song_id,
+	      song_status: 4
+	    });
+	    done();
+	  });
+	}
+      };
+
+      routes.updateBandSongStatus(req, res);
     });
 
     it('should remove the song and ratings from the band', function(done) {

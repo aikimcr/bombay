@@ -22,6 +22,13 @@ exports.createPerson = function(req, res) {
   });
 };
 
+exports.updatePerson = function(req, res) {
+  var dbh = new db.Handle();
+  dbh.person().update(req.body, function(result) {
+    res.json(result);
+  });
+};
+
 exports.removePerson = function(req, res) {
   var dbh = new db.Handle();
   dbh.person().deleteById(req.query.person_id, function(result) {
@@ -347,6 +354,36 @@ exports.addBandSong = function(req, res) {
   addSong();
 };
 
+exports.updateBandSongStatus = function(req, res) {
+  var dbh = new db.Handle();
+  var data = {
+    id: req.body.id,
+    song_status: req.body.song_status
+  };
+
+  var updateStatus = flow.define(
+    function() {
+      this.result = { band_song_id: data.id };
+      dbh.band_song().update(data, this);
+    }, function(result) {
+      if (result.err) {
+	res.json(result);
+      } else {
+	dbh.band_song().getById(this.result.band_song_id, this);
+      }
+    }, function(result) {
+      if (result.err) {
+	res.json(err);
+      } else {
+	this.result.song_status = result.band_song.song_status;
+	res.json(this.result);
+      }
+    }
+  );
+
+  updateStatus();
+};
+
 exports.removeBandSong = function(req, res) {
   var dbh = new db.Handle();
   var band_song_id = req.query.band_song_id;
@@ -404,31 +441,6 @@ exports.removeSong = function(req, res) {
 
 // editor API Links
 /*
-exports.updatePersonProfile = function(req, res) {
-  var data = req.body;
-
-  var sql_text = 'UPDATE person SET name = $1, full_name = $2, email = $3';
-  var sql_values = [data.name, data.full_name, data.email];
-
-  var id_param = "$4";
-  if (data.new_password) {
-    sql_text = sql_text + ', password = $4';
-    sql_values.push(data.new_password);
-    id_param = "$5";
-  }
-
-  sql_text = sql_text + ' WHERE id = ' + id_param;
-  sql_values.push(data.id);
-
-  var db = new sqlite3.Database(db_name);
-
-  db.run(sql_text, sql_values);
-
-  db.close();
-
-  res.redirect('/#person_profile');
-};
-
 exports.updateSongRating = function(req, res) {
   var person_id = req.session.passport.user;
   var data = req.body;
@@ -471,28 +483,4 @@ exports.updateSongRating = function(req, res) {
   db.close();
 };
 
-exports.updateSongStatus = function(req, res) {
-  var person_id = req.session.passport.user;
-  var data = req.body;
-
-  var db = new sqlite3.Database(db_name);
-  var update_sql_text = 'UPDATE band_song SET song_status = $1 WHERE id = $2';
-  var update_sql_values = [data.song_status, data.band_song_id];
-
-  db.run(update_sql_text, update_sql_values, function(err, rows) {
-    if (err) {
-      console.log('Error on update ' + err);
-      console.log(sql_text);
-      console.log(sql_values);
-      res.json({err: err});
-    } else {
-      res.json({
-        band_song_id: data.band_song_id,
-        song_status: data.song_status
-      });
-    }
-  });
-
-  db.close();
-};
 */
