@@ -375,6 +375,7 @@ exports.addBandSong = function(req, res) {
       if (result.err) {
 	dbh.errorAndRollback(result.err, res.json);
       } else {
+debugger;
 	this.result = util.obj_merge(this.result, result);
 	dbh.song_rating().addForSong(req.body.song_id, req.body.band_id, this);
       }
@@ -400,7 +401,7 @@ exports.addBandSong = function(req, res) {
 exports.updateBandSongStatus = function(req, res) {
   var dbh = new db.Handle();
   var data = {
-    id: req.body.id,
+    id: req.body.band_song_id,
     song_status: req.body.song_status
   };
 

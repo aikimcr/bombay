@@ -611,7 +611,7 @@ describe('routes', function() {
 
     it('should update the band song status', function(done) {
       req.body = {
-	id: band_song_id,
+	band_song_id: band_song_id,
 	song_status: 4,
       };
       var res = {
