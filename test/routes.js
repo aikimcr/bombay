@@ -509,6 +509,87 @@ describe('routes', function() {
 
       routes.createSong(req, res);
     });
+
+    var band_song_id;
+    it('should add song to a band', function(done) {
+      req.body = {
+	band_id: 1,
+	song_id: song_id
+      };
+      var res = {
+	json: function(result) {
+	  should.exist(result);
+	  should.exist(result.band_song_id);
+	  should.not.exist(result.err);
+	  band_song_id = result.band_song_id;
+	  dbh.band_song().getById(band_song_id, function(result) {
+	    should.exist(result);
+	    should.exist(result.band_song);
+	    should.not.exist(result.err);
+	    result.band_song.should.eql({
+	      id: band_song_id,
+	      band_id: 1,
+	      song_id: song_id,
+	      song_status: 0
+	    });
+	    dbh.song_rating().getForBandMember(3, 1, function(result) {
+	      should.exist(result);
+	      should.exist(result.member_ratings);
+	      should.not.exist(result.err);
+	      result.member_ratings.should.eql([]);
+	      done();
+	    });
+	  });
+	}
+      };
+
+      routes.addBandSong(req, res);
+    });
+
+    it('should remove the song and ratings from the band', function(done) {
+      req.query = {
+	band_id: 1,
+	band_song_id: band_song_id
+      };
+      var res = {
+	json: function(result) {
+	  should.exist(result);
+	  should.not.exist(result.err);
+	  dbh.band_song().getById(band_song_id, function(result) {
+	    should.exist(result);
+	    should.not.exist(result.band_song);
+	    should.not.exist(result.err);
+	    dbh.song_rating().getForBandMember(3, 1, function(result) {
+	      should.exist(result);
+	      should.exist(result.member_ratings);
+	      should.not.exist(result.err);
+	      result.member_ratings.should.eql([]);
+	      done();
+	    });
+	  });
+	}
+      };
+
+      routes.removeBandSong(req, res);
+    });
+
+    it('should remove the song from the database', function(done) {
+      req.query.song_id = song_id;
+      var res = {
+	json: function(result) {
+	  should.exist(result);
+	  should.not.exist(result.err);
+	  dbh.song().getById(song_id, function(result) {
+	    should.exist(result);
+	    should.not.exist(result.song);
+	    should.not.exist(result.err);
+	    done();
+	  });
+	}
+      };
+
+      routes.removeSong(req, res);
+    });
   });
 
   afterEach(function(done) { req.query = {}; done(); });

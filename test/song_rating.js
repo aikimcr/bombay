@@ -235,4 +235,41 @@ describe('song_rating_util', function() {
       });
     });
   });
+
+  it('should add the ratings for a song', function(done) {
+    song_rating.addForSong(1, 1, function(result) {
+      should.exist(result);
+      should.exist(result.last_song_rating_id);
+      should.not.exist(result.err);
+      done();
+    });
+  });
+
+  it('should get the ratings for a song', function(done) {
+    song_rating.getForSong(1, 1, function(result) {
+      should.exist(result);
+      should.exist(result.song_ratings);
+      should.not.exist(result.err);
+      result.song_ratings.should.eql([{
+	id: 6, person_id: 1, band_song_id: 1, rating: 3
+      }, {
+	id: 7, person_id: 3, band_song_id: 1, rating: 3
+      }]);
+      done();
+    });
+  });
+
+  it('should delete the ratings for a song', function(done) {
+    song_rating.deleteForSong(1, 1, function(result) {
+      should.exist(result);
+      should.not.exist(result.err);
+      song_rating.getForSong(1, 1, function(result) {
+	should.exist(result);
+	should.exist(result.song_ratings);
+	should.not.exist(result.err);
+	result.song_ratings.should.eql([]);
+	done();
+      });
+    });
+  });
 });

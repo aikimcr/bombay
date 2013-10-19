@@ -308,6 +308,100 @@ exports.createSong = function(req, res) {
   });
 };
 
+exports.addBandSong = function(req, res) {
+  var dbh = new db.Handle();
+
+  var addSong = flow.define(
+    function() {
+      this.result = {};
+      dbh.beginTransaction(this);
+    }, function(err) {
+      if (err) {
+	dbh.errorAndRollback(err, res.json);
+      } else {
+	dbh.band_song().create(req.body, this);
+      }
+    }, function(result) {
+      if (result.err) {
+	dbh.errorAndRollback(result.err, res.json);
+      } else {
+	this.result = util.obj_merge(this.result, result);
+	dbh.song_rating().addForSong(this.result.song_id, req.body.band_id, this);
+      }
+    }, function(result) {
+      if (result.err) {
+	dbh.errorAndRollback(result.err, res.json);
+      } else {
+	this.result = util.obj_merge(this.result, result);
+	dbh.commit(this);
+      }
+    }, function(err) {
+      if (err) {
+	dbh.errorAndRollback(err, res.json);
+      } else {
+	res.json(this.result);
+      }
+    }
+  );
+
+  addSong();
+};
+
+exports.removeBandSong = function(req, res) {
+  var dbh = new db.Handle();
+  var band_song_id = req.query.band_song_id;
+  var band_id = req.query.band_id;
+
+  var removeSong = flow.define(
+    function() {
+      this.result = {};
+      dbh.beginTransaction(this);
+    }, function(err) {
+      if (err) {
+	dbh.errorAndRollback(err, res.json);
+      } else {
+	dbh.band_song().getById(band_song_id, this);
+      }
+    }, function(result) {
+      if (result.err) {
+	dbh.errorAndRollback(result.err, res.json);
+      } else {
+	this.song_id = result.band_song.song_id;
+	dbh.song_rating().deleteForSong(this.song_id, band_id, this);
+      }
+    }, function(result) {
+      if (result.err) {
+	dbh.errorAndRollback(result.err, res.json);
+      } else {
+	this.result = util.obj_merge(this.result, result);
+	dbh.band_song().deleteById(band_song_id, this);
+      }
+    }, function(result) {
+      if (result.err) {
+	dbh.errorAndRollback(result.err, res.json);
+      } else {
+	this.result = util.obj_merge(this.result, result);
+	dbh.commit(this);
+      }
+    }, function(err) {
+      if (err) {
+	dbh.errorAndRollback(err, res.json);
+      } else {
+	res.json(this.result);
+      }
+    }
+  );
+
+  removeSong();
+};
+
+exports.removeSong = function(req, res) {
+  var dbh = new db.Handle();
+  dbh.song().deleteById(req.query.song_id, function(result) {
+    res.json(result);
+  });
+};
+
 // editor API Links
 /*
 exports.updatePersonProfile = function(req, res) {
@@ -333,54 +427,6 @@ exports.updatePersonProfile = function(req, res) {
   db.close();
 
   res.redirect('/#person_profile');
-};
-
-exports.addSong = function(req, res) {
-  var data = req.body;
-
-  var band_song_sql_text = 'INSERT INTO band_song (band_id, song_id) VALUES ($1, $2)';
-  var band_song_sql_values = [data.band_id, data.song_id];
-
-  var song_rating_sql_text = 'INSERT INTO song_rating (person_id, band_song_id) ' +
-                             'SELECT band_member.person_id, band_song.id' +
-                             '  FROM band_member, band_song' +
-                             ' WHERE band_member.band_id = band_song.band_id' +
-                             '   AND band_song.band_id = $1' +
-                             '   AND band_song.song_id = $2';
-
-  var song_rating_sql_values = [data.band_id, data.song_id];
-
-  var db = new sqlite3.Database(db_name);
-
-  var addTheSong = flow.define(
-    function(err, rows) {
-      db.run(band_song_sql_text, band_song_sql_values, this);
-    }, function (err, rows) {
-      if (err) {
-        console.log("Error " + err);
-        console.log(err);
-        console.log(band_song_sql_text);
-        console.log(band_song_sql_values);
-        res.json({err: err});
-      } else {
-        db.run(song_rating_sql_text, song_rating_sql_values, this);
-      }
-    }, function(err, rows) {
-      if (err) {
-        console.log("Error " + err);
-        console.log(err);
-        console.log(song_rating_sql_text);
-        console.log(song_rating_sql_values);
-        res.json({err: err});
-      } else {
-        res.json({});
-      }
-    }
-  );
-
-  addTheSong();
-
-  db.close();
 };
 
 exports.updateSongRating = function(req, res) {
@@ -448,83 +494,5 @@ exports.updateSongStatus = function(req, res) {
   });
 
   db.close();
-};
-
-// Deletes
-getSongRatingDeleteSql = function(person_id, band_id) {
-  return 'DELETE FROM song_rating WHERE person_id = ' + person_id + 
-    ' AND band_song_id IN ' +
-    '(SELECT id FROM band_song WHERE band_id = ' + band_id + '); ';
-};
-
-getBandMemberDeleteSql = function(person_id, band_id) {
-  return 'DELETE FROM band_member WHERE person_id = ' + person_id +
-    ' AND band_id = ' + band_id + '; ';
-};
-
-exports.removeBand = function(req, res) {
-  var person_id = req.session.passport.user;
-  var band_id = req.query.band_id;
-
-  var db = new sqlite3.Database(db_name);
-
-  var sql_text = 'BEGIN TRANSACTION; ' +
-    getSongRatingDeleteSql(person_id, band_id) +
-    getBandMemberDeleteSql(person_id, band_id) +
-    'COMMIT; ';
-
-  var sql_values = [];
-
-  db.exec(sql_text, function(err) {
-    if (err) {
-      exports.logDbError(err, sql_text, sql_values);
-      res.json({err: err});
-    } else {
-      res.json({});
-    }
-  });
-};
-
-exports.deleteArtist = function(req, res) {
-  var artist_id = req.query.artist_id;
-
-  var db = new sqlite3.Database(db_name);
-
-  var sql_text = 'BEGIN TRANSACTION; ' +
-    'DELETE FROM artist WHERE id = ' + artist_id + '; ' +
-    'COMMIT; ';
-
-  var sql_values = [];
-
-  db.exec(sql_text, function(err) {
-    if (err) {
-      exports.logDbError(err, sql_text, sql_values);
-      res.json({err: err});
-    } else {
-      res.json({});
-    }
-  });
-};
-
-exports.removeSong = function(req, res) {
-  var band_song_id = req.query.band_song_id;
-
-  var db = new sqlite3.Database(db_name);
-
-  var sql_text = 'BEGIN TRANSACTION; ' +
-    'DELETE FROM song_rating WHERE band_song_id = ' + band_song_id + '; ' +
-    'DELETE FROM band_song WHERE id = ' + band_song_id + '; ' +
-    'COMMIT; ';
-
-  var sql_values = [];
-
-  db.exec(sql_text, function(err) {
-    if (err) {
-      exports.logDbError(err, sql_text, sql_values);
-      res.json({err: err});
-    } else {
-      res.json({});
-    }
-  });
 };
 */
