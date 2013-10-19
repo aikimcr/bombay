@@ -168,9 +168,45 @@ exports.bandMemberInfo = function(req, res) {
 
 exports.addBandMember = function(req, res) {
   var dbh = new db.Handle();
-  dbh.band_member().create(req.body, function(result) {
-    res.json(result);
-  });
+
+  var addMember = flow.define(
+    function() {
+      this.result = {};
+      dbh.beginTransaction(this);
+    }, function(err) {
+      if (err) {
+	dbh.errorAndRollback(err, res.json);
+      } else {
+	dbh.band_member().create(req.body, this);
+      }
+    }, function(result) {
+      if (result.err) {
+	dbh.errorAndRollback(result.err, res.json);
+      } else {
+	this.result = util.obj_merge(this.result, result);
+	dbh.song_rating().addForBandMember(
+	  req.body.person_id,
+	  req.body.band_id,
+	  this
+	);
+      }
+    }, function(result) {
+      if (result.err) {
+	dbh.errorAndRollback(result.err, res.json);
+      } else {
+	this.result = util.obj_merge(this.result, result);
+	dbh.commit(this);
+      }
+    }, function(err) {
+      if (err) {
+	dbh.errorAndRollback(err);
+      } else {
+	res.json(this.result);
+      }
+    }
+  );
+
+  addMember();
 };
 
 exports.removeBandMember = function(req, res) {
@@ -333,7 +369,7 @@ exports.addBandSong = function(req, res) {
 	dbh.errorAndRollback(result.err, res.json);
       } else {
 	this.result = util.obj_merge(this.result, result);
-	dbh.song_rating().addForSong(this.result.song_id, req.body.band_id, this);
+	dbh.song_rating().addForSong(req.body.song_id, req.body.band_id, this);
       }
     }, function(result) {
       if (result.err) {
@@ -382,6 +418,47 @@ exports.updateBandSongStatus = function(req, res) {
   );
 
   updateStatus();
+};
+
+exports.updateBandSongRating = function(req, res) {
+  var dbh = new db.Handle();
+  var person_id = req.session.passport.user;
+  var band_song_id = req.body.band_song_id;
+  var rating = req.body.rating;
+
+  var updateRating = flow.define(
+    function() {
+      this.result = {band_song_id: band_song_id};
+      dbh.beginTransaction(this);
+    }, function(err) {
+      if (err) {
+	dbh.errorAndRollback(err, res.json);
+      } else {
+	dbh.song_rating().updateForPersonAndBandSong(person_id, band_song_id, rating, this);
+      }
+    }, function(result) {
+      if (result.err) {
+	errorAndRollback(result.err, res.json);
+      } else {
+	dbh.song_rating().getForPersonWithAverage(person_id, band_song_id, this);
+      }
+    }, function(result) {
+      if (result.err) {
+	errorAndRollback(result.err, res.json);
+      } else {
+	this.result = util.obj_merge(this.result, result);
+	dbh.commit(this);
+      }
+    }, function(err) {
+      if (err) {
+	errorAndRollback(err, res.json);
+      } else {
+	res.json(this.result);
+      }
+    }
+  );
+
+  updateRating();
 };
 
 exports.removeBandSong = function(req, res) {
@@ -438,49 +515,3 @@ exports.removeSong = function(req, res) {
     res.json(result);
   });
 };
-
-// editor API Links
-/*
-exports.updateSongRating = function(req, res) {
-  var person_id = req.session.passport.user;
-  var data = req.body;
-
-  var db = new sqlite3.Database(db_name);
-  var update_sql_text = 'UPDATE song_rating SET rating = $1' +
-                 ' WHERE person_id = $2 AND band_song_id = $3';
-  var update_sql_values = [data.rating, person_id, data.band_song_id];
-  var get_sql_text = 'SELECT a.rating, avg(b.rating) as average_rating' +
-             '  FROM song_rating a, song_rating b' +
-             ' WHERE a.band_song_id = b.band_song_id ' +
-             '   AND a.person_id = $1 ' +
-             '   AND a.band_song_id = $2 ' +
-             ' GROUP BY a.band_song_id';
-  
-  var get_sql_values = [person_id, data.band_song_id];
-
-  db.serialize(function() {
-    db.run(update_sql_text, update_sql_values, function(err, rows) {
-      if(err) {
-        console.log('Error on update ' + err);
-        console.log(err);
-        console.log(sql_text);
-        console.log(sql_values);
-        res.json({err: err});
-      }
-    });
-    db.all(get_sql_text, get_sql_values, function(err, rows) {
-      if (err) {
-        res.json({err: err});
-      } else {
-        res.json({
-          band_song_id: data.band_song_id,
-          song_rating: rows[0]
-        });
-      }
-    });
-  });
-
-  db.close();
-};
-
-*/

@@ -298,8 +298,27 @@ describe('routes', function() {
       routes.bandMemberInfo(req, res);
     });
 
+    it('should not find the band member', function(done) {
+      dbh.band_member().getByPersonAndBandId(4, 1, function(result) {
+	should.exist(result);
+	should.not.exist(result.band_member);
+	should.not.exist(result.err);
+	done();
+      });
+    });
+
+    it('should find no ratings for person', function(done) {
+      dbh.song_rating().getForBandMember(4, 1, function(result) {
+	should.exist(result);
+	should.exist(result.member_ratings);
+	should.not.exist(result.err);
+	result.member_ratings.should.eql([]);
+	done();
+      });
+    });
+
     var band_member_id;
-    it('should create add a band_member', function(done) {
+    it('should add a band_member', function(done) {
       req.body = {
 	band_id: 1,
 	person_id: 4,
@@ -321,18 +340,28 @@ describe('routes', function() {
 	      person_id: 4,
 	      band_admin: true
 	    });
+	    dbh.song_rating().getForBandMember(4, 1, function(result) {
+	      should.exist(result);
+	      should.exist(result.member_ratings);
+	      should.not.exist(result.err);
+	      result.member_ratings.should.eql([{
+		id: 11, person_id: 4, band_song_id: 1, rating: 3
+	      }, {
+		id: 12, person_id: 4, band_song_id: 2, rating: 3
+	      }, {
+		id: 13, person_id: 4, band_song_id: 3, rating: 3
+	      }, {
+		id: 14, person_id: 4, band_song_id: 4, rating: 3
+	      }, {
+		id: 15, person_id: 4, band_song_id: 5, rating: 3
+	      }]);
+	      done();
+	    });
 	  });
-	  done();
 	}
       };
 
       routes.addBandMember(req, res);
-    });
-
-    before(function(done) {
-      dbh.song_rating().addForBandMember(4, 1, function(result) {
-	done();
-      });
     });
 
     it('should remove the band member and song ratings', function(done) {
@@ -562,11 +591,15 @@ describe('routes', function() {
 	      song_id: song_id,
 	      song_status: 0
 	    });
-	    dbh.song_rating().getForBandMember(3, 1, function(result) {
+	    dbh.song_rating().getForSong(song_id, 1, function(result) {
 	      should.exist(result);
-	      should.exist(result.member_ratings);
+	      should.exist(result.song_ratings);
 	      should.not.exist(result.err);
-	      result.member_ratings.should.eql([]);
+	      result.song_ratings.should.eql([{
+		id: 16, person_id: 1, band_song_id: band_song_id, rating: 3
+	      }, {
+		id: 17, person_id: 3, band_song_id: band_song_id, rating: 3
+	      }])
 	      done();
 	    });
 	  });
@@ -605,6 +638,32 @@ describe('routes', function() {
       };
 
       routes.updateBandSongStatus(req, res);
+    });
+
+    it('should update the song rating', function(done) {
+      req.body = {
+	person_id: 1,
+	band_song_id: band_song_id,
+	rating: 1
+      };
+      var res = {
+	json: function(result) {
+	  should.exist(result);
+	  should.exist(result.band_song_id);
+	  should.exist(result.song_rating);
+	  should.not.exist(result.err);
+	  result.band_song_id.should.eql(band_song_id);
+	  result.song_rating.should.eql({
+	    person_id: 1,
+	    band_song_id: band_song_id,
+	    rating: 1,
+	    average_rating: 2
+	  });
+	  done();
+	}
+      };
+
+      routes.updateBandSongRating(req, res);
     });
 
     it('should remove the song and ratings from the band', function(done) {

@@ -193,6 +193,16 @@ describe('song_rating_util', function() {
     done();
   });
 
+  it('should find no ratings', function(done) {
+    song_rating.getAll(function(result) {
+      should.exist(result);
+      should.exist(result.all_song_ratings);
+      should.not.exist(result.err);
+      result.all_song_ratings.should.eql([]);
+      done();
+    });
+  });
+
   it('should add the ratings for a band member', function(done) {
     song_rating.addForBandMember(1, 1, function(result) {
       should.exist(result);
@@ -236,6 +246,16 @@ describe('song_rating_util', function() {
     });
   });
 
+  it('should find no ratings', function(done) {
+    song_rating.getAll(function(result) {
+      should.exist(result);
+      should.exist(result.all_song_ratings);
+      should.not.exist(result.err);
+      result.all_song_ratings.should.eql([]);
+      done();
+    });
+  });
+
   it('should add the ratings for a song', function(done) {
     song_rating.addForSong(1, 1, function(result) {
       should.exist(result);
@@ -255,6 +275,42 @@ describe('song_rating_util', function() {
       }, {
 	id: 7, person_id: 3, band_song_id: 1, rating: 3
       }]);
+      done();
+    });
+  });
+
+  it('should get the personal rating for a person and band song', function(done) {
+    song_rating.getForPersonAndBandSong(3, 1, function(result) {
+      should.exist(result);
+      should.exist(result.song_rating);
+      should.not.exist(result.err);
+      result.song_rating.should.eql({id: 7, person_id: 3, band_song_id: 1, rating: 3});
+      done();
+    });
+  });
+
+  it('should update the personal rating for a person and band song', function(done) {
+    song_rating.updateForPersonAndBandSong(3, 1, 5, function(result) {
+      should.exist(result);
+      should.not.exist(result.err);
+      song_rating.getForPersonAndBandSong(3, 1, function(result) {
+	should.exist(result);
+	should.exist(result.song_rating);
+	should.not.exist(result.err);
+	result.song_rating.should.eql({id: 7, person_id: 3, band_song_id: 1, rating: 5});
+	done();
+      });
+    });
+  });
+
+  it('should get the rating for a band song with average', function(done) {
+    song_rating.getForPersonWithAverage(3, 1, function(result) {
+      should.exist(result);
+      should.exist(result.song_rating);
+      should.not.exist(result.err);
+      result.song_rating.should.eql({
+	person_id: 3, band_song_id: 1, rating: 5, average_rating: 4
+      });
       done();
     });
   });
