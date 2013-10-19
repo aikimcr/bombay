@@ -172,3 +172,59 @@ describe('band_member_views', function() {
     });
   });
 });
+
+describe('band_member_util', function() {
+  before(function(done) {
+    db.setDbPath('./bombay_test.db');
+    dbh = new db.Handle()
+    var sql = fs.readFileSync('./sql/schema.sql', 'utf8');
+    dbh.doSqlExec([sql], done);
+  });
+
+  before(function(done) {
+    var sql = fs.readFileSync('./test/support/addBands.sql', 'utf8');
+    dbh.doSqlExec(sql, function(err) {
+      done();
+    });
+  });
+
+  before(function(done) {
+    var sql = fs.readFileSync('./test/support/addPeople.sql', 'utf8');
+    dbh.doSqlExec(sql, function(err) {
+      done();
+    });
+  });
+
+  before(function(done) {
+    var sql = fs.readFileSync('./test/support/addBandMembers.sql', 'utf8');
+    dbh.doSqlExec(sql, function(err) {
+      done();
+    });
+  });
+
+  var band_member;
+  before(function(done) {
+    band_member = dbh.band_member();
+    done();
+  });
+
+  it('should delete a band member', function(done) {
+    band_member.deleteByPersonAndBandId(3, 1, function(result) {
+      should.exist(result);
+      should.not.exist(result.err);
+      band_member.getsByBandId(1, function(result) {
+	should.exist(result);
+	should.exist(result.band_members);
+	should.not.exist(result.err);
+	result.band_members.should.eql([{
+	  id: 1,
+	  full_name: 'System Admin Test User',
+	  email: null,
+	  system_admin: 1,
+	  band_admin: 0
+	}]);
+	done();
+      });
+    });
+  });
+});

@@ -10,8 +10,21 @@ var util = require('lib/util');
 exports.personProfile = function(req, res) {
   var person_id = req.session.passport.user;
   var dbh = new db.Handle();
-  var person = dbh.person();
-  person.getById(person_id, function(result) {
+  dbh.person().getById(person_id, function(result) {
+    res.json(result);
+  });
+};
+
+exports.createPerson = function(req, res) {
+  var dbh = new db.Handle();
+  dbh.person().create(req.body, function(result) {
+    res.json(result);
+  });
+};
+
+exports.removePerson = function(req, res) {
+  var dbh = new db.Handle();
+  dbh.person().deleteById(req.query.person_id, function(result) {
     res.json(result);
   });
 };
@@ -49,6 +62,58 @@ exports.bandInfoForPerson = function(req, res) {
   );
 
   getBands();
+};
+
+exports.createBand = function(req, res) {
+  var person_id = req.session.passport.user;
+  var dbh = new db.Handle();
+
+  var createTheBand = flow.define(
+    function() {
+      this.result = {};
+      dbh.beginTransaction(this);
+    }, function(err) {
+      if (err) {
+	dbh.errorAndRollback(err, res.json);
+      } else {
+	dbh.band().create(req.body, this);
+      }
+    }, function(result) {
+      if (result.err) {
+	dbh.errorAndRollback(result.err, res.json);
+      } else {
+	this.result = util.obj_merge(this.result, result);
+	var data = {
+	  person_id: person_id,
+	  band_id: result.band_id,
+	  band_admin: true
+	};
+	dbh.band_member().create(data, this);
+      }
+    }, function(result) {
+      if (result.err) {
+	dbh.errorAndRollback(result.err, res.json);
+      } else {
+	this.result = util.obj_merge(this.result, result);
+	dbh.commit(this);
+      }
+    }, function(err) {
+      if (err) {
+	dbh.errorAndRollback(err, res.json);
+      } else {
+	res.json(this.result);
+      }
+    }
+  );
+
+  createTheBand();
+};
+
+exports.removeBand = function(req, res) {
+  var dbh = new db.Handle();
+  dbh.band().deleteById(req.query.band_id, function(result) {
+    res.json(result);
+  });
 };
 
 exports.bandMemberInfo = function(req, res) {
@@ -94,6 +159,54 @@ exports.bandMemberInfo = function(req, res) {
   get_list();
 };
 
+exports.addBandMember = function(req, res) {
+  var dbh = new db.Handle();
+  dbh.band_member().create(req.body, function(result) {
+    res.json(result);
+  });
+};
+
+exports.removeBandMember = function(req, res) {
+  var dbh = new db.Handle();
+  var band_id = req.query.band_id;
+  var person_id = req.query.person_id;
+
+  var deleteMember = flow.define(
+    function() {
+      this.result = {};
+      dbh.beginTransaction(this);
+    }, function(err) {
+      if (err) {
+	dbh.errorAndRollback(err, res.json);
+      } else {
+	dbh.song_rating().deleteForBandMember(person_id, band_id, this);
+      }
+    }, function(result) {
+      if (result.err) {
+	dbh.errorAndRollback(result.err, res.json);
+      } else {
+	this.result = util.obj_merge(this.result, result);
+	dbh.band_member().deleteByPersonAndBandId(person_id, band_id, this);
+      }
+    }, function(result) {
+      if (result.err) {
+	dbh.errorAndRollback(result.err, res.json);
+      } else {
+	this.result = util.obj_merge(this.result, result);
+	dbh.commit(this);
+      }
+    }, function(err) {
+      if (err) {
+	dbh.errorAndRollback(err, res.json);
+      } else {
+	res.json(this.result);
+      }
+    }
+  );
+
+  deleteMember();
+};
+
 exports.artistInfo = function(req, res) {
   var person_id = req.session.passport.user;
   var band_id = req.query.band_id;
@@ -108,7 +221,7 @@ exports.artistInfo = function(req, res) {
         res.json(result);
       } else {
 	this.result = util.obj_merge(this.result, result);
-	dbh.artist().getAll(this);
+	dbh.artist().getAllWithSongCount(this);
       }
     }, function(result) {
       if (result.err) {
@@ -121,6 +234,20 @@ exports.artistInfo = function(req, res) {
   );
 
   getArtistList();
+};
+
+exports.createArtist = function(req, res) {
+  var dbh = new db.Handle();
+  dbh.artist().create(req.body, function(result) {
+    res.json(result);
+  });
+};
+
+exports.removeArtist = function(req, res) {
+  var dbh = new db.Handle();
+  dbh.artist().deleteById(req.query.artist_id, function(result) {
+    res.json(result);
+  });
 };
 
 exports.songInfo = function(req, res) {
@@ -174,94 +301,15 @@ exports.songInfo = function(req, res) {
   getSongs();
 };
 
+exports.createSong = function(req, res) {
+  var dbh = new db.Handle();
+  dbh.song().create(req.body, function(result) {
+    res.json(result);
+  });
+};
+
 // editor API Links
 /*
-exports.createBand = function(req, res) {
-  var person_id = req.session.passport.user;
-  var band_name = req.body.band_name;
-
-  var created_band_id = 'SELECT id FROM band WHERE name = \'' + band_name + '\'';
-  var sql_text_list = [
-    'BEGIN TRANSACTION;',
-    'INSERT INTO band (name) VALUES (\'' + band_name + '\');',
-    'INSERT INTO band_member (band_id, person_id, band_admin) VALUES (' +
-      '(' + created_band_id + '), ' + person_id + ', 1);',
-    'INSERT INTO song_rating (person_id, band_song_id) '+
-    'SELECT person.id as person_id, band_song.id as band_song_id FROM person, band_song ' +
-    ' WHERE person.id = \'' + person_id + '\' AND band_song.band_id = (' + created_band_id + ');',
-    'COMMIT;'
-  ];
-
-  var sql_text = sql_text_list.join('\n');
-  
-  var db = new sqlite3.Database(db_name);
-
-  db.exec(sql_text, function(err) {
-    if (err) {
-      exports.logDbError(err, sql_text, []);
-      res.json({err: err});
-    }
-    else {
-      res.json({});
-    }
-  });
-
-  db.close();
-};
-
-exports.addMember = function(req, res) {
-  var data = req.body;
-
-  var sql_text_list = [
-    'BEGIN TRANSACTION;',
-    'INSERT INTO band_member (band_id, person_id) VALUES (' + data.band_id + ', ' + data.person_id + ');',
-    'INSERT INTO song_rating (person_id, band_song_id) ' +
-      'SELECT person.id as person_id, band_song.id as band_song_id FROM person, band_song ' +
-      ' WHERE person.id = ' + data.person_id + ' AND band_song.band_id = ' + data.band_id + ';',
-    'COMMIT;'
-  ];
-  
-  var sql_text = sql_text_list.join('\n');
-
-  var db = new sqlite3.Database(db_name);
-
-  db.exec(sql_text, function(err) {
-    if (err) {
-      exports.logDbError(err, sql_text, []);
-      res.json({err: err});
-    }
-    else {
-      res.json({});
-    }
-  });
-
-  db.close();
-};
-
-exports.createPerson = function(req, res) {
-  var data = req.body;
-
-  var member_sql_text = 'INSERT INTO person (name, full_name) VALUES ($1, $2)';
-  var member_sql_values = [data.name, data.full_name];
-
-
-  var db = new sqlite3.Database(db_name);
-
-  db.run(member_sql_text, member_sql_values, function(err, rows) {
-  if (err) {
-    console.log("Error: " + err);
-    console.log(err);
-    console.log(member_sql_text);
-    console.log(member_sql_values);
-    res.json({err: err});
-  } else {
-    res.json({});
-  }
-  });
-
-  db.close();
-};
-
 exports.updatePersonProfile = function(req, res) {
   var data = req.body;
 
@@ -285,29 +333,6 @@ exports.updatePersonProfile = function(req, res) {
   db.close();
 
   res.redirect('/#person_profile');
-};
-
-exports.createArtist = function(req, res) {
-  var data = req.body;
-
-  var sql_text = 'INSERT INTO artist (name) VALUES ($1)';
-  var sql_values = [data.artist_name];
-
-  var db = new sqlite3.Database(db_name);
-
-  db.run(sql_text, sql_values, function(err, rows) {
-    if (err) {
-      console.log("Error: " + err);
-      console.log(err);
-      console.log(sql_text);
-      console.log(sql_values);
-      res.json({err: err});
-    } else {
-      res.json({});
-    }
-  });
-
-  db.close();
 };
 
 exports.addSong = function(req, res) {
@@ -354,28 +379,6 @@ exports.addSong = function(req, res) {
   );
 
   addTheSong();
-
-  db.close();
-};
-
-exports.createSong = function(req, res) {
-  var data = req.body;
-
-  var db = new sqlite3.Database(db_name);
-  var sql_text = 'INSERT INTO song (name, artist_id) VALUES($1, $2)';
-  var sql_values = [data.song_name, data.artist_id];
-
-  db.run(sql_text, sql_values, function(err, rows) {
-    if (err) {
-      console.log('Error ' + err);
-      console.log(err);
-      console.log(sql_text);
-      console.log(sql_values);
-      res.json({err: err});
-    } else {
-      res.json({});
-    }
-  });
 
   db.close();
 };
@@ -468,30 +471,6 @@ exports.removeBand = function(req, res) {
   var sql_text = 'BEGIN TRANSACTION; ' +
     getSongRatingDeleteSql(person_id, band_id) +
     getBandMemberDeleteSql(person_id, band_id) +
-    'COMMIT; ';
-
-  var sql_values = [];
-
-  db.exec(sql_text, function(err) {
-    if (err) {
-      exports.logDbError(err, sql_text, sql_values);
-      res.json({err: err});
-    } else {
-      res.json({});
-    }
-  });
-};
-
-exports.removeMember = function(req, res) {
-  var person_id = req.session.passport.user;
-  var band_id = req.query.band_id;
-  var member_id = req.query.member_id;
-
-  var db = new sqlite3.Database(db_name);
-
-  var sql_text = 'BEGIN TRANSACTION; ' +
-    getSongRatingDeleteSql(member_id, band_id) +
-    getBandMemberDeleteSql(member_id, band_id) +
     'COMMIT; ';
 
   var sql_values = [];

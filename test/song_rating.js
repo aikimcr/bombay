@@ -221,4 +221,18 @@ describe('song_rating_util', function() {
       done();
     });
   });
+
+  it('should delete the ratings for a band member', function(done) {
+    song_rating.deleteForBandMember(1, 1, function(result) {
+      should.exist(result);
+      should.not.exist(result.err);
+      song_rating.getForBandMember(1, 1, function(result) {
+	should.exist(result);
+	should.exist(result.member_ratings);
+	should.not.exist(result.err);
+	result.member_ratings.should.eql([]);
+	done();
+      });
+    });
+  });
 });

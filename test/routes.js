@@ -84,7 +84,7 @@ describe('routes', function() {
 	      full_name: 'System Admin Test User',
 	      password: 'admin',
 	      email: null,
-	      system_admin: 1
+	      system_admin: true
 	    }
 	  });
 	  done();
@@ -92,6 +92,57 @@ describe('routes', function() {
       };
 
       routes.personProfile(req, res);
+    });
+
+    var person_id;
+    it('should create a person', function(done) {
+      req.body = {
+	name: 'dduck',
+	full_name: 'Daffy Duck',
+	email: 'dduck@looneytunes.com'
+      };
+      var res = {
+	json: function(result) {
+	  should.exist(result);
+	  should.exist(result.person_id);
+	  should.not.exist(result.err);
+	  person_id = result.person_id
+	  dbh.person().getById(person_id, function(result) {
+	    should.exist(result);
+	    should.exist(result.person);
+	    should.not.exist(result.err);
+	    result.person.should.eql({
+	      id: person_id,
+	      name: 'dduck',
+	      full_name: 'Daffy Duck',
+	      password: 'password',
+	      email: 'dduck@looneytunes.com',
+	      system_admin: false
+	    });
+	    done();
+	  });
+	}
+      };
+
+      routes.createPerson(req, res);
+    });
+
+    it('should delete the person', function(done) {
+      req.query.person_id = person_id;
+      var res = {
+	json: function(result) {
+	  should.exist(result);
+	  should.not.exist(result.err);
+	  dbh.person().getById(person_id, function(result) {
+	    should.exist(result);
+	    should.not.exist(result.person);
+	    should.not.exist(result.err);
+	    done();
+	  });
+	}
+      };
+
+      routes.removePerson(req, res);
     });
   });
 
@@ -120,6 +171,63 @@ describe('routes', function() {
       };
 
       routes.bandInfoForPerson(req, res);
+    });
+
+    var band_id;
+    it('should create a new band for a person', function(done) {
+      req.body = { name: 'Looney Tunes' };
+      var res = {
+	json: function(result) {
+	  should.exist(result);
+	  should.exist(result.band_id);
+	  should.not.exist(result.err);
+	  band_id = result.band_id;
+	  dbh.band().getsByPersonId(1, function(result) {
+	    should.exist(result);
+	    should.exist(result.person_bands);
+	    should.not.exist(result.err);
+	    result.person_bands.should.eql([{
+	      id: band_id, name: 'Looney Tunes'
+	    }, {
+	      id: 1, name: 'band1'
+	    }, {
+	      id: 2, name: 'band2'
+	    }]);
+	    dbh.person().getLoginPermissions(1, band_id, function(result) {
+	      should.exist(result);
+	      should.exist(result.band_admin);
+	      result.band_admin.should.eql(true);
+	      done();
+	    });
+	  });
+	}
+      };
+
+      routes.createBand(req, res);
+    });
+
+    before(function(done) {
+      dbh.band_member().deleteByPersonAndBandId(1, band_id, function(result) {
+	done();
+      });
+    });
+    
+    it('should remove the band', function(done) {
+      req.query.band_id = band_id;
+      var res = {
+	json: function(result) {
+	  should.exist(result);
+	  should.not.exist(result.err);
+	  dbh.band().getById(band_id, function(result) {
+	    should.exist(result);
+	    should.not.exist(result.band);
+	    should.not.exist(result.err);
+	    done();
+	  });
+	}
+      };
+
+      routes.removeBand(req, res);
     });
   });
 
@@ -160,6 +268,69 @@ describe('routes', function() {
       routes.bandMemberInfo(req, res);
     });
 
+    var band_member_id;
+    it('should create add a band_member', function(done) {
+      req.body = {
+	band_id: 1,
+	person_id: 4,
+	band_admin: true
+      };
+      var res = {
+	json: function(result) {
+	  should.exist(result);
+	  should.exist(result.band_member_id);
+	  should.not.exist(result.err);
+	  band_member_id = result.band_member_id;
+	  dbh.band_member().getById(band_member_id, function(result) {
+	    should.exist(result);
+	    should.exist(result.band_member);
+	    should.not.exist(result.err);
+	    result.band_member.should.eql({
+	      id: band_member_id,
+	      band_id: 1,
+	      person_id: 4,
+	      band_admin: true
+	    });
+	  });
+	  done();
+	}
+      };
+
+      routes.addBandMember(req, res);
+    });
+
+    before(function(done) {
+      dbh.song_rating().addForBandMember(4, 1, function(result) {
+	done();
+      });
+    });
+
+    it('should remove the band member and song ratings', function(done) {
+      req.query = {
+	person_id: 4,
+	band_id: 1
+      };
+      var res = {
+	json: function(result) {
+	  should.exist(result);
+	  should.not.exist(result.err);
+	  dbh.song_rating().getForBandMember(4, 1, function(result) {
+	    should.exist(result);
+	    should.exist(result.member_ratings);
+	    should.not.exist(result.err);
+	    result.member_ratings.should.eql([]);
+	    dbh.band_member().getById(band_member_id, function(result) {
+	      should.exist(result);
+	      should.not.exist(result.band_member);
+	      should.not.exist(result.err);
+	      done();
+	    });
+	  });
+	}
+      };
+
+      routes.removeBandMember(req, res);
+    });
   });
 
   describe('#artist', function() {
@@ -172,12 +343,12 @@ describe('routes', function() {
 	    system_admin: 1,
 	    band_id: 2,
 	    band_admin: 1,
-	    all_artists: [
-	      { id: 1, name: 'AC/DC' },
-	      { id: 5, name: 'David Bowie' },
-	      { id: 3, name: 'Led Zeppelin' },
-	      { id: 4, name: 'The Beatles' },
-	      { id: 2, name: 'ZZ Top' }
+	    artists: [
+	      { id: 1, name: 'AC/DC', song_count: 1 },
+	      { id: 5, name: 'David Bowie', song_count: 2 },
+	      { id: 3, name: 'Led Zeppelin', song_count: 1 },
+	      { id: 4, name: 'The Beatles', song_count: 3 },
+	      { id: 2, name: 'ZZ Top', song_count: 0 }
 	    ]
 	  });
 	  done();
@@ -185,6 +356,49 @@ describe('routes', function() {
       };
 
       routes.artistInfo(req, res);
+    });
+
+    var artist_id;
+    it('should create an artist', function(done) {
+      req.body = {name: 'Mel Blanc'};
+      var res = {
+	json: function(result) {
+	  should.exist(result);
+	  should.exist(result.artist_id);
+	  should.not.exist(result.err);
+	  artist_id = result.artist_id;
+	  dbh.artist().getById(artist_id, function(result) {
+	    should.exist(result);
+	    should.exist(result.artist);
+	    should.not.exist(result.err);
+	    result.artist.should.eql({
+	      id: artist_id,
+	      name: 'Mel Blanc'
+	    });
+	    done();
+	  });
+	}
+      };
+
+      routes.createArtist(req, res);
+    });
+
+    it('should remove the artist', function(done) {
+      req.query = { artist_id: artist_id };
+      var res = {
+	json: function(result) {
+	  should.exist(result);
+	  should.not.exist(result.err);
+	  dbh.artist().getById(artist_id, function(result) {
+	    should.exist(result);
+	    should.not.exist(result.artist);
+	    should.not.exist(result.err);
+	    done();
+	  });
+	}
+      };
+
+      routes.removeArtist(req, res);
     });
   });
 
@@ -266,7 +480,37 @@ describe('routes', function() {
 
       routes.songInfo(req, res);
     });
+
+    var song_id;
+    it('should create a song', function(done) {
+      req.body = {
+	name: 'Whole Lotta Rosie',
+	artist_id: 1
+      };
+      var res = {
+	json: function(result) {
+	  should.exist(result);
+	  should.exist(result.song_id);
+	  should.not.exist(result.err);
+	  song_id = result.song_id;
+	  dbh.song().getById(song_id, function(result) {
+	    should.exist(result);
+	    should.exist(result.song);
+	    should.not.exist(result.err);
+	    result.song.should.eql({
+	      id: song_id,
+	      name: 'Whole Lotta Rosie',
+	      artist_id: 1
+	    });
+	    done();
+	  });
+	}
+      };
+
+      routes.createSong(req, res);
+    });
   });
 
   afterEach(function(done) { req.query = {}; done(); });
+  afterEach(function(done) { req.body = {}; done(); });
 });

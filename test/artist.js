@@ -78,3 +78,48 @@ describe('artist_table', function() {
     });
   });
 });
+
+describe('artist_views', function() {
+  var dbh;
+  before(function(done) {
+    db.setDbPath('./bombay_test.db');
+    dbh = new db.Handle()
+    var sql = fs.readFileSync('./sql/schema.sql', 'utf8');
+    dbh.doSqlExec([sql], done);
+  });
+
+  before(function(done) {
+    var sql = fs.readFileSync('./test/support/addArtists.sql', 'utf8');
+    dbh.doSqlExec(sql, function(err) {
+      done();
+    });
+  });
+
+  before(function(done) {
+    var sql = fs.readFileSync('./test/support/addSongs.sql', 'utf8');
+    dbh.doSqlExec(sql, function(err) {
+      done();
+    });
+  });
+
+  it('should get the artists with a song count', function(done) {
+    dbh.artist().getAllWithSongCount(function(result) {
+      should.exist(result);
+      should.exist(result.artists);
+      should.not.exist(result.err);
+      result.artists.should.eql([{
+	id: 1, name: 'AC/DC', song_count: 1
+      }, {
+	id: 5, name: 'David Bowie', song_count: 2
+      }, {
+	id: 3, name: 'Led Zeppelin', song_count: 1
+      }, {
+	id: 4, name: 'The Beatles', song_count: 3
+      }, {
+	id: 2, name: 'ZZ Top', song_count: 0
+      }]);
+      done();
+    });
+  });
+});
+
