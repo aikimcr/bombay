@@ -1,11 +1,13 @@
 body {
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
-  background-color: #aa7;
+  background-color: #000;
+  color: #fff;
 }
 .navigation {
-  background-color: #cc9;
+  background-color: #b8dfda;
+  color: #000;
   padding: 5px 10px 5px 10px;
-  border: 1px solid #000;
+  border: 2px solid #3f8c83;
   display: inline-block;
   border-radius: 10px 0 0 10px;
   width: 190px;
@@ -40,29 +42,31 @@ body {
   color: #000;
   float: left;
   padding: 5px 10px 5px 10px;
-  border: 1px solid #000;
+  border: 2px solid #3f8c83;
   margin-right: 10px;
   position: static;
   border-radius: 10px 10px 0 0;
 }
 .app_context:not(:target) > a {
-  background-color: #aa7;
+  background-color: #000;
+  color: #fff;
   z-index: 0;
 }
 .app_context:target > a {
-  background-color: #cc9;
-  border-bottom-color: #cc9;
+  background-color: #b8dfda;
+  border-bottom-color: #b8dfda;
+  color: #000;
   z-index: 0;
 }
 .app_context > div {
-  background-color: #cc9;
+  background-color: #b8dfda;
   z-index: 2;
   left: 0;
   top: 29px;
   bottom: 0;
   right: 0;
   padding: 20px;
-  border: 1px solid #000;
+  border: 1px solid #3f8c83;
   position: absolute;
   overflow: hidden;
   height: 640px;
@@ -76,6 +80,7 @@ body {
 }
 .app_context_item {
   padding: 10px;
+  color: #000;
 }
 .app_context_item > div {
   position: absolute;
@@ -156,20 +161,21 @@ body {
 }
 .display .list table {
   border-style: solid;
-  border-color: #000;
+  border-color: #3f8c83;
   border-width: 1px;
 }
 .display .list tr:nth-child(even) {
-  background-color: #eeb;
+  background-color: #fefeea;
 }
 .display .list tr:nth-child(odd) {
-  background-color: #ffc;
+  background-color: #ecedd3;
 }
 .display .list th {
   padding: 5px 5px 0 10px;
   border-style: none solid solid none;
   border-width: 0 1px 5px 0;
-  background-color: #885;
+  background-color: #1f4641;
+  color: #dceeec;
 }
 .display .list td {
   padding: 10px 5px 0 10px;
@@ -221,16 +227,17 @@ body {
   top: 50px;
   left: 350px;
   position: absolute;
-  background-color: #ffa;
+  background-color: #b8dfda;
   border-style: solid;
-  border-color: #000;
+  border-color: #3f8c83;
   border-radius: 10px;
   padding: 20px;
 }
 .dialog_background .dialog_box .dialog_message {
   width: 260px;
   height: 220px;
-  background-color: #aa7;
+  background-color: #1f4641;
+  color: #dceeec;
   border-radius: 10px;
   padding: 20px;
   margin-bottom: 10px;
@@ -240,12 +247,13 @@ body {
   height: 30px;
 }
 .dialog_background .dialog_box .dialog_buttons .dialog_button {
+  background-color: #1f4641;
+  color: #dceeec;
   display: inline-block;
   width: 75px;
   height: 20px;
-  background-color: #aa7;
   border-style: solid;
-  border-color: #000;
+  border-color: #3f8c83;
   border-radius: 5px;
   padding: 10px;
 }

@@ -1,14 +1,29 @@
 container-width = 1000px
 container-height = 700px
 
+text-color = white
+base-color = black
+main-border-color = #3f8c83
+panel-background-color = #b8dfda
+panel-text-color = black
+stripe-color-even = #fefeea
+stripe-color-odd = #ecedd3
+table-header-background-color = #1f4641
+table-header-color = #dceeec
+dialog-background-color = panel-background-color
+dialog-message-background-color = table-header-background-color
+dialog-message-color = table-header-color
+
 body
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif
-  background-color: #aa7
+  background-color: base-color
+  color: text-color
 
 .navigation
-  background-color: #cc9
+  background-color: panel-background-color
+  color: panel-text-color
   padding: 5px 10px 5px 10px
-  border: 1px solid black
+  border: 2px solid main-border-color
   display: inline-block
   border-radius: 10px 0 0 10px
   width: 190px
@@ -37,32 +52,34 @@ body
 
 .app_context > a
   text-decoration: none
-  color: black
+  color: panel-text-color
   float: left
   padding: 5px 10px 5px 10px
-  border: 1px solid black
+  border: 2px solid main-border-color
   margin-right: 10px
   position: static
   border-radius: 10px 10px 0 0
 
 .app_context:not(:target) > a
-  background-color: #aa7
+  background-color: base-color
+  color: text-color
   z-index: 0
 
 .app_context:target > a
-  background-color: #cc9
-  border-bottom-color: #cc9
+  background-color: panel-background-color
+  border-bottom-color: panel-background-color
+  color: panel-text-color
   z-index: 0
 
 .app_context > div
-  background-color: #cc9
+  background-color: panel-background-color
   z-index: 2
   left: 0
   top: 29px
   bottom: 0
   right: 0
   padding: 20px
-  border 1px solid black
+  border 1px solid main-border-color
   position: absolute
   overflow: hidden
   height: 640px
@@ -77,6 +94,7 @@ body
 // app_context_item styles
 .app_context_item
   padding: 10px
+  color: panel-text-color
 
 .app_context_item > div
   position: absolute
@@ -93,6 +111,7 @@ body
 
 .app_context_item .display
   font-size: 120%
+  
 
   .filters
     font-size: 90%
@@ -159,20 +178,21 @@ body
   
     table
       border-style: solid
-      border-color: black
+      border-color: main-border-color
       border-width: 1px;
   
     tr:nth-child(even)
-      background-color: #eeb
+      background-color: stripe-color-even
   
     tr:nth-child(odd)
-      background-color: #ffc
+      background-color: stripe-color-odd
   
     th
       padding: 5px 5px 0 10px
       border-style none solid solid none
       border-width 0 1px 5px 0
-      background-color: #885
+      background-color: table-header-background-color
+      color: table-header-color
   
     td
       padding: 10px 5px 0 10px
@@ -205,7 +225,6 @@ body
 #band_members .list_table th:nth-child(3), .band_member .list table td:nth-child(3)
   width: 50px;
 
-
 // Dialog classes
 .dialog_background
   width: container-width
@@ -221,16 +240,17 @@ body
     top: (container-height / 2) - @height
     left: (container-width / 2) - (@width / 2)
     position: absolute
-    background-color: #ffa
+    background-color: dialog-background-color
     border-style: solid
-    border-color: black
+    border-color: main-border-color
     border-radius: 10px
     padding: 20px
 
     .dialog_message
        width: 260px
        height: 220px
-       background-color: #aa7
+       background-color: dialog-message-background-color
+       color: dialog-message-color
        border-radius: 10px
        padding: 20px
        margin-bottom: 10px
@@ -240,12 +260,13 @@ body
        height: 30px
 
        .dialog_button
+          background-color: dialog-message-background-color
+          color: dialog-message-color
           display: inline-block
           width: 75px
           height: 20px
-          background-color: #aa7
           border-style: solid
-          border-color: black
+          border-color: main-border-color
           border-radius: 5px
           padding: 10px
 
