@@ -1,0 +1,7 @@
+div
+  form
+    input(type="hidden", name="person_id", value="#{person_id}")
+    select(name="band_id")
+      each band in other_bands
+        option(value="#{band.id}") #{band.name}
+    input(type="submit", value="Join")

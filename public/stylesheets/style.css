@@ -116,6 +116,12 @@ body {
   display: inline-block;
   padding: 1px;
 }
+.container > input[id*="editor"]:checked ~ div.editor {
+  display: block;
+}
+.container > input[id*="editor"]:not(:checked) ~ div.editor {
+  display: none;
+}
 .container > input[id*="creator"]:checked ~ div.creator {
   display: block;
 }
@@ -133,6 +139,23 @@ body {
 }
 .container > input[id*="creator"]:not(:checked) ~ div.display >div.list {
   height: 600px;
+}
+.editor {
+  overflow: auto;
+  width: 900px;
+  height: 50px;
+}
+.editor div > div.add {
+  display: block;
+}
+.editor div > div.new {
+  display: none;
+}
+.editor input:checked ~ div.add {
+  display: none;
+}
+.editor input:checked ~ div.new {
+  display: block;
 }
 .creator {
   overflow: auto;

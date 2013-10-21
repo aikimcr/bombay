@@ -9,9 +9,23 @@ div.container
 
     div.creator
 
+  if sections.multiedit
+    if sections.display
+      input(type="checkbox", id="show_#{tab_id}_editor")
+      label(for="show_#{tab_id}_creator") Add
+
+    div.editor
+      div
+        input(type="checkbox", id="show_#{tab_id}_create_new")
+        label(for="show_band_create_new") New
+        div.add
+        div.new
+
   if sections.display
-    if sections.editor || sections.creator
+    if sections.editor || sections.creator || sections.multiedit
       input(type="checkbox", id="show_#{tab_id}_display", checked)
       label(for="show_#{tab_id}_display") List
 
     div.display
+      div.filters
+      div.list

@@ -2,6 +2,25 @@ function app_context() {
   this.context_list = [];
 }
 
+app_context.setBandSelector = function(band_list) {
+  var band_selector = util.getBandSelector();
+  var current_band_id = util.getBandId();
+  util.removeAllChildren(band_selector);
+
+  var selected_band_id = null;
+  band_list.forEach(function(band) {
+    var new_option = document.createElement('option');
+    new_option.innerHTML = band.name;
+    new_option.value = band.id;
+    band_selector.appendChild(new_option);
+    if (band.id == current_band_id) {
+      selected_band_id = band.id;
+    }
+  });
+
+  band_selector.value = selected_band_id || band_list[0].id;
+};
+
 app_context.prototype.render = function() {
   var app_container = document.querySelector('.app_container');
   if (!app_container) return;
@@ -103,15 +122,6 @@ app_context.Person.prototype.handleAPIReturn = function(data) {
   this.form = document.querySelector('div.editor form[name="person"]');
   this.form.addEventListener('submit', util.bind(this.handleEditSubmit, this));
   this.form.addEventListener('change', util.bind(this.handleFormChange, this));
-
-/*
-  this.setupTabOrder_();
-  var validator = util.bind(this.validateForm, this);
-  this.form.addEventListener('change', validator);
-  this.form.addEventListener('submit', validator);
-  this.form.addEventListener('reset', validator);
-  this.form.addEventListener('blur', validator);
-*/
 };
 
 app_context.Person.prototype.handleFormChange = function(e) {
@@ -126,13 +136,13 @@ app_context.Person.prototype.handleFormChange = function(e) {
       verify_new_password.disabled = false;
 
       if (new_password.value != '' && new_password.value != null) {
-	if (new_password.value == verify_new_password.value) {
-	  submit_button.disabled = false;
-	} else {
-	  submit_button.disabled = true;
-	}
+        if (new_password.value == verify_new_password.value) {
+          submit_button.disabled = false;
+        } else {
+          submit_button.disabled = true;
+        }
       } else {
-	submit_button.disabled = false;
+        submit_button.disabled = false;
       }
     } else {
       verify_new_password.disabled = true;
@@ -161,7 +171,7 @@ app_context.Person.prototype.handleEditSubmit = function(e) {
   if (old_password == this.model.person.password) {
     if (new_password != '' && new_password != null) {
       if (new_password == verify_new_password) {
-	data.password = new_password;
+        data.password = new_password;
       }
     }
   }
@@ -176,42 +186,6 @@ app_context.Person.prototype.handleEditSubmit = function(e) {
   return false;
 };
 
-/*
-app_context.Person.prototype.validateForm = function(e) {
-  var form = e.target.tagName.toLowerCase() == 'form' ? form = e.target : form = e.target.form;
-
-  this.fields.old_password.disabled = false;
-  if (e.type == 'reset') { 
-    this.fields.old_password.focus();
-    return;
-  }
-
-  if (this.fields.old_password.value == this.model.person.password) {
-    var next_field_name = this.tab_order[e.target.name];
-    var next_field = this.submit_button;
-
-    if (next_field_name) {
-      next_field = this.fields[next_field_name];
-    }
-
-    if (this.fields.new_password.value == '') {
-      next_field.focus();
-    } else if (this.fields.new_password.value == this.fields.verify_new_password.value) {
-      this.submit_button.disabled = false;
-      next_field.focus();
-    } else {
-      this.submit_button.disabled = true;
-      this.fields.old_password.disabled = false;
-      this.fields.new_password.disabled = false;
-      this.fields.verify_new_password.disabled = false;
-      this.fields.verify_new_password.focus();
-    }
-  } else {
-    this.fields.old_password.focus();
-  }
-};
-*/
-
 // Member Band App Object
 app_context.MemberBand = function() {
   this.tab_id = 'member_bands';
@@ -224,105 +198,31 @@ app_context.MemberBand = function() {
 app_context.MemberBand.prototype = new app_context.Base();
 
 app_context.MemberBand.prototype.getContextArgs = function() {
-  return {sections: {creator: 1, display: 1}, tab_id: this.tab_id};
+  return {sections: {multiedit: 1, display: 1}, tab_id: this.tab_id};
 };
 
 app_context.MemberBand.prototype.handleAPIReturn = function(data) {
   app_context.Base.prototype.handleAPIReturn.call(this, data);
 
-  var creator = document.querySelector('#' + this.tab_id + ' .creator');
-  var creator_text = Templates['band/creator'](data);
-  util.appendTextElement(creator, creator_text);
+  var add_div = document.querySelector('#' + this.tab_id + ' .editor .add');
+  var add_form = new app_form.Editor.BandJoin(data);
+  add_form.createDom(add_div);
+  add_form.renderDocument();
+  add_form.addEventListener('app_form_change', util.bind(this.handleAfterChange, this));
 
-  var display = document.querySelector('#' + this.tab_id + ' .display');
-  var display_text = Templates['band/display'](data);
-  util.appendTextElement(display, display_text);
+  var create_div = document.querySelector('#' + this.tab_id + ' .editor .new');
+  var create_form = new app_form.Editor.BandCreator(data);
+  create_form.createDom(create_div);
+  create_form.renderDocument();
+  create_form.addEventListener('app_form_change', util.bind(this.handleAfterChange, this));
 
-  var list = document.querySelector('#' + this.tab_id + ' .display .list');
-  var list_text = Templates['band/display/list'](data);
-  util.appendTextElement(list, list_text);
+  var list_div = document.querySelector('#' + this.tab_id + ' .display .list');
+  var list_form = new app_form.List.Band(data);
+  list_form.createDom(list_div);
+  list_form.renderDocument();
+  list_form.addEventListener('app_form_change', util.bind(this.handleAfterChange, this));
 
-  var add_form = document.querySelector('#' + this.tab_id + ' .creator div.add form');
-  add_form.addEventListener('submit', util.bind(this.handleAddSubmit, this));
-
-  var new_form = document.querySelector('#' + this.tab_id + ' .creator div.new form');
-  new_form.addEventListener('submit', util.bind(this.handleNewSubmit, this));
-
-  var delete_buttons = document.querySelectorAll('#' + this.tab_id + ' .display .list td.delete');
-  var button_handler = util.bind(this.handleDelete, this);
-
-  for(var button_idx = 0; button_idx < delete_buttons.length; button_idx++) {
-    delete_buttons[button_idx].addEventListener('click', button_handler);
-  }
-
-  var band_selector = util.getBandSelector();
-  var current_band_id = util.getBandId();
-  util.removeAllChildren(band_selector);
-
-  this.model.person_bands.forEach(function(band) {
-    var new_option = document.createElement('option');
-    new_option.innerHTML = band.name;
-    new_option.value = band.id;
-    band_selector.appendChild(new_option);
-    band_selector.value = current_band_id;
-  });
-};
-
-app_context.MemberBand.prototype.handleNewSubmit = function(e) {
-  var form = e.target;
-  var data = {
-    name: form.querySelector('[name="band_name"]').value,
-  };
-
-  this.service = new service.generic(
-    './band',
-    util.bind(this.handleAdd, this)
-  );
-
-  this.service.set(data);
-  e.preventDefault();
-  return false;
-};
-
-app_context.MemberBand.prototype.handleAddSubmit = function(e) {
-  var form = e.target;
-  var data = {
-    band_id: form.querySelector('[name="band_id"]').value,
-    person_id: form.querySelector('[name="person_id"]').value
-  };
-
-  this.service = new service.generic(
-    './person_band',
-    util.bind(this.handleAdd, this)
-  );
-
-  this.service.set(data);
-  e.preventDefault();
-  return false;
-  
-};
-
-app_context.MemberBand.prototype.handleDelete = function(e) {
-  window.console.log("Do the delete?" + e);
-
-  var row = e.target.parentElement;
-  var band_id = row.attributes.item('band_id').value;
-  var band = this.model.person_bands.filter(function (mb) { return mb.id == band_id })[0];
-
-  var confirm_delete = new dialog('Quit band ' + band.name + '?');
-  confirm_delete.show(util.bind(function(result) {
-    if (result) {
-      this.service = new service.generic(
-	'./person_band?band_id=' + band_id + '&person_id=' + this.model.person_id,
-        util.bind(this.handleAfterChange, this)
-      );
-      this.service.delete();
-    } else {
-      this.handleAfterChange();
-    }
-  }, this));
-
-  return true;
+  app_context.setBandSelector(this.model.person_bands);
 };
 
 // Band Member App Object
@@ -432,8 +332,8 @@ app_context.BandMember.prototype.handleDelete = function(e) {
     if (result) {
       var url = './band_member?person_id=' + member_id + '&band_id=' + this.model.band.id;
       this.service = new service.generic(
-	url,
-	util.bind(this.handleAfterChange, this)
+        url,
+        util.bind(this.handleAfterChange, this)
       );
       this.service.delete();
     } else {
@@ -532,8 +432,8 @@ app_context.Artist.prototype.handleDelete = function(e) {
     if (result) {
       var url = './artist?artist_id=' + artist_id;
       this.service = new service.generic(
-	url,
-	util.bind(this.handleAfterChange, this)
+        url,
+        util.bind(this.handleAfterChange, this)
       );
       this.service.delete();
     } else {
@@ -751,8 +651,8 @@ app_context.BandSong.prototype.handleDelete = function(e) {
     if (result) {
       var url = './band_song?band_song_id=' + band_song_id;
       this.service = new service.generic(
-	url,
-	util.bind(this.handleAfterChange, this)
+        url,
+        util.bind(this.handleAfterChange, this)
       );
       this.service.delete();
     } else {

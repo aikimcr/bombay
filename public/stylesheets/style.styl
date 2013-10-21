@@ -132,6 +132,12 @@ body
       padding: 1px
 
 //
+.container > input[id*="editor"]:checked ~ div.editor
+  display: block
+
+.container > input[id*="editor"]:not(:checked) ~ div.editor
+  display: none
+
 .container > input[id*="creator"]:checked ~ div.creator
   display: block
 
@@ -151,6 +157,23 @@ body
   height: 600px
   
 //
+.editor
+  overflow: auto
+  width: 900px
+  height:50px
+
+  div > div.add
+    display: block
+
+  div > div.new
+    display: none
+
+  input:checked ~ div.add
+    display: none
+
+  input:checked ~ div.new
+    display: block
+
 .creator
   overflow: auto
   width: 900px
