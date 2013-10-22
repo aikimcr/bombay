@@ -205,19 +205,19 @@ app_context.MemberBand.prototype.handleAPIReturn = function(data) {
   app_context.Base.prototype.handleAPIReturn.call(this, data);
 
   var add_div = document.querySelector('#' + this.tab_id + ' .editor .add');
-  var add_form = new app_form.Editor.BandJoin(data);
+  var add_form = new app_form.Editor.BandJoin(data, true);
   add_form.createDom(add_div);
   add_form.renderDocument();
   add_form.addEventListener('app_form_change', util.bind(this.handleAfterChange, this));
 
   var create_div = document.querySelector('#' + this.tab_id + ' .editor .new');
-  var create_form = new app_form.Editor.BandCreator(data);
+  var create_form = new app_form.Editor.BandCreator(data, true);
   create_form.createDom(create_div);
   create_form.renderDocument();
   create_form.addEventListener('app_form_change', util.bind(this.handleAfterChange, this));
 
   var list_div = document.querySelector('#' + this.tab_id + ' .display .list');
-  var list_form = new app_form.List.Band(data);
+  var list_form = new app_form.List.Band(data, true);
   list_form.createDom(list_div);
   list_form.renderDocument();
   list_form.addEventListener('app_form_change', util.bind(this.handleAfterChange, this));
@@ -244,7 +244,7 @@ app_context.BandMember.prototype.getContextArgs = function() {
   this.model.band_admin = this.model.band_admin || this.model.system_admin;
   
   return {
-    sections: {creator: this.model.band_admin, display: true},
+    sections: {multiedit: this.model.band_admin, display: true},
     tab_id: this.tab_id
   };
 };
@@ -253,35 +253,27 @@ app_context.BandMember.prototype.handleAPIReturn = function(data) {
   app_context.Base.prototype.handleAPIReturn.call(this, data);
 
   if (this.model.band_admin) {
-    var creator = document.querySelector('#' + this.tab_id + ' .creator');
-    var creator_text = Templates['member/creator'](this.model);
-    util.appendTextElement(creator, creator_text);
+    var add_div = document.querySelector('#' + this.tab_id + ' .editor .add');
+    var add_form = new app_form.Editor.BandMemberAdd(data, this.model.band_admin);
+    add_form.createDom(add_div);
+    add_form.renderDocument();
+    add_form.addEventListener('app_form_change', util.bind(this.handleAfterChange, this));
+
+    var create_div = document.querySelector('#' + this.tab_id + ' .editor .new');
+    var create_form = new app_form.Editor.BandMemberNew(data, this.model.band_admin);
+    create_form.createDom(create_div);
+    create_form.renderDocument();
+    create_form.addEventListener('app_form_change', util.bind(this.handleAfterChange, this));
   }
 
-  var display = document.querySelector('#' + this.tab_id + ' .display');
-  var display_text = Templates['member/display'](this.model);
-  util.appendTextElement(display, display_text);
-
-  var list = document.querySelector('#' + this.tab_id + ' .display .list');
-  var list_text = Templates['member/display/list'](this.model);
-  util.appendTextElement(list, list_text);
-
-  if (this.model.band_admin) {
-    var add_form = document.querySelector('#' + this.tab_id + ' .creator div.add form');
-    add_form.addEventListener('submit', util.bind(this.handleAddSubmit, this));
-
-    var new_form = document.querySelector('#' + this.tab_id + ' .creator div.new form');
-    new_form.addEventListener('submit', util.bind(this.handleNewSubmit, this));
-
-    var delete_buttons = document.querySelectorAll('#' + this.tab_id + ' .display .list td.delete');
-    var button_handler = util.bind(this.handleDelete, this);
-
-    for(var button_idx = 0; button_idx < delete_buttons.length; button_idx++) {
-      delete_buttons[button_idx].addEventListener('click', button_handler);
-    }
-  }
+  var list_div = document.querySelector('#' + this.tab_id + ' .display .list');
+  var list_form = new app_form.List.BandMember(data, this.model.band_admin);
+  list_form.createDom(list_div);
+  list_form.renderDocument();
+  list_form.addEventListener('app_form_change', util.bind(this.handleAfterChange, this));
 };
 
+/*
 app_context.BandMember.prototype.handleAddSubmit = function(e) {
   var form = e.target;
   var data = {
@@ -315,11 +307,13 @@ app_context.BandMember.prototype.handleNewSubmit = function(e) {
   e.preventDefault();
   return false;
 };
+*/
 
 app_context.BandMember.prototype.otherChangeTabs = function() {
   return ['band_songs'];
 };
 
+/*
 app_context.BandMember.prototype.handleDelete = function(e) {
   window.console.log("Do the delete?" + e);
 
@@ -343,6 +337,7 @@ app_context.BandMember.prototype.handleDelete = function(e) {
 
   return true;
 };
+*/
 
 // Artist App Object
 app_context.Artist = function() {

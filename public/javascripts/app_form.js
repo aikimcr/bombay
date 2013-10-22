@@ -1,5 +1,6 @@
-function app_form(model) {
+function app_form(model, editor) {
   this.model_ = model;
+  this.editor_ = editor;
 };
 
 app_form.prototype.createDom = function(parent) {
@@ -33,19 +34,21 @@ app_form.prototype.fireChange = function() {
   this.element_.dispatchEvent(new CustomEvent('app_form_change'));
 };
 
-app_form.List = function(model) {
-  app_form.call(this, model);
+app_form.List = function(model, editor) {
+  app_form.call(this, model, editor);
 };
 util.inherits(app_form.List, app_form);
 
 app_form.List.prototype.renderDocument = function() {
   app_form.prototype.renderDocument.call(this);
 
-  var delete_buttons = this.element_.querySelectorAll('.delete');
-  var button_handler = util.bind(this.handleDelete, this);
+  if (this.editor_) {
+    var delete_buttons = this.element_.querySelectorAll('.delete');
+    var button_handler = util.bind(this.handleDelete, this);
 
-  for(var button_idx = 0; button_idx < delete_buttons.length; button_idx++) {
-    delete_buttons[button_idx].addEventListener('click', button_handler);
+    for(var button_idx = 0; button_idx < delete_buttons.length; button_idx++) {
+      delete_buttons[button_idx].addEventListener('click', button_handler);
+    }
   }
 };
 
@@ -72,8 +75,8 @@ app_form.List.prototype.handleDelete = function(e) {
   return true;
 };
 
-app_form.List.Band = function(model) {
-  app_form.List.call(this, model);
+app_form.List.Band = function(model, editor) {
+  app_form.List.call(this, model, editor);
 };
 util.inherits(app_form.List.Band, app_form.List);
 app_form.List.Band.prototype.template_name_ = 'band/display/list';
@@ -91,8 +94,27 @@ app_form.List.Band.prototype.getServiceUrl = function(band_id) {
   return './person_band?band_id=' + band_id + '&person_id=' + this.getModel().person_id;
 };
 
-app_form.Editor = function(model) {
-  app_form.call(this, model);
+app_form.List.BandMember = function(model, editor) {
+  app_form.List.call(this, model, editor);
+};
+util.inherits(app_form.List.BandMember, app_form.List);
+app_form.List.BandMember.prototype.template_name_ = 'member/display/list';
+app_form.List.BandMember.prototype.identity_name_ = 'member_id';
+
+app_form.List.BandMember.prototype.getRowForIdentity = function(person_id) {
+  return this.getModel().band_members.filter(function (mem) { return mem.id == person_id })[0];
+};
+
+app_form.List.BandMember.prototype.getConfirmMessage = function(person) {
+  return 'Remove ' + person.full_name + ' from ' + this.getModel().band.name + '?'
+};
+
+app_form.List.BandMember.prototype.getServiceUrl = function(person_id) {
+  return './band_member?person_id=' + person_id + '&band_id=' + this.getModel().band.id;
+};
+
+app_form.Editor = function(model, editor) {
+  app_form.call(this, model, editor);
 };
 util.inherits(app_form.Editor, app_form);
 
@@ -129,8 +151,8 @@ app_form.Editor.prototype.handleEdit = function(result) {
   this.fireChange();
 };
 
-app_form.Editor.BandCreator = function(model) {
-  app_form.Editor.call(this, model);
+app_form.Editor.BandCreator = function(model, editor) {
+  app_form.Editor.call(this, model, editor);
 };
 util.inherits(app_form.Editor.BandCreator, app_form.Editor);
 app_form.Editor.BandCreator.prototype.template_name_ = 'band/editor/create';
@@ -142,14 +164,42 @@ app_form.Editor.BandCreator.prototype.getFormData = function(form) {
   };
 };
 
-app_form.Editor.BandJoin = function(model) {
-  app_form.Editor.call(this, model);
+app_form.Editor.BandJoin = function(model, editor) {
+  app_form.Editor.call(this, model, editor);
 };
 util.inherits(app_form.Editor.BandJoin, app_form.Editor);
 app_form.Editor.BandJoin.prototype.template_name_ = 'band/editor/add';
 app_form.Editor.BandJoin.prototype.edit_url_ = './person_band';
 
 app_form.Editor.BandJoin.prototype.getFormData = function(form) {
+  return {
+    band_id: form.querySelector('[name="band_id"]').value,
+    person_id: form.querySelector('[name="person_id"]').value
+  };
+};
+
+app_form.Editor.BandMemberNew = function(model, editor) {
+  app_form.Editor.call(this, model, editor);
+};
+util.inherits(app_form.Editor.BandMemberNew, app_form.Editor);
+app_form.Editor.BandMemberNew.prototype.template_name_ = 'member/editor/new';
+app_form.Editor.BandMemberNew.prototype.edit_url_ = './create_person';
+
+app_form.Editor.BandMemberNew.prototype.getFormData = function(form) {
+  return {
+    name: form.querySelector('[name="name"]').value,
+    full_name: form.querySelector('[name="full_name"]').value
+  };
+};
+
+app_form.Editor.BandMemberAdd = function(model, editor) {
+  app_form.Editor.call(this, model, editor);
+};
+util.inherits(app_form.Editor.BandMemberAdd, app_form.Editor);
+app_form.Editor.BandMemberAdd.prototype.template_name_ = 'member/editor/add';
+app_form.Editor.BandMemberAdd.prototype.edit_url_ = './band_member';
+
+app_form.Editor.BandMemberAdd.prototype.getFormData = function(form) {
   return {
     band_id: form.querySelector('[name="band_id"]').value,
     person_id: form.querySelector('[name="person_id"]').value
