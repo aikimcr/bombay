@@ -39,6 +39,11 @@ app_form.prototype.fireChange = function() {
   this.element_.dispatchEvent(new CustomEvent('app_form_change'));
 };
 
+app_form.Filters = function(mode, editor) {
+  app_form.call(this, model, editor);
+};
+util.inherits(app_form.Filters, app_form);
+
 app_form.List = function(model, editor) {
   app_form.call(this, model, editor);
 };
@@ -135,6 +140,91 @@ app_form.List.Artist.prototype.getConfirmMessage = function(artist) {
 
 app_form.List.Artist.prototype.getServiceUrl = function(artist_id) {
   return './artist?artist_id=' + artist_id;
+};
+
+app_form.List.BandSong = function(model, editor) {
+  app_form.List.call(this, model, editor);
+};
+util.inherits(app_form.List.BandSong, app_form.List);
+app_form.List.BandSong.prototype.template_name_ = 'song/display/list';
+app_form.List.BandSong.prototype.identity_name_ = 'band_song_id';
+
+app_form.List.BandSong.prototype.renderDocument = function() {
+  app_form.List.prototype.renderDocument.call(this);
+
+  this.model.band_songs.forEach(function(band_song) {
+    var rating = document.querySelector('tr[band_song_id="' + band_song.band_song_id + '"] td select[name="song_rating"]');
+    rating.value = band_song.rating;
+    rating.addEventListener('change', util.bind(this.handleRatingChange, this));
+
+    var avg_rating = document.querySelector('tr[band_song_id="' + band_song.band_song_id + '"] [name="avg_rating"] div');
+    var max_width = 100;
+    avg_rating.style.overflow = 'hidden';
+    avg_rating.style.width = parseInt(max_width * (band_song.avg_rating / 5)) + 'px';
+
+    var status = document.querySelector('tr[band_song_id="' + band_song.band_song_id + '"] td select[name="song_status"]');
+    status.value = band_song.song_status;
+    if (this.model.band_admin) {
+      status.addEventListener('change', util.bind(this.handleStatusChange, this));
+    } else {
+      status.disabled = true;
+    }
+  }, this);
+};
+
+app_form.List.BandSong.prototype.handleRatingChange = function(e) {
+  var input = e.target;
+  var row = input.parentElement.parentElement;
+  var band_song_id = row.attributes.getNamedItem('band_song_id').value; 
+
+  var data = {
+    'band_song_id': band_song_id,
+    'rating': input.value
+  };
+
+  input.disabled = true;
+  this.service = new service.generic(
+    './song_rating',
+    util.bind(this.fireChange(), this)
+  );
+  this.service.set(data);
+  return true;
+};
+
+app_form.List.BandSong.prototype.handleSongChange = function(e) {
+  var input = e.target;
+  var row = input.parentElement.parentElement;
+  var band_song_id = row.attributes.getNamedItem('band_song_id').value; 
+
+  var data = {
+    'band_song_id': band_song_id,
+    'song_status': input.value
+  };
+
+  input.disabled = true;
+  this.service = new service.generic(
+    './song_status',
+    function(data) {
+      var row = document.querySelector('#band_songs .list tr[band_song_id="' + data.band_song_id + '"]');
+      var input = row.querySelector('select[name="song_status"]');
+      input.value = data.song_status;
+      input.disabled = false;
+    }
+  );
+  this.service.set(data);
+  return true;
+};
+
+app_form.List.BandSong.prototype.getRowForIdentity = function(band_song_id) {
+  return  this.getModel().band_songs.filter(function (song) { return song.band_song_id == band_song_id })[0];
+};
+
+app_form.List.BandSong.prototype.getConfirmMessage = function(band_song) {
+  return 'Remove ' + band_song.name + '?';
+};
+
+app_form.List.BandSong.prototype.getServiceUrl = function(band_song_id) {
+  return './band_song?band_song_id=' + band_song_id;
 };
 
 app_form.Editor = function(model, editor) {

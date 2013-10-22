@@ -1,0 +1,7 @@
+div
+  form
+    input(type="hidden", name="band_id", value="#{band_id}")
+    select(name="song_id")
+      each song in other_songs
+        option(value="#{song.id}") #{song.description}
+    input(type="submit", value="Add")

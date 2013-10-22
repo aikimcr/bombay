@@ -311,53 +311,9 @@ app_context.Artist.prototype.handleAPIReturn = function(data) {
   list_form.addEventListener('app_form_change', util.bind(this.handleAfterChange, this));
 };
 
-/*
-app_context.Artist.prototype.handleCreateSubmit = function(e) {
-  var form = e.target;
-  var data = {
-    name: form.firstChild.value
-  };
-
-  this.service = new service.generic(
-    './artist',
-    util.bind(this.handleAdd, this)
-  );
-
-  this.service.set(data);
-  e.preventDefault();
-  return false;
-};
-*/
-
 app_context.Artist.prototype.otherChangeTabs = function() {
   return ['band_songs'];
 };
-
-/*
-app_context.Artist.prototype.handleDelete = function(e) {
-  window.console.log("Do the delete?" + e);
-
-  var row = e.target.parentElement;
-  var artist_id = row.attributes.item('artist_id').value;
-  var artist = this.model.artists.filter(function (art) { return art.id == artist_id })[0];
-
-  var confirm_delete = new dialog('Remove ' + artist.name + '?');
-  confirm_delete.show(util.bind(function(result) {
-    if (result) {
-      var url = './artist?artist_id=' + artist_id;
-      this.service = new service.generic(
-        url,
-        util.bind(this.handleAfterChange, this)
-      );
-      this.service.delete();
-    } else {
-      this.handleAfterChange();
-    }
-  }, this));
-
-  return true;
-};
-*/
 
 // BandSong App Object
 app_context.BandSong = function() {
