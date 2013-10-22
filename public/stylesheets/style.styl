@@ -22,23 +22,31 @@ body
 .navigation
   background-color: panel-background-color
   color: panel-text-color
-  padding: 5px 10px 5px 10px
-  border: 2px solid main-border-color
+  padding: 0 10px 0 10px
+  border: 1px solid main-border-color
   display: inline-block
-  border-radius: 10px 0 0 10px
-  width: 190px
+  border-radius: 10px 10px 0 0
+  width: 240px
+  height: 31px
   vertical-align:top
-  margin-top: 29px
+  position: absolute
+  top: 5px
+  right: 257px
+  z-index: 1
   div
     display: block
     text-align: left
+    display: inline-block
 
 .band_selector
   padding-bottom: 10px
+  display: inline-block
   div
     padding: 5px
+    display: inline-block
   div, a
     padding: 5px
+    display: inline-block
 
 .app_container
   width: container-width
@@ -83,7 +91,7 @@ body
   position: absolute
   overflow: hidden
   height: 640px
-  border-radius: 0 10px 10px 10px
+  border-radius: 0 0 10px 10px
 
 .app_context:not(:target) > div
   z-index: -1
