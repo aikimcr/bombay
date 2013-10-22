@@ -160,18 +160,9 @@ body {
 .creator {
   overflow: auto;
   width: 900px;
-  height: 50px;
+  height: 30px;
 }
-.creator div > div:first-of-type {
-  display: block;
-}
-.creator div > div:last-of-type {
-  display: none;
-}
-.creator input:checked ~ div:first-of-type {
-  display: none;
-}
-.creator input:checked ~ div:last-of-type {
+.creator div > div.new {
   display: block;
 }
 .display {

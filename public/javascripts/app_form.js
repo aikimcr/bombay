@@ -3,6 +3,11 @@ function app_form(model, editor) {
   this.editor_ = editor;
 };
 
+app_form.prototype.render = function(parent) {
+  this.createDom(parent);
+  this.renderDocument();
+};
+
 app_form.prototype.createDom = function(parent) {
   this.parent_ = parent;
 };
@@ -113,6 +118,25 @@ app_form.List.BandMember.prototype.getServiceUrl = function(person_id) {
   return './band_member?person_id=' + person_id + '&band_id=' + this.getModel().band.id;
 };
 
+app_form.List.Artist = function(model, editor) {
+  app_form.List.call(this, model, editor);
+};
+util.inherits(app_form.List.Artist, app_form.List);
+app_form.List.Artist.prototype.template_name_ = 'artist/display/list';
+app_form.List.Artist.prototype.identity_name_ = 'artist_id';
+
+app_form.List.Artist.prototype.getRowForIdentity = function(artist_id) {
+  return this.getModel().artists.filter(function (art) { return art.id == artist_id })[0];
+};
+
+app_form.List.Artist.prototype.getConfirmMessage = function(artist) {
+  return 'Remove ' + artist.name + '?';
+};
+
+app_form.List.Artist.prototype.getServiceUrl = function(artist_id) {
+  return './artist?artist_id=' + artist_id;
+};
+
 app_form.Editor = function(model, editor) {
   app_form.call(this, model, editor);
 };
@@ -203,5 +227,18 @@ app_form.Editor.BandMemberAdd.prototype.getFormData = function(form) {
   return {
     band_id: form.querySelector('[name="band_id"]').value,
     person_id: form.querySelector('[name="person_id"]').value
+  };
+};
+
+app_form.Editor.ArtistNew = function(model, editor) {
+  app_form.Editor.call(this, model, editor);
+};
+util.inherits(app_form.Editor.ArtistNew, app_form.Editor);
+app_form.Editor.ArtistNew.prototype.template_name_ = 'artist/editor/new';
+app_form.Editor.ArtistNew.prototype.edit_url_ = './artist';
+
+app_form.Editor.ArtistNew.prototype.getFormData = function(form) {
+  return {
+    name: form.firstChild.value
   };
 };
