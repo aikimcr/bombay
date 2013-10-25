@@ -33,20 +33,3 @@ util.getBandId = function() {
   if (band_selector) { return band_selector.value; }
   return null;
 };
-
-util.bind = function() {
-  var fargs = [];
-
-  for(var i=0;i<arguments.length;i++) {
-    fargs.push(arguments[i]);
-  }
-
-  var f = fargs.shift();
-  var thisObject = fargs.shift();
-  return function() {
-    for(var i=0;i < arguments.length;i++) {
-      fargs.push(arguments[i]);
-    }
-    f.apply(thisObject, fargs, arguments);
-  };
-};

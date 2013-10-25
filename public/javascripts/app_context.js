@@ -56,7 +56,7 @@ app_context.Base.prototype.getDrawUrl = function() {
 
 app_context.Base.prototype.redraw = function() {
   var service_url = this.getDrawUrl();
-  this.service = new service.generic(service_url, util.bind(this.handleAPIReturn, this));
+  this.service = new service.generic(service_url, this.handleAPIReturn.bind(this));
   this.service.get();
 };
 
@@ -120,8 +120,8 @@ app_context.Person.prototype.handleAPIReturn = function(data) {
   util.appendTextElement(editor, editor_text);
 
   this.form = document.querySelector('div.editor form[name="person"]');
-  this.form.addEventListener('submit', util.bind(this.handleEditSubmit, this));
-  this.form.addEventListener('change', util.bind(this.handleFormChange, this));
+  this.form.addEventListener('submit', this.handleEditSubmit.bind(this));
+  this.form.addEventListener('change', this.handleFormChange.bind(this));
 };
 
 app_context.Person.prototype.handleFormChange = function(e) {
@@ -178,7 +178,7 @@ app_context.Person.prototype.handleEditSubmit = function(e) {
 
   this.service = new service.generic(
     './person',
-    util.bind(this.handleEdit, this)
+    this.handleEdit.bind(this)
   );
 
   this.service.set(data);
@@ -205,19 +205,19 @@ app_context.MemberBand.prototype.handleAPIReturn = function(data) {
   app_context.Base.prototype.handleAPIReturn.call(this, data);
 
   var add_div = document.querySelector('#' + this.tab_id + ' .editor .add');
-  var add_form = new app_form.Editor.BandJoin(data, true);
-  add_form.render(add_div);
-  add_form.addEventListener('app_form_change', util.bind(this.handleAfterChange, this));
+  this.add_form = new app_form.Editor.BandJoin(data, true);
+  this.add_form.render(add_div);
+  this.add_form.addEventListener('app_form_change', this.handleAfterChange.bind(this));
 
   var create_div = document.querySelector('#' + this.tab_id + ' .editor .new');
-  var create_form = new app_form.Editor.BandCreator(data, true);
-  create_form.render(create_div);
-  create_form.addEventListener('app_form_change', util.bind(this.handleAfterChange, this));
+  this.create_form = new app_form.Editor.BandCreator(data, true);
+  this.create_form.render(create_div);
+  this.create_form.addEventListener('app_form_change', this.handleAfterChange.bind(this));
 
   var list_div = document.querySelector('#' + this.tab_id + ' .display .list');
-  var list_form = new app_form.List.Band(data, true);
-  list_form.render(list_div);
-  list_form.addEventListener('app_form_change', util.bind(this.handleAfterChange, this));
+  this.list_form = new app_form.List.Band(data, true);
+  this.list_form.render(list_div);
+  this.list_form.addEventListener('app_form_change', this.handleAfterChange.bind(this));
 
   app_context.setBandSelector(this.model.person_bands);
 };
@@ -251,20 +251,20 @@ app_context.BandMember.prototype.handleAPIReturn = function(data) {
 
   if (this.model.band_admin) {
     var add_div = document.querySelector('#' + this.tab_id + ' .editor .add');
-    var add_form = new app_form.Editor.BandMemberAdd(data, this.model.band_admin);
-    add_form.render(add_div);
-    add_form.addEventListener('app_form_change', util.bind(this.handleAfterChange, this));
+    this.add_form = new app_form.Editor.BandMemberAdd(data, this.model.band_admin);
+    this.add_form.render(add_div);
+    this.add_form.addEventListener('app_form_change', this.handleAfterChange.bind(this));
 
     var create_div = document.querySelector('#' + this.tab_id + ' .editor .new');
-    var create_form = new app_form.Editor.BandMemberNew(data, this.model.band_admin);
-    create_form.render(create_div);
-    create_form.addEventListener('app_form_change', util.bind(this.handleAfterChange, this));
+    this.create_form = new app_form.Editor.BandMemberNew(data, this.model.band_admin);
+    this.create_form.render(create_div);
+    this.create_form.addEventListener('app_form_change', this.handleAfterChange.bind(this));
   }
 
   var list_div = document.querySelector('#' + this.tab_id + ' .display .list');
-  var list_form = new app_form.List.BandMember(data, this.model.band_admin);
-  list_form.render(list_div);
-  list_form.addEventListener('app_form_change', util.bind(this.handleAfterChange, this));
+  this.list_form = new app_form.List.BandMember(data, this.model.band_admin);
+  this.list_form.render(list_div);
+  this.list_form.addEventListener('app_form_change', this.handleAfterChange.bind(this));
 };
 
 app_context.BandMember.prototype.otherChangeTabs = function() {
@@ -300,15 +300,15 @@ app_context.Artist.prototype.handleAPIReturn = function(data) {
 
   if (this.model.band_admin) {
     var create_div = document.querySelector('#' + this.tab_id + ' .creator .new');
-    var create_form = new app_form.Editor.ArtistNew(data, this.model.band_admin);
-    create_form.render(create_div);
-    create_form.addEventListener('app_form_change', util.bind(this.handleAfterChange, this));
+    this.create_form = new app_form.Editor.ArtistNew(this.model, this.model.band_admin);
+    this.create_form.render(create_div);
+    this.create_form.addEventListener('app_form_change', this.handleAfterChange.bind(this));
   }
 
   var list_div = document.querySelector('#' + this.tab_id + ' .display .list');
-  var list_form = new app_form.List.Artist(data, this.model.band_admin);
-  list_form.render(list_div);
-  list_form.addEventListener('app_form_change', util.bind(this.handleAfterChange, this));
+  this.list_form = new app_form.List.Artist(this.model, this.model.band_admin);
+  this.list_form.render(list_div);
+  this.list_form.addEventListener('app_form_change', this.handleAfterChange.bind(this));
 };
 
 app_context.Artist.prototype.otherChangeTabs = function() {
@@ -329,30 +329,16 @@ app_context.BandSong = function() {
 app_context.BandSong.prototype = new app_context.Base();
 
 app_context.BandSong.prototype.getDrawUrl = function() {
-  var sort_selector = document.querySelector('#' + this.tab_id + ' .app_context_item .display .filters [name="sort_type"]');
-  
-  var service_url = this.url + '?band_id=' + util.getBandId() + '&sort_type=';
-  service_url += sort_selector ? sort_selector.value : 'song_name';
-
-  var filters = {};
-  var song_filter = document.querySelector('#' + this.tab_id + ' .app_context_item .display .filters [name="song_filter"]');
-  if (song_filter && song_filter.value) {
-    filters.song_name = song_filter.value;
-  }
-  
-  var artist_filter = document.querySelector('#' + this.tab_id + ' .app_context_item .display .filters [name="artist_filter"]');
-  if (artist_filter && artist_filter.value > 0) {
-    filters.artist_id = artist_filter.value;
-  }
-  
-  return service_url + '&filters=' + JSON.stringify(filters);
+  var filter_form = this.filter_form;
+  var filter_query = filter_form ? filter_form.getFilterQuery() : 'sort_type=song_name&filters=' + JSON.stringify({});
+  return this.url + '?band_id=' + util.getBandId() + '&' + filter_query;
 };
 
 app_context.BandSong.prototype.getContextArgs = function() {
   this.model.band_admin = this.model.band_admin || this.model.system_admin;
 
   return {
-    sections: {creator: this.model.band_admin, display: 1},
+    sections: {multiedit: this.model.band_admin, display: 1},
     tab_id: this.tab_id
   };
 };
@@ -361,175 +347,24 @@ app_context.BandSong.prototype.handleAPIReturn = function(data) {
   app_context.Base.prototype.handleAPIReturn.call(this, data);
 
   if (this.model.band_admin) {
-    var creator = document.querySelector('#' + this.tab_id + ' .creator');
-    var creator_text = Templates['song/creator'](this.model);
-    util.appendTextElement(creator, creator_text);
+    var add_div = document.querySelector('#' + this.tab_id + ' .editor .add');
+    this.add_form = new app_form.Editor.BandSongAdd(this.model, this.model.band_admin);
+    this.add_form.render(add_div);
+    this.add_form.addEventListener('app_form_change', this.handleAfterChange.bind(this));
+
+    var new_div = document.querySelector('#' + this.tab_id + ' .editor .new');
+    this.new_form = new app_form.Editor.BandSongNew(this.model, this.model.band_admin);
+    this.new_form.render(new_div);
+    this.new_form.addEventListener('app_form_change', this.handleAfterChange.bind(this));
   }
 
-  var display = document.querySelector('#' + this.tab_id + ' .display');
-  var display_text = Templates['song/display'](this.model);
-  util.appendTextElement(display, display_text);
+  var filter_div = document.querySelector('#' + this.tab_id + ' .display .filters');
+  this.filter_form = new app_form.Filters.BandSong(this.model, false);
+  this.filter_form.render(filter_div);
+  this.filter_form.addEventListener('app_filter_change', this.handleAfterChange.bind(this));
 
-  var filters = document.querySelector('#' + this.tab_id + ' .display .filters');
-  var filter_text = Templates['song/display/filters'](this.model);
-  util.appendTextElement(filters, filter_text);
-
-  var sort_selector = filters.querySelector('[name="sort_type"]');
-  sort_selector.addEventListener('change', util.bind(function() { this.redraw(); }, this));
-  sort_selector.value = this.model.sort_type;
-  
-  var song_filter = filters.querySelector('[name="song_filter"]');
-  song_filter.addEventListener('change', util.bind(function() { this.redraw(); }, this));
-  song_filter.value = this.model.filters.song_name ? this.model.filters.song_name : null;
-  
-  var artist_filter = filters.querySelector('[name="artist_filter"]');
-  artist_filter.addEventListener('change', util.bind(function() { this.redraw(); }, this));
-  artist_filter.value = this.model.filters.artist_id ? this.model.filters.artist_id : -1;
-  
-  var list = document.querySelector('#' + this.tab_id + ' .display .list');
-  var list_text = Templates['song/display/list'](this.model);
-  util.appendTextElement(list, list_text);
-  
-  this.model.band_songs.forEach(function(band_song) {
-    var rating = document.querySelector('tr[band_song_id="' + band_song.band_song_id + '"] td select[name="song_rating"]');
-    rating.value = band_song.rating;
-    rating.addEventListener('change', util.bind(this.ratingChangeHandler, this));
-
-    var status = document.querySelector('tr[band_song_id="' + band_song.band_song_id + '"] td select[name="song_status"]');
-    status.value = band_song.song_status;
-    if (this.model.band_admin) {
-      status.addEventListener('change', util.bind(this.statusChangeHandler, this));
-    } else {
-      status.disabled = true;
-    }
-
-    var avg_rating = document.querySelector('tr[band_song_id="' + band_song.band_song_id + '"] [name="avg_rating"] div');
-    var max_width = 100;
-    avg_rating.style.overflow = 'hidden';
-    avg_rating.style.width = parseInt(max_width * (band_song.avg_rating / 5)) + 'px';
-  }, this);
-
-  //XXX Why is this here?
-  var anchor = this.context.querySelector('a');
-  anchor.addEventListener('click', function(e) { 
-    return false;
-  });
-
-  if (this.model.band_admin) {
-    var add_form = document.querySelector('#' + this.tab_id + ' .creator div.add form');
-    add_form.addEventListener('submit', util.bind(this.handleAddSubmit, this));
-
-    var new_form = document.querySelector('#' + this.tab_id + ' .creator div.new form');
-    new_form.addEventListener('submit', util.bind(this.handleNewSubmit, this));
-
-    var delete_buttons = document.querySelectorAll('#' + this.tab_id + ' .display .list td.delete');
-    var button_handler = util.bind(this.handleDelete, this);
-
-    for(var button_idx = 0; button_idx < delete_buttons.length; button_idx++) {
-      delete_buttons[button_idx].addEventListener('click', button_handler);
-    }
-  }
-};
-
-app_context.BandSong.prototype.handleAddSubmit = function(e) {
-  var form = e.target;
-  var data = {
-    band_id: form.querySelector('[name="band_id"]').value,
-    song_id: form.querySelector('[name="song_id"]').value
-  };
-
-  this.service = new service.generic(
-    './band_song',
-    util.bind(this.handleAdd, this)
-  );
-
-  this.service.set(data);
-  e.preventDefault();
-  return false;
-};
-
-app_context.BandSong.prototype.handleNewSubmit = function(e) {
-  var form = e.target;
-  var data = {
-    name: form.querySelector('[name="song_name"]').value,
-    artist_id: form.querySelector('[name="artist_id"]').value
-  };
-
-  this.service = new service.generic(
-    './song',
-    util.bind(this.handleAdd, this)
-  );
-
-  this.service.set(data);
-  e.preventDefault();
-  return false;
-};
-
-app_context.BandSong.prototype.ratingChangeHandler = function(e) {
-  var input = e.target;
-  var row = input.parentElement.parentElement;
-  var band_song_id = row.attributes.getNamedItem('band_song_id').value; 
-
-  var data = {
-    'band_song_id': band_song_id,
-    'rating': input.value
-  };
-
-  input.disabled = true;
-  this.service = new service.generic(
-    './song_rating',
-    util.bind(function(data) { 
-      this.redraw();
-    }, this)
-  );
-  this.service.set(data);
-  return true;
-};
-
-app_context.BandSong.prototype.statusChangeHandler = function(e) {
-  var input = e.target;
-  var row = input.parentElement.parentElement;
-  var band_song_id = row.attributes.getNamedItem('band_song_id').value; 
-
-  var data = {
-    'band_song_id': band_song_id,
-    'song_status': input.value
-  };
-
-  input.disabled = true;
-  this.service = new service.generic(
-    './song_status',
-    function(data) {
-      var row = document.querySelector('#band_songs .list tr[band_song_id="' + data.band_song_id + '"]');
-      var input = row.querySelector('select[name="song_status"]');
-      input.value = data.song_status;
-      input.disabled = false;
-    }
-  );
-  this.service.set(data);
-  return true;
-};
-
-app_context.BandSong.prototype.handleDelete = function(e) {
-  window.console.log("Do the delete?" + e);
-
-  var row = e.target.parentElement;
-  var band_song_id = row.attributes.item('band_song_id').value;
-  var band_song = this.model.band_songs.filter(function (song) { return song.band_song_id == band_song_id })[0];
-
-  var confirm_delete = new dialog('Remove ' + band_song.name + '?');
-  confirm_delete.show(util.bind(function(result) {
-    if (result) {
-      var url = './band_song?band_song_id=' + band_song_id;
-      this.service = new service.generic(
-        url,
-        util.bind(this.handleAfterChange, this)
-      );
-      this.service.delete();
-    } else {
-      this.handleAfterChange();
-    }
-  }, this));
-
-  return true;
+  var list_div = document.querySelector('#' + this.tab_id + ' .display .list');
+  this.list_form = new app_form.List.BandSong(this.model, this.model.band_admin);
+  this.list_form.render(list_div);
+  this.list_form.addEventListener('app_form_change', this.handleAfterChange.bind(this));
 };

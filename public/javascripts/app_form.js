@@ -31,6 +31,10 @@ app_form.prototype.addEventListener = function(type, callback) {
   this.element_.addEventListener(type, callback);
 };
 
+app_form.prototype.getElement = function() {
+  return this.element_;
+};
+
 app_form.prototype.getModel = function() {
   return this.model_;
 };
@@ -39,10 +43,86 @@ app_form.prototype.fireChange = function() {
   this.element_.dispatchEvent(new CustomEvent('app_form_change'));
 };
 
-app_form.Filters = function(mode, editor) {
+app_form.Filters = function(model, editor) {
   app_form.call(this, model, editor);
 };
 util.inherits(app_form.Filters, app_form);
+
+app_form.Filters.prototype.renderDocument = function() {
+  app_form.prototype.renderDocument.call(this);  
+
+  var filter_fields = this.getFilterFields_();
+  var model = this.getModel();
+
+  filter_fields.sort_type.value = model.sort_type;
+
+  for(var i = 0; i < filter_fields.filters.length; i++) {
+    var filter = filter_fields.filters[i];
+    var filter_name = filter.attributes.item('name').value;
+
+    if (model.filters[filter_name]) {
+      filter.value = model.filters[filter_name];
+    }
+  }
+
+  this.element_.addEventListener('change', function(e) {
+    this.element_.dispatchEvent(new CustomEvent('app_filter_change'));
+  }.bind(this));
+
+};
+
+app_form.Filters.prototype.getFilterFields_ = function() {
+  return {
+    sort_type: this.getElement().querySelector('.sort > :not(label)'),
+    filters: this.getElement().querySelectorAll('.filter > :not(label')
+  };
+};
+
+app_form.Filters.prototype.getFilterValues = function() {
+  var filter_fields = this.getFilterFields_();
+
+  var result = {
+    'sort_type': filter_fields.sort_type.value,
+    'filters': {}
+  };
+
+  for(var i = 0; i < filter_fields.filters.length; i++) {
+    var filter = filter_fields.filters[i];
+    var value = filter.value;
+
+    var filter_name = filter.attributes.item('name').value;
+    if (value != null) {
+      if (value !== '') {
+	var int_value = parseInt(value);
+	if (!isNaN(int_value)) {
+	  if (int_value >= 0) {
+	    result.filters[filter_name] = int_value;
+	  }
+	} else {
+	  result.filters[filter_name] = value;
+	}
+      }
+    }
+  }
+
+  return result;
+};
+
+app_form.Filters.prototype.getFilterQuery = function() {
+  var filters = this.getFilterValues();
+  var result = [
+    'sort_type=' + filters['sort_type'],
+    'filters=' + JSON.stringify(filters['filters'])
+  ];
+
+  return result.join('&');
+};
+
+app_form.Filters.BandSong = function(model, editor) {
+  app_form.Filters.call(this, model, editor);
+};
+util.inherits(app_form.Filters.BandSong, app_form.Filters);
+app_form.Filters.BandSong.prototype.template_name_ = 'song/display/filters';
 
 app_form.List = function(model, editor) {
   app_form.call(this, model, editor);
@@ -54,7 +134,7 @@ app_form.List.prototype.renderDocument = function() {
 
   if (this.editor_) {
     var delete_buttons = this.element_.querySelectorAll('.delete');
-    var button_handler = util.bind(this.handleDelete, this);
+    var button_handler = this.handleDelete.bind(this);
 
     for(var button_idx = 0; button_idx < delete_buttons.length; button_idx++) {
       delete_buttons[button_idx].addEventListener('click', button_handler);
@@ -70,17 +150,17 @@ app_form.List.prototype.handleDelete = function(e) {
   var object = this.getRowForIdentity(identity);
 
   var confirm_delete = new dialog(this.getConfirmMessage(object));
-  confirm_delete.show(util.bind(function(result) {
+  confirm_delete.show(function(result) {
     if (result) {
       this.service = new service.generic(
         this.getServiceUrl(identity),
-        util.bind(this.fireChange, this)
+	this.fireChange.bind(this)
       );
       this.service.delete();
     } else {
       this.fireChange();
     }
-  }, this));
+  }.bind(this));
 
   return true;
 };
@@ -152,10 +232,10 @@ app_form.List.BandSong.prototype.identity_name_ = 'band_song_id';
 app_form.List.BandSong.prototype.renderDocument = function() {
   app_form.List.prototype.renderDocument.call(this);
 
-  this.model.band_songs.forEach(function(band_song) {
+  this.getModel().band_songs.forEach(function(band_song) {
     var rating = document.querySelector('tr[band_song_id="' + band_song.band_song_id + '"] td select[name="song_rating"]');
     rating.value = band_song.rating;
-    rating.addEventListener('change', util.bind(this.handleRatingChange, this));
+    rating.addEventListener('change', this.handleRatingChange.bind(this));
 
     var avg_rating = document.querySelector('tr[band_song_id="' + band_song.band_song_id + '"] [name="avg_rating"] div');
     var max_width = 100;
@@ -164,8 +244,8 @@ app_form.List.BandSong.prototype.renderDocument = function() {
 
     var status = document.querySelector('tr[band_song_id="' + band_song.band_song_id + '"] td select[name="song_status"]');
     status.value = band_song.song_status;
-    if (this.model.band_admin) {
-      status.addEventListener('change', util.bind(this.handleStatusChange, this));
+    if (this.getModel().band_admin) {
+      status.addEventListener('change', this.handleStatusChange.bind(this));
     } else {
       status.disabled = true;
     }
@@ -185,13 +265,13 @@ app_form.List.BandSong.prototype.handleRatingChange = function(e) {
   input.disabled = true;
   this.service = new service.generic(
     './song_rating',
-    util.bind(this.fireChange(), this)
+    this.fireChange.bind(this)
   );
   this.service.set(data);
   return true;
 };
 
-app_form.List.BandSong.prototype.handleSongChange = function(e) {
+app_form.List.BandSong.prototype.handleStatusChange = function(e) {
   var input = e.target;
   var row = input.parentElement.parentElement;
   var band_song_id = row.attributes.getNamedItem('band_song_id').value; 
@@ -234,8 +314,8 @@ util.inherits(app_form.Editor, app_form);
 
 app_form.Editor.prototype.renderDocument = function() {
   app_form.prototype.renderDocument.call(this);
-  this.element_.addEventListener('submit', util.bind(this.handleSubmit, this));
-  this.element_.addEventListener('change', util.bind(this.handleChange, this));
+  this.element_.addEventListener('submit', this.handleSubmit.bind(this));
+  this.element_.addEventListener('change', this.handleChange.bind(this));
 };
 
 app_form.Editor.prototype.getFormData = function(form) {
@@ -252,7 +332,7 @@ app_form.Editor.prototype.handleSubmit = function(e) {
   var data = this.getFormData(form);
   this.service = new service.generic(
     this.edit_url_,
-    util.bind(this.handleEdit, this)
+    this.handleEdit.bind(this)
   );
   this.service.set(data);
   e.preventDefault();
@@ -330,5 +410,33 @@ app_form.Editor.ArtistNew.prototype.edit_url_ = './artist';
 app_form.Editor.ArtistNew.prototype.getFormData = function(form) {
   return {
     name: form.firstChild.value
+  };
+};
+
+app_form.Editor.BandSongNew = function(model, editor) {
+  app_form.Editor.call(this, model, editor);
+};
+util.inherits(app_form.Editor.BandSongNew, app_form.Editor);
+app_form.Editor.BandSongNew.prototype.template_name_ = 'song/editor/new';
+app_form.Editor.BandSongNew.prototype.edit_url_ = './song';
+
+app_form.Editor.BandSongNew.prototype.getFormData = function(form) {
+  return {
+    name: form.querySelector('[name="song_name"]').value,
+    artist_id: form.querySelector('[name="artist_id"]').value
+  };
+};
+
+app_form.Editor.BandSongAdd = function(model, editor) {
+  app_form.Editor.call(this, model, editor);
+};
+util.inherits(app_form.Editor.BandSongAdd, app_form.Editor);
+app_form.Editor.BandSongAdd.prototype.template_name_ = 'song/editor/add';
+app_form.Editor.BandSongAdd.prototype.edit_url_ = './band_song';
+
+app_form.Editor.BandSongAdd.prototype.getFormData = function(form) {
+  return {
+    band_id: form.querySelector('[name="band_id"]').value,
+    song_id: form.querySelector('[name="song_id"]').value
   };
 };

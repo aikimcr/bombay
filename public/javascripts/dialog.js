@@ -7,7 +7,7 @@ dialog.prototype.show = function(callback) {
   util.appendTextElement(document.body, dialog_text);
 
   var buttons = document.querySelectorAll('.dialog_button');
-  var handler = util.bind(this.handleButtonPress, this, callback);
+  var handler = this.handleButtonPress.bind(this, callback);
 
   for(var i=0; i< buttons.length; i++) {
     buttons[i].addEventListener('click', handler);
