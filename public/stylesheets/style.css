@@ -148,6 +148,18 @@ body {
 .container > input[id*="creator"]:not(:checked) ~ div.display >div.list {
   height: 600px;
 }
+.edit_form {
+  overflow: auto;
+}
+.edit_form form table tr td.editor_label {
+  width: 200px;
+}
+.edit_form form table tr td {
+  width: 300px;
+}
+.edit_form form table tr td input {
+  width: 290px;
+}
 .editor {
   overflow: auto;
   width: 900px;

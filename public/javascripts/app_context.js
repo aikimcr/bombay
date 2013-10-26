@@ -109,17 +109,17 @@ app_context.Person = function() {
 app_context.Person.prototype = new app_context.Base();
 
 app_context.Person.prototype.getContextArgs = function() {
-  return {sections: {editor: 1}};
+  return {sections: {edit_form: 1}};
 };
 
 app_context.Person.prototype.handleAPIReturn = function(data) {
   app_context.Base.prototype.handleAPIReturn.call(this, data);
 
-  var editor = document.querySelector('#' + this.tab_id + ' .editor');
+  var edit_div = document.querySelector('#' + this.tab_id + ' .edit_form');
   var editor_text = Templates['person/editor'](this.model);
-  util.appendTextElement(editor, editor_text);
+  util.appendTextElement(edit_div, editor_text);
 
-  this.form = document.querySelector('div.editor form[name="person"]');
+  this.form = document.querySelector('div.edit_form form[name="person"]');
   this.form.addEventListener('submit', this.handleEditSubmit.bind(this));
   this.form.addEventListener('change', this.handleFormChange.bind(this));
 };
