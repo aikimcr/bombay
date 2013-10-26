@@ -14,6 +14,7 @@ service.generic = function(url, callback) {
         } catch(e) {
           window.console.log('Error parsing response text');
           window.console.log(e);
+          service.getInstance().cancelAllRequests();
           window.location.reload();
         }
       } else {

@@ -20,7 +20,7 @@ service.prototype.cancelAllRequests = function() {
   Object.keys(this.requests_).forEach(function(key) {
     this.requests_[key].abort();
     delete this.requests_[key];
-  });
+  }, this);
 };
 
 service.prototype.getRequest_= function(url, callback) {
