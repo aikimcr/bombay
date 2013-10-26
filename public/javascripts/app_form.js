@@ -152,11 +152,10 @@ app_form.List.prototype.handleDelete = function(e) {
   var confirm_delete = new dialog(this.getConfirmMessage(object));
   confirm_delete.show(function(result) {
     if (result) {
-      this.service = new service.generic(
+      service.getInstance().delete(
         this.getServiceUrl(identity),
 	this.fireChange.bind(this)
       );
-      this.service.delete();
     } else {
       this.fireChange();
     }
@@ -221,9 +220,12 @@ app_form.List.BandMember.prototype.handleBandAdminChange = function(e) {
     band_id: util.getBandId(),
     band_admin: cell.checked ? 1 : 0
   };
-    
-  this.service = new service.generic('./band_member', this.fireChange.bind(this));
-  this.service.put(data);
+
+  service.getInstance().put(
+    './band_member',
+    this.fireChange.bind(this),
+    data
+  );
 };
 
 app_form.List.Artist = function(model, editor) {
@@ -286,11 +288,11 @@ app_form.List.BandSong.prototype.handleRatingChange = function(e) {
   };
 
   input.disabled = true;
-  this.service = new service.generic(
+  service.getInstance().set(
     './song_rating',
-    this.fireChange.bind(this)
+    this.fireChange.bind(this),
+    data
   );
-  this.service.set(data);
   return true;
 };
 
@@ -305,16 +307,11 @@ app_form.List.BandSong.prototype.handleStatusChange = function(e) {
   };
 
   input.disabled = true;
-  this.service = new service.generic(
+  service.getInstance.set(
     './song_status',
-    function(data) {
-      var row = document.querySelector('#band_songs .list tr[band_song_id="' + data.band_song_id + '"]');
-      var input = row.querySelector('select[name="song_status"]');
-      input.value = data.song_status;
-      input.disabled = false;
-    }
+    this.fireChange.bind(this),
+    data
   );
-  this.service.set(data);
   return true;
 };
 
@@ -353,11 +350,11 @@ app_form.Editor.prototype.getFormData = function(form) {
 app_form.Editor.prototype.handleSubmit = function(e) {
   var form = e.target;
   var data = this.getFormData(form);
-  this.service = new service.generic(
+  service.getInstance.set(
     this.edit_url_,
-    this.handleEdit.bind(this)
+    this.handleEdit.bind(this),
+    data
   );
-  this.service.set(data);
   e.preventDefault();
   return false;
 };

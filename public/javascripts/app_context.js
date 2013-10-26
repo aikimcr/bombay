@@ -56,8 +56,7 @@ app_context.Base.prototype.getDrawUrl = function() {
 
 app_context.Base.prototype.redraw = function() {
   var service_url = this.getDrawUrl();
-  this.service = new service.generic(service_url, this.handleAPIReturn.bind(this));
-  this.service.get();
+  service.getInstance().get(service_url, this.handleAPIReturn.bind(this));
 };
 
 app_context.Base.prototype.getContextArgs = function() {

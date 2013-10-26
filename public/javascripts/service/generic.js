@@ -1,16 +1,30 @@
 service.generic = function(url, callback) {
+  var date = new Date();
+  var service_key = date.getTime() + url.substr(0, 10);
+  this.key = service_key;
   this.url = url;
   this.service_ = new XMLHttpRequest();
   this.service_.onreadystatechange = function() {
     if (this.readyState == 4) {
+      service.getInstance().removeRequestByKey(service_key);
       if (this.status == 200 || this.status == 304) {
-        var response = JSON.parse(this.responseText);
-        callback(response);
+        try {
+          var response = JSON.parse(this.responseText);
+          callback(response);
+        } catch(e) {
+          window.console.log('Error parsing response text');
+          window.console.log(e);
+          window.location.reload();
+        }
       } else {
-        console.log("error on " + this.url);
+        window.console.log("error on " + this.url);
       }
     }
   };
+};
+
+service.generic.prototype.abort = function() {
+  this.service_.abort();
 };
 
 service.generic.prototype.get = function() {
