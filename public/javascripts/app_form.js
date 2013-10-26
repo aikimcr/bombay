@@ -345,6 +345,66 @@ app_form.Editor.prototype.handleEdit = function(result) {
   this.fireChange();
 };
 
+app_form.Editor.PersonEdit = function(model, editor) {
+  app_form.Editor.call(this, model, editor);
+};
+util.inherits(app_form.Editor.PersonEdit, app_form.Editor);
+app_form.Editor.PersonEdit.prototype.template_name_ = 'person/editor';
+app_form.Editor.PersonEdit.prototype.edit_url_ = './person';
+
+app_form.Editor.PersonEdit.prototype.handleChange = function(e) {
+  var form = e.target.form;
+  var old_password = form.querySelector('[name="old_password"]');
+  var new_password = form.querySelector('[name="new_password"]');
+  var verify_new_password = form.querySelector('[name="verify_new_password"]');
+  var submit_button = form.querySelector('[type="submit"]');
+
+  if (old_password.value != '' && old_password.value != null) {
+    if (old_password.value == this.getModel().person.password) {
+      verify_new_password.disabled = false;
+
+      if (new_password.value != '' && new_password.value != null) {
+        if (new_password.value == verify_new_password.value) {
+          submit_button.disabled = false;
+        } else {
+          submit_button.disabled = true;
+        }
+      } else {
+        submit_button.disabled = false;
+      }
+    } else {
+      verify_new_password.disabled = true;
+      submit_button.disabled = true;
+    }
+  } else {
+    verify_new_password.disabled = true;
+    submit_button.disabled = false;
+  }
+};
+
+app_form.Editor.PersonEdit.prototype.getFormData = function(form) {
+  var data = {
+    id: this.getModel().person.id,
+    name: form.querySelector('[name="name"]').value,
+    full_name: form.querySelector('[name="full_name"]').value,
+    email: form.querySelector('[name="email"]').value
+  };
+
+  var old_password = form.querySelector('[name="old_password"]').value;
+  var new_password = form.querySelector('[name="new_password"]').value;
+  var verify_new_password = form.querySelector('[name="verify_new_password"]').value;
+
+  if (old_password == this.getModel().person.password) {
+    if (new_password != '' && new_password != null) {
+      if (new_password == verify_new_password) {
+        data.password = new_password;
+      }
+    }
+  }
+
+  return data;
+};
+
 app_form.Editor.BandCreator = function(model, editor) {
   app_form.Editor.call(this, model, editor);
 };
