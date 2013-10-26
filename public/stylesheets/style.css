@@ -214,6 +214,9 @@ body {
   border-style: none solid none none;
   border-width: 0 1px 0 0;
 }
+.display .list td.band_admin {
+  text-align: center;
+}
 .display .list th,
 .display .list td {
   text-align: left;

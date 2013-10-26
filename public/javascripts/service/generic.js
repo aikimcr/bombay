@@ -28,6 +28,15 @@ service.generic.prototype.set = function(data) {
   this.service_.send(buffer.join('&'));
 };
 
+service.generic.prototype.put = function(data) {
+  var query_args = [];
+  Object.keys(data).forEach(function(key) {
+    query_args.push(key + '=' + data[key]);
+  });
+  this.service_.open('PUT', this.url + '?' + query_args.join('&'));
+  this.service_.send();
+};
+
 service.generic.prototype.delete = function() {
   this.service_.open('DELETE', this.url);
   this.service_.send();

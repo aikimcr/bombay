@@ -111,6 +111,7 @@ app.delete('/band', requireLogin, route_db.removeBand);
 // Band Members
 app.get('/band_member', requireLogin, route_db.bandMemberInfo);
 app.post('/band_member', requireLogin, route_db.addBandMember);
+app.put('/band_member', requireLogin, route_db.updateBandMember);
 app.delete('/band_member', requireLogin, route_db.removeBandMember);
 
 // Artist Table

@@ -203,6 +203,29 @@ app_form.List.BandMember.prototype.getServiceUrl = function(person_id) {
   return './band_member?person_id=' + person_id + '&band_id=' + this.getModel().band.id;
 };
 
+app_form.List.BandMember.prototype.renderDocument = function() {
+  app_form.List.prototype.renderDocument.call(this);
+
+  var fields = this.getElement().querySelectorAll('tr[member_id] td.band_admin');
+  for(var i = 0; i < fields.length; i++) {
+    var field = fields[i];
+    field.addEventListener('change', this.handleBandAdminChange.bind(this));
+  }
+};
+
+app_form.List.BandMember.prototype.handleBandAdminChange = function(e) {
+  var cell = e.target;
+  var row = cell.parentElement.parentElement;
+  var data = {
+    person_id: row.attributes.getNamedItem('member_id').value,
+    band_id: util.getBandId(),
+    band_admin: cell.checked ? 1 : 0
+  };
+    
+  this.service = new service.generic('./band_member', this.fireChange.bind(this));
+  this.service.put(data);
+};
+
 app_form.List.Artist = function(model, editor) {
   app_form.List.call(this, model, editor);
 };

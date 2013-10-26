@@ -210,6 +210,20 @@ exports.addBandMember = function(req, res) {
   addMember();
 };
 
+exports.updateBandMember = function(req, res) {
+  var dbh = new db.Handle();
+  var band_id = req.query.band_id;
+  var person_id = req.query.person_id;
+  var band_admin = req.query.band_admin;
+  var params = {
+    band_admin: band_admin
+  };
+
+  dbh.band_member().updateByPersonAndBandId(person_id, band_id, params, function(result) {
+    res.json(result);
+  });
+};
+
 exports.removeBandMember = function(req, res) {
   var dbh = new db.Handle();
   var band_id = req.query.band_id;

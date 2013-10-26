@@ -208,6 +208,34 @@ describe('band_member_util', function() {
     done();
   });
 
+  it('should update a band member admin status to true', function(done) {
+    band_member.updateByPersonAndBandId(3, 1, {band_admin: true}, function(result) {
+      should.exist(result);
+      should.not.exist(result.err);
+      band_member.getByPersonAndBandId(3, 1, function (result) {
+	should.exist(result);
+	should.exist(result.band_member);
+	should.not.exist(result.err);
+	result.band_member.band_admin.should.eql(true);
+	done();
+      });
+    });
+  });
+
+  it('should update a band member admin status to false', function(done) {
+    band_member.updateByPersonAndBandId(3, 1, {band_admin: false}, function(result) {
+      should.exist(result);
+      should.not.exist(result.err);
+      band_member.getByPersonAndBandId(3, 1, function (result) {
+	should.exist(result);
+	should.exist(result.band_member);
+	should.not.exist(result.err);
+	result.band_member.band_admin.should.eql(false);
+	done();
+      });
+    });
+  });
+
   it('should delete a band member', function(done) {
     band_member.deleteByPersonAndBandId(3, 1, function(result) {
       should.exist(result);

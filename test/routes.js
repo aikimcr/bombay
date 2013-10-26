@@ -364,6 +364,28 @@ describe('routes', function() {
       routes.addBandMember(req, res);
     });
 
+    it('should update the band member band admin status', function(done) {
+      req.query = {
+	person_id: 4,
+	band_id: 1,
+	band_admin: false
+      };
+      var res = {
+	json: function(result) {
+	  should.exist(result);
+	  should.not.exist(result.err);
+	  dbh.band_member().getById(band_member_id, function(result) {
+	    should.exist(result);
+	    should.exist(result.band_member);
+	    should.not.exist(result.err);
+	    done();
+	  });
+	}
+      };
+
+      routes.updateBandMember(req, res);
+    });
+
     it('should remove the band member and song ratings', function(done) {
       req.query = {
 	person_id: 4,

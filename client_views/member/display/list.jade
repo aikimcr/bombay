@@ -4,6 +4,7 @@ table(cellpadding="0", cellspacing="0")
     th Email
 
     if band_admin
+      th Admin
       th
 
   each member in band_members
@@ -12,4 +13,10 @@ table(cellpadding="0", cellspacing="0")
       td #{member.email}
 
       if band_admin
+        td.band_admin
+          if (member.band_admin)
+            input(type="checkbox", checked)
+          else
+            input(type="checkbox")
+
         td.delete &#x2327;
