@@ -115,7 +115,7 @@ app_context.Person.prototype.handleAPIReturn = function(data) {
   app_context.Base.prototype.handleAPIReturn.call(this, data);
 
   var edit_div = document.querySelector('#' + this.tab_id + ' .edit_form');
-  this.edit_form = new app_form.Editor.PersonEdit(this.model, true);
+  this.edit_form = new app_form.Editor.Updater.PersonEdit(this.model, true);
   this.edit_form.render(edit_div);
   this.edit_form.addEventListener('app_form_change', this.handleAfterChange.bind(this));
 };
@@ -139,12 +139,12 @@ app_context.MemberBand.prototype.handleAPIReturn = function(data) {
   app_context.Base.prototype.handleAPIReturn.call(this, data);
 
   var add_div = document.querySelector('#' + this.tab_id + ' .editor .add');
-  this.add_form = new app_form.Editor.BandJoin(this.model, true);
+  this.add_form = new app_form.Editor.Creator.BandJoin(this.model, true);
   this.add_form.render(add_div);
   this.add_form.addEventListener('app_form_change', this.handleAfterChange.bind(this));
 
   var create_div = document.querySelector('#' + this.tab_id + ' .editor .new');
-  this.create_form = new app_form.Editor.BandCreator(this.model, true);
+  this.create_form = new app_form.Editor.Creator.BandCreator(this.model, true);
   this.create_form.render(create_div);
   this.create_form.addEventListener('app_form_change', this.handleAfterChange.bind(this));
 
@@ -183,12 +183,12 @@ app_context.BandMember.prototype.handleAPIReturn = function(data) {
 
   if (this.model.band_admin) {
     var add_div = document.querySelector('#' + this.tab_id + ' .editor .add');
-    this.add_form = new app_form.Editor.BandMemberAdd(this.model, this.model.band_admin);
+    this.add_form = new app_form.Editor.Creator.BandMemberAdd(this.model, this.model.band_admin);
     this.add_form.render(add_div);
     this.add_form.addEventListener('app_form_change', this.handleAfterChange.bind(this));
 
     var create_div = document.querySelector('#' + this.tab_id + ' .editor .new');
-    this.create_form = new app_form.Editor.BandMemberNew(this.model, this.model.band_admin);
+    this.create_form = new app_form.Editor.Creator.BandMemberNew(this.model, this.model.band_admin);
     this.create_form.render(create_div);
     this.create_form.addEventListener('app_form_change', this.handleAfterChange.bind(this));
   }
@@ -230,7 +230,7 @@ app_context.Artist.prototype.handleAPIReturn = function(data) {
 
   if (this.model.band_admin) {
     var create_div = document.querySelector('#' + this.tab_id + ' .creator .new');
-    this.create_form = new app_form.Editor.ArtistNew(this.model, this.model.band_admin);
+    this.create_form = new app_form.Editor.Creator.ArtistNew(this.model, this.model.band_admin);
     this.create_form.render(create_div);
     this.create_form.addEventListener('app_form_change', this.handleAfterChange.bind(this));
   }
@@ -276,12 +276,12 @@ app_context.BandSong.prototype.handleAPIReturn = function(data) {
 
   if (this.model.band_admin) {
     var add_div = document.querySelector('#' + this.tab_id + ' .editor .add');
-    this.add_form = new app_form.Editor.BandSongAdd(this.model, this.model.band_admin);
+    this.add_form = new app_form.Editor.Creator.BandSongAdd(this.model, this.model.band_admin);
     this.add_form.render(add_div);
     this.add_form.addEventListener('app_form_change', this.handleAfterChange.bind(this));
 
     var new_div = document.querySelector('#' + this.tab_id + ' .editor .new');
-    this.new_form = new app_form.Editor.BandSongNew(this.model, this.model.band_admin);
+    this.new_form = new app_form.Editor.Creator.BandSongNew(this.model, this.model.band_admin);
     this.new_form.render(new_div);
     this.new_form.addEventListener('app_form_change', this.handleAfterChange.bind(this));
   }

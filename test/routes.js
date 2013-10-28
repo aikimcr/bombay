@@ -632,7 +632,7 @@ describe('routes', function() {
     });
 
     it('should update the band song status', function(done) {
-      req.body = {
+      req.query = {
 	band_song_id: band_song_id,
 	song_status: 4,
       };
@@ -659,11 +659,11 @@ describe('routes', function() {
 	}
       };
 
-      routes.updateBandSongStatus(req, res);
+      routes.updateBandSong(req, res);
     });
 
     it('should update the song rating', function(done) {
-      req.body = {
+      req.query = {
 	person_id: 1,
 	band_song_id: band_song_id,
 	rating: 1
@@ -685,7 +685,7 @@ describe('routes', function() {
 	}
       };
 
-      routes.updateBandSongRating(req, res);
+      routes.updateSongRating(req, res);
     });
 
     it('should remove the song and ratings from the band', function(done) {

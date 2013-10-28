@@ -10,13 +10,14 @@ service.generic = function(url, callback) {
       if (this.status == 200 || this.status == 304) {
         try {
           var response = JSON.parse(this.responseText);
-          callback(response);
         } catch(e) {
           window.console.log('Error parsing response text');
           window.console.log(e);
           service.getInstance().cancelAllRequests();
+          window.location.replace(window.location.origin + '/login');
           window.location.reload();
         }
+        callback(response);
       } else {
         window.console.log("error on " + this.url);
       }

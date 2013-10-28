@@ -412,11 +412,11 @@ exports.addBandSong = function(req, res) {
   addSong();
 };
 
-exports.updateBandSongStatus = function(req, res) {
+exports.updateBandSong = function(req, res) {
   var dbh = new db.Handle();
   var data = {
-    id: req.body.band_song_id,
-    song_status: req.body.song_status
+    id: req.query.band_song_id,
+    song_status: req.query.song_status
   };
 
   var updateStatus = flow.define(
@@ -490,11 +490,11 @@ exports.removeBandSong = function(req, res) {
   removeSong();
 };
 
-exports.updateBandSongRating = function(req, res) {
+exports.updateSongRating = function(req, res) {
   var dbh = new db.Handle();
   var person_id = req.session.passport.user;
-  var band_song_id = req.body.band_song_id;
-  var rating = req.body.rating;
+  var band_song_id = req.query.band_song_id;
+  var rating = req.query.rating;
 
   var updateRating = flow.define(
     function() {

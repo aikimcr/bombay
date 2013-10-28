@@ -288,7 +288,7 @@ app_form.List.BandSong.prototype.handleRatingChange = function(e) {
   };
 
   input.disabled = true;
-  service.getInstance().set(
+  service.getInstance().put(
     './song_rating',
     this.fireChange.bind(this),
     data
@@ -307,8 +307,8 @@ app_form.List.BandSong.prototype.handleStatusChange = function(e) {
   };
 
   input.disabled = true;
-  service.getInstance.set(
-    './song_status',
+  service.getInstance().put(
+    './band_song',
     this.fireChange.bind(this),
     data
   );
@@ -347,7 +347,18 @@ app_form.Editor.prototype.getFormData = function(form) {
   return data;
 }
 
-app_form.Editor.prototype.handleSubmit = function(e) {
+app_form.Editor.prototype.handleChange = function(e) {};
+
+app_form.Editor.prototype.handleEdit = function(result) {
+  this.fireChange();
+};
+
+app_form.Editor.Creator = function(model, editor) {
+  app_form.Editor.call(this, model, editor);
+};
+util.inherits(app_form.Editor.Creator, app_form.Editor);
+
+app_form.Editor.Creator.prototype.handleSubmit = function(e) {
   var form = e.target;
   var data = this.getFormData(form);
   service.getInstance.set(
@@ -359,20 +370,31 @@ app_form.Editor.prototype.handleSubmit = function(e) {
   return false;
 };
 
-app_form.Editor.prototype.handleChange = function(e) {};
-
-app_form.Editor.prototype.handleEdit = function(result) {
-  this.fireChange();
-};
-
-app_form.Editor.PersonEdit = function(model, editor) {
+app_form.Editor.Updater = function(model, editor) {
   app_form.Editor.call(this, model, editor);
 };
-util.inherits(app_form.Editor.PersonEdit, app_form.Editor);
-app_form.Editor.PersonEdit.prototype.template_name_ = 'person/editor';
-app_form.Editor.PersonEdit.prototype.edit_url_ = './person';
+util.inherits(app_form.Editor.Updater, app_form.Editor);
 
-app_form.Editor.PersonEdit.prototype.handleChange = function(e) {
+app_form.Editor.Updater.prototype.handleSubmit = function(e) {
+  var form = e.target;
+  var data = this.getFormData(form);
+  service.getInstance.put(
+    this.edit_url_,
+    this.handleEdit.bind(this),
+    data
+  );
+  e.preventDefault();
+  return false;
+};
+
+app_form.Editor.Updater.PersonEdit = function(model, editor) {
+  app_form.Editor.Updater.call(this, model, editor);
+};
+util.inherits(app_form.Editor.Updater.PersonEdit, app_form.Editor.Updater);
+app_form.Editor.Updater.PersonEdit.prototype.template_name_ = 'person/editor';
+app_form.Editor.Updater.PersonEdit.prototype.edit_url_ = './person';
+
+app_form.Editor.Updater.PersonEdit.prototype.handleChange = function(e) {
   var form = e.target.form;
   var old_password = form.querySelector('[name="old_password"]');
   var new_password = form.querySelector('[name="new_password"]');
@@ -402,7 +424,7 @@ app_form.Editor.PersonEdit.prototype.handleChange = function(e) {
   }
 };
 
-app_form.Editor.PersonEdit.prototype.getFormData = function(form) {
+app_form.Editor.Updater.PersonEdit.prototype.getFormData = function(form) {
   var data = {
     id: this.getModel().person.id,
     name: form.querySelector('[name="name"]').value,
@@ -425,96 +447,96 @@ app_form.Editor.PersonEdit.prototype.getFormData = function(form) {
   return data;
 };
 
-app_form.Editor.BandCreator = function(model, editor) {
-  app_form.Editor.call(this, model, editor);
+app_form.Editor.Creator.BandCreator = function(model, editor) {
+  app_form.Editor.Creator.call(this, model, editor);
 };
-util.inherits(app_form.Editor.BandCreator, app_form.Editor);
-app_form.Editor.BandCreator.prototype.template_name_ = 'band/editor/create';
-app_form.Editor.BandCreator.prototype.edit_url_ = './band';
+util.inherits(app_form.Editor.Creator.BandCreator, app_form.Editor.Creator);
+app_form.Editor.Creator.BandCreator.prototype.template_name_ = 'band/editor/create';
+app_form.Editor.Creator.BandCreator.prototype.edit_url_ = './band';
 
-app_form.Editor.BandCreator.prototype.getFormData = function(form) {
+app_form.Editor.Creator.BandCreator.prototype.getFormData = function(form) {
   return {
     name: form.querySelector('[name="band_name"]').value
   };
 };
 
-app_form.Editor.BandJoin = function(model, editor) {
-  app_form.Editor.call(this, model, editor);
+app_form.Editor.Creator.BandJoin = function(model, editor) {
+  app_form.Editor.Creator.call(this, model, editor);
 };
-util.inherits(app_form.Editor.BandJoin, app_form.Editor);
-app_form.Editor.BandJoin.prototype.template_name_ = 'band/editor/add';
-app_form.Editor.BandJoin.prototype.edit_url_ = './person_band';
+util.inherits(app_form.Editor.Creator.BandJoin, app_form.Editor.Creator);
+app_form.Editor.Creator.BandJoin.prototype.template_name_ = 'band/editor/add';
+app_form.Editor.Creator.BandJoin.prototype.edit_url_ = './person_band';
 
-app_form.Editor.BandJoin.prototype.getFormData = function(form) {
+app_form.Editor.Creator.BandJoin.prototype.getFormData = function(form) {
   return {
     band_id: form.querySelector('[name="band_id"]').value,
     person_id: form.querySelector('[name="person_id"]').value
   };
 };
 
-app_form.Editor.BandMemberNew = function(model, editor) {
-  app_form.Editor.call(this, model, editor);
+app_form.Editor.Creator.BandMemberNew = function(model, editor) {
+  app_form.Editor.Creator.call(this, model, editor);
 };
-util.inherits(app_form.Editor.BandMemberNew, app_form.Editor);
-app_form.Editor.BandMemberNew.prototype.template_name_ = 'member/editor/new';
-app_form.Editor.BandMemberNew.prototype.edit_url_ = './create_person';
+util.inherits(app_form.Editor.Creator.BandMemberNew, app_form.Editor.Creator);
+app_form.Editor.Creator.BandMemberNew.prototype.template_name_ = 'member/editor/new';
+app_form.Editor.Creator.BandMemberNew.prototype.edit_url_ = './person';
 
-app_form.Editor.BandMemberNew.prototype.getFormData = function(form) {
+app_form.Editor.Creator.BandMemberNew.prototype.getFormData = function(form) {
   return {
     name: form.querySelector('[name="name"]').value,
     full_name: form.querySelector('[name="full_name"]').value
   };
 };
 
-app_form.Editor.BandMemberAdd = function(model, editor) {
-  app_form.Editor.call(this, model, editor);
+app_form.Editor.Creator.BandMemberAdd = function(model, editor) {
+  app_form.Editor.Creator.call(this, model, editor);
 };
-util.inherits(app_form.Editor.BandMemberAdd, app_form.Editor);
-app_form.Editor.BandMemberAdd.prototype.template_name_ = 'member/editor/add';
-app_form.Editor.BandMemberAdd.prototype.edit_url_ = './band_member';
+util.inherits(app_form.Editor.Creator.BandMemberAdd, app_form.Editor.Creator);
+app_form.Editor.Creator.BandMemberAdd.prototype.template_name_ = 'member/editor/add';
+app_form.Editor.Creator.BandMemberAdd.prototype.edit_url_ = './band_member';
 
-app_form.Editor.BandMemberAdd.prototype.getFormData = function(form) {
+app_form.Editor.Creator.BandMemberAdd.prototype.getFormData = function(form) {
   return {
     band_id: form.querySelector('[name="band_id"]').value,
     person_id: form.querySelector('[name="person_id"]').value
   };
 };
 
-app_form.Editor.ArtistNew = function(model, editor) {
-  app_form.Editor.call(this, model, editor);
+app_form.Editor.Creator.ArtistNew = function(model, editor) {
+  app_form.Editor.Creator.call(this, model, editor);
 };
-util.inherits(app_form.Editor.ArtistNew, app_form.Editor);
-app_form.Editor.ArtistNew.prototype.template_name_ = 'artist/editor/new';
-app_form.Editor.ArtistNew.prototype.edit_url_ = './artist';
+util.inherits(app_form.Editor.Creator.ArtistNew, app_form.Editor.Creator);
+app_form.Editor.Creator.ArtistNew.prototype.template_name_ = 'artist/editor/new';
+app_form.Editor.Creator.ArtistNew.prototype.edit_url_ = './artist';
 
-app_form.Editor.ArtistNew.prototype.getFormData = function(form) {
+app_form.Editor.Creator.ArtistNew.prototype.getFormData = function(form) {
   return {
     name: form.firstChild.value
   };
 };
 
-app_form.Editor.BandSongNew = function(model, editor) {
-  app_form.Editor.call(this, model, editor);
+app_form.Editor.Creator.BandSongNew = function(model, editor) {
+  app_form.Editor.Creator.call(this, model, editor);
 };
-util.inherits(app_form.Editor.BandSongNew, app_form.Editor);
-app_form.Editor.BandSongNew.prototype.template_name_ = 'song/editor/new';
-app_form.Editor.BandSongNew.prototype.edit_url_ = './song';
+util.inherits(app_form.Editor.Creator.BandSongNew, app_form.Editor.Creator);
+app_form.Editor.Creator.BandSongNew.prototype.template_name_ = 'song/editor/new';
+app_form.Editor.Creator.BandSongNew.prototype.edit_url_ = './song';
 
-app_form.Editor.BandSongNew.prototype.getFormData = function(form) {
+app_form.Editor.Creator.BandSongNew.prototype.getFormData = function(form) {
   return {
     name: form.querySelector('[name="song_name"]').value,
     artist_id: form.querySelector('[name="artist_id"]').value
   };
 };
 
-app_form.Editor.BandSongAdd = function(model, editor) {
-  app_form.Editor.call(this, model, editor);
+app_form.Editor.Creator.BandSongAdd = function(model, editor) {
+  app_form.Editor.Creator.call(this, model, editor);
 };
-util.inherits(app_form.Editor.BandSongAdd, app_form.Editor);
-app_form.Editor.BandSongAdd.prototype.template_name_ = 'song/editor/add';
-app_form.Editor.BandSongAdd.prototype.edit_url_ = './band_song';
+util.inherits(app_form.Editor.Creator.BandSongAdd, app_form.Editor.Creator);
+app_form.Editor.Creator.BandSongAdd.prototype.template_name_ = 'song/editor/add';
+app_form.Editor.Creator.BandSongAdd.prototype.edit_url_ = './band_song';
 
-app_form.Editor.BandSongAdd.prototype.getFormData = function(form) {
+app_form.Editor.Creator.BandSongAdd.prototype.getFormData = function(form) {
   return {
     band_id: form.querySelector('[name="band_id"]').value,
     song_id: form.querySelector('[name="song_id"]').value

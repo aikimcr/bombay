@@ -95,8 +95,8 @@ app.get('/', requireLogin, index.index);
 
 // Person Table
 app.get('/person', requireLogin, route_db.getPerson);
-app.post('/create_person', requireLogin, route_db.createPerson);
-app.post('/person', requireLogin, route_db.updatePerson);
+app.post('/person', requireLogin, route_db.createPerson);
+app.put('/person', requireLogin, route_db.updatePerson);
 app.delete('/person', requireLogin, route_db.removePerson);
 
 // Person Views
@@ -127,10 +127,10 @@ app.post('/song', requireLogin, route_db.removeSong);
 app.get('/band_song', requireLogin, route_db.bandSongInfo);
 app.post('/band_song', requireLogin, route_db.addBandSong);
 app.delete('/band_song', requireLogin, route_db.removeBandSong);
-app.post('/song_status', requireLogin, route_db.updateBandSongStatus);
+app.put('/band_song', requireLogin, route_db.updateBandSong);
 
 // Song Rating Table
-app.post('/song_rating', requireLogin, route_db.updateBandSongRating)
+app.put('/song_rating', requireLogin, route_db.updateSongRating)
 
 // Authentication handlers
 app.get('/login', login.login);
