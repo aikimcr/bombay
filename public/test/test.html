@@ -6,23 +6,20 @@
 </head>
 <body>
   <div id="mocha">Client Side Mocha Tests</div>
-<!--
-  <script src="jquery.js"></script>
-  <script src="expect.js"></script>
--->
+
+  <!-- Test Utility Code -->
+  <script src="/templates.js"></script>
   <script src="./lib/chai.js"></script>
   <script src="./lib/mocha.js"></script>
   <script>mocha.setup('bdd')</script>
-  
+
   <!-- Code under Test. -->
-  <script src="../../public/javascripts/util.js"></script>
-<!--
-  <script src="test.array.js"></script>
-  <script src="test.object.js"></script>
-  <script src="test.xhr.js"></script>
--->
+  <script src="../javascripts/util.js"></script>
+  <script src="../javascripts/app_form.js"></script>
+
   <!-- Test code. -->
-  <script src="t001.js"></script>
+  <script src="./util.js"></script>
+  <script src="./band.js"></script>
   <script>
   /*
     mocha.checkLeaks();

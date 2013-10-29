@@ -2,9 +2,7 @@ NODE_MODULES = ./node_modules
 PACKAGE = ./package.json
 JS_DIR = ./public/javascripts
 JS_LIB = $(JS_DIR)/lib
-TEST_DIR = ./test
-TEST_CLIENT_DIR = $(TEST_DIR)/client
-TEST_CLIENT_LIB = $(TEST_CLIENT_DIR)/lib
+TEST_CLIENT_LIB = ./public/test/lib
 
 JADE_JS_DIR = $(JS_LIB)/jade
 JADE_JS_RUNTIME = $(JADE_JS_DIR)/runtime.js
@@ -77,8 +75,5 @@ $(MOCHA_CSS): $(TEST_CLIENT_LIB) $(MOCHA_CSS_SRC)
 $(SHOULD_JS):
 	npm install should
 
-$(TEST_CLIENT_LIB): $(TEST_CLIENT_DIR)
+$(TEST_CLIENT_LIB):
 	mkdir $(TEST_CLIENT_LIB)
-
-$(TEST_CLIENT_DIR): $(TEST_DIR)
-	mkdir $(TEST_CLIENT_DIR)

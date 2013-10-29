@@ -42,16 +42,4 @@ describe('util', function() {
       done();
     });
   });
-  
-  describe('#bind', function() {
-    it('should bind this to the second parameter', function(done) {
-      var plover_type = function() {};
-      var plover = new plover_type();
-      var snipe = function(done) {
-        this.should.equal(plover);
-        done();
-      };
-      util.bind(snipe, plover)(done);
-    });
-  });
 });
