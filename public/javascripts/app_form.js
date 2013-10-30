@@ -176,7 +176,7 @@ app_form.List.Band.prototype.getRowForIdentity = function(band_id) {
 };
 
 app_form.List.Band.prototype.getConfirmMessage = function(band) {
-  return 'Quit band ' + band.name + '?';
+  return 'Quit ' + band.name + '?';
 };
 
 app_form.List.Band.prototype.getServiceUrl = function(band_id) {
