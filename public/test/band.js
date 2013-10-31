@@ -44,12 +44,14 @@ describe('band', function() {
   beforeEach(function(done) {
     test_div = document.createElement('div');
     document.body.appendChild(test_div);
+    service.getInstance();
     done();
   });
 
   afterEach(function(done) {
     document.body.removeChild(test_div);
     test_div = null;
+    service.getInstance().resetCalls();
     done();
   });
 
@@ -150,6 +152,91 @@ describe('band', function() {
       fields[1].options[0].value.should.eql('5');
       fields[1].options[1].innerHTML.should.eql('Samurai Jack');
       fields[1].options[1].value.should.eql('10');
+
+      // Submit Button
+      fields[2].tagName.should.eql('INPUT');
+      fields[2].attributes.getNamedItem('type').value.should.eql('submit');
+      fields[2].value.should.eql('Join');
+      done();
+    });
+
+    it('should call the add API', function(done) {
+      var add_form = new app_form.Editor.Creator.BandJoin(model, true);
+      add_form.render(test_div);
+
+      var svc = service.getInstance();
+      var form = test_div.querySelector('form');
+      var fields = form.children;
+      fields[2].dispatchEvent(new Event('click'));
+
+      svc.set.calls.should.eql(1);
+      svc.set.params.length.should.eql(1);
+      svc.set.params.should.eql([[
+        './person_band',
+        'function',
+        {
+          band_id: '5',
+          person_id: '1'
+        }
+      ]]);
+      done();
+    });
+  });
+
+  describe('#new', function() {
+    it('should render the new band form', function(done) {
+      var add_form = new app_form.Editor.Creator.BandCreator(model, true);
+      add_form.render(test_div);
+
+      should.exist(test_div.firstChild);
+      test_div.children.length.should.eql(1);
+
+      var form = test_div.querySelector('form');
+      should.exist(form);
+      var fields = form.children;
+      should.exist(fields);
+      fields.length.should.eql(3);
+
+      // Person ID
+      fields[0].tagName.should.eql('INPUT');
+      fields[0].attributes.getNamedItem('type').value.should.eql('hidden');
+      fields[0].attributes.getNamedItem('name').value.should.eql('person_id');
+      fields[0].value.should.eql('1');
+
+      // Band Name
+      fields[1].tagName.should.eql('INPUT');
+      fields[1].attributes.getNamedItem('type').value.should.eql('text');
+      fields[1].attributes.getNamedItem('name').value.should.eql('band_name');
+      fields[1].attributes.getNamedItem('placeholder').value.should.eql('New Band Name');
+      fields[1].value.should.eql('');
+
+      // Submit Button
+      fields[2].tagName.should.eql('INPUT');
+      fields[2].attributes.getNamedItem('type').value.should.eql('submit');
+      fields[2].value.should.eql('New');
+      done();
+    });
+
+    it('should call the create API', function(done) {
+      var add_form = new app_form.Editor.Creator.BandCreator(model, true);
+      add_form.render(test_div);
+
+      var svc = service.getInstance();
+      var form = test_div.querySelector('form');
+      var fields = form.children;
+      fields[1].value = 'Johnny Bravo';
+      fields[2].dispatchEvent(new Event('click'));
+
+      svc.set.calls.should.eql(1);
+      svc.set.params.length.should.eql(1);
+window.console.log(svc.set.params);
+      svc.set.params.should.eql([[
+        './band',
+        'function',
+        {
+          name: 'Johnny Bravo',
+        }
+      ]]);
       done();
     });
   });

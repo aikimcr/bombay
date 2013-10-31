@@ -361,7 +361,7 @@ util.inherits(app_form.Editor.Creator, app_form.Editor);
 app_form.Editor.Creator.prototype.handleSubmit = function(e) {
   var form = e.target;
   var data = this.getFormData(form);
-  service.getInstance.set(
+  service.getInstance().set(
     this.edit_url_,
     this.handleEdit.bind(this),
     data
@@ -378,7 +378,7 @@ util.inherits(app_form.Editor.Updater, app_form.Editor);
 app_form.Editor.Updater.prototype.handleSubmit = function(e) {
   var form = e.target;
   var data = this.getFormData(form);
-  service.getInstance.put(
+  service.getInstance().put(
     this.edit_url_,
     this.handleEdit.bind(this),
     data
