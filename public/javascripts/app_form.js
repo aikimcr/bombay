@@ -208,6 +208,7 @@ app_form.List.BandMember.prototype.renderDocument = function() {
   var fields = this.getElement().querySelectorAll('tr[member_id] td.band_admin');
   for(var i = 0; i < fields.length; i++) {
     var field = fields[i];
+window.console.log(field);
     field.addEventListener('change', this.handleBandAdminChange.bind(this));
   }
 };
@@ -216,9 +217,9 @@ app_form.List.BandMember.prototype.handleBandAdminChange = function(e) {
   var cell = e.target;
   var row = cell.parentElement.parentElement;
   var data = {
-    person_id: row.attributes.getNamedItem('member_id').value,
-    band_id: util.getBandId(),
-    band_admin: cell.checked ? 1 : 0
+    person_id: parseInt(row.attributes.getNamedItem('member_id').value),
+    band_id: this.getModel().band_id,
+    band_admin: cell.checked
   };
 
   service.getInstance().put(
@@ -469,8 +470,8 @@ app_form.Editor.Creator.BandJoin.prototype.edit_url_ = './person_band';
 
 app_form.Editor.Creator.BandJoin.prototype.getFormData = function(form) {
   return {
-    band_id: form.querySelector('[name="band_id"]').value,
-    person_id: form.querySelector('[name="person_id"]').value
+    band_id: parseInt(form.querySelector('[name="band_id"]').value),
+    person_id: parseInt(form.querySelector('[name="person_id"]').value)
   };
 };
 
@@ -497,8 +498,8 @@ app_form.Editor.Creator.BandMemberAdd.prototype.edit_url_ = './band_member';
 
 app_form.Editor.Creator.BandMemberAdd.prototype.getFormData = function(form) {
   return {
-    band_id: form.querySelector('[name="band_id"]').value,
-    person_id: form.querySelector('[name="person_id"]').value
+    band_id: parseInt(form.querySelector('[name="band_id"]').value),
+    person_id: parseInt(form.querySelector('[name="person_id"]').value)
   };
 };
 
