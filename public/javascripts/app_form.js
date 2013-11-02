@@ -208,7 +208,6 @@ app_form.List.BandMember.prototype.renderDocument = function() {
   var fields = this.getElement().querySelectorAll('tr[member_id] td.band_admin');
   for(var i = 0; i < fields.length; i++) {
     var field = fields[i];
-window.console.log(field);
     field.addEventListener('change', this.handleBandAdminChange.bind(this));
   }
 };
