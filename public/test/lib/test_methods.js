@@ -37,3 +37,18 @@ function check_checkbox(box, checked, expected_classlist) {
   box.checked.should.eql(checked);
   check_classlist(box.classList, expected_classlist);
 };
+
+function check_select(select, value, exp_name, exp_options, expected_classlist) {
+  should.exist(select);
+  select.tagName.should.eql('SELECT');
+  select.attributes.getNamedItem('name').value.should.eql(exp_name);
+  var option_list = select.querySelectorAll('option');
+  option_list.length.should.eql(exp_options.length);
+  var got_options = [];
+  for(var i = 0; i < option_list.length; i++) {
+    window.console.log(i);
+    var got = {value: option_list[i].value, label: option_list[i].innerHTML};
+    got.should.eql(exp_options[i]);
+  }
+  check_classlist(select.classList, expected_classlist);
+};

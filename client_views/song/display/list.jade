@@ -21,7 +21,7 @@ table(cellpadding="0", cellspacing="0")
           option(value="1") Learning
           option(value="2") Run Through
           option(value="3") Ready
-          option(value="4") Standard 
+          option(value="4") Standard
       td
         select(name="song_rating")
           option(value="1") &#x2605;
@@ -30,7 +30,7 @@ table(cellpadding="0", cellspacing="0")
           option(value="4") &#x2605;&#x2605;&#x2605;&#x2605;
           option(value="5") &#x2605;&#x2605;&#x2605;&#x2605;&#x2605;
       td(name="avg_rating")
-        div
+        div(value="#{band_song.avg_rating}")
           img(src="/images/five_stars.png", width="100px", height="20px")
 
       if band_admin
