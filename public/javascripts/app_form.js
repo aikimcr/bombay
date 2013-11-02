@@ -283,8 +283,8 @@ app_form.List.BandSong.prototype.handleRatingChange = function(e) {
   var band_song_id = row.attributes.getNamedItem('band_song_id').value; 
 
   var data = {
-    'band_song_id': band_song_id,
-    'rating': input.value
+    'band_song_id': parseInt(band_song_id),
+    'rating': parseInt(input.value)
   };
 
   input.disabled = true;
@@ -302,8 +302,8 @@ app_form.List.BandSong.prototype.handleStatusChange = function(e) {
   var band_song_id = row.attributes.getNamedItem('band_song_id').value; 
 
   var data = {
-    'band_song_id': band_song_id,
-    'song_status': input.value
+    'band_song_id': parseInt(band_song_id),
+    'song_status': parseInt(input.value)
   };
 
   input.disabled = true;
@@ -525,7 +525,7 @@ app_form.Editor.Creator.BandSongNew.prototype.edit_url_ = './song';
 app_form.Editor.Creator.BandSongNew.prototype.getFormData = function(form) {
   return {
     name: form.querySelector('[name="song_name"]').value,
-    artist_id: form.querySelector('[name="artist_id"]').value
+    artist_id: parseInt(form.querySelector('[name="artist_id"]').value)
   };
 };
 
@@ -538,7 +538,7 @@ app_form.Editor.Creator.BandSongAdd.prototype.edit_url_ = './band_song';
 
 app_form.Editor.Creator.BandSongAdd.prototype.getFormData = function(form) {
   return {
-    band_id: form.querySelector('[name="band_id"]').value,
-    song_id: form.querySelector('[name="song_id"]').value
+    band_id: parseInt(form.querySelector('[name="band_id"]').value),
+    song_id: parseInt(form.querySelector('[name="song_id"]').value)
   };
 };

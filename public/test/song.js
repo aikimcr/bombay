@@ -31,6 +31,12 @@ var song_model = {
     description: 'Help by The Beatles',
     id: 7,
     name: 'Help'
+  }, {
+    artist_id: 1,
+    artist_name: 'AC/DC',
+    description: 'Whole Lotta Rosie by AC/DC',
+    id: 9,
+    name: 'Whole Lotta Rosie'
   }],
   sort_type: "song_name",
   filters: {}
@@ -164,6 +170,179 @@ describe('band_song', function() {
       svc.delete.params.should.eql([[
         './band_song?band_song_id=5',
         'function'
+      ]]);
+      done();
+    });
+
+    it('should call the update API for song_status', function(done) {
+      var list_form = new app_form.List.BandSong(song_model, true);
+      list_form.render(test_div);
+
+      should.exist(test_div.firstChild);
+      var table = test_div.firstChild;
+      var rows = table.querySelectorAll('tr');
+      var status_select = rows[1].querySelector('[name="song_status"]');
+      should.exist(status_select);
+
+      var svc = service.getInstance();
+      status_select.value = 4;
+      status_select.dispatchEvent(new CustomEvent('change', {bubbles: true}));
+      svc.put.calls.should.eql(1);
+      svc.put.params.should.eql([[
+        './band_song',
+        'function',
+        {
+          band_song_id: 5,
+          song_status: 4
+        }
+      ]]);
+
+      done();
+    });
+
+    it('should call the update API for song_rating', function(done) {
+      var list_form = new app_form.List.BandSong(song_model, true);
+      list_form.render(test_div);
+
+      should.exist(test_div.firstChild);
+      var table = test_div.firstChild;
+      var rows = table.querySelectorAll('tr');
+      var status_select = rows[1].querySelector('[name="song_rating"]');
+      should.exist(status_select);
+
+      var svc = service.getInstance();
+      status_select.value = 4;
+      status_select.dispatchEvent(new CustomEvent('change', {bubbles: true}));
+      svc.put.calls.should.eql(1);
+      svc.put.params.should.eql([[
+        './song_rating',
+        'function',
+        {
+          band_song_id: 5,
+          rating: 4
+        }
+      ]]);
+
+      done();
+    });
+  });
+
+  describe('#add', function() {
+    it('should render the add form', function(done) {
+      var add_form = new app_form.Editor.Creator.BandSongAdd(song_model, true);
+      add_form.render(test_div);
+
+      should.exist(test_div.firstChild);
+      test_div.children.length.should.eql(1);
+
+      var form = test_div.querySelector('form');
+      should.exist(form);
+      var fields = form.children;
+      should.exist(fields);
+      fields.length.should.eql(3);
+
+      // Band ID
+      fields[0].tagName.should.eql('INPUT');
+      fields[0].attributes.getNamedItem('type').value.should.eql('hidden');
+      fields[0].attributes.getNamedItem('name').value.should.eql('band_id');
+      fields[0].value.should.eql('1');
+
+      // Song ID
+      fields[1].tagName.should.eql('SELECT');
+      check_select(fields[1], 7, 'song_id', [{
+        value: '7', label: 'Help by The Beatles'
+      }, {
+        value: '9', label: 'Whole Lotta Rosie by AC/DC'
+      }], []);
+
+      // Submit Button
+      fields[2].tagName.should.eql('INPUT');
+      fields[2].attributes.getNamedItem('type').value.should.eql('submit');
+      fields[2].value.should.eql('Add');
+      done();
+    });
+
+    it('should call the add API', function(done) {
+      var add_form = new app_form.Editor.Creator.BandSongAdd(song_model, true);
+      add_form.render(test_div);
+
+      var svc = service.getInstance();
+      var form = test_div.querySelector('form');
+      var fields = form.children;
+      fields[2].dispatchEvent(new Event('click'));
+
+      svc.set.calls.should.eql(1);
+      svc.set.params.length.should.eql(1);
+      svc.set.params.should.eql([[
+        './band_song',
+        'function',
+        {
+          band_id: 1,
+          song_id: 7
+        }
+      ]]);
+      done();
+    });
+  });
+
+  describe('#new', function() {
+    it('should render the new song form', function(done) {
+      var add_form = new app_form.Editor.Creator.BandSongNew(song_model, true);
+      add_form.render(test_div);
+
+      should.exist(test_div.firstChild);
+      test_div.children.length.should.eql(1);
+
+      var form = test_div.querySelector('form');
+      should.exist(form);
+      var fields = form.children;
+      should.exist(fields);
+      fields.length.should.eql(3);
+
+      // New Song Name
+      fields[0].tagName.should.eql('INPUT');
+      fields[0].attributes.getNamedItem('type').value.should.eql('text');
+      fields[0].attributes.getNamedItem('name').value.should.eql('song_name');
+      fields[0].attributes.getNamedItem('placeholder').value.should.eql('New Song Name');
+      fields[0].value.should.eql('');
+
+      // New Artist Id
+      fields[1].tagName.should.eql('SELECT');
+      check_select(fields[1], 1, 'artist_id', [{
+        value: '1', label: 'AC/DC'
+      }, {
+        value: '2', label: 'Jethro Tull'
+      }, {
+        value: '3', label: 'The Beatles'
+      }], []);
+
+      // Submit Button
+      fields[2].tagName.should.eql('INPUT');
+      fields[2].attributes.getNamedItem('type').value.should.eql('submit');
+      fields[2].value.should.eql('New');
+      done();
+    });
+
+    it('should call the new API', function(done) {
+      var add_form = new app_form.Editor.Creator.BandSongNew(song_model, true);
+      add_form.render(test_div);
+
+      var svc = service.getInstance();
+      var form = test_div.querySelector('form');
+      var fields = form.children;
+      fields[0].value = 'I Wanna Hold Your Hand';
+      fields[1].value = 3;
+      fields[2].dispatchEvent(new Event('click'));
+
+      svc.set.calls.should.eql(1);
+      svc.set.params.length.should.eql(1);
+      svc.set.params.should.eql([[
+        './song',
+        'function',
+        {
+          name: 'I Wanna Hold Your Hand',
+          artist_id: 3
+        }
       ]]);
       done();
     });
