@@ -13,7 +13,6 @@ ToDo:
 - Original key signature on songs.
 - Ability to attach links to video/audio on songs.
 - Form-level redraw.
-- Client-side tests.
 - There needs to be a way for members who are not band admins to propose song choices to the band admin.
 - Adding members to a band needs to be a two-step process.  Both the band admin and new member need to be
   involved.
