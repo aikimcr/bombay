@@ -46,9 +46,16 @@ function check_select(select, value, exp_name, exp_options, expected_classlist) 
   option_list.length.should.eql(exp_options.length);
   var got_options = [];
   for(var i = 0; i < option_list.length; i++) {
-    window.console.log(i);
     var got = {value: option_list[i].value, label: option_list[i].innerHTML};
     got.should.eql(exp_options[i]);
   }
   check_classlist(select.classList, expected_classlist);
+};
+
+function fireChange(target) {
+  target.dispatchEvent(new CustomEvent('change', {bubbles: true}));
+};
+
+function fireClick(target) {
+  target.dispatchEvent(new CustomEvent('click', {bubbles: true}));
 };

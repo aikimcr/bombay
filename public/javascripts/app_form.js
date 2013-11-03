@@ -31,6 +31,10 @@ app_form.prototype.addEventListener = function(type, callback) {
   this.element_.addEventListener(type, callback);
 };
 
+app_form.prototype.removeEventListener = function(type, callback) {
+  this.element_.removeEventListener(type, callback);
+};
+
 app_form.prototype.getElement = function() {
   return this.element_;
 };
@@ -67,6 +71,8 @@ app_form.Filters.prototype.renderDocument = function() {
 
   this.element_.addEventListener('change', function(e) {
     this.element_.dispatchEvent(new CustomEvent('app_filter_change'));
+    e.stopPropagation();
+    return false;
   }.bind(this));
 
 };
@@ -76,6 +82,21 @@ app_form.Filters.prototype.getFilterFields_ = function() {
     sort_type: this.getElement().querySelector('.sort > :not(label)'),
     filters: this.getElement().querySelectorAll('.filter > :not(label')
   };
+};
+
+app_form.Filters.prototype.setFilterField = function(name, value) {
+  var filter_fields = this.getFilterFields_();
+
+  if (name === 'sort_type') {
+    filter_fields.sort_type.value = value;
+  } else {
+    for(var i = 0; i < filter_fields.filters.length; i++) {
+      var filter = filter_fields.filters[i];
+      if (filter.attributes.getNamedItem('name').value === name) {
+        filter.value = value;
+      }
+    }
+  }
 };
 
 app_form.Filters.prototype.getFilterValues = function() {
@@ -111,9 +132,12 @@ app_form.Filters.prototype.getFilterValues = function() {
 app_form.Filters.prototype.getFilterQuery = function() {
   var filters = this.getFilterValues();
   var result = [
-    'sort_type=' + filters['sort_type'],
-    'filters=' + JSON.stringify(filters['filters'])
+    'sort_type=' + filters.sort_type,
   ];
+
+  if (Object.keys(filters.filters).length > 0) {
+    result.push('filters=' + JSON.stringify(filters.filters));
+  }
 
   return result.join('&');
 };

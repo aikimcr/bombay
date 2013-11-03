@@ -43,34 +43,38 @@ var song_model = {
 };
 
 describe('band_song', function() {
-  var test_div;
-
-  beforeEach(function(done) {
-    test_div = document.createElement('div');
-    document.body.appendChild(test_div);
-    service.getInstance();
-    done();
-  });
-
-  afterEach(function(done) {
-    document.body.removeChild(test_div);
-    test_div = null;
-    service.getInstance().resetCalls();
-    done();
-  });
-
   describe('#list', function() {
+    var test_div;
+    var svc;
+    var list_form;
+    var table;
+    var rows;
+
+    before(function(done) {
+      test_div = document.createElement('div');
+      document.body.appendChild(test_div);
+      svc = service.getInstance();
+      done();
+    });
+
+    after(function(done) {
+      document.body.removeChild(test_div);
+      test_div = null;
+      service.getInstance().resetCalls();
+      done();
+    });
+
     it('should render the band_song list form', function(done) {
-      var list_form = new app_form.List.BandSong(song_model, true);
+      list_form = new app_form.List.BandSong(song_model, true);
       list_form.render(test_div);
 
       should.exist(test_div.firstChild);
       test_div.children.length.should.eql(1);
 
       // Should be a table.
-      var table = test_div.firstChild;
+      table = test_div.firstChild;
       table.tagName.should.eql('TABLE');
-      var rows = table.querySelectorAll('tr');
+      rows = table.querySelectorAll('tr');
       rows.length.should.eql(3);
 
       // Check the header row.
@@ -137,14 +141,8 @@ describe('band_song', function() {
     });
 
     it('should call the delete API', function(done) {
-      var list_form = new app_form.List.BandSong(song_model, true);
-      list_form.render(test_div);
-
-      should.exist(test_div.firstChild);
-      var table = test_div.firstChild;
-      var rows = table.querySelectorAll('tr');
       var delete_cell = rows[1].querySelector('.delete');
-      delete_cell.dispatchEvent(new Event('click'));
+      fireClick(delete_cell);
 
       var dialog_box = document.querySelector('.dialog_box');
       should.exist(dialog_box);
@@ -156,16 +154,16 @@ describe('band_song', function() {
       dialog_buttons.children[0].attributes.getNamedItem('name').value.should.eql('okay');
       dialog_buttons.children[1].attributes.getNamedItem('name').value.should.eql('cancel');
 
-      var svc = service.getInstance();
-      dialog_buttons.children[1].dispatchEvent(new Event('click'));
+      svc.resetCalls();
+      fireClick(dialog_buttons.children[1]);
       svc.delete.calls.should.eql(0);
       svc.delete.params.should.eql([]);
-      svc.resetCalls();
 
-      delete_cell.dispatchEvent(new Event('click'));
+      svc.resetCalls();
+      fireClick(delete_cell);
       dialog_box = document.querySelector('.dialog_box');
       dialog_buttons = dialog_box.querySelector('.dialog_buttons');
-      dialog_buttons.children[0].dispatchEvent(new Event('click'));
+      fireClick(dialog_buttons.children[0]);
       svc.delete.calls.should.eql(1);
       svc.delete.params.should.eql([[
         './band_song?band_song_id=5',
@@ -175,18 +173,12 @@ describe('band_song', function() {
     });
 
     it('should call the update API for song_status', function(done) {
-      var list_form = new app_form.List.BandSong(song_model, true);
-      list_form.render(test_div);
-
-      should.exist(test_div.firstChild);
-      var table = test_div.firstChild;
-      var rows = table.querySelectorAll('tr');
       var status_select = rows[1].querySelector('[name="song_status"]');
       should.exist(status_select);
 
-      var svc = service.getInstance();
+      svc.resetCalls();
       status_select.value = 4;
-      status_select.dispatchEvent(new CustomEvent('change', {bubbles: true}));
+      fireChange(status_select);
       svc.put.calls.should.eql(1);
       svc.put.params.should.eql([[
         './band_song',
@@ -201,18 +193,12 @@ describe('band_song', function() {
     });
 
     it('should call the update API for song_rating', function(done) {
-      var list_form = new app_form.List.BandSong(song_model, true);
-      list_form.render(test_div);
-
-      should.exist(test_div.firstChild);
-      var table = test_div.firstChild;
-      var rows = table.querySelectorAll('tr');
       var status_select = rows[1].querySelector('[name="song_rating"]');
       should.exist(status_select);
 
-      var svc = service.getInstance();
+      svc.resetCalls();
       status_select.value = 4;
-      status_select.dispatchEvent(new CustomEvent('change', {bubbles: true}));
+      fireChange(status_select);
       svc.put.calls.should.eql(1);
       svc.put.params.should.eql([[
         './song_rating',
@@ -228,16 +214,36 @@ describe('band_song', function() {
   });
 
   describe('#add', function() {
+    var test_div;
+    var svc;
+    var add_form;
+    var form;
+    var fields;
+
+    before(function(done) {
+      test_div = document.createElement('div');
+      document.body.appendChild(test_div);
+      svc = service.getInstance();
+      done();
+    });
+
+    after(function(done) {
+      document.body.removeChild(test_div);
+      test_div = null;
+      service.getInstance().resetCalls();
+      done();
+    });
+
     it('should render the add form', function(done) {
-      var add_form = new app_form.Editor.Creator.BandSongAdd(song_model, true);
+      add_form = new app_form.Editor.Creator.BandSongAdd(song_model, true);
       add_form.render(test_div);
 
       should.exist(test_div.firstChild);
       test_div.children.length.should.eql(1);
 
-      var form = test_div.querySelector('form');
+      form = test_div.querySelector('form');
       should.exist(form);
-      var fields = form.children;
+      fields = form.children;
       should.exist(fields);
       fields.length.should.eql(3);
 
@@ -263,13 +269,8 @@ describe('band_song', function() {
     });
 
     it('should call the add API', function(done) {
-      var add_form = new app_form.Editor.Creator.BandSongAdd(song_model, true);
-      add_form.render(test_div);
-
-      var svc = service.getInstance();
-      var form = test_div.querySelector('form');
-      var fields = form.children;
-      fields[2].dispatchEvent(new Event('click'));
+      svc.resetCalls();
+      fireClick(fields[2]);
 
       svc.set.calls.should.eql(1);
       svc.set.params.length.should.eql(1);
@@ -286,16 +287,36 @@ describe('band_song', function() {
   });
 
   describe('#new', function() {
+    var test_div;
+    var svc;
+    var new_form;
+    var form;
+    var fields;
+
+    before(function(done) {
+      test_div = document.createElement('div');
+      document.body.appendChild(test_div);
+      svc = service.getInstance();
+      done();
+    });
+
+    after(function(done) {
+      document.body.removeChild(test_div);
+      test_div = null;
+      service.getInstance().resetCalls();
+      done();
+    });
+
     it('should render the new song form', function(done) {
-      var add_form = new app_form.Editor.Creator.BandSongNew(song_model, true);
-      add_form.render(test_div);
+      new_form = new app_form.Editor.Creator.BandSongNew(song_model, true);
+      new_form.render(test_div);
 
       should.exist(test_div.firstChild);
       test_div.children.length.should.eql(1);
 
-      var form = test_div.querySelector('form');
+      form = test_div.querySelector('form');
       should.exist(form);
-      var fields = form.children;
+      fields = form.children;
       should.exist(fields);
       fields.length.should.eql(3);
 
@@ -324,15 +345,10 @@ describe('band_song', function() {
     });
 
     it('should call the new API', function(done) {
-      var add_form = new app_form.Editor.Creator.BandSongNew(song_model, true);
-      add_form.render(test_div);
-
-      var svc = service.getInstance();
-      var form = test_div.querySelector('form');
-      var fields = form.children;
+      svc.resetCalls();
       fields[0].value = 'I Wanna Hold Your Hand';
       fields[1].value = 3;
-      fields[2].dispatchEvent(new Event('click'));
+      fireClick(fields[2]);
 
       svc.set.calls.should.eql(1);
       svc.set.params.length.should.eql(1);
@@ -345,6 +361,205 @@ describe('band_song', function() {
         }
       ]]);
       done();
+    });
+  });
+
+  describe('#filters', function() {
+    var test_div;
+    var svc;
+    var filter_form;
+    var top_div;
+
+    before(function(done) {
+      test_div = document.createElement('div');
+      document.body.appendChild(test_div);
+      svc = service.getInstance();
+      done();
+    });
+
+    after(function(done) {
+      document.body.removeChild(test_div);
+      test_div = null;
+      service.getInstance().resetCalls();
+      done();
+    });
+
+    it('should render the filters', function(done) {
+      filter_form = new app_form.Filters.BandSong(song_model, true);
+      filter_form.render(test_div);
+
+      should.exist(test_div.firstChild);
+      test_div.children.length.should.eql(1);
+
+      top_div = test_div.firstChild;
+      top_div.tagName.should.eql('DIV');
+      done();
+    });
+
+    describe('sort select', function() {
+      var sort_div;
+      var sort_select;
+      var listener;
+
+      after(function(done) {
+        filter_form.removeEventListener('app_filter_change', listener);
+        done();
+      });
+
+      it('should have rendered the sort selector', function(done) {
+        sort_div = top_div.querySelector('div.sort');
+        should.exist(sort_div);
+        sort_select = sort_div.querySelector('select');
+        check_select(sort_select, 'song_name', 'sort_type', [{
+          value: 'song_name', label: 'Song Name (A-Z)'
+        }, {
+          value: 'song_name_rev', label: 'Song Name (Z-A)'
+        }, {
+          value: 'artist_name', label: 'Artist Name (A-Z)'
+        }, {
+          value: 'artist_name_rev', label: 'Artist Name (Z-A)'
+        }, {
+          value: 'average_rating', label: 'Average Rating (Low-High)'
+        }, {
+          value: 'average_rating_rev', label: 'Average Rating (High-Low)'
+        }], []);
+        var sort_label = sort_div.querySelector('label[for="sort_type"]');
+        should.exist(sort_label);
+        sort_label.innerHTML.should.eql('Sort');
+        done();
+      });
+
+      it('should should fire the app_filter_change', function(done) {
+        listener = function(e) {
+          e.type.should.eql('app_filter_change');
+          done();
+        };
+
+        filter_form.addEventListener('app_filter_change', listener);
+        sort_select.value = 'artist_name';
+        fireChange(sort_select);
+      });
+    });
+
+    describe('filter_divs', function() {
+      var filter_divs;
+      var song_name_filter;
+      var artist_id_filter;
+      var listener;
+      var finish_listen;
+
+      before(function(done) {
+        listener = function(e) {
+          e.type.should.eql('app_filter_change');
+          finish_listen();
+        };
+
+        filter_form.addEventListener('app_filter_change', listener);
+        done();
+      });
+
+      after(function(done) {
+        filter_form.removeEventListener('app_filter_change', listener);
+        done();
+      });
+
+      it('should have rendered the filters', function(done) {
+        filter_divs = top_div.querySelectorAll('div.filter');
+        should.exist(filter_divs);
+        filter_divs.length.should.eql(2);
+        done();
+      });
+
+      it('should have rendered the song name filter', function(done) {
+        song_name_filter = filter_divs[0].querySelector('input[name="song_name"]');
+        should.exist(song_name_filter);
+        song_name_filter.value.should.eql('');
+        var song_name_label = filter_divs[0].querySelector('label[for="song_name"]');
+        should.exist(song_name_label);
+        song_name_label.innerHTML.should.eql('By Name');
+        done();
+      });
+
+      it('should fire the app_filter_change', function(done) {
+        finish_listen = function() { done(); };
+        song_name_filter.value = 'Thick';
+        fireChange(song_name_filter);
+      });
+
+      it('should have rendered the artist id filter', function(done) {
+        artist_id_filter = filter_divs[1].querySelector('select[name="artist_id"]');
+        should.exist(artist_id_filter);
+        check_select(artist_id_filter, 1, 'artist_id', [{
+          value: '-1', label: '--All Artists--'
+        }, {
+          value: '1', label: 'AC/DC'
+        }, {
+          value: '2', label: 'Jethro Tull'
+        }, {
+          value: '3', label: 'The Beatles'
+        }], []);
+        var artist_id_label = filter_divs[1].querySelector('label[for="artist_id"]');
+        should.exist(artist_id_label);
+        artist_id_label.innerHTML.should.eql('For Artist');
+        done();
+      });
+
+      it('should fire the app_filter_change', function(done) {
+        finish_listen = function() { done(); };
+        song_name_filter.value = 1;
+        fireChange(artist_id_filter);
+      });
+    });
+
+    describe('get and set filter values', function() {
+      it('should get the sort and filter values all set', function(done) {
+        filter_form.setFilterField('sort_type', 'artist_name');
+        filter_form.setFilterField('song_name', 'Thick');
+        filter_form.setFilterField('artist_id', 1);
+        var filter_values = filter_form.getFilterValues();
+        should.exist(filter_values);
+        filter_values.should.eql({
+          sort_type: 'artist_name',
+          filters: {
+            song_name: 'Thick',
+            artist_id: 1
+          }
+        });
+        done();
+      });
+
+      it('should get the filter query all set', function(done) {
+        filter_form.setFilterField('sort_type', 'artist_name');
+        filter_form.setFilterField('song_name', 'Thick');
+        filter_form.setFilterField('artist_id', 1);
+        var filter_query = filter_form.getFilterQuery();
+        should.exist(filter_query);
+        filter_query.should.eql('sort_type=artist_name&filters={"song_name":"Thick","artist_id":1}');
+        done();
+      });
+
+      it('should get the sort and filter values only sort', function(done) {
+        filter_form.setFilterField('sort_type', 'artist_name_rev');
+        filter_form.setFilterField('song_name', '');
+        filter_form.setFilterField('artist_id', -1);
+        var filter_values = filter_form.getFilterValues();
+        should.exist(filter_values);
+        filter_values.should.eql({
+          sort_type: 'artist_name_rev',
+          filters: {}
+        });
+        done();
+      });
+
+      it('should get the filter query only sort', function(done) {
+        filter_form.setFilterField('sort_type', 'artist_name_rev');
+        filter_form.setFilterField('song_name', '');
+        filter_form.setFilterField('artist_id', -1);
+        var filter_query = filter_form.getFilterQuery();
+        should.exist(filter_query);
+        filter_query.should.eql('sort_type=artist_name_rev');
+        done();
+      });
     });
   });
 });
