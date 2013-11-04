@@ -1,6 +1,7 @@
 function app_form(model, editor) {
   this.model_ = model;
   this.editor_ = editor;
+  this.listeners_ = {};
 };
 
 app_form.prototype.render = function(parent) {
@@ -24,15 +25,32 @@ app_form.prototype.draw_ = function() {
 
 app_form.prototype.redraw = function(new_model) {
   this.model_ = new_model;
+  util.removeAllChildren(this.parent_);
   this.draw_();
 };
 
-app_form.prototype.addEventListener = function(type, callback) {
-  this.element_.addEventListener(type, callback);
+app_form.prototype.listen = function(type, callback) {
+  if (!(type in this.listeners_)) {
+    this.listeners_[type] = [];
+  }
+  this.listeners_[type].push(callback);
 };
 
-app_form.prototype.removeEventListener = function(type, callback) {
+app_form.prototype.unListen = function(type, callback) {
+  if (type in this.listeners_) {
+    var result = [];
+    this.listeners_[type].forEach(function(l) {
+      if (l != callback) {
+        result.push(l);
+      }
+    });
+    this.listeners_[type] = result;
+  }
   this.element_.removeEventListener(type, callback);
+};
+
+app_form.prototype.unListenAll = function(type) {
+  this.listeners_[type] = [];
 };
 
 app_form.prototype.getElement = function() {
@@ -43,8 +61,19 @@ app_form.prototype.getModel = function() {
   return this.model_;
 };
 
+app_form.prototype.fireEvent_ = function(type) {
+  var e = new CustomEvent(type, {bubbles: false});
+  var listeners = this.listeners_[type];
+
+  if (listeners) {
+    listeners.forEach(function(l) {
+      l(e);
+    });
+  }
+};
+
 app_form.prototype.fireChange = function() {
-  this.element_.dispatchEvent(new CustomEvent('app_form_change'));
+  this.fireEvent_('app_form_change');
 };
 
 app_form.Filters = function(model, editor) {
@@ -70,11 +99,15 @@ app_form.Filters.prototype.renderDocument = function() {
   }
 
   this.element_.addEventListener('change', function(e) {
-    this.element_.dispatchEvent(new CustomEvent('app_filter_change'));
+    this.fireFilterChange();
     e.stopPropagation();
     return false;
   }.bind(this));
 
+};
+
+app_form.Filters.prototype.fireFilterChange = function() {
+  this.fireEvent_('app_filter_change');
 };
 
 app_form.Filters.prototype.getFilterFields_ = function() {
@@ -170,6 +203,7 @@ app_form.List.prototype.handleDelete = function(e) {
   window.console.log("Do the delete?" + e);
 
   var row = e.target.parentElement;
+  if (row.tagName.toUpperCase() != 'TR') { row = row.parentElement }
   var identity = row.attributes.item(this.identity_name_).value;
   var object = this.getRowForIdentity(identity);
 
@@ -358,8 +392,18 @@ util.inherits(app_form.Editor, app_form);
 
 app_form.Editor.prototype.renderDocument = function() {
   app_form.prototype.renderDocument.call(this);
+};
+
+app_form.Editor.prototype.draw_ = function() {
+  app_form.prototype.draw_.call(this);
   this.element_.addEventListener('submit', this.handleSubmit.bind(this));
   this.element_.addEventListener('change', this.handleChange.bind(this));
+};
+
+app_form.Editor.prototype.redraw = function(new_model) {
+  this.element_.removeEventListener('submit', this.handleSubmit.bind(this));
+  this.element_.removeEventListener('change', this.handleChange.bind(this));
+  app_form.prototype.redraw.call(this, new_model);
 };
 
 app_form.Editor.prototype.getFormData = function(form) {

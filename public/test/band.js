@@ -57,7 +57,10 @@ describe('band', function() {
       should.exist(band);
       band.attributes.getNamedItem('band_id').value.should.eql('2');
       check_cell(band.children[0], 'TD', 'Phineas And Pherb', 0, []);
-      check_cell(band.children[1], 'TD', '\u2327', 1, ['delete']);
+      var delete_cell = check_cell(band.children[1], 'TD', '<HTML>', 1, ['delete']);
+      var delete_button = delete_cell.querySelector('input[type="button"][name="delete"]');
+      should.exist(delete_button);
+      delete_button.value.should.eql('-');
 
       done();
     });

@@ -137,6 +137,11 @@ body
       display: inline-block
       padding: 1px
 
+.edit_button
+  display: inline-block
+  background-color: base-color
+  color: text-color
+
 //
 .container > input[id*="editor"]:checked ~ div.editor
   display: block
@@ -274,8 +279,8 @@ body
 
   .dialog_box
     width: 300px;
-    height: 300px;
-    top: (container-height / 2) - @height
+    height: 150px;
+    top: (@height / 2) + 25
     left: (container-width / 2) - (@width / 2)
     position: absolute
     background-color: dialog-background-color
@@ -286,7 +291,7 @@ body
 
     .dialog_message
        width: 260px
-       height: 220px
+       height: 70px
        background-color: dialog-message-background-color
        color: dialog-message-color
        border-radius: 10px
@@ -311,3 +316,42 @@ body
        .dialog_button:first-child
           margin-left: 10px
           margin-right: 40px
+
+.dialog
+  width: 600px;
+  height: 150px;
+  top: (@height / 2) + 25
+  left: (container-width / 2) - (@width / 2)
+  position: absolute
+  background-color: dialog-background-color
+  border-style: solid
+  border-color: main-border-color
+  border-radius: 10px
+  padding: 20px
+
+  .title_bar
+    background-color: dialog-message-background-color
+    color: dialog-message-color
+    display: block
+    height: 20px
+    border-style: solid
+    border-color: main-border-color
+    border-radius: 5px
+    padding: 10px
+
+    .title
+      display: inline-block
+
+    .close_button
+      display: inline-block
+      border-style: solid
+      border-color: main-border-color
+      position: absolute
+      right: 30px
+
+  .dialog_body
+    border-style: solid
+    border-color: main-border-color
+    border-radius: 5px
+    padding: 10px
+    margin-top: 5px

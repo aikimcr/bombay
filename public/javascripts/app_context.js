@@ -117,7 +117,7 @@ app_context.Person.prototype.handleAPIReturn = function(data) {
   var edit_div = document.querySelector('#' + this.tab_id + ' .edit_form');
   this.edit_form = new app_form.Editor.Updater.PersonEdit(this.model, true);
   this.edit_form.render(edit_div);
-  this.edit_form.addEventListener('app_form_change', this.handleAfterChange.bind(this));
+  this.edit_form.listen('app_form_change', this.handleAfterChange.bind(this));
 };
 
 // Member Band App Object
@@ -132,26 +132,38 @@ app_context.MemberBand = function() {
 app_context.MemberBand.prototype = new app_context.Base();
 
 app_context.MemberBand.prototype.getContextArgs = function() {
-  return {sections: {multiedit: 1, display: 1}, tab_id: this.tab_id};
+  return {sections: {display: 1}, tab_id: this.tab_id};
 };
 
 app_context.MemberBand.prototype.handleAPIReturn = function(data) {
   app_context.Base.prototype.handleAPIReturn.call(this, data);
 
+  var new_button = this.context_item.querySelector('[name="add"]');
+  new_button.addEventListener('click', function(e) {
+    var dlg = form_dialog.getDialog(
+      'Join A Band',
+      new app_form.Editor.Creator.BandJoin(this.model, true),
+      function(e) { this.redraw() }.bind(this)
+    );
+    dlg.show();
+  }.bind(this));
+
+/*
   var add_div = document.querySelector('#' + this.tab_id + ' .editor .add');
   this.add_form = new app_form.Editor.Creator.BandJoin(this.model, true);
   this.add_form.render(add_div);
-  this.add_form.addEventListener('app_form_change', this.handleAfterChange.bind(this));
+  this.add_form.listen('app_form_change', this.handleAfterChange.bind(this));
 
   var create_div = document.querySelector('#' + this.tab_id + ' .editor .new');
   this.create_form = new app_form.Editor.Creator.BandCreator(this.model, true);
   this.create_form.render(create_div);
-  this.create_form.addEventListener('app_form_change', this.handleAfterChange.bind(this));
+  this.create_form.listen('app_form_change', this.handleAfterChange.bind(this));
+*/
 
   var list_div = document.querySelector('#' + this.tab_id + ' .display .list');
   this.list_form = new app_form.List.Band(this.model, true);
   this.list_form.render(list_div);
-  this.list_form.addEventListener('app_form_change', this.handleAfterChange.bind(this));
+  this.list_form.listen('app_form_change', this.handleAfterChange.bind(this));
 
   app_context.setBandSelector(this.model.person_bands);
 };
@@ -185,18 +197,18 @@ app_context.BandMember.prototype.handleAPIReturn = function(data) {
     var add_div = document.querySelector('#' + this.tab_id + ' .editor .add');
     this.add_form = new app_form.Editor.Creator.BandMemberAdd(this.model, this.model.band_admin);
     this.add_form.render(add_div);
-    this.add_form.addEventListener('app_form_change', this.handleAfterChange.bind(this));
+    this.add_form.listen('app_form_change', this.handleAfterChange.bind(this));
 
     var create_div = document.querySelector('#' + this.tab_id + ' .editor .new');
     this.create_form = new app_form.Editor.Creator.BandMemberNew(this.model, this.model.band_admin);
     this.create_form.render(create_div);
-    this.create_form.addEventListener('app_form_change', this.handleAfterChange.bind(this));
+    this.create_form.listen('app_form_change', this.handleAfterChange.bind(this));
   }
 
   var list_div = document.querySelector('#' + this.tab_id + ' .display .list');
   this.list_form = new app_form.List.BandMember(this.model, this.model.band_admin);
   this.list_form.render(list_div);
-  this.list_form.addEventListener('app_form_change', this.handleAfterChange.bind(this));
+  this.list_form.listen('app_form_change', this.handleAfterChange.bind(this));
 };
 
 app_context.BandMember.prototype.otherChangeTabs = function() {
@@ -232,13 +244,13 @@ app_context.Artist.prototype.handleAPIReturn = function(data) {
     var create_div = document.querySelector('#' + this.tab_id + ' .creator .new');
     this.create_form = new app_form.Editor.Creator.ArtistNew(this.model, this.model.band_admin);
     this.create_form.render(create_div);
-    this.create_form.addEventListener('app_form_change', this.handleAfterChange.bind(this));
+    this.create_form.listen('app_form_change', this.handleAfterChange.bind(this));
   }
 
   var list_div = document.querySelector('#' + this.tab_id + ' .display .list');
   this.list_form = new app_form.List.Artist(this.model, this.model.band_admin);
   this.list_form.render(list_div);
-  this.list_form.addEventListener('app_form_change', this.handleAfterChange.bind(this));
+  this.list_form.listen('app_form_change', this.handleAfterChange.bind(this));
 };
 
 app_context.Artist.prototype.otherChangeTabs = function() {
@@ -278,21 +290,21 @@ app_context.BandSong.prototype.handleAPIReturn = function(data) {
     var add_div = document.querySelector('#' + this.tab_id + ' .editor .add');
     this.add_form = new app_form.Editor.Creator.BandSongAdd(this.model, this.model.band_admin);
     this.add_form.render(add_div);
-    this.add_form.addEventListener('app_form_change', this.handleAfterChange.bind(this));
+    this.add_form.listen('app_form_change', this.handleAfterChange.bind(this));
 
     var new_div = document.querySelector('#' + this.tab_id + ' .editor .new');
     this.new_form = new app_form.Editor.Creator.BandSongNew(this.model, this.model.band_admin);
     this.new_form.render(new_div);
-    this.new_form.addEventListener('app_form_change', this.handleAfterChange.bind(this));
+    this.new_form.listen('app_form_change', this.handleAfterChange.bind(this));
   }
 
   var filter_div = document.querySelector('#' + this.tab_id + ' .display .filters');
   this.filter_form = new app_form.Filters.BandSong(this.model, false);
   this.filter_form.render(filter_div);
-  this.filter_form.addEventListener('app_filter_change', this.handleAfterChange.bind(this));
+  this.filter_form.listen('app_filter_change', this.handleAfterChange.bind(this));
 
   var list_div = document.querySelector('#' + this.tab_id + ' .display .list');
   this.list_form = new app_form.List.BandSong(this.model, this.model.band_admin);
   this.list_form.render(list_div);
-  this.list_form.addEventListener('app_form_change', this.handleAfterChange.bind(this));
+  this.list_form.listen('app_form_change', this.handleAfterChange.bind(this));
 };

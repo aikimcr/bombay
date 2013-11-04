@@ -122,6 +122,11 @@ body {
   display: inline-block;
   padding: 1px;
 }
+.edit_button {
+  display: inline-block;
+  background-color: #000;
+  color: #fff;
+}
 .container > input[id*="editor"]:checked ~ div.editor {
   display: block;
 }
@@ -258,8 +263,8 @@ body {
 }
 .dialog_background .dialog_box {
   width: 300px;
-  height: 300px;
-  top: 50px;
+  height: 150px;
+  top: 100px;
   left: 350px;
   position: absolute;
   background-color: #b8dfda;
@@ -270,7 +275,7 @@ body {
 }
 .dialog_background .dialog_box .dialog_message {
   width: 260px;
-  height: 220px;
+  height: 70px;
   background-color: #1f4641;
   color: #dceeec;
   border-radius: 10px;
@@ -295,4 +300,43 @@ body {
 .dialog_background .dialog_box .dialog_buttons .dialog_button:first-child {
   margin-left: 10px;
   margin-right: 40px;
+}
+.dialog {
+  width: 600px;
+  height: 150px;
+  top: 100px;
+  left: 200px;
+  position: absolute;
+  background-color: #b8dfda;
+  border-style: solid;
+  border-color: #3f8c83;
+  border-radius: 10px;
+  padding: 20px;
+}
+.dialog .title_bar {
+  background-color: #1f4641;
+  color: #dceeec;
+  display: block;
+  height: 20px;
+  border-style: solid;
+  border-color: #3f8c83;
+  border-radius: 5px;
+  padding: 10px;
+}
+.dialog .title_bar .title {
+  display: inline-block;
+}
+.dialog .title_bar .close_button {
+  display: inline-block;
+  border-style: solid;
+  border-color: #3f8c83;
+  position: absolute;
+  right: 30px;
+}
+.dialog .dialog_body {
+  border-style: solid;
+  border-color: #3f8c83;
+  border-radius: 5px;
+  padding: 10px;
+  margin-top: 5px;
 }

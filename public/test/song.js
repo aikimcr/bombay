@@ -401,11 +401,6 @@ describe('band_song', function() {
       var sort_select;
       var listener;
 
-      after(function(done) {
-        filter_form.removeEventListener('app_filter_change', listener);
-        done();
-      });
-
       it('should have rendered the sort selector', function(done) {
         sort_div = top_div.querySelector('div.sort');
         should.exist(sort_div);
@@ -435,9 +430,15 @@ describe('band_song', function() {
           done();
         };
 
-        filter_form.addEventListener('app_filter_change', listener);
+        filter_form.listen('app_filter_change', listener);
         sort_select.value = 'artist_name';
         fireChange(sort_select);
+      });
+
+      it('should remove the listener', function(done) {
+        filter_form.unListen('app_filter_change', listener);
+        filter_form.listeners_['app_filter_change'].length.should.eql(0);
+        done();
       });
     });
 
@@ -447,19 +448,17 @@ describe('band_song', function() {
       var artist_id_filter;
       var listener;
       var finish_listen;
+      var fireCount;
 
       before(function(done) {
         listener = function(e) {
           e.type.should.eql('app_filter_change');
+          fireCount++;
           finish_listen();
         };
 
-        filter_form.addEventListener('app_filter_change', listener);
-        done();
-      });
-
-      after(function(done) {
-        filter_form.removeEventListener('app_filter_change', listener);
+        filter_form.listen('app_filter_change', listener);
+        fireCount = 0;
         done();
       });
 
@@ -481,7 +480,10 @@ describe('band_song', function() {
       });
 
       it('should fire the app_filter_change', function(done) {
-        finish_listen = function() { done(); };
+        finish_listen = function() {
+          fireCount.should.eql(1);
+          done();
+        };
         song_name_filter.value = 'Thick';
         fireChange(song_name_filter);
       });
@@ -505,9 +507,25 @@ describe('band_song', function() {
       });
 
       it('should fire the app_filter_change', function(done) {
-        finish_listen = function() { done(); };
+        finish_listen = function() {
+          fireCount.should.eql(2);
+          done();
+        };
         song_name_filter.value = 1;
         fireChange(artist_id_filter);
+      });
+
+      it('should have fireCount set to 2', function(done) {
+        fireCount.should.eql(2);
+        done();
+      });
+
+      it('should remove all listeners', function(done) {
+        filter_form.listen('app_filter_change', function(e) { return true; });
+        filter_form.listeners_['app_filter_change'].length.should.eql(2);
+        filter_form.unListenAll('app_filter_change', listener);
+        filter_form.listeners_['app_filter_change'].length.should.eql(0);
+        done();
       });
     });
 
