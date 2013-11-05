@@ -173,14 +173,16 @@ app_context.BandMember.prototype.getDrawUrl = function() {
 
 app_context.BandMember.prototype.getContextArgs = function() {
   return {
-    sections: {multiedit: this.model.band_admin, display: true},
-    tab_id: this.tab_id
+    sections: {display: true},
+    tab_id: this.tab_id,
+    edit_ok: this.model.band_admin
   };
 };
 
 app_context.BandMember.prototype.handleAPIReturn = function(data) {
   app_context.Base.prototype.handleAPIReturn.call(this, data);
 
+/*
   if (this.model.band_admin) {
     var add_div = document.querySelector('#' + this.tab_id + ' .editor .add');
     this.add_form = new app_form.Editor.Creator.BandMemberAdd(this.model, this.model.band_admin);
@@ -191,6 +193,20 @@ app_context.BandMember.prototype.handleAPIReturn = function(data) {
     this.create_form = new app_form.Editor.Creator.BandMemberNew(this.model, this.model.band_admin);
     this.create_form.render(create_div);
     this.create_form.listen('app_form_change', this.handleAfterChange.bind(this));
+  }
+*/
+
+  var new_button = this.context_item.querySelector('[name="add"]');
+
+  if (new_button) {
+    new_button.addEventListener('click', function(e) {
+      var dlg = form_dialog.getDialog(
+        'Add A Band Member',
+        new app_form.Editor.Creator.BandMemberAdd(this.model, true),
+        function(e) { this.redraw() }.bind(this)
+      );
+      dlg.show();
+    }.bind(this));
   }
 
   var list_div = document.querySelector('#' + this.tab_id + ' .display .list');

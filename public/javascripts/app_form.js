@@ -588,11 +588,31 @@ util.inherits(app_form.Editor.Creator.BandMemberAdd, app_form.Editor.Creator);
 app_form.Editor.Creator.BandMemberAdd.prototype.template_name_ = 'member/editor/add';
 app_form.Editor.Creator.BandMemberAdd.prototype.edit_url_ = './band_member';
 
+app_form.Editor.Creator.BandMemberAdd.prototype.draw_ = function() {
+  app_form.Editor.Creator.prototype.draw_.call(this);
+  this.element_.addEventListener('click', this.handleCreate.bind(this));
+};
+
+app_form.Editor.Creator.BandMemberAdd.prototype.redraw = function(new_model) {
+  this.element_.removeEventListener('click', this.handleCreate.bind(this));
+  app_form.Editor.Creator.prototype.redraw.call(this, new_model);
+};
+
 app_form.Editor.Creator.BandMemberAdd.prototype.getFormData = function(form) {
   return {
     band_id: parseInt(form.querySelector('[name="band_id"]').value),
     person_id: parseInt(form.querySelector('[name="person_id"]').value)
   };
+};
+
+app_form.Editor.Creator.BandMemberAdd.prototype.handleCreate = function(e) {
+  var target = e.target;
+
+  if (target.tagName == 'INPUT' && target.name == 'create_member') {
+    var new_form = new app_form.Editor.Creator.BandMemberNew(this.model, true);
+    this.fireChange('Create A New Band Member', new_form);
+  }
+  return true;
 };
 
 app_form.Editor.Creator.ArtistNew = function(model, editor) {

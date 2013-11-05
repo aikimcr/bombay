@@ -85,14 +85,28 @@ form_dialog.prototype.keepFocus_ = function(e) {
   }
 };
 
+form_dialog.prototype.exitForm_ = function(e) {
+  var old_form = this.form_cache_.pop();
+
+  if (old_form) {
+    var old_title = this.title_cache_.pop();
+    this.title_.innerHTML = old_title;
+    this.form_.unListenAll();
+    util.removeAllChildren(this.getElement());
+    this.addForm(old_form);
+  } else {
+    this.dismiss();
+  }
+};
+
 form_dialog.prototype.handleKeys_ = function(e) {
   if (this.dialogOpen() && e.keyCode == 27) {
-    this.dismiss();
+    this.exitForm_();
   };
 };
 
 form_dialog.prototype.handleClick_ = function(e) {
-  this.dismiss();
+  this.exitForm_();
 };
 
 form_dialog.prototype.handleFormChange_ = function(e) {
@@ -104,17 +118,7 @@ form_dialog.prototype.handleFormChange_ = function(e) {
     this.addForm(e.detail.new_form);
     this.title_.innerHTML = e.detail.new_title;
   } else {
-    var old_form = this.form_cache_.pop();
-
-    if (old_form) {
-      var old_title = this.title_cache_.pop();
-      this.title_.innerHTML = old_title;
-      this.form_.unListenAll();
-      util.removeAllChildren(this.getElement());
-      this.addForm(old_form);
-    } else {
-      this.dismiss();
-    }
+    this.exitForm_();
   }
 };
 
