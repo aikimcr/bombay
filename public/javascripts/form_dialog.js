@@ -8,10 +8,10 @@ form_dialog = function(dialog_title) {
   title_bar.setAttribute('class', 'title_bar');
   this.dialog_div_.appendChild(title_bar);
 
-  var title = document.createElement('div');
-  title.setAttribute('class', 'title');
-  title.innerHTML = dialog_title;
-  title_bar.appendChild(title);
+  this.title_ = document.createElement('div');
+  this.title_.setAttribute('class', 'title');
+  this.title_.innerHTML = dialog_title;
+  title_bar.appendChild(this.title_);
 
   this.close_button_ = document.createElement('div');
   this.close_button_.setAttribute('class', 'close_button');
@@ -22,6 +22,8 @@ form_dialog = function(dialog_title) {
   this.element_.setAttribute('class', 'dialog_body');
   this.dialog_div_.appendChild(this.element_);
 
+  this.form_cache_ = [];
+  this.title_cache_ = [];
   this.dialog_open_ = false;
 };
 
@@ -94,7 +96,26 @@ form_dialog.prototype.handleClick_ = function(e) {
 };
 
 form_dialog.prototype.handleFormChange_ = function(e) {
-  this.dismiss();
+  if (e.detail.new_form) {
+    this.form_cache_.push(this.form_);
+    this.title_cache_.push(this.title_.innerHTML);
+    this.form_.unListenAll();
+    util.removeAllChildren(this.getElement());
+    this.addForm(e.detail.new_form);
+    this.title_.innerHTML = e.detail.new_title;
+  } else {
+    var old_form = this.form_cache_.pop();
+
+    if (old_form) {
+      var old_title = this.title_cache_.pop();
+      this.title_.innerHTML = old_title;
+      this.form_.unListenAll();
+      util.removeAllChildren(this.getElement());
+      this.addForm(old_form);
+    } else {
+      this.dismiss();
+    }
+  }
 };
 
 form_dialog.prototype.addEventListener = function(type, callback) {

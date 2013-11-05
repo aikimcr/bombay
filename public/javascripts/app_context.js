@@ -132,7 +132,7 @@ app_context.MemberBand = function() {
 app_context.MemberBand.prototype = new app_context.Base();
 
 app_context.MemberBand.prototype.getContextArgs = function() {
-  return {sections: {display: 1}, tab_id: this.tab_id};
+  return {sections: {display: 1}, tab_id: this.tab_id, edit_ok: true};
 };
 
 app_context.MemberBand.prototype.handleAPIReturn = function(data) {
@@ -147,18 +147,6 @@ app_context.MemberBand.prototype.handleAPIReturn = function(data) {
     );
     dlg.show();
   }.bind(this));
-
-/*
-  var add_div = document.querySelector('#' + this.tab_id + ' .editor .add');
-  this.add_form = new app_form.Editor.Creator.BandJoin(this.model, true);
-  this.add_form.render(add_div);
-  this.add_form.listen('app_form_change', this.handleAfterChange.bind(this));
-
-  var create_div = document.querySelector('#' + this.tab_id + ' .editor .new');
-  this.create_form = new app_form.Editor.Creator.BandCreator(this.model, true);
-  this.create_form.render(create_div);
-  this.create_form.listen('app_form_change', this.handleAfterChange.bind(this));
-*/
 
   var list_div = document.querySelector('#' + this.tab_id + ' .display .list');
   this.list_form = new app_form.List.Band(this.model, true);

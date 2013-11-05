@@ -334,6 +334,8 @@ body {
   right: 30px;
 }
 .dialog .dialog_body {
+  background-color: #b8dfda;
+  color: #000;
   border-style: solid;
   border-color: #3f8c83;
   border-radius: 5px;

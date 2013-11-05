@@ -27,8 +27,10 @@ div.container
       input(type="checkbox", id="show_#{tab_id}_display", checked)
       label(for="show_#{tab_id}_display") List
 
-    div.display
+    if edit_ok
       input(type="button", id="add_#{tab_id}_button", value="+", name="add")
       label(for="add_#{tab_id}_button") Add
+
+    div.display
       div.filters
       div.list

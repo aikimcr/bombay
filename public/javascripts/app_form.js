@@ -61,8 +61,8 @@ app_form.prototype.getModel = function() {
   return this.model_;
 };
 
-app_form.prototype.fireEvent_ = function(type) {
-  var e = new CustomEvent(type, {bubbles: false});
+app_form.prototype.fireEvent_ = function(type, detail) {
+  var e = new CustomEvent(type, {bubbles: false, detail: detail});
   var listeners = this.listeners_[type];
 
   if (listeners) {
@@ -72,8 +72,13 @@ app_form.prototype.fireEvent_ = function(type) {
   }
 };
 
-app_form.prototype.fireChange = function() {
-  this.fireEvent_('app_form_change');
+app_form.prototype.fireChange = function(new_title, new_form) {
+  var detail = {};
+  if (new_title && new_form) {
+    detail.new_title = new_title;
+    detail.new_form = new_form;
+  }
+  this.fireEvent_('app_form_change', detail);
 };
 
 app_form.Filters = function(model, editor) {
@@ -107,7 +112,7 @@ app_form.Filters.prototype.renderDocument = function() {
 };
 
 app_form.Filters.prototype.fireFilterChange = function() {
-  this.fireEvent_('app_filter_change');
+  this.fireEvent_('app_filter_change', {});
 };
 
 app_form.Filters.prototype.getFilterFields_ = function() {
@@ -535,11 +540,31 @@ util.inherits(app_form.Editor.Creator.BandJoin, app_form.Editor.Creator);
 app_form.Editor.Creator.BandJoin.prototype.template_name_ = 'band/editor/add';
 app_form.Editor.Creator.BandJoin.prototype.edit_url_ = './person_band';
 
+app_form.Editor.Creator.BandJoin.prototype.draw_ = function() {
+  app_form.Editor.Creator.prototype.draw_.call(this);
+  this.element_.addEventListener('click', this.handleCreate.bind(this));
+};
+
+app_form.Editor.Creator.BandJoin.prototype.redraw = function(new_model) {
+  this.element_.removeEventListener('click', this.handleCreate.bind(this));
+  app_form.Editor.Creator.prototype.redraw.call(this, new_model);
+};
+
 app_form.Editor.Creator.BandJoin.prototype.getFormData = function(form) {
   return {
     band_id: parseInt(form.querySelector('[name="band_id"]').value),
     person_id: parseInt(form.querySelector('[name="person_id"]').value)
   };
+};
+
+app_form.Editor.Creator.BandJoin.prototype.handleCreate = function(e) {
+  var target = e.target;
+
+  if (target.tagName == 'INPUT' && target.name == 'create_band') {
+    var new_form = new app_form.Editor.Creator.BandCreator(this.model, true);
+    this.fireChange('Create A New Band', new_form);
+  }
+  return true;
 };
 
 app_form.Editor.Creator.BandMemberNew = function(model, editor) {
