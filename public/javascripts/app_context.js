@@ -182,20 +182,6 @@ app_context.BandMember.prototype.getContextArgs = function() {
 app_context.BandMember.prototype.handleAPIReturn = function(data) {
   app_context.Base.prototype.handleAPIReturn.call(this, data);
 
-/*
-  if (this.model.band_admin) {
-    var add_div = document.querySelector('#' + this.tab_id + ' .editor .add');
-    this.add_form = new app_form.Editor.Creator.BandMemberAdd(this.model, this.model.band_admin);
-    this.add_form.render(add_div);
-    this.add_form.listen('app_form_change', this.handleAfterChange.bind(this));
-
-    var create_div = document.querySelector('#' + this.tab_id + ' .editor .new');
-    this.create_form = new app_form.Editor.Creator.BandMemberNew(this.model, this.model.band_admin);
-    this.create_form.render(create_div);
-    this.create_form.listen('app_form_change', this.handleAfterChange.bind(this));
-  }
-*/
-
   var new_button = this.context_item.querySelector('[name="add"]');
 
   if (new_button) {
@@ -236,19 +222,26 @@ app_context.Artist.prototype.getDrawUrl = function() {
 
 app_context.Artist.prototype.getContextArgs = function() {
   return {
-    sections: {creator: this.model.band_admin, display: 1},
-    tab_id: this.tab_id
+    sections: {display: 1},
+    tab_id: this.tab_id,
+    edit_ok: this.model.band_admin
   }
 };
 
 app_context.Artist.prototype.handleAPIReturn = function(data) {
   app_context.Base.prototype.handleAPIReturn.call(this, data);
 
-  if (this.model.band_admin) {
-    var create_div = document.querySelector('#' + this.tab_id + ' .creator .new');
-    this.create_form = new app_form.Editor.Creator.ArtistNew(this.model, this.model.band_admin);
-    this.create_form.render(create_div);
-    this.create_form.listen('app_form_change', this.handleAfterChange.bind(this));
+  var new_button = this.context_item.querySelector('[name="add"]');
+
+  if (new_button) {
+    new_button.addEventListener('click', function(e) {
+      var dlg = form_dialog.getDialog(
+        'Add An Artist',
+        new app_form.Editor.Creator.ArtistNew(this.model, true),
+        function(e) { this.redraw() }.bind(this)
+      );
+      dlg.show();
+    }.bind(this));
   }
 
   var list_div = document.querySelector('#' + this.tab_id + ' .display .list');
@@ -282,14 +275,16 @@ app_context.BandSong.prototype.getDrawUrl = function() {
 
 app_context.BandSong.prototype.getContextArgs = function() {
   return {
-    sections: {multiedit: this.model.band_admin, display: 1},
-    tab_id: this.tab_id
+    sections: {display: 1},
+    tab_id: this.tab_id,
+    edit_ok: this.model.band_admin
   };
 };
 
 app_context.BandSong.prototype.handleAPIReturn = function(data) {
   app_context.Base.prototype.handleAPIReturn.call(this, data);
 
+/*
   if (this.model.band_admin) {
     var add_div = document.querySelector('#' + this.tab_id + ' .editor .add');
     this.add_form = new app_form.Editor.Creator.BandSongAdd(this.model, this.model.band_admin);
@@ -300,6 +295,20 @@ app_context.BandSong.prototype.handleAPIReturn = function(data) {
     this.new_form = new app_form.Editor.Creator.BandSongNew(this.model, this.model.band_admin);
     this.new_form.render(new_div);
     this.new_form.listen('app_form_change', this.handleAfterChange.bind(this));
+  }
+*/
+
+  var new_button = this.context_item.querySelector('[name="add"]');
+
+  if (new_button) {
+    new_button.addEventListener('click', function(e) {
+      var dlg = form_dialog.getDialog(
+        'Add A Song',
+        new app_form.Editor.Creator.BandSongAdd(this.model, true),
+        function(e) { this.redraw() }.bind(this)
+      );
+      dlg.show();
+    }.bind(this));
   }
 
   var filter_div = document.querySelector('#' + this.tab_id + ' .display .filters');

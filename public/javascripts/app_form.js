@@ -561,7 +561,7 @@ app_form.Editor.Creator.BandJoin.prototype.handleCreate = function(e) {
   var target = e.target;
 
   if (target.tagName == 'INPUT' && target.name == 'create_band') {
-    var new_form = new app_form.Editor.Creator.BandCreator(this.model, true);
+    var new_form = new app_form.Editor.Creator.BandCreator(this.model_, true);
     this.fireChange('Create A New Band', new_form);
   }
   return true;
@@ -609,7 +609,7 @@ app_form.Editor.Creator.BandMemberAdd.prototype.handleCreate = function(e) {
   var target = e.target;
 
   if (target.tagName == 'INPUT' && target.name == 'create_member') {
-    var new_form = new app_form.Editor.Creator.BandMemberNew(this.model, true);
+    var new_form = new app_form.Editor.Creator.BandMemberNew(this.model_, true);
     this.fireChange('Create A New Band Member', new_form);
   }
   return true;
@@ -649,9 +649,29 @@ util.inherits(app_form.Editor.Creator.BandSongAdd, app_form.Editor.Creator);
 app_form.Editor.Creator.BandSongAdd.prototype.template_name_ = 'song/editor/add';
 app_form.Editor.Creator.BandSongAdd.prototype.edit_url_ = './band_song';
 
+app_form.Editor.Creator.BandSongAdd.prototype.draw_ = function() {
+  app_form.Editor.Creator.prototype.draw_.call(this);
+  this.element_.addEventListener('click', this.handleCreate.bind(this));
+};
+
+app_form.Editor.Creator.BandSongAdd.prototype.redraw = function(new_model) {
+  this.element_.removeEventListener('click', this.handleCreate.bind(this));
+  app_form.Editor.Creator.prototype.redraw.call(this, new_model);
+};
+
 app_form.Editor.Creator.BandSongAdd.prototype.getFormData = function(form) {
   return {
     band_id: parseInt(form.querySelector('[name="band_id"]').value),
     song_id: parseInt(form.querySelector('[name="song_id"]').value)
   };
+};
+
+app_form.Editor.Creator.BandSongAdd.prototype.handleCreate = function(e) {
+  var target = e.target;
+
+  if (target.tagName == 'INPUT' && target.name == 'create_song') {
+    var new_form = new app_form.Editor.Creator.BandSongNew(this.model_, true);
+    this.fireChange('Create A New Song', new_form);
+  }
+  return true;
 };
