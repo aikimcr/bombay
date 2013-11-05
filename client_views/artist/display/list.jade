@@ -1,9 +1,7 @@
 table(cellpadding="0", cellspacing="0")
   tr
     th Artist Name
-
-    if system_admin
-      th
+    th
   each artist in artists
     tr.display(artist_id="#{artist.id}")
       td #{artist.name}
@@ -12,4 +10,6 @@ table(cellpadding="0", cellspacing="0")
         if artist.song_count > 0
           td #{artist.song_count}
         else
-          td.delete &#x2327;
+          if system_admin
+            td.delete
+              input(type="button", value="-", name="delete")

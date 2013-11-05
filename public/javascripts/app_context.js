@@ -284,20 +284,6 @@ app_context.BandSong.prototype.getContextArgs = function() {
 app_context.BandSong.prototype.handleAPIReturn = function(data) {
   app_context.Base.prototype.handleAPIReturn.call(this, data);
 
-/*
-  if (this.model.band_admin) {
-    var add_div = document.querySelector('#' + this.tab_id + ' .editor .add');
-    this.add_form = new app_form.Editor.Creator.BandSongAdd(this.model, this.model.band_admin);
-    this.add_form.render(add_div);
-    this.add_form.listen('app_form_change', this.handleAfterChange.bind(this));
-
-    var new_div = document.querySelector('#' + this.tab_id + ' .editor .new');
-    this.new_form = new app_form.Editor.Creator.BandSongNew(this.model, this.model.band_admin);
-    this.new_form.render(new_div);
-    this.new_form.listen('app_form_change', this.handleAfterChange.bind(this));
-  }
-*/
-
   var new_button = this.context_item.querySelector('[name="add"]');
 
   if (new_button) {
