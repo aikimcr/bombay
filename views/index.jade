@@ -6,11 +6,117 @@ block content
     div.band_selector
       div Current Band
       div
-        select(name="band")
-          each band in bands
-            option(value=band.id)= band.name
+        select(name="band", data-bind="options: $root.current_bands, value: current_band, optionsText: 'name'")
+
+    div.band_selector
+      div Current Person
+      div
+        select(name="person", data-bind="options: $root.people, value: current_person, optionsText: 'name'")
 
     div.band_selector
       a(href="./logout") Logout
 
   div.app_container
+    section.app_context(id="bands")
+      a(href="#bands") Bands
+      div.app_context_item
+        div.display
+          div.list
+            table
+              thead
+                tr
+                  th Name
+    
+              tbody(data-bind="foreach: current_bands")
+                tr
+                  td(data-bind="text: name")
+
+    section.app_context(id="members")
+      a(href="#members") Band Members
+      div.app_context_item
+        div.display
+          div.list
+            table
+              thead
+                tr
+                  th Person Name
+                  th Email
+                  th Admin
+
+              tbody(data-bind="foreach: current_members")
+                tr
+                  td(data-bind="text: person().full_name")
+                  td(data-bind="text: person().email")
+                  td(data-bind="text: band_admin")
+
+    section.app_context(id="artists")
+      a(href="#artists") Artists
+      div.app_context_item
+        div.display
+          div.control
+            button.edit_button(id="add_artists", data-bind="click: showArtistForm") +
+            label(for="add_artists") Add Artist
+
+          div.list
+            table
+              thead
+                tr
+                  th Name
+                  th Song Count
+
+              tbody(data-bind="foreach: artists")
+                tr
+                  td(data-bind="text: name")
+                  td(data-bind="text: song_count")
+
+    section.app_context(id="songs")
+      a(href="#songs") Songs
+      div.app_context_item
+        div.display
+          div.list
+            table
+              thead
+                tr
+                  th Name
+                  th Artist Name
+                  th Bands
+
+              tbody(data-bind="foreach: songs")
+                tr
+                  td(data-bind="text: name")
+                  td(data-bind="text: artist().name")
+                  td(data-bind="text: band_count")
+
+    section.app_context(id="bandsongs")
+      a(href="#bandsongs") Band Songs
+      div.app_context_item
+        div.display
+          div.list
+            table
+              thead
+                tr
+                  th Name
+                  th Artist Name
+                  th Status
+                  th Member Rating
+                  th Average Rating
+
+              tbody(data-bind="foreach: current_band_songs")
+                tr
+                  td(data-bind="text: song().name")
+                  td(data-bind="text: song().artist().name")
+                  td(data-bind="text: status")
+                  td(data-bind="text: member_rating")
+                  td(data-bind="text: average_rating")
+
+  div#add_artist_form(data-bind="visible: artistFormVisible")
+    div.dialog_background
+      div.dialog
+        div.title_bar
+          div.title Add Artist
+          div.close_button(data-bind="click: hideArtistForm") X
+
+        div.dialog_body
+          form(data-bind="submit: addArtist")
+            input(data-bind="value: newArtistName", type="text", name="artist_name", placeholder="New Artist Name")
+            input(type="submit", value="Add")

@@ -19,7 +19,8 @@
     "passport-local": "*",
     "flow": "*",
     "asset-rack": "*",
-    "connect-flash": "*"
+    "connect-flash": "*",
+    "knockout": "*"
   },
   "repository": {
     "type": "git",

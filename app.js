@@ -91,7 +91,8 @@ if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
-app.get('/', requireLogin, index.index);
+//app.get('/', requireLogin, index.index);
+app.get('/', index.index);
 
 // Person Table
 app.get('/person', requireLogin, route_db.getPerson);

@@ -141,33 +141,17 @@ body
   display: inline-block
   background-color: base-color
   color: text-color
+  font-size: 20px
+
+label[for="artists"]
+  display: inline-block
+  margin-left: 10px
 
 //
-.container > input[id*="editor"]:checked ~ div.editor
+.control
+  width: 860px
   display: block
 
-.container > input[id*="editor"]:not(:checked) ~ div.editor
-  display: none
-
-.container > input[id*="creator"]:checked ~ div.creator
-  display: block
-
-.container > input[id*="creator"]:not(:checked) ~ div.creator
-  display: none
-
-.container > input[id*="display"]:checked ~ div.display
-  display: block
-
-.container > input[id*="display"]:not(:checked) ~ div.display
-  display: none
-
-.container > input[id*="creator"]:checked ~ div.display >div.list
-  height: 520px
-
-.container > input[id*="creator"]:not(:checked) ~ div.display >div.list
-  height: 600px
-  
-//
 .edit_form
   overflow: auto
 
