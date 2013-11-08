@@ -238,13 +238,21 @@ label[for="artists"] {
 .band_member .list table td:nth-child(3) {
   width: 50px;
 }
+#add_artist_form .dialog_background {
+  z-index: 200;
+}
+#add_song_form .dialog_background {
+  z-index: 180;
+}
+#add_band_song_form .dialog_background {
+  z-index: 160;
+}
 .dialog_background {
   width: 1000px;
   height: 700px;
   top: 0;
   left: 0;
   position: absolute;
-  z-index: 100;
 }
 .dialog_background .dialog_box {
   width: 300px;

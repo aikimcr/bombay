@@ -3,6 +3,17 @@ var manager;
 function Band(id, name) {
   this.id = ko.observable(id);
   this.name = ko.observable(name);
+
+  this.band_members = ko.computed(function () {
+    return ko.utils.arrayFilter(manager.band_members(), function(band_member) {
+      return band_member.band_id() == this.id();
+    }.bind(this));
+  }.bind(this));
+  this.band_songs = ko.computed(function () {
+    return ko.utils.arrayFilter(manager.band_songs(), function(band_song) {
+      return band_song.band_id() == this.id();
+    }.bind(this));
+  }.bind(this));
 }
 
 function Person(id, name, full_name, email) {
@@ -10,6 +21,11 @@ function Person(id, name, full_name, email) {
   this.name = ko.observable(name);
   this.full_name = ko.observable(full_name);
   this.email = ko.observable(email);
+  this.song_ratings = ko.computed(function () {
+    return ko.utils.arrayFilter(manager.song_ratings(), function(song_rating) {
+      return song_rating.person_id() == this.id();
+    }.bind(this));
+  }.bind(this));
 }
 
 function Artist(id, name) {
@@ -32,9 +48,17 @@ function Song(id, name, artist_id) {
   this.artist = ko.computed(function () {
     return manager.getById(manager.artists, this.artist_id());
   }.bind(this));
-  this.bands = ko.computed(function () {
-    return ko.utils.arrayFilter(manager.band_songs(), function(band_song) {
+  this.band_songs = ko.computed(function () {
+    return ko.utils.arrayFilter(manager.band_songs(), function (band_song) {
       return band_song.song_id() == this.id();
+    }.bind(this));
+  }.bind(this));
+  this.description = ko.computed(function () {
+    return this.name() + ' by ' + this.artist().name();
+  }.bind(this));
+  this.bands = ko.computed(function () {
+    return ko.utils.arrayMap(this.band_songs(), function(band_song) {
+      return band_song.band();
     }.bind(this));
   }.bind(this));
   this.band_count = ko.computed(function () {
@@ -60,6 +84,8 @@ function BandSong(id, band_id, song_id, status) {
   this.band_id = ko.observable(band_id);
   this.song_id = ko.observable(song_id);
   this.status = ko.observable(status);
+
+  // Joins
   this.band = ko.computed(function () {
     return manager.getById(manager.bands, this.band_id());
   }.bind(this));
@@ -71,6 +97,8 @@ function BandSong(id, band_id, song_id, status) {
       return rating.band_song_id() == this.id();
     }.bind(this));
   }.bind(this));
+
+  // Calculations
   this.member_rating = ko.computed(function () {
     var ratings = this.ratings();
     if (ratings.length == 0) {
@@ -86,6 +114,7 @@ function BandSong(id, band_id, song_id, status) {
       }
     }
   }.bind(this));
+
   this.average_rating = ko.computed(function () {
     var ratings = this.ratings();
     if (ratings.length == 0) {
@@ -97,6 +126,11 @@ function BandSong(id, band_id, song_id, status) {
     });
 
     return rating_sum / ratings.length;
+  }.bind(this));
+
+  // Additional Add logic
+  ko.utils.arrayForEach(this.band().band_members(), function(band_member) {
+    manager.addSongRatingWithArgs(band_member.person_id(), this.id());
   }.bind(this));
 }
 
@@ -157,8 +191,13 @@ function Manager() {
   this.songs.push(new Song(1, 'You Shook Me All Night Long', 1));
   this.songs.push(new Song(2, 'Help', 2));
   this.songs.push(new Song(3, 'Rebel, Rebel', 3));
-  this.songs.push(new Song(4, 'La Grange', 5));
+  this.songs.push(new Song(4, 'La Grange', 4));
   this.next_song_id = 5;
+
+  var next_song_rating_id = 1;
+  this.addSongRatingWithArgs = function(person_id, band_song_id) {
+    this.song_ratings.push(new SongRating(next_song_rating_id, person_id, band_song_id, 3));
+  };
 
   this.band_songs.push(new BandSong(1, 1, 1, 0));
   this.band_songs.push(new BandSong(2, 1, 2, 1));
@@ -166,7 +205,7 @@ function Manager() {
   this.band_songs.push(new BandSong(4, 2, 4, -1));
   this.next_band_song_id = 5;
 
-  var next_song_rating_id = 1;
+/*
   this.bands().forEach(function (band) {
     var b_members = ko.utils.arrayFilter(this.band_members(), function(band_member) {
       return band_member.band_id() == band.id();
@@ -183,6 +222,7 @@ function Manager() {
       }.bind(this));
     }.bind(this));
   }.bind(this));
+*/
 
 
   // Standard filtered lists
@@ -209,6 +249,16 @@ function Manager() {
     }.bind(this));
   }.bind(this));
 
+  this.non_band_songs = ko.computed(function () {
+    return ko.utils.arrayFilter(this.songs(), function(song) {
+      var result = ko.utils.arrayFirst(this.band_songs(), function(band_song) {
+        return band_song.band_id() == this.current_band().id() &&
+          band_song.song_id() == song.id();
+      }.bind(this));
+      return !result;
+    }.bind(this));
+  }.bind(this));
+
   // Show Editors
   this.artistFormVisible = ko.observable(false);
   this.showArtistForm = function () {
@@ -222,6 +272,44 @@ function Manager() {
     this.artists.push(new Artist(this.next_artist_id, this.newArtistName()));
     this.next_artist_id++;
     this.newArtistName(null);
+  };
+
+  this.songFormVisible = ko.observable(false);
+  this.showSongForm = function () {
+    this.songFormVisible(true);
+  };
+  this.hideSongForm = function () {
+    this.songFormVisible(false);
+  };
+  this.newSongName = ko.observable();
+  this.newSongArtist = ko.observable();
+  this.addSong = function() {
+    this.songs.push(new Song(
+      this.next_song_id,
+      this.newSongName(),
+      this.newSongArtist().id()
+    ));
+    this.next_song_id++;
+    this.newSongName(null);
+    this.newSongArtist(null);
+  };
+
+  this.bandSongFormVisible = ko.observable(false);
+  this.showBandSongForm = function () {
+    this.bandSongFormVisible(true);
+  };
+  this.hideBandSongForm = function () {
+    this.bandSongFormVisible(false);
+  };
+  this.newBandSongSong = ko.observable();
+  this.addBandSong = function() {
+    this.band_songs.push(new BandSong(
+      this.next_band_song_id,
+      this.current_band().id(),
+      this.newBandSongSong().id()
+    ));
+    this.next_song_id++;
+    this.newBandSongSong(null);
   };
 }
 

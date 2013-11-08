@@ -6,12 +6,12 @@ block content
     div.band_selector
       div Current Band
       div
-        select(name="band", data-bind="options: $root.current_bands, value: current_band, optionsText: 'name'")
+        select(data-bind="options: $root.current_bands, value: current_band, optionsText: 'name'")
 
     div.band_selector
       div Current Person
       div
-        select(name="person", data-bind="options: $root.people, value: current_person, optionsText: 'name'")
+        select(data-bind="options: $root.people, value: current_person, optionsText: 'name'")
 
     div.band_selector
       a(href="./logout") Logout
@@ -73,6 +73,10 @@ block content
       a(href="#songs") Songs
       div.app_context_item
         div.display
+          div.control
+            button.edit_button(id="add_songs", data-bind="click: showSongForm") +
+            label(for="add_songs") Add Song
+
           div.list
             table
               thead
@@ -91,6 +95,10 @@ block content
       a(href="#bandsongs") Band Songs
       div.app_context_item
         div.display
+          div.control
+            button.edit_button(id="add_band_songs", data-bind="click: showBandSongForm") +
+            label(for="add_band_songs") Add Band Song
+
           div.list
             table
               thead
@@ -118,5 +126,39 @@ block content
 
         div.dialog_body
           form(data-bind="submit: addArtist")
-            input(data-bind="value: newArtistName", type="text", name="artist_name", placeholder="New Artist Name")
+            input(data-bind="value: newArtistName", type="text", placeholder="New Artist Name")
             input(type="submit", value="Add")
+
+  div#add_song_form(data-bind="visible: songFormVisible")
+    div.dialog_background
+      div.dialog
+        div.title_bar
+          div.title Add Song
+          div.close_button(data-bind="click: hideSongForm") X
+
+        div.control
+          button.edit_button(id="add_artists", data-bind="click: showArtistForm") +
+          label(for="add_artists") Add Artist
+
+        div.dialog_body
+          form(data-bind="submit: addSong")
+            input(data-bind="value: newSongName", type="text", placeholder="New Song Name")
+            select(data-bind="options: $root.artists, value: newSongArtist, optionsText: 'name'")
+            input(type="submit", value="Add")
+
+  div#add_band_song_form(data-bind="visible: bandSongFormVisible")
+    div.dialog_background
+      div.dialog
+        div.title_bar
+          div.title Add Band Song
+          div.close_button(data-bind="click: hideBandSongForm") X
+
+        div.control
+          button.edit_button(id="add_songs", data-bind="click: showSongForm") +
+          label(for="add_songs") Add Song
+
+        div.dialog_body
+          form(data-bind="submit: addBandSong")
+            select(data-bind="options: $root.non_band_songs, value: newBandSongSong, optionsText: 'description'")
+            input(type="submit", value="Add")
+
