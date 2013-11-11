@@ -1,7 +1,0 @@
-div
-  form
-    input(type="text", name="song_name", placeholder="New Song Name")
-    select(name="artist_id")
-      each artist in all_artists
-        option(value="#{artist.id}") #{artist.name}
-    input(type="submit", value="New")
