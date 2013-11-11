@@ -1,18 +1,34 @@
-container-width = 1000px
+container-width = 1200px
 container-height = 700px
 
 text-color = white
 base-color = black
 main-border-color = #3f8c83
+
 panel-background-color = #b8dfda
 panel-text-color = black
 stripe-color-even = #fefeea
 stripe-color-odd = #ecedd3
+
 table-header-background-color = #1f4641
 table-header-color = #dceeec
+
 dialog-background-color = panel-background-color
+dialog-text-color = panel-text-color
 dialog-message-background-color = table-header-background-color
 dialog-message-color = table-header-color
+dialog-outer-width = 600px
+dialog-outer-height = 150px
+dialog-padding = 5px
+dialog-border-width = 2px
+dialog-inner-width = dialog-outer-width - ((dialog-padding + dialog-border-width) * 2)
+
+button-background-color = panel-background-color
+button-text-color = panel-text-color
+button-min-width = 30px
+button-min-height = 30px
+button-padding = 2px
+button-border-width = 2px
 
 body
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif
@@ -30,7 +46,7 @@ body
   vertical-align:top
   position: absolute
   top: 5px
-  right: 257px
+  right: 57px
   z-index: 1
   div
     text-align: left
@@ -137,13 +153,21 @@ body
       display: inline-block
       padding: 1px
 
-.edit_button
+.close_button, .edit_button
   display: inline-block
-  background-color: base-color
-  color: text-color
+  border-style: solid
+  border-color: main-border-color
+  border-radius: 5px
+  border-width: button-border-width
+  min-height: button-min-height
+  min-width: button-min-width
+  padding: button-padding;
+  background-color: button-background-color
+  color: button-text-color
   font-size: 20px
+  text-align: center
 
-label[for="artists"]
+.control label
   display: inline-block
   margin-left: 10px
 
@@ -151,46 +175,6 @@ label[for="artists"]
 .control
   width: 860px
   display: block
-
-.edit_form
-  overflow: auto
-
-  form
-    table
-      tr
-        td.editor_label
-          width: 200px;
-
-        td
-          width: 300px;
-
-.edit_form form table tr td input
-  width: 290px;
-
-.editor
-  overflow: auto
-  width: 900px
-  height:50px
-
-  div > div.add
-    display: block
-
-  div > div.new
-    display: none
-
-  input:checked ~ div.add
-    display: none
-
-  input:checked ~ div.new
-    display: block
-
-.creator
-  overflow: auto
-  width: 900px
-  height:30px
-
-  div > div.new
-    display: block
 
 .display
   width: 860px
@@ -234,25 +218,16 @@ label[for="artists"]
       border-right-style: none
       border-right-width: 0
 
-#band_members .creator input[name="name"]
-  width: 100px
-
-#band_members .creator input[name="full_name"]
-  width: 300px
-
-#band_members .creator input[type="submit"]
-  width: 50px
-
-#band_members .list_table th:nth-child(1), .band_member .list table td:nth-child(1)
-  width: 100px;
-
-#band_members .list_table th:nth-child(2), .band_member .list table td:nth-child(2)
-  width: 300px;
-
-#band_members .list_table th:nth-child(3), .band_member .list table td:nth-child(3)
-  width: 50px;
-
 // Dialog classes
+#add_band .dialog_background
+  z-index: 200
+
+#join_band .dialog_background
+  z-index: 180
+
+#add_band_member
+  z-index: 180
+
 #add_artist_form .dialog_background
   z-index: 200
 
@@ -310,36 +285,40 @@ label[for="artists"]
           margin-right: 40px
 
 .dialog
-  width: 600px;
-  height: 150px;
-  top: (@height / 2) + 25
-  left: (container-width / 2) - (@width / 2)
-  position: absolute
+  width: dialog-outer-width;
+  height: dialog-outer-height;
   background-color: dialog-background-color
+  color: dialog-text-color
   border-style: solid
   border-color: main-border-color
-  border-radius: 10px
-  padding: 20px
+  border-radius: 5px
+  border-width: dialog-border-width
+  padding: dialog-padding
+  position: absolute
+  top: (@height / 2) + 25
+  left: (container-width / 2) - (@width / 2)
 
   .title_bar
+    display: block
+    width: dialog-outer-width - ((dialog-border-width + dialog-padding) * 2)
+    height: button-min-height
     background-color: dialog-message-background-color
     color: dialog-message-color
-    display: block
-    height: 20px
     border-style: solid
     border-color: main-border-color
     border-radius: 5px
-    padding: 10px
+    border-width: dialog-border-width
+    padding: dialog-padding
 
     .title
       display: inline-block
+      width: dialog-inner-width - (button-min-width + ((button-padding + button-border-width) * 2))
+      height: button-min-height
+      vertical-align: middle
 
     .close_button
-      display: inline-block
-      border-style: solid
-      border-color: main-border-color
-      position: absolute
-      right: 30px
+      width: button-min-width
+      height: button-min-height
 
   .dialog_body
     background-color: panel-background-color

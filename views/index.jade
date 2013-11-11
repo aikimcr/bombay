@@ -18,23 +18,57 @@ block content
 
   div.app_container
     section.app_context(id="bands")
-      a(href="#bands") Bands
+      a(href="#bands") All Bands
       div.app_context_item
         div.display
+          div.control
+            button.edit_button(id="add_bands", data-bind="click: showBandForm") +
+            label(for="add_bands") Add Band
+
           div.list
             table
               thead
                 tr
                   th Name
+                  th Member Count
+                  th
+    
+              tbody(data-bind="foreach: bands")
+                tr
+                  td(data-bind="text: name")
+                  td(data-bind="text: band_member_count")
+                  td
+                    button.edit_button(data-bind="click: $root.deleteBand, disable: band_member_count") -
+
+    section.app_context(id="my_bands")
+      a(href="#my_bands") Bands
+      div.app_context_item
+        div.display
+          div.control
+            button.edit_button(id="join_bands", data-bind="click: showJoinBandForm") +
+            label(for="join_bands") Join Band
+
+          div.list
+            table
+              thead
+                tr
+                  th Name
+                  th
     
               tbody(data-bind="foreach: current_bands")
                 tr
                   td(data-bind="text: name")
+                  td
+                    button.edit_button(data-bind="click: $root.quitBand") -
 
     section.app_context(id="members")
       a(href="#members") Band Members
       div.app_context_item
         div.display
+          div.control
+            button.edit_button(id="add_band_member", data-bind="click: showBandMemberForm") +
+            label(for="add_band_member") Add Members
+
           div.list
             table
               thead
@@ -42,12 +76,16 @@ block content
                   th Person Name
                   th Email
                   th Admin
+                  th
 
               tbody(data-bind="foreach: current_members")
                 tr
                   td(data-bind="text: person().full_name")
                   td(data-bind="text: person().email")
                   td(data-bind="text: band_admin")
+                  td
+                    button.edit_button(data-bind="click: $root.deleteBandMember") -
+
 
     section.app_context(id="artists")
       a(href="#artists") Artists
@@ -63,11 +101,14 @@ block content
                 tr
                   th Name
                   th Song Count
+                  th
 
               tbody(data-bind="foreach: artists")
                 tr
                   td(data-bind="text: name")
                   td(data-bind="text: song_count")
+                  td
+                    button.edit_button(data-bind="click: $root.deleteArtist") -
 
     section.app_context(id="songs")
       a(href="#songs") Songs
@@ -84,12 +125,15 @@ block content
                   th Name
                   th Artist Name
                   th Bands
+                  th
 
               tbody(data-bind="foreach: songs")
                 tr
                   td(data-bind="text: name")
                   td(data-bind="text: artist().name")
                   td(data-bind="text: band_count")
+                  td
+                    button.edit_button(data-bind="click: $root.deleteSong") -
 
     section.app_context(id="bandsongs")
       a(href="#bandsongs") Band Songs
@@ -108,6 +152,7 @@ block content
                   th Status
                   th Member Rating
                   th Average Rating
+                  th
 
               tbody(data-bind="foreach: current_band_songs")
                 tr
@@ -116,13 +161,81 @@ block content
                   td(data-bind="text: status")
                   td(data-bind="text: member_rating")
                   td(data-bind="text: average_rating")
+                  td
+                    button.edit_button(data-bind="click: $root.deleteBandSong") -
+
+
+  div#join_band_form(data-bind="visible: joinBandFormVisible")
+    div.dialog_background
+      div.dialog
+        div.title_bar
+          div.title Join Band
+          div.close_button
+            button.close_button(data-bind="click: hideJoinBandForm") X
+
+        div.control
+          button.edit_button(id="add_bands", data-bind="click: showBandForm") +
+          label(for="add_bands") Add Band
+
+        div.dialog_body
+          form(data-bind="submit: joinBand")
+            select(data-bind="options: $root.other_bands, value: newBandMemberBand, optionsText: 'name'")
+            input(type="submit", value="Join")
+
+  div#add_band_form(data-bind="visible: bandFormVisible")
+    div.dialog_background
+      div.dialog
+        div.title_bar
+          div.title Add Band
+          div.close_button
+            button.close_button(data-bind="click: hideBandForm") X
+
+        div.dialog_body
+          form(data-bind="submit: addBand")
+            input(data-bind="value: newBandName", type="text", placeholder="New Band Name")
+            input(type="submit", value="Add")
+
+  div#add_band_member_form(data-bind="visible: bandMemberFormVisible")
+    div.dialog_background
+      div.dialog
+        div.title_bar
+          div.title Add Band Member
+          div.close_button
+            button.close_button(data-bind="click: hideBandMemberForm") X
+
+        div.control
+          button.edit_button(id="add_people", data-bind="click: showPersonForm") +
+          label(for="add_people") Add Person
+
+        div.dialog_body
+          form(data-bind="submit: addBandMember")
+            select(data-bind="options: $root.other_people, value: newBandMemberPerson, optionsText: 'name'")
+            input(type="submit", value="Add")
+
+
+  div#add_person_form(data-bind="visible: personFormVisible")
+    div.dialog_background
+      div.dialog
+        div.title_bar
+          div.title Add Person
+          div.close_button
+            button.close_button(data-bind="click: hidePersonForm") X
+
+        div.dialog_body
+          form(data-bind="submit: addPerson")
+            input(data-bind="value: newPersonLoginName", type="text", placeholder="New Login Name")
+            input(data-bind="value: newPersonFullName", type="text", placeholder="Full Name")
+            input(data-bind="value: newPersonEmail", type="email", placeholder="E-Mail")
+            input(type="submit", value="Add")
+
 
   div#add_artist_form(data-bind="visible: artistFormVisible")
     div.dialog_background
       div.dialog
         div.title_bar
           div.title Add Artist
-          div.close_button(data-bind="click: hideArtistForm") X
+          div.close_button
+            button.close_button(data-bind="click: hideArtistForm") X
 
         div.dialog_body
           form(data-bind="submit: addArtist")
@@ -134,7 +247,8 @@ block content
       div.dialog
         div.title_bar
           div.title Add Song
-          div.close_button(data-bind="click: hideSongForm") X
+          div.close_button
+            button.close_button(data-bind="click: hideSongForm") X
 
         div.control
           button.edit_button(id="add_artists", data-bind="click: showArtistForm") +
@@ -151,7 +265,8 @@ block content
       div.dialog
         div.title_bar
           div.title Add Band Song
-          div.close_button(data-bind="click: hideBandSongForm") X
+          div.close_button
+            button.close_button(data-bind="click: hideBandSongForm") X
 
         div.control
           button.edit_button(id="add_songs", data-bind="click: showSongForm") +

@@ -14,7 +14,7 @@ body {
   vertical-align: top;
   position: absolute;
   top: 5px;
-  right: 257px;
+  right: 57px;
   z-index: 1;
 }
 .navigation div {
@@ -35,7 +35,7 @@ body {
   display: inline-block;
 }
 .app_container {
-  width: 1000px;
+  width: 1200px;
   height: 700px;
   position: relative;
   display: inline-block;
@@ -122,55 +122,27 @@ body {
   display: inline-block;
   padding: 1px;
 }
+.close_button,
 .edit_button {
   display: inline-block;
-  background-color: #000;
-  color: #fff;
+  border-style: solid;
+  border-color: #3f8c83;
+  border-radius: 5px;
+  border-width: 2px;
+  min-height: 30px;
+  min-width: 30px;
+  padding: 2px;
+  background-color: #b8dfda;
+  color: #000;
   font-size: 20px;
+  text-align: center;
 }
-label[for="artists"] {
+.control label {
   display: inline-block;
   margin-left: 10px;
 }
 .control {
   width: 860px;
-  display: block;
-}
-.edit_form {
-  overflow: auto;
-}
-.edit_form form table tr td.editor_label {
-  width: 200px;
-}
-.edit_form form table tr td {
-  width: 300px;
-}
-.edit_form form table tr td input {
-  width: 290px;
-}
-.editor {
-  overflow: auto;
-  width: 900px;
-  height: 50px;
-}
-.editor div > div.add {
-  display: block;
-}
-.editor div > div.new {
-  display: none;
-}
-.editor input:checked ~ div.add {
-  display: none;
-}
-.editor input:checked ~ div.new {
-  display: block;
-}
-.creator {
-  overflow: auto;
-  width: 900px;
-  height: 30px;
-}
-.creator div > div.new {
   display: block;
 }
 .display {
@@ -217,26 +189,14 @@ label[for="artists"] {
   border-right-style: none;
   border-right-width: 0;
 }
-#band_members .creator input[name="name"] {
-  width: 100px;
+#add_band .dialog_background {
+  z-index: 200;
 }
-#band_members .creator input[name="full_name"] {
-  width: 300px;
+#join_band .dialog_background {
+  z-index: 180;
 }
-#band_members .creator input[type="submit"] {
-  width: 50px;
-}
-#band_members .list_table th:nth-child(1),
-.band_member .list table td:nth-child(1) {
-  width: 100px;
-}
-#band_members .list_table th:nth-child(2),
-.band_member .list table td:nth-child(2) {
-  width: 300px;
-}
-#band_members .list_table th:nth-child(3),
-.band_member .list table td:nth-child(3) {
-  width: 50px;
+#add_band_member {
+  z-index: 180;
 }
 #add_artist_form .dialog_background {
   z-index: 200;
@@ -248,7 +208,7 @@ label[for="artists"] {
   z-index: 160;
 }
 .dialog_background {
-  width: 1000px;
+  width: 1200px;
   height: 700px;
   top: 0;
   left: 0;
@@ -258,7 +218,7 @@ label[for="artists"] {
   width: 300px;
   height: 150px;
   top: 100px;
-  left: 350px;
+  left: 450px;
   position: absolute;
   background-color: #b8dfda;
   border-style: solid;
@@ -297,34 +257,38 @@ label[for="artists"] {
 .dialog {
   width: 600px;
   height: 150px;
-  top: 100px;
-  left: 200px;
-  position: absolute;
   background-color: #b8dfda;
-  border-style: solid;
-  border-color: #3f8c83;
-  border-radius: 10px;
-  padding: 20px;
-}
-.dialog .title_bar {
-  background-color: #1f4641;
-  color: #dceeec;
-  display: block;
-  height: 20px;
+  color: #000;
   border-style: solid;
   border-color: #3f8c83;
   border-radius: 5px;
-  padding: 10px;
+  border-width: 2px;
+  padding: 5px;
+  position: absolute;
+  top: 100px;
+  left: 300px;
+}
+.dialog .title_bar {
+  display: block;
+  width: 586px;
+  height: 30px;
+  background-color: #1f4641;
+  color: #dceeec;
+  border-style: solid;
+  border-color: #3f8c83;
+  border-radius: 5px;
+  border-width: 2px;
+  padding: 5px;
 }
 .dialog .title_bar .title {
   display: inline-block;
+  width: 548px;
+  height: 30px;
+  vertical-align: middle;
 }
 .dialog .title_bar .close_button {
-  display: inline-block;
-  border-style: solid;
-  border-color: #3f8c83;
-  position: absolute;
-  right: 30px;
+  width: 30px;
+  height: 30px;
 }
 .dialog .dialog_body {
   background-color: #b8dfda;

@@ -9,6 +9,9 @@ function Band(id, name) {
       return band_member.band_id() == this.id();
     }.bind(this));
   }.bind(this));
+  this.band_member_count = ko.computed(function () {
+    return this.band_members().length;
+  }.bind(this));
   this.band_songs = ko.computed(function () {
     return ko.utils.arrayFilter(manager.band_songs(), function(band_song) {
       return band_song.band_id() == this.id();
@@ -21,6 +24,11 @@ function Person(id, name, full_name, email) {
   this.name = ko.observable(name);
   this.full_name = ko.observable(full_name);
   this.email = ko.observable(email);
+  this.band_members = ko.computed(function() {
+    return ko.utils.arrayFilter(manager.band_members(), function(band_member) {
+      return band_member.person_id() == this.id();
+    }.bind(this));
+  }.bind(this));
   this.song_ratings = ko.computed(function () {
     return ko.utils.arrayFilter(manager.song_ratings(), function(song_rating) {
       return song_rating.person_id() == this.id();
@@ -54,6 +62,7 @@ function Song(id, name, artist_id) {
     }.bind(this));
   }.bind(this));
   this.description = ko.computed(function () {
+    if (!this.name() || !this.artist()) { return ''; }
     return this.name() + ' by ' + this.artist().name();
   }.bind(this));
   this.bands = ko.computed(function () {
@@ -70,12 +79,12 @@ function BandMember(id, band_id, person_id, band_admin) {
   this.id = ko.observable(id);
   this.band_id = ko.observable(band_id);
   this.person_id = ko.observable(person_id);
+  this.person = ko.computed(function () {
+    return manager.getById(manager.people, this.person_id());
+  }.bind(this));
   this.band_admin = ko.observable(band_admin);
   this.band = ko.computed(function () {
     return manager.getById(manager.bands, this.band_id());
-  }.bind(this));
-  this.person = ko.computed(function () {
-    return manager.getById(manager.people, this.person_id());
   }.bind(this));
 }
 
@@ -92,7 +101,7 @@ function BandSong(id, band_id, song_id, status) {
   this.song = ko.computed(function () {
     return manager.getById(manager.songs, this.song_id());
   }.bind(this));
-  this.ratings = ko.computed(function () {
+  this.song_ratings = ko.computed(function () {
     return ko.utils.arrayFilter(manager.song_ratings(), function (rating) {
       return rating.band_song_id() == this.id();
     }.bind(this));
@@ -100,7 +109,7 @@ function BandSong(id, band_id, song_id, status) {
 
   // Calculations
   this.member_rating = ko.computed(function () {
-    var ratings = this.ratings();
+    var ratings = this.song_ratings();
     if (ratings.length == 0) {
       return '**no ratings**';
     } else {
@@ -108,7 +117,7 @@ function BandSong(id, band_id, song_id, status) {
         return rating.person_id() == manager.current_person().id();
       }.bind(this));
       if (member_rating) {
-        return member_rating.rating();
+        return member_rating.song_rating();
       } else {
         return '**unrated**';
       }
@@ -116,13 +125,13 @@ function BandSong(id, band_id, song_id, status) {
   }.bind(this));
 
   this.average_rating = ko.computed(function () {
-    var ratings = this.ratings();
+    var ratings = this.song_ratings();
     if (ratings.length == 0) {
       return '**no ratings**';
     }
     var rating_sum = 0;
     ratings.forEach(function(rating) {
-      rating_sum += rating.rating();
+      rating_sum += rating.song_rating();
     });
 
     return rating_sum / ratings.length;
@@ -138,7 +147,7 @@ function SongRating(id, person_id, band_song_id, rating) {
   this.id = ko.observable(id);
   this.person_id = ko.observable(person_id);
   this.band_song_id = ko.observable(band_song_id);
-  this.rating = ko.observable(rating);
+  this.song_rating = ko.observable(rating);
   this.person_name = ko.computed(function () {
     return manager.getById(manager.people, this.person_id()).full_name();
   }.bind(this));
@@ -205,41 +214,39 @@ function Manager() {
   this.band_songs.push(new BandSong(4, 2, 4, -1));
   this.next_band_song_id = 5;
 
-/*
-  this.bands().forEach(function (band) {
-    var b_members = ko.utils.arrayFilter(this.band_members(), function(band_member) {
-      return band_member.band_id() == band.id();
-    }.bind(this));
-    var b_songs = ko.utils.arrayFilter(this.band_songs(), function(band_song) {
-      return band_song.band_id() == band.id();
-    }.bind(this));
-    b_members.forEach(function (member) {
-      b_songs.forEach(function (song) {
-        this.song_ratings.push(
-          new SongRating(next_song_rating_id, member.person_id(), song.id(), 3)
-        );
-        next_song_rating_id++;
-      }.bind(this));
-    }.bind(this));
-  }.bind(this));
-*/
-
-
   // Standard filtered lists
   this.current_bands = ko.computed(function() {
     return ko.utils.arrayMap(
-      ko.utils.arrayFilter(this.band_members(), function(band_member) {
-        return band_member.person_id() == this.current_person().id();
-      }.bind(this)),
+      this.current_person().band_members(), 
       function(band_member) {
         return band_member.band();
       }.bind(this)
     );
   }.bind(this));
 
+  this.other_bands = ko.computed(function() {
+    return ko.utils.arrayFilter(this.bands(), function(band) {
+      var result = ko.utils.arrayFirst(this.band_members(), function(band_member) {
+        return band_member.person_id() == this.current_person().id() &&
+          band_member.band_id() == band.id();
+      }.bind(this));
+      return !result;
+    }.bind(this));
+  }.bind(this));
+
   this.current_members = ko.computed(function () {
     return ko.utils.arrayFilter(this.band_members(), function(band_member) {
       return band_member.band_id() == this.current_band().id();
+    }.bind(this));
+  }.bind(this));
+
+  this.other_people = ko.computed(function () {
+    return ko.utils.arrayFilter(this.people(), function(person) {
+      var result = ko.utils.arrayFirst(this.band_members(), function(band_member) {
+        return band_member.person_id() == person.id() &&
+          band_member.band_id() == this.current_band().id();
+      }.bind(this));
+      return !result;
     }.bind(this));
   }.bind(this));
 
@@ -260,6 +267,88 @@ function Manager() {
   }.bind(this));
 
   // Show Editors
+  this.joinBandFormVisible = ko.observable(false);
+  this.showJoinBandForm = function () {
+    this.joinBandFormVisible(true);
+  };
+  this.hideJoinBandForm = function () {
+    this.joinBandFormVisible(false);
+  };
+  this.newBandMemberBand = ko.observable();
+  this.joinBand = function() {
+    this.band_members.push(new BandMember(
+      this.next_band_member_id,
+      this.newBandMemberBand().id(),
+      this.current_person().id(),
+      false
+    ));
+    this.next_band_member_id++;
+    this.newBandMemberBand(null);
+  };
+
+  this.bandFormVisible = ko.observable(false);
+  this.showBandForm = function () {
+    this.bandFormVisible(true);
+  };
+  this.hideBandForm = function () {
+    this.bandFormVisible(false);
+  };
+  this.newBandName = ko.observable();
+  this.addBand = function() {
+    this.bands.push(new Band(this.next_band_id, this.newBandName()));
+    this.band_members.push(new BandMember(
+      this.next_band_member_id,
+      this.next_band_id,
+      this.current_person().id(),
+      true
+    ));
+    this.next_band_id++;
+    this.next_band_member_id++;
+    this.newBandName(null);
+  };
+
+  this.bandMemberFormVisible = ko.observable(false);
+  this.showBandMemberForm = function () {
+    this.bandMemberFormVisible(true);
+  };
+  this.hideBandMemberForm = function () {
+    this.bandMemberFormVisible(false);
+  };
+  this.newBandMemberPerson = ko.observable();
+  this.addBandMember = function() {
+    this.band_members.push(new BandMember(
+      this.next_band_member_id,
+      this.current_band().id(),
+      this.newBandMemberPerson().id(),
+      false
+    ));
+    this.next_band_member_id++;
+    this.newBandMemberPerson(null);
+  };
+
+  this.personFormVisible = ko.observable(false);
+  this.showPersonForm = function () {
+    this.personFormVisible(true);
+  };
+  this.hidePersonForm = function () {
+    this.personFormVisible(false);
+  };
+  this.newPersonLoginName = ko.observable();
+  this.newPersonFullName = ko.observable();
+  this.newPersonEmail = ko.observable();
+  this.addPerson = function() {
+    this.people.push(new Person(
+      this.next_person_id,
+      this.newPersonLoginName(),
+      this.newPersonFullName(),
+      this.newPersonEmail()
+    ));
+    this.next_person_id++;
+    this.newPersonLoginName(null);
+    this.newPersonFullName(null);
+    this.newPersonEmail(null);
+  };
+
   this.artistFormVisible = ko.observable(false);
   this.showArtistForm = function () {
     this.artistFormVisible(true);
@@ -310,6 +399,55 @@ function Manager() {
     ));
     this.next_song_id++;
     this.newBandSongSong(null);
+  };
+
+  // Delete Code
+  this.deleteBand = function(band) {
+    manager.bands.remove(band);
+    delete band;
+  };
+
+  this.deleteBandMember = function(band_member) {
+    ko.utils.arrayForEach(band_member.person().song_ratings(), function(song_rating) {
+      if (song_rating.band_song().band_id() == band_member.band_id()) {
+        manager.song_ratings.remove(song_rating);
+        delete song_rating;
+      }
+    }.bind(this));
+    manager.band_members.remove(band_member);
+    delete band_member;
+  };
+
+  this.quitBand = function(band) {
+    ko.utils.arrayForEach(band.band_songs().song_ratings(), function(song_rating) {
+      if (song_rating.person_id() == manager.current_person().id()) {
+        manager.song_ratings.remove(song_rating);
+        delete song_rating;
+      }
+    }.bind(this));
+    var band_member = ko.utils.arrayFirst(manager.band_members(), function(band_member) {
+      return band_member.band_id() == band.id() && band_member.person_id() == this.current_person().id();
+    }.bind(manager));
+    manager.deleteBandMember(band_member);
+  };
+
+  this.deleteArtist = function(artist) {
+    manager.artists.remove(artist);
+    delete artist;
+  };
+
+  this.deleteSong = function(song) {
+    manager.songs.remove(song);
+    delete song;
+  };
+
+  this.deleteBandSong = function(band_song) {
+    ko.utils.arrayForEach(band_song.song_ratings(), function (song_rating) {
+      manager.song_ratings.remove(song_rating);
+      delete song_rating;
+    }.bind(this));
+    manager.band_songs.remove(band_song);
+    delete band_song;
   };
 }
 
