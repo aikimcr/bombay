@@ -1,222 +1,153 @@
 var band_model = {
-  band_admin: null,
-  band_id: null,
-  other_bands: [{
-    id: 5, name: 'Dexter\'s Laboratory'
+  all_bands: [{
+    id: 45, name: 'Plover'
   }, {
-    id: 10, name: 'Samurai Jack'
-  }],
-  person_bands: [{
-    id: 2, name: 'Phineas And Pherb'
+    id: 16, name: 'Plugh'
   }, {
-    id: 3, name: 'The Fairly Odd Parents'
-  }],
-  person_id: 1,
-  system_admin: 1
+    id: 63, name: 'Xyzzy'
+  }]
 };
 
-describe('band', function() {
-  var test_div;
+describe('Band', function() {
+  describe('#Instantiate', function() {
+    var band;
+    var expected_id = 1;
+    var expected_name = 'Band Number 01';
 
-  beforeEach(function(done) {
-    test_div = document.createElement('div');
-    document.body.appendChild(test_div);
-    service.getInstance();
-    done();
-  });
-
-  afterEach(function(done) {
-    document.body.removeChild(test_div);
-    test_div = null;
-    service.getInstance().resetCalls();
-    done();
-  });
-
-  describe('#list', function() {
-    it('should render the band list form including delete buttons', function(done) {
-      var list_form = new app_form.List.Band(band_model, true);
-      list_form.render(test_div);
-
-      should.exist(test_div.firstChild);
-      test_div.children.length.should.eql(1);
-
-      // Should be a table.
-      var table = test_div.firstChild;
-      table.tagName.should.eql('TABLE');
-      var rows = table.querySelectorAll('tr');
-      rows.length.should.eql(3);
-      rows[0].children.length.should.eql(2);
-
-      // Check the header row.
-      var header = check_row(rows[0], 2, 0);
-      check_cell(header.children[0], 'TH', 'Band Name', 0, []);
-      check_cell(header.children[1], 'TH', '', 0, []);
-
-      // Check first band row.
-      var band = check_row(rows[1], 2, 2);
+    it('should create a band object', function(done) {
+      band = new Band(expected_id, expected_name);
       should.exist(band);
-      band.attributes.getNamedItem('band_id').value.should.eql('2');
-      check_cell(band.children[0], 'TD', 'Phineas And Pherb', 0, []);
-      var delete_cell = check_cell(band.children[1], 'TD', '<HTML>', 1, ['delete']);
-      var delete_button = delete_cell.querySelector('input[type="button"][name="delete"]');
-      should.exist(delete_button);
-      delete_button.value.should.eql('-');
-
       done();
     });
 
-    it('should call the delete API', function(done) {
-      var list_form = new app_form.List.Band(band_model, true);
-      list_form.render(test_div);
+    it('should have an id', function(done) {
+      band.should.have.property('id');
+      done();
+    });
 
-      should.exist(test_div.firstChild);
-      var table = test_div.firstChild;
-      var rows = table.querySelectorAll('tr');
-      var delete_cell = rows[1].querySelector('.delete');
-      delete_cell.dispatchEvent(new Event('click'));
+    it('should have observable id', function(done) {
+      ko.isObservable(band.id).should.be.true;
+      done();
+    });
 
-      var dialog_box = document.querySelector('.dialog_box');
-      should.exist(dialog_box);
-      var dialog_message = dialog_box.querySelector('.dialog_message');
-      should.exist(dialog_message);
-      dialog_message.innerHTML.should.eql('Quit Phineas And Pherb?');
-      var dialog_buttons = dialog_box.querySelector('.dialog_buttons');
-      should.exist(dialog_buttons);
-      dialog_buttons.children[0].attributes.getNamedItem('name').value.should.eql('okay');
-      dialog_buttons.children[1].attributes.getNamedItem('name').value.should.eql('cancel');
+    it('should have id set to expected', function(done) {
+      band.id().should.eql(expected_id);
+      done();
+    });
 
-      var svc = service.getInstance();
-      dialog_buttons.children[1].dispatchEvent(new Event('click'));
-      svc.delete.calls.should.eql(0);
-      svc.delete.params.should.eql([]);
+    it('should have a name', function(done) {
+      band.should.have.property('name');
+      done();
+    });
+
+    it('should have observable name', function(done) {
+      ko.isObservable(band.name).should.be.true;
+      done();
+    });
+
+    it('should have name set to expected', function(done) {
+      band.name().should.eql(expected_name);
+      done();
+    });
+
+    after(function(done) {
+      delete band;
+      band = null;
+      done();
+    });
+  });
+
+  describe('loadById', function() {
+    var band;
+    var svc;
+
+    before(function(done) {
+      svc = service.getInstance();
       svc.resetCalls();
+      done();
+    });
 
-      delete_cell.dispatchEvent(new Event('click'));
-      dialog_box = document.querySelector('.dialog_box');
-      dialog_buttons = dialog_box.querySelector('.dialog_buttons');
-      dialog_buttons.children[0].dispatchEvent(new Event('click'));
-      svc.delete.calls.should.eql(1);
-      svc.delete.params.should.eql([[
-        './person_band?band_id=2&person_id=1',
+    it('should call the band API', function(done) {
+      svc.get.result = { band: band_model.all_bands[1] };
+      Band.loadById(16, function(result) {
+        should.exist(result);
+        band = result;
+        done();
+      });
+    });
+
+    it('should have called the service', function(done) {
+      svc.get.calls.should.be.eql(1);
+      svc.get.params.should.eql([[
+        './band?id=16',
         'function'
       ]]);
       done();
     });
-  });
 
-  describe('#add', function() {
-    it('should render the add form', function(done) {
-      var add_form = new app_form.Editor.Creator.BandJoin(band_model, true);
-      add_form.render(test_div);
-
-      should.exist(test_div.firstChild);
-      test_div.children.length.should.eql(1);
-
-      var form = test_div.querySelector('form');
-      should.exist(form);
-      var fields = form.children;
-      should.exist(fields);
-      fields.length.should.eql(3);
-
-      // Person ID
-      fields[0].tagName.should.eql('INPUT');
-      fields[0].attributes.getNamedItem('type').value.should.eql('hidden');
-      fields[0].attributes.getNamedItem('name').value.should.eql('person_id');
-      fields[0].value.should.eql('1');
-
-      // Band ID
-      fields[1].tagName.should.eql('SELECT');
-      fields[1].attributes.getNamedItem('name').value.should.eql('band_id');
-      fields[1].options.length.should.eql(2);
-      fields[1].options[0].innerHTML.should.eql('Dexter\'s Laboratory');
-      fields[1].options[0].value.should.eql('5');
-      fields[1].options[1].innerHTML.should.eql('Samurai Jack');
-      fields[1].options[1].value.should.eql('10');
-
-      // Submit Button
-      fields[2].tagName.should.eql('INPUT');
-      fields[2].attributes.getNamedItem('type').value.should.eql('submit');
-      fields[2].value.should.eql('Join');
+    it('should get the band', function(done) {
+      should.exist(band);
+      band.should.be.an.instanceOf(Band);
       done();
     });
 
-    it('should call the add API', function(done) {
-      var add_form = new app_form.Editor.Creator.BandJoin(band_model, true);
-      add_form.render(test_div);
-
-      var svc = service.getInstance();
-      var form = test_div.querySelector('form');
-      var fields = form.children;
-      fields[2].dispatchEvent(new Event('click'));
-
-      svc.set.calls.should.eql(1);
-      svc.set.params.length.should.eql(1);
-      svc.set.params.should.eql([[
-        './person_band',
-        'function',
-        {
-          band_id: 5,
-          person_id: 1
-        }
-      ]]);
+    it('should be a valid band', function(done) {
+      band.should.have.property('id');
+      ko.isObservable(band.id).should.be.true;
+      band.id().should.eql(band_model.all_bands[1].id);
+      band.should.have.property('name');
+      ko.isObservable(band.name).should.be.true;
+      band.name().should.eql(band_model.all_bands[1].name);
       done();
     });
   });
+});
 
-  describe('#new', function() {
-    it('should render the new band form', function(done) {
-      var add_form = new app_form.Editor.Creator.BandCreator(band_model, true);
-      add_form.render(test_div);
+describe('BandList', function() {
+  var band_list;
+  var svc;
 
-      should.exist(test_div.firstChild);
-      test_div.children.length.should.eql(1);
+  before(function(done) {
+    svc = service.getInstance();
+    svc.get.result = band_model;
+    svc.resetCalls();
+    done();
+  });
 
-      var form = test_div.querySelector('form');
-      should.exist(form);
-      var fields = form.children;
-      should.exist(fields);
-      fields.length.should.eql(3);
+  it('should create a band list', function(done) {
+    band_list = new BandList();
+    should.exist(band_list);
+    done();
+  });
 
-      // Person ID
-      fields[0].tagName.should.eql('INPUT');
-      fields[0].attributes.getNamedItem('type').value.should.eql('hidden');
-      fields[0].attributes.getNamedItem('name').value.should.eql('person_id');
-      fields[0].value.should.eql('1');
+  it('should have an observable array as list', function(done) {
+    ko.isObservable(band_list.list).should.be.true;
+    done();
+  });
 
-      // Band Name
-      fields[1].tagName.should.eql('INPUT');
-      fields[1].attributes.getNamedItem('type').value.should.eql('text');
-      fields[1].attributes.getNamedItem('name').value.should.eql('band_name');
-      fields[1].attributes.getNamedItem('placeholder').value.should.eql('New Band Name');
-      fields[1].value.should.eql('');
+  it('should load from the service', function(done) {
+    band_list.load();
+    svc.get.calls.should.eql(1);
+    svc.get.params.should.eql([[
+      './band',
+      'function'
+    ]]);
+    done();
+  });
 
-      // Submit Button
-      fields[2].tagName.should.eql('INPUT');
-      fields[2].attributes.getNamedItem('type').value.should.eql('submit');
-      fields[2].value.should.eql('New');
-      done();
-    });
+  it('should have all the bands', function(done) {
+    band_list.list().should.have.length(band_model.all_bands.length);
+    done();
+  });
 
-    it('should call the create API', function(done) {
-      var add_form = new app_form.Editor.Creator.BandCreator(band_model, true);
-      add_form.render(test_div);
-
-      var svc = service.getInstance();
-      var form = test_div.querySelector('form');
-      var fields = form.children;
-      fields[1].value = 'Johnny Bravo';
-      fields[2].dispatchEvent(new Event('click'));
-
-      svc.set.calls.should.eql(1);
-      svc.set.params.length.should.eql(1);
-      svc.set.params.should.eql([[
-        './band',
-        'function',
-        {
-          name: 'Johnny Bravo',
-        }
-      ]]);
-      done();
+  it('should have an id and name in each record', function() {
+    band_list.list().forEach(function(band, index) {
+      band.should.have.property('id');
+      ko.isObservable(band.id).should.be.true;
+      band.id().should.eql(band_model.all_bands[index].id);
+      band.should.have.property('name');
+      ko.isObservable(band.name).should.be.true;
+      band.name().should.eql(band_model.all_bands[index].name);
     });
   });
 });

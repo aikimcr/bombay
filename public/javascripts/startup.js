@@ -19,11 +19,12 @@ function Band(id, name) {
   }.bind(this));
 }
 
-function Person(id, name, full_name, email) {
+function Person(id, name, full_name, email, system_admin) {
   this.id = ko.observable(id);
   this.name = ko.observable(name);
   this.full_name = ko.observable(full_name);
   this.email = ko.observable(email);
+  this.system_admin = ko.observable(system_admin);
   this.band_members = ko.computed(function() {
     return ko.utils.arrayFilter(manager.band_members(), function(band_member) {
       return band_member.person_id() == this.id();
@@ -170,8 +171,8 @@ function Manager() {
   this.song_ratings = ko.observableArray([]);
 
   // Populate the model lists
-  this.people.push(new Person(1, 'mriehle', 'Michael Riehle', 'rumbler@mriehle.com'))
-  this.people.push(new Person(2, 'bbunny', 'Bugs Bunny', 'bbunny@mriehle.com'))
+  this.people.push(new Person(1, 'mriehle', 'Michael Riehle', 'rumbler@mriehle.com', true))
+  this.people.push(new Person(2, 'bbunny', 'Bugs Bunny', 'bbunny@mriehle.com', false))
   this.current_person = ko.observable(this.people()[1]);
   this.next_person_id = 3;
 
@@ -341,7 +342,8 @@ function Manager() {
       this.next_person_id,
       this.newPersonLoginName(),
       this.newPersonFullName(),
-      this.newPersonEmail()
+      this.newPersonEmail(),
+      false
     ));
     this.next_person_id++;
     this.newPersonLoginName(null);

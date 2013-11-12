@@ -1,158 +1,153 @@
 var artist_model = {
-  person_id: 1,
-  system_admin: 1,
-  band_id: 1, 
-  band_admin: 1,
-  artists: [{
-    id: 1, name: 'AC/DC', song_count: 10,
+  all_artists: [{
+    id: 13, name: 'Twisty Maze'
   }, {
-    id: 2, name: 'The Bangles', song_count: 0,
+    id: 12, name: 'Canyon'
   }, {
-    id: 3, name: 'ZZ Top', song_count: 20
-  }],
+    id: 90, name: 'Pump House'
+  }]
 };
 
-describe('artist', function() {
-  var test_div;
+describe('Artist', function() {
+  describe('#Instantiate', function() {
+    var artist;
+    var expected_id = 1;
+    var expected_name = 'Artist Number 01';
 
-  beforeEach(function(done) {
-    test_div = document.createElement('div');
-    document.body.appendChild(test_div);
-    service.getInstance();
-    done();
-  });
-
-  afterEach(function(done) {
-    document.body.removeChild(test_div);
-    test_div = null;
-    service.getInstance().resetCalls();
-    done();
-  });
-
-  describe('#list', function() {
-    it('should render the artist list form including delete buttons', function(done) {
-      var list_form = new app_form.List.Artist(artist_model, true);
-      list_form.render(test_div);
-
-      should.exist(test_div.firstChild);
-      test_div.children.length.should.eql(1);
-
-      // Should be a table.
-      var table = test_div.firstChild;
-      table.tagName.should.eql('TABLE');
-      var rows = table.querySelectorAll('tr');
-      rows.length.should.eql(4);
-      rows[0].children.length.should.eql(2);
-
-      // Check the header row.
-      var header = check_row(rows[0], 2, 0);
-      check_cell(header.children[0], 'TH', 'Artist Name', 0, []);
-      check_cell(header.children[1], 'TH', '', 0, []);
-
-      // Check first artist row.
-      var artist = check_row(rows[1], 2, 2);
+    it('should create a artist object', function(done) {
+      artist = new Artist(expected_id, expected_name);
       should.exist(artist);
-      artist.attributes.getNamedItem('artist_id').value.should.eql('1');
-      check_cell(artist.children[0], 'TD', 'AC/DC', 0, []);
-      check_cell(artist.children[1], 'TD', '10', 0, []);
-
-      // Check second artist row.
-      artist = check_row(rows[2], 2, 2);
-      should.exist(artist);
-      artist.attributes.getNamedItem('artist_id').value.should.eql('2');
-      check_cell(artist.children[0], 'TD', 'The Bangles', 0, []);
-      check_cell(artist.children[1], 'TD', '\u2327', 1, ['delete']);
-
       done();
     });
 
-    it('should call the delete API', function(done) {
-      var list_form = new app_form.List.Artist(artist_model, true);
-      list_form.render(test_div);
+    it('should have an id', function(done) {
+      artist.should.have.property('id');
+      done();
+    });
 
-      should.exist(test_div.firstChild);
-      var table = test_div.firstChild;
-      var rows = table.querySelectorAll('tr');
-      var delete_cell = rows[2].querySelector('.delete');
-      delete_cell.dispatchEvent(new Event('click'));
+    it('should have observable id', function(done) {
+      ko.isObservable(artist.id).should.be.true;
+      done();
+    });
 
-      var dialog_box = document.querySelector('.dialog_box');
-      should.exist(dialog_box);
-      var dialog_message = dialog_box.querySelector('.dialog_message');
-      should.exist(dialog_message);
-      dialog_message.innerHTML.should.eql('Remove The Bangles?');
-      var dialog_buttons = dialog_box.querySelector('.dialog_buttons');
-      should.exist(dialog_buttons);
-      dialog_buttons.children[0].attributes.getNamedItem('name').value.should.eql('okay');
-      dialog_buttons.children[1].attributes.getNamedItem('name').value.should.eql('cancel');
+    it('should have id set to expected', function(done) {
+      artist.id().should.eql(expected_id);
+      done();
+    });
 
-      var svc = service.getInstance();
-      dialog_buttons.children[1].dispatchEvent(new Event('click'));
-      svc.delete.calls.should.eql(0);
-      svc.delete.params.should.eql([]);
+    it('should have a name', function(done) {
+      artist.should.have.property('name');
+      done();
+    });
+
+    it('should have observable name', function(done) {
+      ko.isObservable(artist.name).should.be.true;
+      done();
+    });
+
+    it('should have name set to expected', function(done) {
+      artist.name().should.eql(expected_name);
+      done();
+    });
+
+    after(function(done) {
+      delete artist;
+      artist = null;
+      done();
+    });
+  });
+
+  describe('loadById', function() {
+    var artist;
+    var svc;
+
+    before(function(done) {
+      svc = service.getInstance();
       svc.resetCalls();
+      done();
+    });
 
-      delete_cell.dispatchEvent(new Event('click'));
-      dialog_box = document.querySelector('.dialog_box');
-      dialog_buttons = dialog_box.querySelector('.dialog_buttons');
-      dialog_buttons.children[0].dispatchEvent(new Event('click'));
-      svc.delete.calls.should.eql(1);
-      svc.delete.params.should.eql([[
-        './artist?artist_id=2',
+    it('should call the artist API', function(done) {
+      svc.get.result = { artist: artist_model.all_artists[1] };
+      Artist.loadById(16, function(result) {
+        should.exist(result);
+        artist = result;
+        done();
+      });
+    });
+
+    it('should have called the service', function(done) {
+      svc.get.calls.should.be.eql(1);
+      svc.get.params.should.eql([[
+        './artist?id=16',
         'function'
       ]]);
       done();
     });
-  });
 
-  describe('#new', function() {
-    it('should render the new artist form', function(done) {
-      var add_form = new app_form.Editor.Creator.ArtistNew(artist_model, true);
-      add_form.render(test_div);
-
-      should.exist(test_div.firstChild);
-      test_div.children.length.should.eql(1);
-
-      var form = test_div.querySelector('form');
-      should.exist(form);
-      var fields = form.children;
-      should.exist(fields);
-      fields.length.should.eql(2);
-
-      // Artist Name
-      fields[0].tagName.should.eql('INPUT');
-      fields[0].attributes.getNamedItem('type').value.should.eql('text');
-      fields[0].attributes.getNamedItem('name').value.should.eql('artist_name');
-      fields[0].attributes.getNamedItem('placeholder').value.should.eql('New Artist Name');
-      fields[0].value.should.eql('');
-
-      // Submit Button
-      fields[1].tagName.should.eql('INPUT');
-      fields[1].attributes.getNamedItem('type').value.should.eql('submit');
-      fields[1].value.should.eql('New');
+    it('should get the artist', function(done) {
+      should.exist(artist);
+      artist.should.be.an.instanceOf(Artist);
       done();
     });
 
-    it('should call the create API', function(done) {
-      var add_form = new app_form.Editor.Creator.ArtistNew(artist_model, true);
-      add_form.render(test_div);
-
-      var svc = service.getInstance();
-      var form = test_div.querySelector('form');
-      var fields = form.children;
-      fields[0].value = 'David Bowie';
-      fields[1].dispatchEvent(new Event('click'));
-
-      svc.set.calls.should.eql(1);
-      svc.set.params.length.should.eql(1);
-      svc.set.params.should.eql([[
-        './artist',
-        'function',
-        {
-          name: 'David Bowie',
-        }
-      ]]);
+    it('should be a valid artist', function(done) {
+      artist.should.have.property('id');
+      ko.isObservable(artist.id).should.be.true;
+      artist.id().should.eql(artist_model.all_artists[1].id);
+      artist.should.have.property('name');
+      ko.isObservable(artist.name).should.be.true;
+      artist.name().should.eql(artist_model.all_artists[1].name);
       done();
+    });
+  });
+});
+
+describe('ArtistList', function() {
+  var artist_list;
+  var svc;
+
+  before(function(done) {
+    svc = service.getInstance();
+    svc.get.result = artist_model;
+    svc.resetCalls();
+    done();
+  });
+
+  it('should create a artist list', function(done) {
+    artist_list = new ArtistList();
+    should.exist(artist_list);
+    done();
+  });
+
+  it('should have an observable array as list', function(done) {
+    ko.isObservable(artist_list.list).should.be.true;
+    done();
+  });
+
+  it('should load from the service', function(done) {
+    artist_list.load();
+    svc.get.calls.should.eql(1);
+    svc.get.params.should.eql([[
+      './artist',
+      'function'
+    ]]);
+    done();
+  });
+
+  it('should have all the artists', function(done) {
+    artist_list.list().should.have.length(artist_model.all_artists.length);
+    done();
+  });
+
+  it('should have an id and name in each record', function() {
+    artist_list.list().forEach(function(artist, index) {
+      artist.should.have.property('id');
+      ko.isObservable(artist.id).should.be.true;
+      artist.id().should.eql(artist_model.all_artists[index].id);
+      artist.should.have.property('name');
+      ko.isObservable(artist.name).should.be.true;
+      artist.name().should.eql(artist_model.all_artists[index].name);
     });
   });
 });

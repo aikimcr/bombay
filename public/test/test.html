@@ -12,7 +12,7 @@
     window.console.log('Breaker, Breaker 19');
   </script>
   <!-- Third Party Code -->
-  <script src="/templates.js"></script>
+  <script src="../javascripts/lib/knockout-3.0.0.js"></script>
 
   <!-- Mocha and Chai -->
   <script src="./lib/chai.js"></script>
@@ -25,17 +25,16 @@
 
   <!-- Code under Test. -->
   <script src="../javascripts/util.js"></script>
-  <script src="../javascripts/dialog.js"></script>
-  <script src="../javascripts/form_dialog.js"></script>
-  <script src="../javascripts/app_form.js"></script>
+  <script src="../javascripts/view_model/Table.js"></script>
+  <script src="../javascripts/view_model/Band.js"></script>
+  <script src="../javascripts/view_model/Person.js"></script>
+  <script src="../javascripts/view_model/Artist.js"></script>
+  <script src="../javascripts/view_model/Manager.js"></script>
 
   <!-- Test code. -->
-  <script src="./util.js"></script>
-  <script src="./dialog.js"></script>
-  <script src="./band.js"></script>
-  <script src="./member.js"></script>
-  <script src="./artist.js"></script>
-  <script src="./song.js"></script>
+  <script src="./Band.js"></script>
+  <script src="./Person.js"></script>
+  <script src="./Artist.js"></script>
   <script>
   /*
     mocha.checkLeaks();

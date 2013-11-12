@@ -11,6 +11,7 @@ service = function() {
       } else {
         this[type].params.push([url, cb, data]);
       }
+      callback(this[type].result);
     };
     this[type].calls = 0;
     this[type].params = [];
