@@ -43,8 +43,8 @@ describe('band_table', function() {
 	id: 1, name: 'Wild At Heart',
       }];
       band.getAll(function(result) {
-        done();
         test_util.check_list(result, expected, 'all_bands', ['id', 'name']);
+        done();
       });
     });
 

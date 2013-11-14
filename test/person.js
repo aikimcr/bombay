@@ -153,5 +153,44 @@ describe('person_table', function() {
         done();
       });
     });
+
+    it('should get all the persons with email at musichero, sorted by name', function(done) {
+      var expected = [{
+	id: 3,
+	name: 'ddrums',
+	full_name: 'Danny Drums',
+	password: 'backbeat',
+	email: 'ddrums@musichero.foo',
+	system_admin: false
+      }, {
+	id: 4,
+	name: 'jguitar',
+	full_name: 'Johnny Guitar',
+	password: 'tonefreak',
+	email: 'jguitar@musichero.foo',
+	system_admin: false
+      }];
+      person.getAllWithArgs({
+        where: { email: { like: '%musichero%' } },
+        sort: { order: 'name' }
+      }, function(result) {
+        test_util.check_list(result, expected, 'all_persons', ['id', 'name', 'full_name', 'password', 'email', 'system_admin']);
+        done();
+      });
+    });
+
+    it('should get the id and password for Alan Poser', function(done) {
+      var expected = [{
+	id: 2,
+	password: 'fakeit',
+      }];
+      person.getAllWithArgs({
+        fields: ['id', 'password' ],
+        where: { name: 'aposer' }
+      }, function(result) {
+        test_util.check_list(result, expected, 'all_persons', ['id', 'password']);
+        done();
+      });
+    });
   });
 });
