@@ -7,10 +7,6 @@ TEST_CLIENT_LIB = ./public/test/lib
 KNOCKOUT_URL = http://knockoutjs.com/downloads/knockout-3.0.0.js
 KNOCKOUT_JS = $(JS_LIB)/knockout-3.0.0.js
 
-JADE_JS_DIR = $(JS_LIB)/jade
-JADE_JS_RUNTIME = $(JADE_JS_DIR)/runtime.js
-JADE_SRC = $(NODE_MODULES)/jade/runtime.js
-
 CHAI_JS = $(TEST_CLIENT_LIB)/chai.js
 CHAI_SRC = $(NODE_MODULES)/chai/chai.js
 
@@ -27,24 +23,16 @@ TEST_FILES = $(MOCHA_JS) $(MOCHA_CSS) $(CHAI_JS) $(SHOULD_JS)
 SCHEMA = ./sql/schema.sql
 DATABASE = ./bombay.db
 
-all: $(NODE_MODULES) $(JADE_JS_RUNTIME) $(KNOCKOUT_JS)
+all: $(NODE_MODULES) $(KNOCKOUT_JS)
 
-install: $(NODE_MODULES) $(JADE_JS_RUNTIME) $(KNOCKOUT_JS) test
+install: $(NODE_MODULES) $(KNOCKOUT_JS) test
 
-test: $(NODE_MODULES) $(JADE_JS_RUNTIME) $(MOCHA) $(SHOULD_JS)
+test: $(NODE_MODULES) $(MOCHA) $(SHOULD_JS)
 	npm test
 
 test_setup: $(TEST_FILES)
 
-jade: $(NODE_MODULES) $(JADE_JS_RUNTIME)
-
 database: $(DATABASE)
-
-$(JADE_JS_RUNTIME): $(NODE_MODULES) $(JADE_JS_DIR)
-	cp $(JADE_SRC) $(JADE_JS_RUNTIME)
-
-$(JADE_JS_DIR): $(JS_LIB)
-	mkdir $(JADE_JS_DIR)
 
 $(KNOCKOUT_JS): $(JS_LIB)
         curl -o $(KNOCKOUT_JS) $(KNOCKOUT_URL)

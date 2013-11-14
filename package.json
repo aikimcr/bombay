@@ -15,6 +15,7 @@
     "jade": "*",
     "stylus": "*",
     "sqlite3": "*",
+    "sql-generator": "*",
     "passport": "*",
     "passport-local": "*",
     "flow": "*",

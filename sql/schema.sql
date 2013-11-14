@@ -62,12 +62,12 @@ CREATE TABLE band_song (
 
 CREATE TABLE song_rating (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
-	person_id INTEGER NOT NULL,
+	band_member_id INTEGER NOT NULL,
 	band_song_id INTEGER NOT NULL,
 	rating INTEGER NOT NULL DEFAULT 3,
-	FOREIGN KEY (person_id) REFERENCES person(id),
+	FOREIGN KEY (band_member_id) REFERENCES band_member(id),
 	FOREIGN KEY (band_song_id) REFERENCES band_song(id),
-	UNIQUE (person_id, band_song_id)
+	UNIQUE (band_member_id, band_song_id)
 );
 
 CREATE TABLE setlist (
