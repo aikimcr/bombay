@@ -18,7 +18,7 @@ describe('db_utility', function() {
       db.setDbPath('./bombay_test.db');
       var path = db.getDbPath();
       should.exist(path);
-      path.should.eql('./bombay_test.db');
+      path.should.eql(fs.realpathSync('./bombay_test.db'));
       done();
     });
   });

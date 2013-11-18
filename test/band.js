@@ -118,11 +118,24 @@ describe('band_table', function() {
     });
 
     it('should get the band', function(done) {
+      var expected = {id: band_id, name: 'Cover Story'};
       band.getById(band_id, function(result) {
-        should.exist(result);
-        should.exist(result.band);
-        result.band.id.should.eql(band_id);
-        result.band.name.should.eql('Cover Story');
+        test_util.check_item(result, expected, 'band', ['id', 'name']);
+        done();
+      });
+    });
+
+    it('should update the band', function(done) {
+      band.update({id: band_id, name: 'Groove On The Side'}, function(result) {
+        test_util.check_result(result, 'band');
+        done();
+      });
+    });
+
+    it('should get the band', function(done) {
+      var expected = {id: band_id, name: 'Groove On The Side'};
+      band.getById(band_id, function(result) {
+        test_util.check_item(result, expected, 'band', ['id', 'name']);
         done();
       });
     });

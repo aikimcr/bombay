@@ -559,4 +559,364 @@ describe('routes', function() {
       });
     });
   });
+
+  describe('#put', function() {
+    describe('#band', function() {
+      it('should update the band name', function(done) {
+        req.query = {id: 1, name: 'Groove On The Side'};
+        var res = {
+          json: function(result) {
+            band_id = test_util.check_result(result, 'band');
+            done();
+          }
+        };
+        routes.putBandTable(req, res);
+      });
+
+      it('should get the band', function(done) {
+        var expected = {id: 1, name: 'Groove On The Side'};
+        dbh.band().getById(1, function(result) {
+          test_util.check_item(result, expected, 'band', ['id', 'name']);
+          done();
+        });
+      });
+    });
+
+    describe('#person', function() {
+      it('should update the person name', function(done) {
+        req.query = {id: 1, email: 'admin@musichero.foo'};
+        var res = {
+          json: function(result) {
+            person_id = test_util.check_result(result, 'person');
+            done();
+          }
+        };
+        routes.putPersonTable(req, res);
+      });
+
+      it('should get the person', function(done) {
+        var expected = {
+          id: 1,
+          name: 'admin',
+          full_name: 'System Admin User',
+          email: 'admin@musichero.foo',
+          system_admin: true
+        };
+        dbh.person().getById(1, function(result) {
+          test_util.check_item(result, expected, 'person', ['id', 'name', 'full_name', 'email', 'system_admin']);
+          done();
+        });
+      });
+    });
+
+    describe('#artist', function() {
+      it('should update the artist name', function(done) {
+        req.query = {id: 1, name: 'Mott The Hoople'};
+        var res = {
+          json: function(result) {
+            artist_id = test_util.check_result(result, 'artist');
+            done();
+          }
+        };
+        routes.putArtistTable(req, res);
+      });
+
+      it('should get the artist', function(done) {
+        var expected = {id: 1, name: 'Mott The Hoople'};
+        dbh.artist().getById(1, function(result) {
+          test_util.check_item(result, expected, 'artist', ['id', 'name']);
+          done();
+        });
+      });
+    });
+
+    describe('#song', function() {
+      it('should update the song name', function(done) {
+        req.query = {id: 1, name: 'Ziggy Stardust'};
+        var res = {
+          json: function(result) {
+            song_id = test_util.check_result(result, 'song');
+            done();
+          }
+        };
+        routes.putSongTable(req, res);
+      });
+
+      it('should get the song', function(done) {
+        var expected = {id: 1, name: 'Ziggy Stardust', artist_id: 5};
+        dbh.song().getById(1, function(result) {
+          test_util.check_item(result, expected, 'song', ['id', 'name', 'artist_id']);
+          done();
+        });
+      });
+    });
+
+    describe('#band_member', function() {
+      it('should update the band_member name', function(done) {
+        req.query = {id: 1, band_admin: true};
+        var res = {
+          json: function(result) {
+            band_member_id = test_util.check_result(result, 'band_member');
+            done();
+          }
+        };
+        routes.putBandMemberTable(req, res);
+      });
+
+      it('should get the band_member', function(done) {
+        var expected = {id: 1, band_id: 1, person_id: 1, band_admin: true};
+        dbh.band_member().getById(1, function(result) {
+          test_util.check_item(result, expected, 'band_member', ['id', 'band_id', 'person_id', 'band_admin']);
+          done();
+        });
+      });
+    });
+
+    describe('#band_song', function() {
+      it('should update the band_song name', function(done) {
+        req.query = {id: 1, song_status: 2};
+        var res = {
+          json: function(result) {
+            band_song_id = test_util.check_result(result, 'band_song');
+            done();
+          }
+        };
+        routes.putBandSongTable(req, res);
+      });
+
+      it('should get the band_song', function(done) {
+        var expected = {id: 1, band_id: 1, song_id: 1, song_status: 2};
+        dbh.band_song().getById(1, function(result) {
+          test_util.check_item(result, expected, 'band_song', ['id', 'band_id', 'song_id', 'song_status']);
+          done();
+        });
+      });
+    });
+
+    describe('#song_rating', function() {
+      it('should update the song_rating name', function(done) {
+        req.query = {id: 1, rating: 2};
+        var res = {
+          json: function(result) {
+            song_rating_id = test_util.check_result(result, 'song_rating');
+            done();
+          }
+        };
+        routes.putSongRatingTable(req, res);
+      });
+
+      it('should get the song_rating', function(done) {
+        var expected = {id: 1, band_member_id: 1, band_song_id: 1, rating: 2};
+        dbh.song_rating().getById(1, function(result) {
+          test_util.check_item(result, expected, 'song_rating', ['id', 'band_member_id', 'band_song_id', 'rating']);
+          done();
+        });
+      });
+    });
+  });
+
+  describe('#delete', function() {
+    describe('#band', function() {
+      it('should get the band', function(done) {
+        dbh.band().getById(4, function(result) {
+          should.exist(result);
+          result.should.have.property('band');
+          done();
+        });
+      });
+
+      it('should delete the band', function(done) {
+        req.query = {id: 4};
+        var res = {
+          json: function(result) {
+            band_id = test_util.check_result(result, 'band');
+            done();
+          }
+        };
+        routes.deleteBandTable(req, res);
+      });
+
+      it('should not get the band', function(done) {
+        dbh.band().getById(4, function(result) {
+          should.exist(result);
+          result.should.not.have.property('band');
+          done();
+        });
+      });
+    });
+
+    describe('#person', function() {
+      it('should get the person', function(done) {
+        dbh.person().getById(4, function(result) {
+          should.exist(result);
+          result.should.have.property('person');
+          done();
+        });
+      });
+
+      it('should delete the person', function(done) {
+        req.query = {id: 4};
+        var res = {
+          json: function(result) {
+            person_id = test_util.check_result(result, 'person');
+            done();
+          }
+        };
+        routes.deletePersonTable(req, res);
+      });
+
+      it('should not get the person', function(done) {
+        dbh.person().getById(4, function(result) {
+          should.exist(result);
+          result.should.not.have.property('person');
+          done();
+        });
+      });
+    });
+
+    describe('#artist', function() {
+      it('should get the artist', function(done) {
+        dbh.artist().getById(3, function(result) {
+          should.exist(result);
+          result.should.have.property('artist');
+          done();
+        });
+      });
+
+      it('should delete the artist', function(done) {
+        req.query = {id: 3};
+        var res = {
+          json: function(result) {
+            artist_id = test_util.check_result(result, 'artist');
+            done();
+          }
+        };
+        routes.deleteArtistTable(req, res);
+      });
+
+      it('should not get the artist', function(done) {
+        dbh.artist().getById(3, function(result) {
+          should.exist(result);
+          result.should.not.have.property('artist');
+          done();
+        });
+      });
+    });
+
+    describe('#song', function() {
+      it('should get the song', function(done) {
+        dbh.song().getById(7, function(result) {
+          should.exist(result);
+          result.should.have.property('song');
+          done();
+        });
+      });
+
+      it('should delete the song', function(done) {
+        req.query = {id: 7};
+        var res = {
+          json: function(result) {
+            song_id = test_util.check_result(result, 'song');
+            done();
+          }
+        };
+        routes.deleteSongTable(req, res);
+      });
+
+      it('should not get the song', function(done) {
+        dbh.song().getById(7, function(result) {
+          should.exist(result);
+          result.should.not.have.property('song');
+          done();
+        });
+      });
+    });
+
+    describe('#band_member', function() {
+      it('should get the band_member', function(done) {
+        dbh.band_member().getById(5, function(result) {
+          should.exist(result);
+          result.should.have.property('band_member');
+          done();
+        });
+      });
+
+      it('should delete the band_member', function(done) {
+        req.query = {id: 5};
+        var res = {
+          json: function(result) {
+            band_member_id = test_util.check_result(result, 'band_member');
+            done();
+          }
+        };
+        routes.deleteBandMemberTable(req, res);
+      });
+
+      it('should not get the band_member', function(done) {
+        dbh.band_member().getById(5, function(result) {
+          should.exist(result);
+          result.should.not.have.property('band_member');
+          done();
+        });
+      });
+    });
+
+    describe('#band_song', function() {
+      it('should get the band_song', function(done) {
+        dbh.band_song().getById(5, function(result) {
+          should.exist(result);
+          result.should.have.property('band_song');
+          done();
+        });
+      });
+
+      it('should delete the band_song', function(done) {
+        req.query = {id: 5};
+        var res = {
+          json: function(result) {
+            band_song_id = test_util.check_result(result, 'band_song');
+            done();
+          }
+        };
+        routes.deleteBandSongTable(req, res);
+      });
+
+      it('should not get the band_song', function(done) {
+        dbh.band_song().getById(5, function(result) {
+          should.exist(result);
+          result.should.not.have.property('band_song');
+          done();
+        });
+      });
+    });
+
+    describe('#song_rating', function() {
+      it('should get the song_rating', function(done) {
+        dbh.song_rating().getById(5, function(result) {
+          should.exist(result);
+          result.should.have.property('song_rating');
+          done();
+        });
+      });
+
+      it('should delete the song_rating', function(done) {
+        req.query = {id: 5};
+        var res = {
+          json: function(result) {
+            song_rating_id = test_util.check_result(result, 'song_rating');
+            done();
+          }
+        };
+        routes.deleteSongRatingTable(req, res);
+      });
+
+      it('should not get the song_rating', function(done) {
+        dbh.song_rating().getById(5, function(result) {
+          should.exist(result);
+          result.should.not.have.property('song_rating');
+          done();
+        });
+      });
+    });
+  });
 });
