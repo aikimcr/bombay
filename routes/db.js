@@ -6,15 +6,141 @@ var flow = require('flow');
 var db = require('lib/db');
 var util = require('lib/util');
 
-/* JSON API Links */
-exports.getPerson = function(req, res) {
-  var person_id = req.session.passport.user;
+exports.getBandTable = function(req, res) {
+  var band_id = req.params.id;
+  if (!band_id) band_id = req.query.id;
+
   var dbh = new db.Handle();
-  dbh.person().getById(person_id, function(result) {
-    res.json(result);
-  });
+
+  if (band_id) {
+    dbh.band().getById(band_id, res.json);
+  } else {
+    var params = { sort: { order: 'name' }};
+    dbh.band().getAllWithArgs(params, res.json);
+  }
 };
 
+exports.postBandTable = function(req, res) {
+  var dbh = new db.Handle();
+  dbh.band().create(req.body, res.json);
+};
+
+exports.getPersonTable = function(req, res) {
+  var person_id = req.params.id;
+  if (!person_id) person_id = req.query.id;
+
+  var dbh = new db.Handle();
+
+  if (person_id) {
+    dbh.person().getById(person_id, res.json);
+  } else {
+    var params = { sort: { order: 'full_name' }};
+    dbh.person().getAllWithArgs(params, res.json);
+  }
+};
+
+exports.postPersonTable = function(req, res) {
+  var dbh = new db.Handle();
+  dbh.person().create(req.body, res.json);
+};
+
+exports.getArtistTable = function(req, res) {
+  var artist_id = req.params.id;
+  if (!artist_id) artist_id = req.query.id;
+
+  var dbh = new db.Handle();
+
+  if (artist_id) {
+    dbh.artist().getById(artist_id, res.json);
+  } else {
+    var params = { sort: { order: 'name' }};
+    dbh.artist().getAllWithArgs(params, res.json);
+  }
+};
+
+exports.postArtistTable = function(req, res) {
+  var dbh = new db.Handle();
+  dbh.artist().create(req.body, res.json);
+};
+
+exports.getSongTable = function(req, res) {
+  var song_id = req.params.id;
+  if (!song_id) song_id = req.query.id;
+
+  var dbh = new db.Handle();
+
+  if (song_id) {
+    dbh.song().getById(song_id, res.json);
+  } else {
+    var params = { sort: { order: 'name' }};
+    dbh.song().getAllWithArgs(params, res.json);
+  }
+};
+
+exports.postSongTable = function(req, res) {
+  var dbh = new db.Handle();
+  dbh.song().create(req.body, res.json);
+};
+
+exports.getBandMemberTable = function(req, res) {
+  var band_member_id = req.params.id;
+  if (!band_member_id) band_member_id = req.query.id;
+
+  var dbh = new db.Handle();
+
+  if (band_member_id) {
+    dbh.band_member().getById(band_member_id, res.json);
+  } else {
+    var params = { sort: { order: [ 'band_id', 'person_id' ] }};
+    dbh.band_member().getAllWithArgs(params, res.json);
+  }
+};
+
+exports.postBandMemberTable = function(req, res) {
+  var dbh = new db.Handle();
+  dbh.band_member().create(req.body, res.json);
+};
+
+exports.getBandSongTable = function(req, res) {
+  var band_song_id = req.params.id;
+  if (!band_song_id) band_song_id = req.query.id;
+
+  var dbh = new db.Handle();
+
+  if (band_song_id) {
+    dbh.band_song().getById(band_song_id, res.json);
+  } else {
+    var params = { sort: { order: [ 'band_id', 'song_id' ] }};
+    dbh.band_song().getAllWithArgs(params, res.json);
+  }
+};
+
+exports.postBandSongTable = function(req, res) {
+  var dbh = new db.Handle();
+  dbh.band_song().create(req.body, res.json);
+};
+
+exports.getSongRatingTable = function(req, res) {
+  var song_rating_id = req.params.id;
+  if (!song_rating_id) song_rating_id = req.query.id;
+
+  var dbh = new db.Handle();
+
+  if (song_rating_id) {
+    dbh.song_rating().getById(song_rating_id, res.json);
+  } else {
+    var params = { sort: { order: [ 'band_member_id', 'band_song_id' ] }};
+    dbh.song_rating().getAllWithArgs(params, res.json);
+  }
+};
+
+exports.postSongRatingTable = function(req, res) {
+  var dbh = new db.Handle();
+  dbh.song_rating().create(req.body, res.json);
+};
+
+/*
+// JSON API Links
 exports.createPerson = function(req, res) {
   var dbh = new db.Handle();
   dbh.person().create(req.body, function(result) {
@@ -35,41 +161,6 @@ exports.removePerson = function(req, res) {
   dbh.person().deleteById(req.query.person_id, function(result) {
     res.json(result);
   });
-};
-
-exports.bandInfoForPerson = function(req, res) {
-  var person_id = req.session.passport.user;
-  var dbh = new db.Handle();
-
-  var getBands = flow.define(
-    function() {
-      this.result = {};
-      dbh.person().getLoginPermissions(person_id, null, this);
-    }, function(result) {
-      if (result.err) {
-        res.json(result);
-      } else {
-        this.result = util.obj_merge(this.result, result);
-	dbh.band().getsByPersonId(person_id, this);
-      }
-    }, function(result) {
-      if (result.err) {
-        res.json(result);
-      } else {
-        this.result = util.obj_merge(this.result, result);
-	dbh.band().getsByNotPersonId(person_id, this);
-      }
-    }, function(result) {
-      if (result.err) {
-        res.json(result);
-      } else {
-        this.result = util.obj_merge(this.result, result);
-        res.json(this.result);
-     }
-    }
-  );
-
-  getBands();
 };
 
 exports.createBand = function(req, res) {
@@ -122,49 +213,6 @@ exports.removeBand = function(req, res) {
   dbh.band().deleteById(req.query.band_id, function(result) {
     res.json(result);
   });
-};
-
-exports.bandMemberInfo = function(req, res) {
-  var person_id = req.session.passport.user;
-  var band_id = req.query.band_id;
-  var dbh = new db.Handle();
-
-  var get_list = flow.define(
-    function() {
-      this.result = {};
-      dbh.person().getLoginPermissions(person_id, band_id, this);
-    }, function(result) {
-      if (result.err) {
-        res.json(result);
-      } else {
-        this.result = util.obj_merge(this.result, result);
-        dbh.band_member().getsByBandId(band_id, this);
-      }
-    }, function(result) {
-       if (result.err) {
-         res.json(result);
-       } else {
-         this.result = util.obj_merge(this.result, result);
-	 dbh.band_member().getsByNotBandId(band_id, this);
-       }
-    }, function(result) {
-      if (result.err) {
-        res.json(result);
-      } else {
-        this.result = util.obj_merge(this.result, result);
-	dbh.band().getById(band_id, this);
-      }
-    }, function(result) {
-      if (result.err) {
-        res.json(result);
-      } else {
-        this.result = util.obj_merge(this.result, result);
-        res.json(this.result);
-      }
-    }
-  );
-
-  get_list();
 };
 
 exports.addBandMember = function(req, res) {
@@ -265,35 +313,6 @@ exports.removeBandMember = function(req, res) {
   deleteMember();
 };
 
-exports.artistInfo = function(req, res) {
-  var person_id = req.session.passport.user;
-  var band_id = req.query.band_id;
-  var dbh = new db.Handle();
-
-  var getArtistList = flow.define(
-    function() {
-      this.result = {};
-      dbh.person().getLoginPermissions(person_id, band_id, this);
-    }, function(result) {
-      if (result.err) {
-        res.json(result);
-      } else {
-	this.result = util.obj_merge(this.result, result);
-	dbh.artist().getAllWithSongCount(this);
-      }
-    }, function(result) {
-      if (result.err) {
-        res.json(result);
-      } else {
-        this.result = util.obj_merge(this.result, result);
-        res.json(this.result);
-      }
-    }
-  );
-
-  getArtistList();
-};
-
 exports.createArtist = function(req, res) {
   var dbh = new db.Handle();
   dbh.artist().create(req.body, function(result) {
@@ -320,57 +339,6 @@ exports.removeSong = function(req, res) {
   dbh.song().deleteById(req.query.song_id, function(result) {
     res.json(result);
   });
-};
-
-exports.bandSongInfo = function(req, res) {
-  var person_id = req.session.passport.user;
-  var band_id = req.query.band_id;
-  var sort_type = req.query.sort_type;
-  var filters_json = req.query.filters;
-  var filters = filters_json ? JSON.parse(filters_json) : [];
-
-  var dbh = new db.Handle();
-
-  var getSongs = flow.define(
-    function() {
-      this.result = {
-        sort_type: sort_type,
-        filters: filters
-      };
-
-      dbh.person().getLoginPermissions(person_id, band_id, this);
-    }, function(result) {
-      if (result.err) {
-        res.json(result);
-      } else {
-        this.result = util.obj_merge(this.result, result);
-        dbh.song().getBandList(person_id, band_id, sort_type, filters, this);
-      }
-    }, function(result) {
-      if (result.err) {
-        res.json(result);
-      } else {
-        this.result = util.obj_merge(this.result, result);
-        dbh.artist().getAll(this);
-      }
-    }, function(result) {
-      if (result.err) {
-        res.json(result);
-      } else {
-        this.result = util.obj_merge(this.result, result);
-        dbh.song().getOtherSongs(band_id, this);
-      }
-    }, function(result) {
-      if (result.err) {
-        res.json(result);
-      } else {
-        this.result = util.obj_merge(this.result, result);
-        res.json(this.result);
-      }
-    }
-  );
-
-  getSongs();
 };
 
 exports.addBandSong = function(req, res) {
@@ -530,3 +498,4 @@ exports.updateSongRating = function(req, res) {
 
   updateRating();
 };
+*/

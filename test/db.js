@@ -5,7 +5,7 @@ var fs = require('fs');
 
 var db = require('lib/db');
 
-describe('db utility', function() {
+describe('db_utility', function() {
   describe('#path', function() {
     it('should set the path', function(done) {
       db.setDbPath();
@@ -24,7 +24,7 @@ describe('db utility', function() {
   });
 });
 
-describe('db', function() {
+describe('db_basic', function() {
   describe('#execute', function() {
     before(function(done) {
       db.setDbPath('./bombay_test.db');
@@ -95,13 +95,13 @@ describe('db', function() {
 	should.not.exist(result.err);
 	result.band.length.should.eql(4);
 	result.band.should.eql([{
-	  id: 1, name: 'band1',
+	  id: 4, name: 'Jazz Wild',
 	}, {
-	  id: 2, name: 'band2',
+	  id: 2, name: 'Live! Dressed! Girls!',
 	}, {
-	  id: 3, name: 'band3',
+	  id: 3, name: 'Sally Says Go',
 	}, {
-	  id: 4, name: 'band4',
+	  id: 1, name: 'Wild At Heart',
 	}]);
 	done();
       });
@@ -151,13 +151,13 @@ describe('db', function() {
 	  should.not.exist(result.err);
 	  result.band.length.should.eql(4);
 	  result.band.should.eql([{
-	    id: 1, name: 'band1',
+	    id: 4, name: 'Jazz Wild',
 	  }, {
-	    id: 2, name: 'band2',
+	    id: 2, name: 'Live! Dressed! Girls!',
 	  }, {
-	    id: 3, name: 'band3',
+	    id: 3, name: 'Sally Says Go',
 	  }, {
-	    id: 4, name: 'band4',
+	    id: 1, name: 'Wild At Heart',
 	  }]);
 	  done();
 	});
@@ -204,13 +204,13 @@ describe('db', function() {
 	  should.not.exist(result.err);
 	  result.band.length.should.eql(4);
 	  result.band.should.eql([{
-	    id: 1, name: 'band1',
+	    id: 4, name: 'Jazz Wild',
 	  }, {
-	    id: 2, name: 'band2',
+	    id: 2, name: 'Live! Dressed! Girls!',
 	  }, {
-	    id: 3, name: 'band3',
+	    id: 3, name: 'Sally Says Go',
 	  }, {
-	    id: 4, name: 'band4',
+	    id: 1, name: 'Wild At Heart',
 	  }]);
 	  done();
 	});
@@ -230,13 +230,13 @@ describe('db', function() {
 	  should.not.exist(result.err);
 	  result.band.length.should.eql(4);
 	  result.band.should.eql([{
-	    id: 1, name: 'band1',
+	    id: 4, name: 'Jazz Wild',
 	  }, {
-	    id: 2, name: 'band2',
+	    id: 2, name: 'Live! Dressed! Girls!',
 	  }, {
-	    id: 3, name: 'band3',
+	    id: 3, name: 'Sally Says Go',
 	  }, {
-	    id: 4, name: 'band4',
+	    id: 1, name: 'Wild At Heart',
 	  }]);
 	  done();
 	});

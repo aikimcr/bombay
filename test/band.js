@@ -112,10 +112,7 @@ describe('band_table', function() {
     var band_id;
     it('should create the band', function(done) {
       band.create({name: 'Cover Story'}, function(result) {
-        should.exist(result);
-        should.exist(result.band_id);
-        should.not.exist(result.err);
-        band_id = result.band_id;
+        band_id = test_util.check_result(result, 'band_id');
         done();
       });
     });

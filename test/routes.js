@@ -1,8 +1,12 @@
 var should = require('should');
 var fs = require('fs');
 
+var test_util = require('test/lib/util');
+
 var db = require('lib/db');
 var routes = require('routes/db');
+
+db.setLogDbErrors(false);
 
 describe('routes', function() {
   var dbh;
@@ -62,678 +66,497 @@ describe('routes', function() {
     });
   });
 
-  var req = {
-    session: {
-      passport: {
-        user: 1
-      }
-    },
-    query: {
-    }
-  };
-
-  describe('#person', function() {
-    it('should return the person profile', function(done) {
-      var res = {
-	json: function(result) {
-	  result.should.eql({
-	    person: 
-	    {
-	      id: 1,
-	      name: 'test',
-	      full_name: 'System Admin Test User',
-	      password: 'admin',
-	      email: null,
-	      system_admin: true
-	    }
-	  });
-	  done();
-	}
-      };
-
-      routes.getPerson(req, res);
-    });
-
-    var person_id;
-    it('should create a person', function(done) {
-      req.body = {
-	name: 'dduck',
-	full_name: 'Daffy Duck',
-	email: 'dduck@looneytunes.com'
-      };
-      var res = {
-	json: function(result) {
-	  should.exist(result);
-	  should.exist(result.person_id);
-	  should.not.exist(result.err);
-	  person_id = result.person_id
-	  dbh.person().getById(person_id, function(result) {
-	    should.exist(result);
-	    should.exist(result.person);
-	    should.not.exist(result.err);
-	    result.person.should.eql({
-	      id: person_id,
-	      name: 'dduck',
-	      full_name: 'Daffy Duck',
-	      password: 'password',
-	      email: 'dduck@looneytunes.com',
-	      system_admin: false
-	    });
-	    done();
-	  });
-	}
-      };
-
-      routes.createPerson(req, res);
-    });
-
-    it('should update the person', function(done) {
-      req.body = {
-	id: person_id,
-	password: 'IAmTheEggDuck',
-	system_admin: true
-      };
-      var res = {
-	json: function(result) {
-	  should.exist(result);
-	  should.not.exist(result.err);
-	  dbh.person().getById(person_id, function(result) {
-	    should.exist(result);
-	    should.exist(result.person);
-	    should.not.exist(result.err);
-	    result.person.should.eql({
-	      id: person_id,
-	      name: 'dduck',
-	      full_name: 'Daffy Duck',
-	      password: 'IAmTheEggDuck',
-	      email: 'dduck@looneytunes.com',
-	      system_admin: true
-	    });
-	    done();
-	  });
-	}
-      };
-
-      routes.updatePerson(req, res);
-    });
-
-    it('should delete the person', function(done) {
-      req.query.person_id = person_id;
-      var res = {
-	json: function(result) {
-	  should.exist(result);
-	  should.not.exist(result.err);
-	  dbh.person().getById(person_id, function(result) {
-	    should.exist(result);
-	    should.not.exist(result.person);
-	    should.not.exist(result.err);
-	    done();
-	  });
-	}
-      };
-
-      routes.removePerson(req, res);
-    });
+  var req;
+  beforeEach(function(done) {
+    req = {
+      session: {
+        passport: {
+          user: 1
+        }
+      },
+      query: {
+      },
+      params: {
+      },
+    };
+    done();
   });
 
-  describe('#band', function() {
-    it('should return the band tab object', function(done) {
-      var res = {
-	json: function(result) {
-	  result.should.eql({
-	    person_id: 1,
-	    system_admin: 1,
-	    band_id: null,
-	    band_admin: null,
-	    person_bands: [{
-	      id: 1, name: 'band1'
-	    }, {
-	      id: 2, name: 'band2'
-	    }],
-	    other_bands: [{
-	      id: 3, name: 'band3'
-	    }, {
-	      id: 4, name: 'band4'
-	    }]
-	  });
-	  done();
-	}
-      };
-
-      routes.bandInfoForPerson(req, res);
-    });
-
-    var band_id;
-    it('should create a new band for a person', function(done) {
-      req.body = { name: 'Looney Tunes' };
-      var res = {
-	json: function(result) {
-	  should.exist(result);
-	  should.exist(result.band_id);
-	  should.not.exist(result.err);
-	  band_id = result.band_id;
-	  dbh.band().getsByPersonId(1, function(result) {
-	    should.exist(result);
-	    should.exist(result.person_bands);
-	    should.not.exist(result.err);
-	    result.person_bands.should.eql([{
-	      id: band_id, name: 'Looney Tunes'
-	    }, {
-	      id: 1, name: 'band1'
-	    }, {
-	      id: 2, name: 'band2'
-	    }]);
-	    dbh.person().getLoginPermissions(1, band_id, function(result) {
-	      should.exist(result);
-	      should.exist(result.band_admin);
-	      result.band_admin.should.eql(true);
-	      done();
-	    });
-	  });
-	}
-      };
-
-      routes.createBand(req, res);
-    });
-
-    before(function(done) {
-      dbh.band_member().deleteByPersonAndBandId(1, band_id, function(result) {
-	done();
+  describe('#get', function() {
+    describe('#band', function() {
+      it('should return all the bands, sorted by name', function(done) {
+        var expected = [{
+	  id: 4, name: 'Jazz Wild'
+        }, {
+	  id: 2, name: 'Live! Dressed! Girls!'
+        }, {
+	  id: 3, name: 'Sally Says Go'
+        }, {
+	  id: 1, name: 'Wild At Heart'
+        }];
+        var res = {
+          json: function(result) {
+            test_util.check_list(result, expected, 'all_bands', ['id', 'name']);
+	    done();
+          }
+        };
+        routes.getBandTable(req, res);
       });
-    });
-    
-    it('should remove the band', function(done) {
-      req.query.band_id = band_id;
-      var res = {
-	json: function(result) {
-	  should.exist(result);
-	  should.not.exist(result.err);
-	  dbh.band().getById(band_id, function(result) {
-	    should.exist(result);
-	    should.not.exist(result.band);
-	    should.not.exist(result.err);
+
+      it('should return band with id 1', function(done) {
+        var expected = {id: 1, name: 'Wild At Heart' };
+        req.query.id = 1;
+        var res = {
+          json: function(result) {
+            test_util.check_item(result, expected, 'band', ['id', 'name']);
 	    done();
-	  });
-	}
-      };
-
-      routes.removeBand(req, res);
-    });
-  });
-
-  describe('#band_member', function() {
-    it('should return the band_member tab info', function(done) {
-      req.query.band_id = 1;
-      var res = {
-	json: function(result) {
-	  result.should.eql({
-	    person_id: 1,
-	    system_admin: 1,
-	    band_id: 1,
-	    band_admin: 0,
-	    band_members: [{
-	      id: 3,
-              full_name: 'Herkimer Jones',
-              email: null,
-              system_admin: 0,
-              band_admin: 0 
-	    }, {
-	      id: 1,
-              full_name: 'System Admin Test User',
-              email: null,
-              system_admin: 1,
-              band_admin: 0 
-	    }],
-	    non_band_members: [{
-	      id: 4, full_name: 'Bugs Bunny', email: null
-	    }, {
-	      id: 2, full_name: 'Non System Admin Test User', email: null 
-	    }],
-	    band: { id: 1, name: 'band1' }
-	  });
-	  done();
-	}
-      };
-
-      routes.bandMemberInfo(req, res);
-    });
-
-    it('should not find the band member', function(done) {
-      dbh.band_member().getByPersonAndBandId(4, 1, function(result) {
-	should.exist(result);
-	should.not.exist(result.band_member);
-	should.not.exist(result.err);
-	done();
+          }
+        };
+        routes.getBandTable(req, res);
       });
     });
 
-    it('should find no ratings for person', function(done) {
-      dbh.song_rating().getForBandMember(4, 1, function(result) {
-	should.exist(result);
-	should.exist(result.member_ratings);
-	should.not.exist(result.err);
-	result.member_ratings.should.eql([]);
-	done();
+    describe('#person', function() {
+      it('should return all the persons, sorted by full name', function(done) {
+        var expected = [{
+	  id: 2,
+	  name: 'aposer',
+	  full_name: 'Alan Poser',
+	  password: 'fakeit',
+	  email: 'aposer@wannabe.net',
+	  system_admin: false
+        }, {
+	  id: 3,
+	  name: 'ddrums',
+	  full_name: 'Danny Drums',
+	  password: 'backbeat',
+	  email: 'ddrums@musichero.foo',
+	  system_admin: false
+        }, {
+	  id: 4,
+	  name: 'jguitar',
+	  full_name: 'Johnny Guitar',
+	  password: 'tonefreak',
+	  email: 'jguitar@musichero.foo',
+	  system_admin: false
+        }, {
+	  id: 1,
+	  name: 'admin',
+	  full_name: 'System Admin User',
+	  password: 'admin',
+	  email: 'admin@allnightmusic.com',
+	  system_admin: true
+        }];
+        var res = {
+          json: function(result) {
+            test_util.check_list(result, expected, 'all_persons', ['id', 'name', 'full_name', 'password', 'email', 'system_admin']);
+	    done();
+          }
+        };
+        routes.getPersonTable(req, res);
+      });
+
+      it('should return person with id 1', function(done) {
+        var expected = {
+	  id: 1,
+	  name: 'admin',
+	  full_name: 'System Admin User',
+	  password: 'admin',
+	  email: 'admin@allnightmusic.com',
+	  system_admin: true
+        };
+        req.query.id = 1;
+        var res = {
+          json: function(result) {
+            test_util.check_item(result, expected, 'person', ['id', 'name', 'full_name', 'password', 'email', 'system_admin']);
+	    done();
+          }
+        };
+        routes.getPersonTable(req, res);
       });
     });
 
-    var band_member_id;
-    it('should add a band_member', function(done) {
-      req.body = {
-	band_id: 1,
-	person_id: 4,
-	band_admin: true
-      };
-      var res = {
-	json: function(result) {
-	  should.exist(result);
-	  should.exist(result.band_member_id);
-	  should.not.exist(result.err);
-	  band_member_id = result.band_member_id;
-	  dbh.band_member().getById(band_member_id, function(result) {
-	    should.exist(result);
-	    should.exist(result.band_member);
-	    should.not.exist(result.err);
-	    result.band_member.should.eql({
-	      id: band_member_id,
-	      band_id: 1,
-	      person_id: 4,
-	      band_admin: true
-	    });
-	    dbh.song_rating().getForBandMember(4, 1, function(result) {
-	      should.exist(result);
-	      should.exist(result.member_ratings);
-	      should.not.exist(result.err);
-	      result.member_ratings.should.eql([{
-		id: 11, person_id: 4, band_song_id: 1, rating: 3
-	      }, {
-		id: 12, person_id: 4, band_song_id: 2, rating: 3
-	      }, {
-		id: 13, person_id: 4, band_song_id: 3, rating: 3
-	      }, {
-		id: 14, person_id: 4, band_song_id: 4, rating: 3
-	      }, {
-		id: 15, person_id: 4, band_song_id: 5, rating: 3
-	      }]);
-	      done();
-	    });
-	  });
-	}
-      };
-
-      routes.addBandMember(req, res);
-    });
-
-    it('should update the band member band admin status', function(done) {
-      req.query = {
-	person_id: 4,
-	band_id: 1,
-	band_admin: false
-      };
-      var res = {
-	json: function(result) {
-	  should.exist(result);
-	  should.not.exist(result.err);
-	  dbh.band_member().getById(band_member_id, function(result) {
-	    should.exist(result);
-	    should.exist(result.band_member);
-	    should.not.exist(result.err);
+    describe('#artist', function() {
+      it('should return all the artists, sorted by name', function(done) {
+        var expected = [{
+	  id: 1, name: 'AC/DC'
+        }, {
+	  id: 5, name: 'David Bowie'
+        }, {
+	  id: 3, name: 'Led Zeppelin'
+        }, {
+	  id: 4, name: 'The Beatles'
+        }, {
+	  id: 2, name: 'ZZ Top'      
+        }];
+        var res = {
+          json: function(result) {
+            test_util.check_list(result, expected, 'all_artists', ['id', 'name']);
 	    done();
-	  });
-	}
-      };
+          }
+        };
+        routes.getArtistTable(req, res);
+      });
 
-      routes.updateBandMember(req, res);
+      it('should return artist with id 1', function(done) {
+        var expected = {id: 1, name: 'AC/DC' };
+        req.query.id = 1;
+        var res = {
+          json: function(result) {
+            test_util.check_item(result, expected, 'artist', ['id', 'name']);
+	    done();
+          }
+        };
+        routes.getArtistTable(req, res);
+      });
     });
 
-    it('should remove the band member and song ratings', function(done) {
-      req.query = {
-	person_id: 4,
-	band_id: 1
-      };
-      var res = {
-	json: function(result) {
-	  should.exist(result);
-	  should.not.exist(result.err);
-	  dbh.song_rating().getForBandMember(4, 1, function(result) {
-	    should.exist(result);
-	    should.exist(result.member_ratings);
-	    should.not.exist(result.err);
-	    result.member_ratings.should.eql([]);
-	    dbh.band_member().getById(band_member_id, function(result) {
-	      should.exist(result);
-	      should.not.exist(result.band_member);
-	      should.not.exist(result.err);
-	      done();
-	    });
-	  });
-	}
-      };
+    describe('#song', function() {
+      it('should return all the songs, sorted by name', function(done) {
+        var expected = [{
+	  id: 6, name: 'Help', artist_id: 4
+        }, {
+	  id: 5, name: 'I Wanna Hold Your Hand', artist_id: 4
+        }, {
+	  id: 4, name: 'Love Me Do', artist_id: 4
+        }, {
+	  id: 2, name: 'Rebel, Rebel', artist_id: 5
+        }, {
+	  id: 1, name: 'Space Oddity', artist_id: 5
+        }, {
+	  id: 7, name: 'Stairway To Heaven', artist_id: 3
+        }, {
+	  id: 3, name: 'You Shook Me All Night Long', artist_id: 1      
+        }];
+        var res = {
+          json: function(result) {
+            test_util.check_list(result, expected, 'all_songs', ['id', 'name', 'artist_id']);
+	    done();
+          }
+        };
+        routes.getSongTable(req, res);
+      });
 
-      routes.removeBandMember(req, res);
+      it('should return song with id 1', function(done) {
+        var expected = {id: 1, name: 'Space Oddity', artist_id: 5 };
+        req.query.id = 1;
+        var res = {
+          json: function(result) {
+            test_util.check_item(result, expected, 'song', ['id', 'name', 'artist_id']);
+	    done();
+          }
+        };
+        routes.getSongTable(req, res);
+      });
+    });
+
+    describe('#band_member', function() {
+      it('should return all the band_members, sorted by band_id and person_id', function(done) {
+        var expected = [{
+	  id: 1, band_id: 1, person_id: 1, band_admin: false
+        }, {
+	  id: 5, band_id: 1, person_id: 3, band_admin: false
+        }, {
+	  id: 2, band_id: 2, person_id: 1, band_admin: true
+        }, {
+	  id: 3, band_id: 3, person_id: 2, band_admin: false
+        }, {
+	  id: 4, band_id: 4, person_id: 2, band_admin: true
+        }];
+        var res = {
+          json: function(result) {
+            test_util.check_list(result, expected, 'all_band_members', ['id', 'band_id', 'person_id', 'band_admin']);
+	    done();
+          }
+        };
+        routes.getBandMemberTable(req, res);
+      });
+
+      it('should return band_member with id 1', function(done) {
+        var expected = {id: 1, band_id: 1, person_id: 1, band_admin: false };
+        req.query.id = 1;
+        var res = {
+          json: function(result) {
+            test_util.check_item(result, expected, 'band_member', ['id', 'band_id', 'person_id', 'band_admin']);
+	    done();
+          }
+        };
+        routes.getBandMemberTable(req, res);
+      });
+    });
+
+    describe('#band_song', function()  {
+      it('should return all the band_songs, sorted by band_id and song_id', function(done) {
+        var expected = [{
+	  id: 1, band_id: 1, song_id: 1, song_status: 4
+        }, {
+	  id: 2, band_id: 1, song_id: 2, song_status: 2
+        }, {
+	  id: 3, band_id: 1, song_id: 3, song_status: 3
+        }, {
+	  id: 4, band_id: 1, song_id: 4, song_status: 1
+        }, {
+	  id: 5, band_id: 1, song_id: 5, song_status: -1
+        }];
+        var res = {
+          json: function(result) {
+            test_util.check_list(result, expected, 'all_band_songs', ['id', 'band_id', 'song_id', 'song_status']);
+	    done();
+          }
+        };
+        routes.getBandSongTable(req, res);
+      });
+
+      it('should return band_song with id 1', function(done) {
+        var expected = {id: 1, band_id: 1, song_id: 1, song_status: 4 };
+        req.query.id = 1;
+        var res = {
+          json: function(result) {
+            test_util.check_item(result, expected, 'band_song', ['id', 'band_id', 'song_id', 'song_status']);
+	    done();
+          }
+        };
+        routes.getBandSongTable(req, res);
+      });
+    });
+
+    describe('#song_rating', function()  {
+      it('should return all the song_ratings, sorted by band_member_id and band_song_id', function(done) {
+        var expected = [{
+          id: 1, band_member_id: 1, band_song_id: 1, rating: 1
+        }, {
+          id: 2, band_member_id: 1, band_song_id: 2, rating: 2
+        }, {
+          id: 3, band_member_id: 1, band_song_id: 3, rating: 3
+        }, {
+          id: 4, band_member_id: 1, band_song_id: 4, rating: 4
+        }, {
+          id: 5, band_member_id: 1, band_song_id: 5, rating: 5
+        }, {
+          id: 6, band_member_id: 2, band_song_id: 1, rating: 1
+        }, {
+          id: 7, band_member_id: 2, band_song_id: 2, rating: 3
+        }, {
+          id: 8, band_member_id: 2, band_song_id: 3, rating: 3
+        }, {
+          id: 9, band_member_id: 2, band_song_id: 4, rating: 3
+        }, {
+          id: 10, band_member_id: 2, band_song_id: 5, rating: 5
+        }];
+        var res = {
+          json: function(result) {
+            test_util.check_list(result, expected, 'all_song_ratings', ['id', 'band_member_id', 'band_song_id', 'rating']);
+	    done();
+          }
+        };
+        routes.getSongRatingTable(req, res);
+      });
+
+      it('should return song_rating with id 1', function(done) {
+        var expected = {id: 1, band_member_id: 1, band_song_id: 1, rating: 1 };
+        req.query.id = 1;
+        var res = {
+          json: function(result) {
+            test_util.check_item(result, expected, 'song_rating', ['id', 'band_member_id', 'band_song_id', 'rating']);
+	    done();
+          }
+        };
+        routes.getSongRatingTable(req, res);
+      });
     });
   });
 
-  describe('#artist', function() {
-    it('should return the artist tab info', function(done) {
-      req.query.band_id = 2; // Need to know if user is a band_admin
-      var res = {
-	json: function(result) {
-	  result.should.eql({
-	    person_id: 1,
-	    system_admin: 1,
-	    band_id: 2,
-	    band_admin: 1,
-	    artists: [
-	      { id: 1, name: 'AC/DC', song_count: 1 },
-	      { id: 5, name: 'David Bowie', song_count: 2 },
-	      { id: 3, name: 'Led Zeppelin', song_count: 1 },
-	      { id: 4, name: 'The Beatles', song_count: 3 },
-	      { id: 2, name: 'ZZ Top', song_count: 0 }
-	    ]
-	  });
-	  done();
-	}
-      };
+  describe('#post', function() {
+    describe('#band', function() {
+      // Band creation should a a system_admin function.  The 
+      // process should be to create a band, create a person then
+      // make that person a band_member with band_admin privileges
+      // for the new band.
 
-      routes.artistInfo(req, res);
+      var band_id;
+      it('should create a band', function(done) {
+        req.body = {name: 'Cover Story'};
+        var res = {
+          json: function(result) {
+            band_id = test_util.check_result(result, 'band_id');
+            done();
+          }
+        };
+        routes.postBandTable(req, res);
+      });
+
+      it('should return an error', function(done) {
+        req.body = {name: 'Cover Story'};
+        var res = {
+          json: function(result) {
+            var error = test_util.check_error_result(result, 'band_id');
+            done();
+          }
+        };
+        routes.postBandTable(req, res);
+      });
     });
 
-    var artist_id;
-    it('should create an artist', function(done) {
-      req.body = {name: 'Mel Blanc'};
-      var res = {
-	json: function(result) {
-	  should.exist(result);
-	  should.exist(result.artist_id);
-	  should.not.exist(result.err);
-	  artist_id = result.artist_id;
-	  dbh.artist().getById(artist_id, function(result) {
-	    should.exist(result);
-	    should.exist(result.artist);
-	    should.not.exist(result.err);
-	    result.artist.should.eql({
-	      id: artist_id,
-	      name: 'Mel Blanc'
-	    });
-	    done();
-	  });
-	}
-      };
+    describe('#person', function() {
+      var person_id;
+      it('should create a person', function(done) {
+        req.body = {
+          name: 'bbongos',
+          full_name: 'Billy Bongos',
+          password: 'clave',
+          email: 'bbongos@musichero.foo',
+          system_admin: false,
+        };
+        var res = {
+          json: function(result) {
+            person_id = test_util.check_result(result, 'person_id');
+            done();
+          }
+        };
+        routes.postPersonTable(req, res);
+      });
 
-      routes.createArtist(req, res);
+      it('should return an error', function(done) {
+        req.body = {
+          name: 'bbongos',
+          full_name: 'Billy Bongos',
+          password: 'clave',
+          email: 'bbongos@musichero.foo',
+          system_admin: false,
+        };
+        var res = {
+          json: function(result) {
+            var error = test_util.check_error_result(result, 'person_id');
+            done();
+          }
+        };
+        routes.postPersonTable(req, res);
+      });
     });
 
-    it('should remove the artist', function(done) {
-      req.query = { artist_id: artist_id };
-      var res = {
-	json: function(result) {
-	  should.exist(result);
-	  should.not.exist(result.err);
-	  dbh.artist().getById(artist_id, function(result) {
-	    should.exist(result);
-	    should.not.exist(result.artist);
-	    should.not.exist(result.err);
-	    done();
-	  });
-	}
-      };
+    describe('#artist', function() {
+      var artist_id;
+      it('should create a artist', function(done) {
+        req.body = {name: 'Mott the Hoople'};
+        var res = {
+          json: function(result) {
+            artist_id = test_util.check_result(result, 'artist_id');
+            done();
+          }
+        };
+        routes.postArtistTable(req, res);
+      });
 
-      routes.removeArtist(req, res);
-    });
-  });
-
-  describe('#song_info', function() {
-    it('should return the song tab info', function(done) {
-      req.query = {
-	band_id: 1,
-	sort_type: 'song_name',
-	filters: JSON.stringify([])
-      };
-      var res = {
-	json: function(result) {
-	  result.should.eql({
-	    sort_type: 'song_name',
-	    filters: {},
-	    person_id: 1,
-	    system_admin: 1,
-	    band_id: 1,
-	    band_admin: 0,
-	    band_songs: [{
-	      name: 'I Wanna Hold Your Hand',
-              artist_name: 'The Beatles',
-              band_song_id: 5,
-              song_status: -1,
-              rating: 5,
-              avg_rating: 5
-	    }, {
-	      name: 'Love Me Do',
-              artist_name: 'The Beatles',
-              band_song_id: 4,
-              song_status: 1,
-              rating: 4,
-              avg_rating: 3.5
-	    }, {
-	      name: 'Rebel, Rebel',
-              artist_name: 'David Bowie',
-              band_song_id: 2,
-              song_status: 2,
-              rating: 2,
-              avg_rating: 2.5
-	    }, {
-	      name: 'Space Oddity',
-              artist_name: 'David Bowie',
-              band_song_id: 1,
-              song_status: 4,
-              rating: 1,
-              avg_rating: 1
-	    }, {
-	      name: 'You Shook Me All Night Long',
-              artist_name: 'AC/DC',
-              band_song_id: 3,
-              song_status: 3,
-              rating: 3,
-              avg_rating: 3 
-	    }],
-	    all_artists: [
-	      { id: 1, name: 'AC/DC' },
-	      { id: 5, name: 'David Bowie' },
-	      { id: 3, name: 'Led Zeppelin' },
-	      { id: 4, name: 'The Beatles' },
-	      { id: 2, name: 'ZZ Top' }
-	    ],
-	    other_songs: [{
-	      id: 6,
-              name: 'Help',
-              artist_id: 4,
-              artist_name: 'The Beatles',
-              description: 'Help by The Beatles'
-	    }, {
-	      id: 7,
-              name: 'Stairway To Heaven',
-              artist_id: 3,
-              artist_name: 'Led Zeppelin',
-              description: 'Stairway To Heaven by Led Zeppelin' }]
-	  });
-	  done();
-	}
-      };
-
-      routes.bandSongInfo(req, res);
+      it('should return an error', function(done) {
+        req.body = {name: 'Mott the Hoople'};
+        var res = {
+          json: function(result) {
+            var error = test_util.check_error_result(result, 'artist_id');
+            done();
+          }
+        };
+        routes.postArtistTable(req, res);
+      });
     });
 
-    var song_id;
-    it('should create a song', function(done) {
-      req.body = {
-	name: 'Whole Lotta Rosie',
-	artist_id: 1
-      };
-      var res = {
-	json: function(result) {
-	  should.exist(result);
-	  should.exist(result.song_id);
-	  should.not.exist(result.err);
-	  song_id = result.song_id;
-	  dbh.song().getById(song_id, function(result) {
-	    should.exist(result);
-	    should.exist(result.song);
-	    should.not.exist(result.err);
-	    result.song.should.eql({
-	      id: song_id,
-	      name: 'Whole Lotta Rosie',
-	      artist_id: 1
-	    });
-	    done();
-	  });
-	}
-      };
+    describe('#song', function() {
+      var song_id;
+      it('should create a song', function(done) {
+        req.body = {name: 'La Grange', artist_id: 2};
+        var res = {
+          json: function(result) {
+            song_id = test_util.check_result(result, 'song_id');
+            done();
+          }
+        };
+        routes.postSongTable(req, res);
+      });
 
-      routes.createSong(req, res);
+      it('should return an error', function(done) {
+        req.body = {name: 'La Grange', artist_id: 2};
+        var res = {
+          json: function(result) {
+            var error = test_util.check_error_result(result, 'song_id');
+            done();
+          }
+        };
+        routes.postSongTable(req, res);
+      });
     });
 
-    var band_song_id;
-    it('should add song to a band', function(done) {
-      req.body = {
-	band_id: 1,
-	song_id: song_id
-      };
-      var res = {
-	json: function(result) {
-	  should.exist(result);
-	  should.exist(result.band_song_id);
-	  should.not.exist(result.err);
-	  band_song_id = result.band_song_id;
-	  dbh.band_song().getById(band_song_id, function(result) {
-	    should.exist(result);
-	    should.exist(result.band_song);
-	    should.not.exist(result.err);
-	    result.band_song.should.eql({
-	      id: band_song_id,
-	      band_id: 1,
-	      song_id: song_id,
-	      song_status: 0
-	    });
-	    dbh.song_rating().getForSong(song_id, 1, function(result) {
-	      should.exist(result);
-	      should.exist(result.song_ratings);
-	      should.not.exist(result.err);
-	      result.song_ratings.should.eql([{
-		id: 16, person_id: 1, band_song_id: band_song_id, rating: 3
-	      }, {
-		id: 17, person_id: 3, band_song_id: band_song_id, rating: 3
-	      }])
-	      done();
-	    });
-	  });
-	}
-      };
+    describe('#band_member', function() {
+      var band_member_id;
+      it('should create a band_member', function(done) {
+        req.body = {band_id: 3, person_id: 1, band_admin: true};
+        var res = {
+          json: function(result) {
+            band_member_id = test_util.check_result(result, 'band_member_id');
+            done();
+          }
+        };
+        routes.postBandMemberTable(req, res);
+      });
 
-      routes.addBandSong(req, res);
+      it('should return an error', function(done) {
+        req.body = {band_id: 3, person_id: 1, band_admin: true};
+        var res = {
+          json: function(result) {
+            var error = test_util.check_error_result(result, 'band_member_id');
+            done();
+          }
+        };
+        routes.postBandMemberTable(req, res);
+      });
     });
 
-    it('should update the band song status', function(done) {
-      req.query = {
-	band_song_id: band_song_id,
-	song_status: 4,
-      };
-      var res = {
-	json: function(result) {
-	  should.exist(result);
-	  should.not.exist(result.err);
-	  result.should.eql({
-	    band_song_id: band_song_id,
-	    song_status: 4
-	  });
-	  dbh.band_song().getById(band_song_id, function(result) {
-	    should.exist(result);
-	    should.exist(result.band_song);
-	    should.not.exist(result.err);
-	    result.band_song.should.eql({
-	      id: band_song_id,
-	      band_id: 1,
-	      song_id: song_id,
-	      song_status: 4
-	    });
-	    done();
-	  });
-	}
-      };
+    describe('#band_song', function() {
+      var band_song_id;
+      it('should create a band_song', function(done) {
+        req.body = {band_id: 3, song_id: 1, song_status: 3};
+        var res = {
+          json: function(result) {
+            band_song_id = test_util.check_result(result, 'band_song_id');
+            done();
+          }
+        };
+        routes.postBandSongTable(req, res);
+      });
 
-      routes.updateBandSong(req, res);
+      it('should return an error', function(done) {
+        req.body = {band_id: 3, song_id: 1, song_status: 4};
+        var res = {
+          json: function(result) {
+            var error = test_util.check_error_result(result, 'band_song_id');
+            done();
+          }
+        };
+        routes.postBandSongTable(req, res);
+      });
     });
 
-    it('should update the song rating', function(done) {
-      req.query = {
-	person_id: 1,
-	band_song_id: band_song_id,
-	rating: 1
-      };
-      var res = {
-	json: function(result) {
-	  should.exist(result);
-	  should.exist(result.band_song_id);
-	  should.exist(result.song_rating);
-	  should.not.exist(result.err);
-	  result.band_song_id.should.eql(band_song_id);
-	  result.song_rating.should.eql({
-	    person_id: 1,
-	    band_song_id: band_song_id,
-	    rating: 1,
-	    average_rating: 2
-	  });
-	  done();
-	}
-      };
+    describe('#song_rating', function() {
+      var song_rating_id;
+      it('should create a song_rating', function(done) {
+        req.body = {band_member_id: 3, band_song_id: 1, rating: 3};
+        var res = {
+          json: function(result) {
+            song_rating_id = test_util.check_result(result, 'song_rating_id');
+            done();
+          }
+        };
+        routes.postSongRatingTable(req, res);
+      });
 
-      routes.updateSongRating(req, res);
-    });
-
-    it('should remove the song and ratings from the band', function(done) {
-      req.query = {
-	band_id: 1,
-	band_song_id: band_song_id
-      };
-      var res = {
-	json: function(result) {
-	  should.exist(result);
-	  should.not.exist(result.err);
-	  dbh.band_song().getById(band_song_id, function(result) {
-	    should.exist(result);
-	    should.not.exist(result.band_song);
-	    should.not.exist(result.err);
-	    dbh.song_rating().getForBandMember(3, 1, function(result) {
-	      should.exist(result);
-	      should.exist(result.member_ratings);
-	      should.not.exist(result.err);
-	      result.member_ratings.should.eql([]);
-	      done();
-	    });
-	  });
-	}
-      };
-
-      routes.removeBandSong(req, res);
-    });
-
-    it('should remove the song from the database', function(done) {
-      req.query.song_id = song_id;
-      var res = {
-	json: function(result) {
-	  should.exist(result);
-	  should.not.exist(result.err);
-	  dbh.song().getById(song_id, function(result) {
-	    should.exist(result);
-	    should.not.exist(result.song);
-	    should.not.exist(result.err);
-	    done();
-	  });
-	}
-      };
-
-      routes.removeSong(req, res);
+      it('should return an error', function(done) {
+        req.body = {band_member_id: 3, band_song_id: 1, rating: 4};
+        var res = {
+          json: function(result) {
+            var error = test_util.check_error_result(result, 'song_rating_id');
+            done();
+          }
+        };
+        routes.postSongRatingTable(req, res);
+      });
     });
   });
-
-  afterEach(function(done) { req.query = {}; done(); });
-  afterEach(function(done) { req.body = {}; done(); });
 });

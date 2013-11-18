@@ -104,10 +104,7 @@ describe('song_table', function() {
         name: 'La Grange',
         artist_id: 2,
       }, function(result) {
-        should.exist(result);
-        should.exist(result.song_id);
-        should.not.exist(result.err);
-        song_id = result.song_id;
+        song_id = test_util.check_result(result, 'song_id');
         done();
       });
     });
@@ -118,6 +115,24 @@ describe('song_table', function() {
         should.exist(result.song);
         result.song.id.should.eql(song_id);
         result.song.name.should.eql('La Grange');
+        result.song.artist_id.should.eql(2);
+        done();
+      });
+    });
+
+    it('should update the song', function(done) {
+      song.update({id: song_id, name: 'TV Dinners'}, function(result) {
+        test_util.check_result(result, 'song');
+        done();
+      });
+    });
+
+    it('should get the song', function(done) {
+      song.getById(song_id, function(result) {
+        should.exist(result);
+        should.exist(result.song);
+        result.song.id.should.eql(song_id);
+        result.song.name.should.eql('TV Dinners');
         result.song.artist_id.should.eql(2);
         done();
       });
