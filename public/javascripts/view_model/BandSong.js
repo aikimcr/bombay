@@ -1,34 +1,33 @@
 function BandSong(id, band_id, song_id, status) {
-  this.id = ko.observable(id);
-  this.band_id = ko.observable(band_id);
-  this.song_id = ko.observable(song_id);
-  this.status = ko.observable(status);
+  this.id = ko.observable(id || -1);
+  this.band_id = ko.observable(band_id || -1);
+  this.song_id = ko.observable(song_id || -1);
+  this.status = ko.observable(status || null);
 
-/*
   // Joins
-  this.band = ko.computed(function () {
-    return manager.getById(manager.bands, this.band_id());
+  this.band = ko.computed(function() {
+    return manager.bands.getById(this.band_id()) || new Band();
   }.bind(this));
-  this.song = ko.computed(function () {
-    return manager.getById(manager.songs, this.song_id());
+
+  this.song = ko.computed(function() {
+    return manager.songs.getById(this.song_id()) || new Song();
   }.bind(this));
-  this.song_ratings = ko.computed(function () {
-    return ko.utils.arrayFilter(manager.song_ratings(), function (rating) {
-      return rating.band_song_id() == this.id();
-    }.bind(this));
+
+  this.song_ratings = ko.computed(function() {
+    return manager.song_ratings.filterByKey('band_song_id', this.id());
   }.bind(this));
 
   // Calculations
-  this.member_rating = ko.computed(function () {
+  this.member_rating = ko.computed(function() {
     var ratings = this.song_ratings();
     if (ratings.length == 0) {
       return '**no ratings**';
     } else {
       var member_rating = ko.utils.arrayFirst(ratings, function(rating) {
-        return rating.person_id() == manager.current_person().id();
+        return rating.band_member_id() == manager.current_band_member().id();
       }.bind(this));
       if (member_rating) {
-        return member_rating.song_rating();
+        return member_rating.rating();
       } else {
         return '**unrated**';
       }
@@ -42,17 +41,11 @@ function BandSong(id, band_id, song_id, status) {
     }
     var rating_sum = 0;
     ratings.forEach(function(rating) {
-      rating_sum += rating.song_rating();
+      rating_sum += rating.rating();
     });
 
     return rating_sum / ratings.length;
   }.bind(this));
-
-  // Additional Add logic
-  ko.utils.arrayForEach(this.band().band_members(), function(band_member) {
-    manager.addSongRatingWithArgs(band_member.person_id(), this.id());
-  }.bind(this));
-*/
 }
 util.inherits(BandSong, Table);
 

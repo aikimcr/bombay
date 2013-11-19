@@ -1,10 +1,10 @@
 function Person(id, name, full_name, email, system_admin) {
   Table.call(this);
-  this.id = ko.observable(id);
-  this.name = ko.observable(name);
-  this.full_name = ko.observable(full_name);
-  this.email = ko.observable(email);
-  this.system_admin = ko.observable(system_admin);
+  this.id = ko.observable(id || -1);
+  this.name = ko.observable(name || '');
+  this.full_name = ko.observable(full_name || '');
+  this.email = ko.observable(email || '');
+  this.system_admin = ko.observable(system_admin || false);
 
 /*
   this.band_members = ko.computed(function() {

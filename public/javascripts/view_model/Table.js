@@ -18,3 +18,15 @@ TableList.prototype.load_ = function(result) {
     this.list.push(this.build_object_(model));
   }.bind(this));
 };
+
+TableList.prototype.filterByKey = function(key, value) {
+  return ko.utils.arrayFilter(this.list(), function(item) {
+    return item[key]() == value;
+  });
+};
+
+TableList.prototype.getById = function(id) {
+  return ko.utils.arrayFirst(this.list(), function(item) {
+    return item.id() == id;
+  }.bind(this));
+};

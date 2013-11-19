@@ -1,17 +1,16 @@
 function BandMember(id, band_id, person_id, band_admin) {
-  this.id = ko.observable(id);
-  this.band_id = ko.observable(band_id);
-  this.person_id = ko.observable(person_id);
-  this.band_admin = ko.observable(band_admin);
+  this.id = ko.observable(id || -1);
+  this.band_id = ko.observable(band_id || -1);
+  this.person_id = ko.observable(person_id || -1);
+  this.band_admin = ko.observable(band_admin || false);
 
-/*
-  this.person = ko.computed(function () {
-    return manager.getById(manager.people, this.person_id());
+  this.band = ko.computed(function() {
+    return manager.bands.getById(this.band_id()) || new Band();
   }.bind(this));
-  this.band = ko.computed(function () {
-    return manager.getById(manager.bands, this.band_id());
+
+  this.person = ko.computed(function() {
+    return manager.persons.getById(this.person_id()) || new Person();
   }.bind(this));
-*/
 }
 util.inherits(BandMember, Table);
 

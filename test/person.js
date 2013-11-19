@@ -53,7 +53,6 @@ describe('person_table', function() {
       });
     });
 
-
     it('should update the person', function(done) {
       var data = {
         id: person_id,

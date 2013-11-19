@@ -1,31 +1,31 @@
 function Song(id, name, artist_id) {
   Table.call(this);
-  this.id = ko.observable(id);
-  this.name = ko.observable(name);
-  this.artist_id = ko.observable(artist_id);
+  this.id = ko.observable(id || -1);
+  this.name = ko.observable(name || '');
+  this.artist_id = ko.observable(artist_id || -1);
 
-/*
-  this.artist = ko.computed(function () {
-    return manager.getById(manager.artists, this.artist_id());
+  this.artist = ko.computed(function() {
+    return manager.artists.getById(this.artist_id()) || new Artist();
   }.bind(this));
-  this.band_songs = ko.computed(function () {
-    return ko.utils.arrayFilter(manager.band_songs(), function (band_song) {
-      return band_song.song_id() == this.id();
-    }.bind(this));
+
+  this.band_songs = ko.computed(function() {
+    return manager.band_songs.filterByKey('song_id', this.id());
   }.bind(this));
+
   this.description = ko.computed(function () {
     if (!this.name() || !this.artist()) { return ''; }
     return this.name() + ' by ' + this.artist().name();
   }.bind(this));
+
   this.bands = ko.computed(function () {
     return ko.utils.arrayMap(this.band_songs(), function(band_song) {
       return band_song.band();
     }.bind(this));
   }.bind(this));
+
   this.band_count = ko.computed(function () {
     return this.bands().length;
   }.bind(this));
-*/
 }
 util.inherits(Song, Table);
 

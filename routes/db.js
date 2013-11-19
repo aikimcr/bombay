@@ -6,6 +6,14 @@ var flow = require('flow');
 var db = require('lib/db');
 var util = require('lib/util');
 
+exports.getSessionInfo = function(req, res) {
+  var session = req.session.passport;
+  var dbh = new db.Handle();
+  dbh.person().getById(session.user, function(result) {
+    res.json(result);
+  });
+};
+
 exports.getBandTable = function(req, res) {
   var band_id = req.params.id;
   if (!band_id) band_id = req.query.id;
@@ -13,26 +21,36 @@ exports.getBandTable = function(req, res) {
   var dbh = new db.Handle();
 
   if (band_id) {
-    dbh.band().getById(band_id, res.json);
+    dbh.band().getById(band_id, function(result) {
+      res.json(result);
+    });
   } else {
     var params = { sort: { order: 'name' }};
-    dbh.band().getAllWithArgs(params, res.json);
+    dbh.band().getAllWithArgs(params, function(result) {
+      res.json(result);
+    });
   }
 };
 
 exports.postBandTable = function(req, res) {
   var dbh = new db.Handle();
-  dbh.band().create(req.body, res.json);
+  dbh.band().create(req.body, function(result) {
+    res.json(result);
+  });
 };
 
 exports.putBandTable = function(req, res) {
   var dbh = new db.Handle();
-  dbh.band().update(req.query, res.json);
+  dbh.band().update(req.query, function(result) {
+    res.json(result);
+  });
 };
 
 exports.deleteBandTable = function(req, res) {
   var dbh = new db.Handle();
-  dbh.band().deleteById(req.query.id, res.json);
+  dbh.band().deleteById(req.query.id, function(result) {
+    res.json(result);
+  });
 };
 
 exports.getPersonTable = function(req, res) {
@@ -42,26 +60,36 @@ exports.getPersonTable = function(req, res) {
   var dbh = new db.Handle();
 
   if (person_id) {
-    dbh.person().getById(person_id, res.json);
+    dbh.person().getById(person_id, function(result) {
+      res.json(result);
+    });
   } else {
     var params = { sort: { order: 'full_name' }};
-    dbh.person().getAllWithArgs(params, res.json);
+    dbh.person().getAllWithArgs(params, function(result) {
+      res.json(result);
+    });
   }
 };
 
 exports.postPersonTable = function(req, res) {
   var dbh = new db.Handle();
-  dbh.person().create(req.body, res.json);
+  dbh.person().create(req.body, function(result) {
+    res.json(result);
+  });
 };
 
 exports.putPersonTable = function(req, res) {
   var dbh = new db.Handle();
-  dbh.person().update(req.query, res.json);
+  dbh.person().update(req.query, function(result) {
+    res.json(result);
+  });
 };
 
 exports.deletePersonTable = function(req, res) {
   var dbh = new db.Handle();
-  dbh.person().deleteById(req.query.id, res.json);
+  dbh.person().deleteById(req.query.id, function(result) {
+    res.json(result);
+  });
 };
 
 exports.getArtistTable = function(req, res) {
@@ -71,26 +99,36 @@ exports.getArtistTable = function(req, res) {
   var dbh = new db.Handle();
 
   if (artist_id) {
-    dbh.artist().getById(artist_id, res.json);
+    dbh.artist().getById(artist_id, function(result) {
+      res.json(result);
+    });
   } else {
     var params = { sort: { order: 'name' }};
-    dbh.artist().getAllWithArgs(params, res.json);
+    dbh.artist().getAllWithArgs(params, function(result) {
+      res.json(result);
+    });
   }
 };
 
 exports.postArtistTable = function(req, res) {
   var dbh = new db.Handle();
-  dbh.artist().create(req.body, res.json);
+  dbh.artist().create(req.body, function(result) {
+    res.json(result);
+  });
 };
 
 exports.putArtistTable = function(req, res) {
   var dbh = new db.Handle();
-  dbh.artist().update(req.query, res.json);
+  dbh.artist().update(req.query, function(result) {
+    res.json(result);
+  });
 };
 
 exports.deleteArtistTable = function(req, res) {
   var dbh = new db.Handle();
-  dbh.artist().deleteById(req.query.id, res.json);
+  dbh.artist().deleteById(req.query.id, function(result) {
+    res.json(result);
+  });
 };
 
 exports.getSongTable = function(req, res) {
@@ -100,26 +138,36 @@ exports.getSongTable = function(req, res) {
   var dbh = new db.Handle();
 
   if (song_id) {
-    dbh.song().getById(song_id, res.json);
+    dbh.song().getById(song_id, function(result) {
+      res.json(result);
+    });
   } else {
     var params = { sort: { order: 'name' }};
-    dbh.song().getAllWithArgs(params, res.json);
+    dbh.song().getAllWithArgs(params, function(result) {
+      res.json(result);
+    });
   }
 };
 
 exports.postSongTable = function(req, res) {
   var dbh = new db.Handle();
-  dbh.song().create(req.body, res.json);
+  dbh.song().create(req.body, function(result) {
+    res.json(result);
+  });
 };
 
 exports.putSongTable = function(req, res) {
   var dbh = new db.Handle();
-  dbh.song().update(req.query, res.json);
+  dbh.song().update(req.query, function(result) {
+    res.json(result);
+  });
 };
 
 exports.deleteSongTable = function(req, res) {
   var dbh = new db.Handle();
-  dbh.song().deleteById(req.query.id, res.json);
+  dbh.song().deleteById(req.query.id, function(result) {
+    res.json(result);
+  });
 };
 
 exports.getBandMemberTable = function(req, res) {
@@ -129,26 +177,36 @@ exports.getBandMemberTable = function(req, res) {
   var dbh = new db.Handle();
 
   if (band_member_id) {
-    dbh.band_member().getById(band_member_id, res.json);
+    dbh.band_member().getById(band_member_id, function(result) {
+      res.json(result);
+    });
   } else {
     var params = { sort: { order: [ 'band_id', 'person_id' ] }};
-    dbh.band_member().getAllWithArgs(params, res.json);
+    dbh.band_member().getAllWithArgs(params, function(result) {
+      res.json(result);
+    });
   }
 };
 
 exports.postBandMemberTable = function(req, res) {
   var dbh = new db.Handle();
-  dbh.band_member().create(req.body, res.json);
+  dbh.band_member().create(req.body, function(result) {
+    res.json(result);
+  });
 };
 
 exports.putBandMemberTable = function(req, res) {
   var dbh = new db.Handle();
-  dbh.band_member().update(req.query, res.json);
+  dbh.band_member().update(req.query, function(result) {
+    res.json(result);
+  });
 };
 
 exports.deleteBandMemberTable = function(req, res) {
   var dbh = new db.Handle();
-  dbh.band_member().deleteById(req.query.id, res.json);
+  dbh.band_member().deleteById(req.query.id, function(result) {
+    res.json(result);
+  });
 };
 
 exports.getBandSongTable = function(req, res) {
@@ -158,26 +216,36 @@ exports.getBandSongTable = function(req, res) {
   var dbh = new db.Handle();
 
   if (band_song_id) {
-    dbh.band_song().getById(band_song_id, res.json);
+    dbh.band_song().getById(band_song_id, function(result) {
+      res.json(result);
+    });
   } else {
     var params = { sort: { order: [ 'band_id', 'song_id' ] }};
-    dbh.band_song().getAllWithArgs(params, res.json);
+    dbh.band_song().getAllWithArgs(params, function(result) {
+      res.json(result);
+    });
   }
 };
 
 exports.postBandSongTable = function(req, res) {
   var dbh = new db.Handle();
-  dbh.band_song().create(req.body, res.json);
+  dbh.band_song().create(req.body, function(result) {
+    res.json(result);
+  });
 };
 
 exports.putBandSongTable = function(req, res) {
   var dbh = new db.Handle();
-  dbh.band_song().update(req.query, res.json);
+  dbh.band_song().update(req.query, function(result) {
+    res.json(result);
+  });
 };
 
 exports.deleteBandSongTable = function(req, res) {
   var dbh = new db.Handle();
-  dbh.band_song().deleteById(req.query.id, res.json);
+  dbh.band_song().deleteById(req.query.id, function(result) {
+    res.json(result);
+  });
 };
 
 exports.getSongRatingTable = function(req, res) {
@@ -187,24 +255,34 @@ exports.getSongRatingTable = function(req, res) {
   var dbh = new db.Handle();
 
   if (song_rating_id) {
-    dbh.song_rating().getById(song_rating_id, res.json);
+    dbh.song_rating().getById(song_rating_id, function(result) {
+      res.json(result);
+    });
   } else {
     var params = { sort: { order: [ 'band_member_id', 'band_song_id' ] }};
-    dbh.song_rating().getAllWithArgs(params, res.json);
+    dbh.song_rating().getAllWithArgs(params, function(result) {
+      res.json(result);
+    });
   }
 };
 
 exports.postSongRatingTable = function(req, res) {
   var dbh = new db.Handle();
-  dbh.song_rating().create(req.body, res.json);
+  dbh.song_rating().create(req.body, function(result) {
+    res.json(result);
+  });
 };
 
 exports.putSongRatingTable = function(req, res) {
   var dbh = new db.Handle();
-  dbh.song_rating().update(req.query, res.json);
+  dbh.song_rating().update(req.query, function(result) {
+    res.json(result);
+  });
 };
 
 exports.deleteSongRatingTable = function(req, res) {
   var dbh = new db.Handle();
-  dbh.song_rating().deleteById(req.query.id, res.json);
+  dbh.song_rating().deleteById(req.query.id, function(result) {
+    res.json(result);
+  });
 };

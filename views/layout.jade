@@ -4,9 +4,19 @@ html
     title= title
     link(rel='stylesheet', href='/stylesheets/style.css')
     block scripts
-      script(src='./templates.js')
       script(src='./javascripts/lib/knockout-3.0.0.js')
       script(src='./javascripts/util.js')
+      script(src='./javascripts/service.js');
+      script(src='./javascripts/service/generic.js')
+      script(src="./javascripts/view_model/Table.js")
+      script(src="./javascripts/view_model/Band.js")
+      script(src="./javascripts/view_model/Person.js")
+      script(src="./javascripts/view_model/Artist.js")
+      script(src="./javascripts/view_model/Song.js")
+      script(src="./javascripts/view_model/BandMember.js")
+      script(src="./javascripts/view_model/BandSong.js")
+      script(src="./javascripts/view_model/SongRating.js")
+      script(src="./javascripts/view_model/Manager.js")
       script(src='./javascripts/startup.js')
 
   body(onload='app_start()')

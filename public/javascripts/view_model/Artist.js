@@ -1,17 +1,13 @@
 function Artist(id, name) {
-  this.id = ko.observable(id);
-  this.name = ko.observable(name);
+  this.id = ko.observable(id || -1);
+  this.name = ko.observable(name || '');
 
-/*
-  this.songs = ko.computed(function () {
-    return ko.utils.arrayFilter(manager.songs(), function(song) {
-      return song.artist_id() == this.id();
-    }.bind(this));
+  this.songs = ko.computed(function() {
+    return manager.songs.filterByKey('artist_id', this.id());
   }.bind(this));
-  this.song_count = ko.computed(function () {
+  this.song_count = ko.computed(function() {
     return this.songs().length;
   }.bind(this));
-*/
 }
 util.inherits(Artist, Table);
 

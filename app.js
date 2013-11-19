@@ -12,16 +12,18 @@ var express = require('express')
   , login = require('routes/login')
   , passport = require('passport')
   , LocalStrategy = require('passport-local').Strategy
-  , flash = require('connect-flash')
-  , rack = require('asset-rack');
+  , flash = require('connect-flash');
 
 passport.use(new LocalStrategy(
   function(username, password, done) {
     var dbh = new db.Handle();
     //console.log(username + ', ' + password);
 
-    dbh.person().getByUsername(username, function(result) {
-      var person = result.person;
+    dbh.person().getAllWithArgs({
+      fields: ['id', 'name', 'password'],
+      where: {name: username}
+    }, function(result) {
+      var person = result.all_persons[0];
       if (person) {
         if (username == person.name && password == person.password) {
           console.log(username + ' logged in');
@@ -54,11 +56,6 @@ function requireLogin(req, res, next) {
   }
 }
 
-var jade_asset = new rack.JadeAsset({
-  url: '/templates.js',
-  dirname: './client_views',
-});
-
 db.setDbPath();
 
 var app = express();
@@ -81,7 +78,6 @@ app.use(express.session({
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
-app.use(jade_asset);
 app.use(app.router);
 app.use(require('stylus').middleware(__dirname + '/public'));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -91,47 +87,49 @@ if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
-//app.get('/', requireLogin, index.index);
-app.get('/', index.index);
+app.get('/', requireLogin, index.index);
 
-// Person Table
-app.get('/person', requireLogin, route_db.getPerson);
-app.post('/person', requireLogin, route_db.createPerson);
-app.put('/person', requireLogin, route_db.updatePerson);
-app.delete('/person', requireLogin, route_db.removePerson);
+// Band
+app.get('/band', requireLogin, route_db.getBandTable);
+app.post('/band', requireLogin, route_db.postBandTable);
+app.put('/band', requireLogin, route_db.putBandTable);
+app.delete('/band', requireLogin, route_db.deleteBandTable);
 
-// Person Views
-app.get('/person_band', requireLogin, route_db.bandInfoForPerson);
-app.post('/person_band', requireLogin, route_db.addBandMember);
-app.delete('/person_band', requireLogin, route_db.removeBandMember);
+// Person
+app.get('/person', requireLogin, route_db.getPersonTable);
+app.post('/person', requireLogin, route_db.postPersonTable);
+app.put('/person', requireLogin, route_db.putPersonTable);
+app.delete('/person', requireLogin, route_db.deletePersonTable);
 
-// Band Table
-app.post('/band', requireLogin, route_db.createBand);
-app.delete('/band', requireLogin, route_db.removeBand);
+// Artist
+app.get('/artist', requireLogin, route_db.getArtistTable);
+app.post('/artist', requireLogin, route_db.postArtistTable);
+app.put('/artist', requireLogin, route_db.putArtistTable);
+app.delete('/artist', requireLogin, route_db.deleteArtistTable);
 
-// Band Members
-app.get('/band_member', requireLogin, route_db.bandMemberInfo);
-app.post('/band_member', requireLogin, route_db.addBandMember);
-app.put('/band_member', requireLogin, route_db.updateBandMember);
-app.delete('/band_member', requireLogin, route_db.removeBandMember);
+// Song
+app.get('/song', requireLogin, route_db.getSongTable);
+app.post('/song', requireLogin, route_db.postSongTable);
+app.put('/song', requireLogin, route_db.putSongTable);
+app.delete('/song', requireLogin, route_db.deleteSongTable);
 
-// Artist Table
-app.get('/artist', requireLogin, route_db.artistInfo);
-app.post('/artist', requireLogin, route_db.createArtist);
-app.delete('/artist', requireLogin, route_db.removeArtist);
+// BandMember
+app.get('/band_member', requireLogin, route_db.getBandMemberTable);
+app.post('/band_member', requireLogin, route_db.postBandMemberTable);
+app.put('/band_member', requireLogin, route_db.putBandMemberTable);
+app.delete('/band_member', requireLogin, route_db.deleteBandMemberTable);
 
-// Song Table
-app.post('/song', requireLogin, route_db.createSong);
-app.post('/song', requireLogin, route_db.removeSong);
+// BandSong
+app.get('/band_song', requireLogin, route_db.getBandSongTable);
+app.post('/band_song', requireLogin, route_db.postBandSongTable);
+app.put('/band_song', requireLogin, route_db.putBandSongTable);
+app.delete('/band_song', requireLogin, route_db.deleteBandSongTable);
 
-// Band Song Table
-app.get('/band_song', requireLogin, route_db.bandSongInfo);
-app.post('/band_song', requireLogin, route_db.addBandSong);
-app.delete('/band_song', requireLogin, route_db.removeBandSong);
-app.put('/band_song', requireLogin, route_db.updateBandSong);
-
-// Song Rating Table
-app.put('/song_rating', requireLogin, route_db.updateSongRating)
+// SongRating
+app.get('/song_rating', requireLogin, route_db.getSongRatingTable);
+app.post('/song_rating', requireLogin, route_db.postSongRatingTable);
+app.put('/song_rating', requireLogin, route_db.putSongRatingTable);
+app.delete('/song_rating', requireLogin, route_db.deleteSongRatingTable);
 
 // Authentication handlers
 app.get('/login', login.login);
@@ -145,6 +143,9 @@ app.get('/logout', function(req, res) {
   req.logout();
   res.redirect('/login');
 });
+
+// SessionInfo
+app.get('/session_info', requireLogin, route_db.getSessionInfo);
 
 //console.log(app.routes);
 

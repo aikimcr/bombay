@@ -1,18 +1,18 @@
 // The Individual Band Objects
 function Band(id, name) {
   Table.call(this);
-  this.id = ko.observable(id);
-  this.name = ko.observable(name);
+  this.id = ko.observable(id || -1);
+  this.name = ko.observable(name || '');
+
+  this.band_members = ko.computed(function() {
+    return manager.band_members.filterByKey('band_id', this.id());
+  }.bind(this));
+
+  this.band_member_count = ko.computed(function() {
+    return this.band_members().length;
+  }.bind(this))
 
 /*
-  this.band_members = ko.computed(function () {
-    return ko.utils.arrayFilter(manager.band_members(), function(band_member) {
-      return band_member.band_id() == this.id();
-    }.bind(this));
-  }.bind(this));
-  this.band_member_count = ko.computed(function () {
-    return this.band_members().length;
-  }.bind(this));
   this.band_songs = ko.computed(function () {
     return ko.utils.arrayFilter(manager.band_songs(), function(band_song) {
       return band_song.band_id() == this.id();

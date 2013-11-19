@@ -2,7 +2,7 @@ function SongRating(id, band_member_id, band_song_id, rating) {
   this.id = ko.observable(id);
   this.band_member_id = ko.observable(band_member_id);
   this.band_song_id = ko.observable(band_song_id);
-  this.song_rating = ko.observable(rating);
+  this.rating = ko.observable(rating);
 
 /*
   this.band_member_name = ko.computed(function () {
@@ -19,7 +19,7 @@ SongRating.loadById = function(id, callback) {
       result.song_rating.id,
       result.song_rating.band_member_id,
       result.song_rating.band_song_id,
-      result.song_rating.song_rating
+      result.song_rating.rating
     ));
   });
 };
@@ -35,6 +35,6 @@ SongRatingList.prototype.build_object_ = function(model) {
     model.id,
     model.band_member_id,
     model.band_song_id,
-    model.song_rating
+    model.rating
   );
 };
