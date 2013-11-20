@@ -2,7 +2,7 @@ function BandSong(id, band_id, song_id, status) {
   this.id = ko.observable(id || -1);
   this.band_id = ko.observable(band_id || -1);
   this.song_id = ko.observable(song_id || -1);
-  this.status = ko.observable(status || null);
+  this.status = ko.observable(status);
 
   // Joins
   this.band = ko.computed(function() {

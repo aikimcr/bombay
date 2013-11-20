@@ -1,10 +1,10 @@
 var song_rating_model = {
   all_song_ratings: [{
-    id: 45, band_member_id: 12, band_song_id: 2, song_rating: 3
+    id: 45, band_member_id: 12, band_song_id: 2, rating: 3
   }, {
-    id: 16, band_member_id: 40, band_song_id: 10, song_rating: 1
+    id: 16, band_member_id: 40, band_song_id: 10, rating: 1
   }, {
-    id: 63, band_member_id: 9, band_song_id: 5, song_rating: 4
+    id: 63, band_member_id: 9, band_song_id: 5, rating: 4
   }]
 };
 
@@ -14,14 +14,14 @@ describe('SongRating', function() {
     var expected_id = 1;
     var expected_band_member_id = 12;
     var expected_band_song_id = 10;
-    var expected_song_rating = 3;
+    var expected_rating = 3;
 
     it('should create a song_rating object', function(done) {
       song_rating = new SongRating(
         expected_id,
         expected_band_member_id,
         expected_band_song_id,
-        expected_song_rating
+        expected_rating
       );
       should.exist(song_rating);
       done();
@@ -73,17 +73,17 @@ describe('SongRating', function() {
     });
 
     it('should have a song_rating', function(done) {
-      song_rating.should.have.property('song_rating');
+      song_rating.should.have.property('rating');
       done();
     });
 
     it('should have observable song_rating', function(done) {
-      ko.isObservable(song_rating.song_rating).should.be.true;
+      ko.isObservable(song_rating.rating).should.be.true;
       done();
     });
 
     it('should have song_rating set to expected', function(done) {
-      song_rating.song_rating().should.eql(expected_song_rating);
+      song_rating.rating().should.eql(expected_rating);
       done();
     });
 
@@ -138,9 +138,9 @@ describe('SongRating', function() {
       song_rating.should.have.property('band_song_id');
       ko.isObservable(song_rating.band_song_id).should.be.true;
       song_rating.band_song_id().should.eql(song_rating_model.all_song_ratings[1].band_song_id);
-      song_rating.should.have.property('song_rating');
-      ko.isObservable(song_rating.song_rating).should.be.true;
-      song_rating.song_rating().should.eql(song_rating_model.all_song_ratings[1].song_rating);
+      song_rating.should.have.property('rating');
+      ko.isObservable(song_rating.rating).should.be.true;
+      song_rating.rating().should.eql(song_rating_model.all_song_ratings[1].rating);
       done();
     });
   });
@@ -194,9 +194,9 @@ describe('SongRatingList', function() {
       song_rating.should.have.property('band_song_id');
       ko.isObservable(song_rating.band_song_id).should.be.true;
       song_rating.band_song_id().should.eql(song_rating_model.all_song_ratings[index].band_song_id);
-      song_rating.should.have.property('song_rating');
-      ko.isObservable(song_rating.song_rating).should.be.true;
-      song_rating.song_rating().should.eql(song_rating_model.all_song_ratings[index].song_rating);
+      song_rating.should.have.property('rating');
+      ko.isObservable(song_rating.rating).should.be.true;
+      song_rating.rating().should.eql(song_rating_model.all_song_ratings[index].rating);
     });
   });
 });
