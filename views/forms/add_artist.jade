@@ -1,0 +1,12 @@
+div#add_artist_form(data-bind="visible: artistFormVisible")
+  div.dialog_background
+    div.dialog
+      div.title_bar
+        div.title Add Artist
+        div.close_button
+          button.close_button(data-bind="click: hideArtistForm") X
+
+      div.dialog_body
+        form(data-bind="submit: addArtist")
+          input(data-bind="value: newArtistName", type="text", placeholder="New Artist Name")
+          input(type="submit", value="Add")

@@ -1,0 +1,12 @@
+div#add_band_form(data-bind="visible: bandFormVisible")
+  div.dialog_background
+    div.dialog
+      div.title_bar
+        div.title Add Band
+        div.close_button
+          button.close_button(data-bind="click: hideBandForm") X
+
+      div.dialog_body
+        form(data-bind="submit: addBand")
+          input(data-bind="value: newBandName", type="text", placeholder="New Band Name")
+          input(type="submit", value="Add")

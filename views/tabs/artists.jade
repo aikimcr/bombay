@@ -1,0 +1,22 @@
+section.app_context(id="artists")
+  a(href="#artists") Artists
+  div.app_context_item
+    div.display
+      div.control
+        button.edit_button(id="add_artists", data-bind="click: showArtistForm") +
+        label(for="add_artists") Add Artist
+
+      div.list
+        table
+          thead
+            tr
+              th Name
+              th Song Count
+              th
+
+          tbody(data-bind="foreach: artists.list")
+            tr
+              td(data-bind="text: name")
+              td(data-bind="text: song_count")
+              td
+                button.edit_button(data-bind="click: $root.deleteArtist") -

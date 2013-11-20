@@ -1,0 +1,16 @@
+div#add_band_member_form(data-bind="visible: bandMemberFormVisible")
+  div.dialog_background
+    div.dialog
+      div.title_bar
+        div.title Add Band Member
+        div.close_button
+          button.close_button(data-bind="click: hideBandMemberForm") X
+
+      div.control
+        button.edit_button(id="add_people", data-bind="click: showPersonForm") +
+        label(for="add_people") Add Person
+
+      div.dialog_body
+        form(data-bind="submit: addBandMember")
+          select(data-bind="options: $root.other_people, value: newBandMemberPerson, optionsText: 'name'")
+          input(type="submit", value="Add")

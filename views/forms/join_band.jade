@@ -1,0 +1,16 @@
+div#join_band_form(data-bind="visible: joinBandFormVisible")
+  div.dialog_background
+    div.dialog
+      div.title_bar
+        div.title Join Band
+        div.close_button
+          button.close_button(data-bind="click: hideJoinBandForm") X
+
+      div.control
+        button.edit_button(id="add_bands", data-bind="click: showBandForm") +
+        label(for="add_bands") Add Band
+
+      div.dialog_body
+        form(data-bind="submit: joinBand")
+          select(data-bind="options: $root.other_bands, value: newBandMemberBand, optionsText: 'name'")
+          input(type="submit", value="Join")

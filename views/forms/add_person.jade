@@ -1,0 +1,14 @@
+div#add_person_form(data-bind="visible: personFormVisible")
+  div.dialog_background
+    div.dialog
+      div.title_bar
+        div.title Add Person
+        div.close_button
+          button.close_button(data-bind="click: hidePersonForm") X
+
+      div.dialog_body
+        form(data-bind="submit: addPerson")
+          input(data-bind="value: newPersonLoginName", type="text", placeholder="New Login Name")
+          input(data-bind="value: newPersonFullName", type="text", placeholder="Full Name")
+          input(data-bind="value: newPersonEmail", type="email", placeholder="E-Mail")
+          input(type="submit", value="Add")
