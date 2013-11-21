@@ -3,7 +3,7 @@ section.app_context(id="band_members")
   div.app_context_item
     div.display
       div.control(data-bind="if: $root.current_person().system_admin")
-        button.edit_button(id="add_band_member", data-bind="click: showBandMemberForm") +
+        button.edit_button(id="add_band_member", data-bind="click: forms.add_band_member.show.bind(forms.add_band_member)") +
         label(for="add_band_member") Add Members
 
       div.list

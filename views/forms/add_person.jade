@@ -1,14 +1,14 @@
-div#add_person_form(data-bind="visible: personFormVisible")
+div#add_person_form(data-bind="visible: forms.add_person.isVisible")
   div.dialog_background
     div.dialog
       div.title_bar
         div.title Add Person
         div.close_button
-          button.close_button(data-bind="click: hidePersonForm") X
+          button.close_button(data-bind="click: forms.add_person.hide.bind(forms.add_person)") X
 
       div.dialog_body
-        form(data-bind="submit: addPerson")
-          input(data-bind="value: newPersonLoginName", type="text", placeholder="New Login Name")
-          input(data-bind="value: newPersonFullName", type="text", placeholder="Full Name")
-          input(data-bind="value: newPersonEmail", type="email", placeholder="E-Mail")
+        form(data-bind="submit: function() { Form.postChange(forms.add_person, persons); }")
+          input(data-bind="value: forms.add_person.name", type="text", placeholder="New Login Name")
+          input(data-bind="value: forms.add_person.full_name", type="text", placeholder="Full Name")
+          input(data-bind="value: forms.add_person.email", type="email", placeholder="E-Mail")
           input(type="submit", value="Add")
