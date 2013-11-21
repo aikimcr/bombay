@@ -3,7 +3,7 @@ section.app_context(id="artists")
   div.app_context_item
     div.display
       div.control
-        button.edit_button(id="add_artists", data-bind="click: showArtistForm") +
+        button.edit_button(id="add_artists", data-bind="click: forms.add_artist.show.bind(forms.add_artist)") +
         label(for="add_artists") Add Artist
 
       div.list

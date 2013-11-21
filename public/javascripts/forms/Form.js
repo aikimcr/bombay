@@ -135,7 +135,7 @@ AddBandSong.prototype.postChange_ = function(callback) {
   var params = {
     band_id: manager.current_band().id(),
     song_id: this.song().id(),
-    band_admin: false
+    song_status: -1
   };
   svc.set('./band_song', function(result) {
     callback(result);

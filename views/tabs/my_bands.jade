@@ -3,7 +3,7 @@ section.app_context(id="my_bands")
   div.app_context_item
     div.display
       div.control
-        button.edit_button(id="join_bands", data-bind="click: showJoinBandForm") +
+        button.edit_button(id="join_bands", data-bind="click: forms.join_band.show.bind(forms.join_band)") +
         label(for="join_bands") Join Band
 
       div.list

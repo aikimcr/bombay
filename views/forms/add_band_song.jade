@@ -1,16 +1,16 @@
-div#add_band_song_form(data-bind="visible: bandSongFormVisible")
+div#add_band_song_form(data-bind="visible: forms.add_band_song.isVisible")
   div.dialog_background
     div.dialog
       div.title_bar
         div.title Add Band Song
         div.close_button
-          button.close_button(data-bind="click: hideBandSongForm") X
+          button.close_button(data-bind="click: forms.add_band_song.hide.bind(forms.add_band_song)") X
 
       div.control
-        button.edit_button(id="add_songs", data-bind="click: showSongForm") +
+        button.edit_button(id="add_songs", data-bind="click: forms.add_song.show.bind(forms.add_song)") +
         label(for="add_songs") Add Song
 
       div.dialog_body
-        form(data-bind="submit: addBandSong")
-          select(data-bind="options: $root.non_band_songs, value: newBandSongSong, optionsText: 'description'")
+        form(data-bind="submit: function() { Form.postChange(forms.add_band_song, band_songs); }")
+          select(data-bind="options: $root.non_band_songs, value: forms.add_band_song.song, optionsText: 'description'")
           input(type="submit", value="Add")

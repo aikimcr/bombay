@@ -54,6 +54,16 @@ function Manager(for_test) {
     );
   }.bind(this));
 
+  this.other_bands = ko.computed(function() {
+    return ko.utils.arrayFilter(this.bands.list(), function(band) {
+      var member = ko.utils.arrayFirst(this.band_members.list(), function(band_member) {
+        return band_member.band_id() == band.id() &&
+          band_member.person_id() == this.current_person().id();
+      }.bind(this));
+      return !member;
+    }.bind(this));
+  }.bind(this));
+
   this.current_members = ko.computed(function() {
     if (this.current_band()) {
       return this.current_band().band_members();
@@ -84,16 +94,29 @@ function Manager(for_test) {
     }
   }.bind(this));
 
+  this.non_band_songs = ko.computed(function() {
+    if (this.current_band()) {
+      return ko.utils.arrayFilter(this.songs.list(), function(song) {
+        var result = ko.utils.arrayFirst(this.band_songs.list(), function(band_song) {
+          return band_song.band_id() == this.current_band().id() &&
+            band_song.song_id() == song.id();
+        }.bind(this));
+        return !result;
+      }.bind(this));
+    } else {
+      return this.songs.list();
+    }
+  }.bind(this));
+
   this.forms = {};
   if (!for_test) {
     this.forms.add_band = new AddBand();
+    this.forms.join_band = new JoinBand();
     this.forms.add_person = new AddPerson();
     this.forms.add_band_member = new AddBandMember();
-
-    this.showJoinBandForm = function() {};
-    this.showArtistForm = function() {};
-    this.showSongForm = function() {};
-    this.showBandSongForm = function() {};
+    this.forms.add_artist = new AddArtist();
+    this.forms.add_song = new AddSong();
+    this.forms.add_band_song = new AddBandSong();
   }
 }
 

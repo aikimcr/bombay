@@ -1,17 +1,17 @@
-div#add_song_form(data-bind="visible: songFormVisible")
+div#add_song_form(data-bind="visible: forms.add_song.isVisible")
   div.dialog_background
     div.dialog
       div.title_bar
         div.title Add Song
         div.close_button
-          button.close_button(data-bind="click: hideSongForm") X
+          button.close_button(data-bind="click: forms.add_song.hide.bind(forms.add_song)") X
 
       div.control
-        button.edit_button(id="add_artists", data-bind="click: showArtistForm") +
+        button.edit_button(id="add_artists", data-bind="click: forms.add_artist.show.bind(forms.add_artist)") +
         label(for="add_artists") Add Artist
 
       div.dialog_body
-        form(data-bind="submit: addSong")
-          input(data-bind="value: newSongName", type="text", placeholder="New Song Name")
-          select(data-bind="options: $root.artists, value: newSongArtist, optionsText: 'name'")
+        form(data-bind="submit: function() { Form.postChange(forms.add_song, songs); }")
+          input(data-bind="value: forms.add_song.name", type="text", placeholder="New Song Name")
+          select(data-bind="options: $root.artists.list, value: forms.add_song.artist, optionsText: 'name'")
           input(type="submit", value="Add")
