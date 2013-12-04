@@ -407,7 +407,7 @@ describe('Form', function() {
       svc.set.params.should.eql([[
         './band_song',
         'function',
-        {band_id: 1, song_id: 2, band_admin: false},
+        {band_id: 1, song_id: 2, song_status: -1},
       ]]);
       done();
     });

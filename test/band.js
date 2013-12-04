@@ -143,7 +143,7 @@ describe('band_table', function() {
     it('should delete the band', function(done) {
       band.deleteById(band_id, function(result) {
         should.exist(result);
-        should.exist(result.band);
+        result.should.have.property('band');
         result.band.should.eql(1);
         done();
       });

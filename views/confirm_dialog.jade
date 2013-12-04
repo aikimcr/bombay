@@ -1,0 +1,13 @@
+div#confirm_dialog(data-bind="visible: dialog.isVisible")
+  div.dialog_background
+    div.dialog
+      div.title_bar
+        div.title Confirm Dialog
+        div.close_button
+          button.close_button(data_bind="click": dialog.doCancel") X
+
+      div.dialog_body
+        div.dialog_message(data-bind="text: dialog.messageText")
+        div.dialog_buttons
+          div.dialog_button(data-bind="click: function() { dialog.doOkay() }") Okay
+          div.dialog_button(data-bind="click: function() { dialog.doCancel() }") Cancel

@@ -19,4 +19,4 @@ section.app_context(id="bands", data-bind="if: $root.current_person().system_adm
               td(data-bind="text: name")
               td(data-bind="text: band_member_count")
               td(data-bind="ifnot: band_member_count")
-                button.edit_button(data-bind="click: $root.deleteBand") -
+                button.edit_button(data-bind="click: function(data, event) { data.delete() }") -

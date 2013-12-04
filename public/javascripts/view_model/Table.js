@@ -1,5 +1,18 @@
-function Table() {
+function Table(delete_url) {
+  this.delete_url = delete_url;
 }
+
+Table.prototype.delete = function(callback) {
+  var svc = service.getInstance();
+  svc.delete(this.delete_url + '?id=' + this.id(), function(result) {
+    if (result.err) {
+      if (callback) callback(result);
+    } else {
+      manager.bands.load();
+      if (callback) callback(result);
+    }
+  });
+};
 
 function TableList(load_url, model_key) {
   this.list = ko.observableArray([]);

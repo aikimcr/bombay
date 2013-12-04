@@ -1,6 +1,6 @@
 // The Individual Band Objects
 function Band(id, name) {
-  Table.call(this);
+  Table.call(this, './band');
   this.id = ko.observable(id || -1);
   this.name = ko.observable(name || '');
 
