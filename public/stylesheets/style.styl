@@ -240,6 +240,9 @@ body
 #add_band_song_form .dialog_background
   z-index: 160
 
+#confirm_dialog .dialog_background
+  z-index: 250
+
 .dialog_background
   width: container-width
   height: container-height
@@ -248,8 +251,7 @@ body
   position: absolute
 
   .dialog_box
-    width: 300px;
-    height: 150px;
+    width: 300px
     top: (@height / 2) + 25
     left: (container-width / 2) - (@width / 2)
     position: absolute
@@ -259,37 +261,9 @@ body
     border-radius: 10px
     padding: 20px
 
-    .dialog_message
-       width: 260px
-       height: 70px
-       background-color: dialog-message-background-color
-       color: dialog-message-color
-       border-radius: 10px
-       padding: 20px
-       margin-bottom: 10px
-
-    .dialog_buttons
-       width: 300px
-       height: 30px
-
-       .dialog_button
-          background-color: dialog-message-background-color
-          color: dialog-message-color
-          display: inline-block
-          width: 75px
-          height: 20px
-          border-style: solid
-          border-color: main-border-color
-          border-radius: 5px
-          padding: 10px
-
-       .dialog_button:first-child
-          margin-left: 10px
-          margin-right: 40px
 
 .dialog
-  width: dialog-outer-width;
-  height: dialog-outer-height;
+  width: dialog-outer-width
   background-color: dialog-background-color
   color: dialog-text-color
   border-style: solid
@@ -298,7 +272,7 @@ body
   border-width: dialog-border-width
   padding: dialog-padding
   position: absolute
-  top: (@height / 2) + 25
+  top: (dialog-outer-height / 2) + 25
   left: (container-width / 2) - (@width / 2)
 
   .title_bar
@@ -331,3 +305,26 @@ body
     border-radius: 5px
     padding: 10px
     margin-top: 5px
+
+    .dialog_message
+       background-color: dialog-message-background-color
+       color: dialog-message-color
+       border-radius: 10px
+       padding: 20px
+       margin-bottom: 10px
+
+    .dialog_buttons
+       .dialog_button
+          background-color: dialog-message-background-color
+          color: dialog-message-color
+          display: inline-block
+          width: 75px
+          height: 20px
+          border-style: solid
+          border-color: main-border-color
+          border-radius: 5px
+          padding: 10px
+
+       .dialog_button:first-child
+          margin-left: 10px
+          margin-right: 40px

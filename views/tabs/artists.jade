@@ -18,5 +18,5 @@ section.app_context(id="artists")
             tr
               td(data-bind="text: name")
               td(data-bind="text: song_count")
-              td
-                button.edit_button(data-bind="click: $root.deleteArtist") -
+              td(data-bind="ifnot: song_count")
+                button.edit_button(data-bind="click: $root.delete_table_object") -

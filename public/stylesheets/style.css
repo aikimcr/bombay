@@ -210,6 +210,9 @@ body {
 #add_band_song_form .dialog_background {
   z-index: 160;
 }
+#confirm_dialog .dialog_background {
+  z-index: 250;
+}
 .dialog_background {
   width: 1200px;
   height: 700px;
@@ -219,8 +222,7 @@ body {
 }
 .dialog_background .dialog_box {
   width: 300px;
-  height: 150px;
-  top: 100px;
+  top: 375px;
   left: 450px;
   position: absolute;
   background-color: #b8dfda;
@@ -229,37 +231,8 @@ body {
   border-radius: 10px;
   padding: 20px;
 }
-.dialog_background .dialog_box .dialog_message {
-  width: 260px;
-  height: 70px;
-  background-color: #1f4641;
-  color: #dceeec;
-  border-radius: 10px;
-  padding: 20px;
-  margin-bottom: 10px;
-}
-.dialog_background .dialog_box .dialog_buttons {
-  width: 300px;
-  height: 30px;
-}
-.dialog_background .dialog_box .dialog_buttons .dialog_button {
-  background-color: #1f4641;
-  color: #dceeec;
-  display: inline-block;
-  width: 75px;
-  height: 20px;
-  border-style: solid;
-  border-color: #3f8c83;
-  border-radius: 5px;
-  padding: 10px;
-}
-.dialog_background .dialog_box .dialog_buttons .dialog_button:first-child {
-  margin-left: 10px;
-  margin-right: 40px;
-}
 .dialog {
   width: 600px;
-  height: 150px;
   background-color: #b8dfda;
   color: #000;
   border-style: solid;
@@ -301,4 +274,26 @@ body {
   border-radius: 5px;
   padding: 10px;
   margin-top: 5px;
+}
+.dialog .dialog_body .dialog_message {
+  background-color: #1f4641;
+  color: #dceeec;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 10px;
+}
+.dialog .dialog_body .dialog_buttons .dialog_button {
+  background-color: #1f4641;
+  color: #dceeec;
+  display: inline-block;
+  width: 75px;
+  height: 20px;
+  border-style: solid;
+  border-color: #3f8c83;
+  border-radius: 5px;
+  padding: 10px;
+}
+.dialog .dialog_body .dialog_buttons .dialog_button:first-child {
+  margin-left: 10px;
+  margin-right: 40px;
 }

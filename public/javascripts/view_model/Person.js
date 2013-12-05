@@ -1,23 +1,10 @@
 function Person(id, name, full_name, email, system_admin) {
-  Table.call(this);
+  Table.call(this, './person');
   this.id = ko.observable(id || -1);
   this.name = ko.observable(name || '');
   this.full_name = ko.observable(full_name || '');
   this.email = ko.observable(email || '');
   this.system_admin = ko.observable(system_admin || false);
-
-/*
-  this.band_members = ko.computed(function() {
-    return ko.utils.arrayFilter(manager.band_members(), function(band_member) {
-      return band_member.person_id() == this.id();
-    }.bind(this));
-  }.bind(this));
-  this.song_ratings = ko.computed(function () {
-    return ko.utils.arrayFilter(manager.song_ratings(), function(song_rating) {
-      return song_rating.person_id() == this.id();
-    }.bind(this));
-  }.bind(this));
-*/
 }
 util.inherits(Person, Table);
 
@@ -32,6 +19,14 @@ Person.loadById = function(id, callback) {
       result.person.system_admin
     ));
   });
+};
+
+Person.prototype.confirm_text = function() {
+  return 'Delete person ' + this.name() + '?';
+};
+
+Person.prototype.reload_list = function() {
+  manager.persons.load();
 };
 
 // The List Object

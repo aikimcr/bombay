@@ -8,7 +8,7 @@ var artist_model = {
   }]
 };
 
-describe('Artist', function() {
+describe('Artist Table', function() {
   describe('#Instantiate', function() {
     var artist;
     var expected_id = 1;
@@ -98,6 +98,46 @@ describe('Artist', function() {
       artist.should.have.property('name');
       ko.isObservable(artist.name).should.be.true;
       artist.name().should.eql(artist_model.all_artists[1].name);
+      done();
+    });
+  });
+
+  describe('Delete', function() {
+    var artist;
+    var expected_id = 1;
+    var expected_name = 'Artist Number 01';
+    var svc;
+
+    before(function(done) {
+      svc = service.getInstance();
+      svc.resetCalls();
+      done();
+    });
+
+    it('should create a artist object', function(done) {
+      artist = new Artist(expected_id, expected_name);
+      should.exist(artist);
+      done();
+    });
+
+    it('should call the artist API', function(done) {
+      svc.delete.result = {artist: 1};
+      svc.get.result = artist_model;
+      artist.delete(function (result) {
+        should.exist(result);
+        result.should.have.property('artist');
+        result.artist.should.eql(1);
+        result.should.not.have.property('err');
+        done();
+      });
+    });
+
+    it('should have called the delete service', function(done) {
+      svc.delete.calls.should.be.eql(1);
+      svc.delete.params.should.eql([[
+        './artist?id=1',
+        'function'
+      ]]);
       done();
     });
   });

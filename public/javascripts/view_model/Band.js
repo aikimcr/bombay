@@ -11,14 +11,6 @@ function Band(id, name) {
   this.band_member_count = ko.computed(function() {
     return this.band_members().length;
   }.bind(this))
-
-/*
-  this.band_songs = ko.computed(function () {
-    return ko.utils.arrayFilter(manager.band_songs(), function(band_song) {
-      return band_song.band_id() == this.id();
-    }.bind(this));
-  }.bind(this));
-*/
 }
 util.inherits(Band, Table);
 
@@ -27,6 +19,14 @@ Band.loadById = function(id, callback) {
   svc.get('./band?id=' + id, function(result) {
     callback(new Band(result.band.id, result.band.name));
   });
+};
+
+Band.prototype.confirm_text = function() {
+  return 'Delete band ' + this.name() + '?';
+};
+
+Band.prototype.reload_list = function() {
+  manager.bands.load();
 };
 
 // The Band List Object

@@ -2,16 +2,21 @@ function Table(delete_url) {
   this.delete_url = delete_url;
 }
 
-Table.prototype.delete = function(callback) {
-  var svc = service.getInstance();
-  svc.delete(this.delete_url + '?id=' + this.id(), function(result) {
-    if (result.err) {
-      if (callback) callback(result);
+Table.prototype.delete = function(callback, opt_event) {
+  manager.confirm_dialog.show(this.confirm_text(), opt_event, function(delete_it) {
+    if (delete_it) {
+      var svc = service.getInstance();
+      svc.delete(this.delete_url + '?id=' + this.id(), function(result) {
+        if (result.err) {
+          if (callback) callback(result);
+        } else {
+          if (callback) callback(result);
+        }
+      });
     } else {
-      manager.bands.load();
-      if (callback) callback(result);
+      if (callback) callback();
     }
-  });
+  }.bind(this));
 };
 
 function TableList(load_url, model_key) {

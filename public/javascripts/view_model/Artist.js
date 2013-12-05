@@ -1,4 +1,5 @@
 function Artist(id, name) {
+  Table.call(this, './artist');
   this.id = ko.observable(id || -1);
   this.name = ko.observable(name || '');
 
@@ -16,6 +17,14 @@ Artist.loadById = function(id, callback) {
   svc.get('./artist?id=' + id, function(result) {
     callback(new Artist(result.artist.id, result.artist.name));
   });
+};
+
+Artist.prototype.confirm_text = function() {
+  return 'Delete artist ' + this.name() + '?';
+};
+
+Artist.prototype.reload_list = function() {
+  manager.artists.load();
 };
 
 // The Artist List Object

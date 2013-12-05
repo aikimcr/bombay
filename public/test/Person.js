@@ -20,7 +20,7 @@ var person_model = {
   }]
 };
 
-describe('Person', function() {
+describe('Person Table', function() {
   describe('#Instantiate', function() {
     var person;
     var expected_id = 1;
@@ -167,6 +167,46 @@ describe('Person', function() {
       person.should.have.property('system_admin');
       ko.isObservable(person.system_admin).should.be.true;
       person.system_admin().should.eql(person_model.all_persons[1].system_admin);
+      done();
+    });
+  });
+
+  describe('Delete', function() {
+    var person;
+    var expected_id = 1;
+    var expected_name = 'Person Number 01';
+    var svc;
+
+    before(function(done) {
+      svc = service.getInstance();
+      svc.resetCalls();
+      done();
+    });
+
+    it('should create a person object', function(done) {
+      person = new Person(expected_id, expected_name);
+      should.exist(person);
+      done();
+    });
+
+    it('should call the person API', function(done) {
+      svc.delete.result = {person: 1};
+      svc.get.result = person_model;
+      person.delete(function (result) {
+        should.exist(result);
+        result.should.have.property('person');
+        result.person.should.eql(1);
+        result.should.not.have.property('err');
+        done();
+      });
+    });
+
+    it('should have called the delete service', function(done) {
+      svc.delete.calls.should.be.eql(1);
+      svc.delete.params.should.eql([[
+        './person?id=1',
+        'function'
+      ]]);
       done();
     });
   });

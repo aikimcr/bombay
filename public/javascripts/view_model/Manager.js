@@ -118,6 +118,16 @@ function Manager(for_test) {
     this.forms.add_song = new AddSong();
     this.forms.add_band_song = new AddBandSong();
   }
+
+  this.confirm_dialog = new confirm_dialog();
+
+  this.delete_table_object = function(data, event) {
+    data.delete(function(result) {
+      if (result && !result.err) {
+        data.reload_list();
+      }
+    }, event);
+  };
 }
 
 function app_start() {

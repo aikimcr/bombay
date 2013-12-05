@@ -140,19 +140,10 @@ describe('Band Table', function() {
       ]]);
       done();
     });
-
-    it('should have loaded the table', function(done) {
-      svc.get.calls.should.be.eql(1);
-      svc.get.params.should.eql([[
-        './band',
-        'function'
-      ]]);
-      done();
-    });
   });
 });
 
-describe('BandList', function() {
+describe('Band List', function() {
   var band_list;
   var svc;
 
