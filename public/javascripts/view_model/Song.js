@@ -1,5 +1,5 @@
 function Song(id, name, artist_id) {
-  Table.call(this);
+  Table.call(this, './song');
   this.id = ko.observable(id || -1);
   this.name = ko.observable(name || '');
   this.artist_id = ko.observable(artist_id || -1);
@@ -34,6 +34,14 @@ Song.loadById = function(id, callback) {
   svc.get('./song?id=' + id, function(result) {
     callback(new Song(result.song.id, result.song.name, result.song.artist_id));
   });
+};
+
+Song.prototype.confirm_text = function() {
+  return 'Delete song ' + this.name() + ' by ' + this.artist().name() + '?';
+};
+
+Song.prototype.reload_list = function() {
+  manager.songs.load();
 };
 
 // The Song List Object

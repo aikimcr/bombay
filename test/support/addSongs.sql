@@ -1,3 +1,5 @@
+PRAGMA foreign_keys = ON;
+
 INSERT INTO song (id, name, artist_id) VALUES (1, 'Space Oddity', 5);
 INSERT INTO song (id, name, artist_id) VALUES (2, 'Rebel, Rebel', 5);
 INSERT INTO song (id, name, artist_id) VALUES (3, 'You Shook Me All Night Long', 1);

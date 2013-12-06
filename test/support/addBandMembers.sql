@@ -1,3 +1,5 @@
+PRAGMA foreign_keys = ON;
+
 INSERT INTO band_member (id, band_id, person_id, band_admin) VALUES (1, 1, 1, 0);
 INSERT INTO band_member (id, band_id, person_id, band_admin) VALUES (2, 2, 1, 1);
 INSERT INTO band_member (id, band_id, person_id, band_admin) VALUES (3, 3, 2, 0);

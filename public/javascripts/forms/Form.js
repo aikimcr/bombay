@@ -1,5 +1,6 @@
-function Form() {
+function Form(opt_other_models) {
   this.isVisible = ko.observable(false);
+  this.other_models = opt_other_models ? opt_other_models : [];
 }
 
 Form.prototype.show = function() {
@@ -13,7 +14,10 @@ Form.prototype.hide = function() {
 Form.postChange = function(form, model) {
   form.postChange_(function (result) {
     model.load();
-  });
+    this.other_models.forEach(function(omodel) {
+      omodel.load();
+    }.bind(this));
+  }.bind(form));
 }
 
 function AddBand() {
@@ -87,7 +91,7 @@ AddSong.prototype.postChange_ = function(callback) {
 };
 
 function JoinBand() {
-  Form.call(this);
+  Form.call(this, [manager.song_ratings]);
   this.band = ko.observable(null);
 }
 util.inherits(JoinBand, Form);
@@ -106,7 +110,7 @@ JoinBand.prototype.postChange_ = function(callback) {
 };
 
 function AddBandMember() {
-  Form.call(this);
+  Form.call(this, [manager.song_ratings]);
   this.person = ko.observable(null);
 }
 util.inherits(AddBandMember, Form);
@@ -125,7 +129,7 @@ AddBandMember.prototype.postChange_ = function(callback) {
 };
 
 function AddBandSong() {
-  Form.call(this);
+  Form.call(this, [manager.song_ratings]);
   this.song = ko.observable(null);
 }
 util.inherits(AddBandSong, Form);
