@@ -1,15 +1,23 @@
-PRAGMA foreign_keys = ON;
-
-DROP TABLE IF EXISTS band;
-DROP TABLE IF EXISTS person;
-DROP TABLE IF EXISTS band_member;
-DROP TABLE IF EXISTS artist;
-DROP TABLE IF EXISTS song;
-DROP TABLE IF EXISTS band_song;
-DROP TABLE IF EXISTS song_rating;
-DROP TABLE IF EXISTS setlist;
-DROP TABLE IF EXISTS setlist_set;
 DROP TABLE IF EXISTS setlist_song;
+DROP TABLE IF EXISTS setlist_set;
+DROP TABLE IF EXISTS setlist;
+
+DROP TABLE IF EXISTS song_rating;
+
+DROP TRIGGER IF EXISTS new_band_song;
+DROP TRIGGER IF EXISTS del_band_song;
+DROP TABLE IF EXISTS band_song;
+
+DROP TABLE IF EXISTS song;
+
+DROP TRIGGER IF EXISTS new_band_member;
+DROP TRIGGER IF EXISTS del_band_member;
+DROP TABLE IF EXISTS band_member;
+
+DROP TABLE IF EXISTS artist;
+DROP TABLE IF EXISTS person;
+DROP TABLE IF EXISTS band;
+
 DROP TABLE IF EXISTS schema_change;
 
 CREATE TABLE band (

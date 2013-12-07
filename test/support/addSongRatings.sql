@@ -1,5 +1,7 @@
 PRAGMA foreign_keys = ON;
 
+DELETE FROM song_rating;
+
 INSERT INTO song_rating (id, band_member_id, band_song_id, rating) VALUES (1, 1, 1, 1);
 INSERT INTO song_rating (id, band_member_id, band_song_id, rating) VALUES (2, 1, 2, 2);
 INSERT INTO song_rating (id, band_member_id, band_song_id, rating) VALUES (3, 1, 3, 3);

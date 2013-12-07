@@ -1,5 +1,7 @@
 PRAGMA foreign_keys = ON;
 
+DELETE FROM person;
+
 INSERT INTO person (id, name, full_name, system_admin, email, password)
   VALUES (1, 'admin',   'System Admin User', 1, 'admin@allnightmusic.com', 'admin');
 INSERT INTO person (id, name, full_name, system_admin, email, password)

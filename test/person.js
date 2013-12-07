@@ -87,7 +87,7 @@ describe('person_table', function() {
       person.deleteById(person_id, function(result) {
         should.exist(result);
         should.exist(result.person);
-        result.person.should.eql(1);
+        result.person.should.eql(person_id);
         done();
       });
     });

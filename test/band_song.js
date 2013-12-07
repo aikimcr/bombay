@@ -14,7 +14,10 @@ describe('band_song_table', function() {
       db.setDbPath('./bombay_test.db');
       dbh = new db.Handle()
       var sql = fs.readFileSync('./sql/schema.sql', 'utf8');
-      dbh.doSqlExec([sql], done);
+      dbh.doSqlExec([sql], function(err) {
+        should.not.exist(err);
+        done();
+      });
     });
 
     before(function(done) {

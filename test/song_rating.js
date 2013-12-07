@@ -121,7 +121,7 @@ describe('song_rating_table', function() {
     });
   });
 
-  describe('#CreateAndUpdate', function() {
+  describe('#GetAndUpdate', function() {
     before(function(done) {
       db.setDbPath('./bombay_test.db');
       dbh = new db.Handle()
@@ -171,6 +171,14 @@ describe('song_rating_table', function() {
       });
     });
 
+    it('should load all the records into the db', function(done) {
+      var sql = fs.readFileSync('./test/support/addSongRatings.sql', 'utf8');
+      dbh.doSqlExec(sql, function(err) {
+        should.not.exist(err);
+        done();
+      });
+    });
+
     var song_rating;
     it('should get the song_rating object', function(done) {
       song_rating = dbh.song_rating();
@@ -179,16 +187,16 @@ describe('song_rating_table', function() {
     });
 
     var song_rating_id;
-    it('should create the song_rating', function(done) {
-      song_rating.create({
+    it('should get all the song_ratings for band_member 1 and band_song 4', function(done) {
+      var expected = [{
+        id: 4, band_member_id: 1, band_song_id: 4, rating: 4
+      }];
+      song_rating.getAllWithArgs({ where: {
         band_member_id: 1,
-        band_song_id: 1,
-        rating: 4,
-      }, function(result) {
-        should.exist(result);
-        should.exist(result.song_rating_id);
-        should.not.exist(result.err);
-        song_rating_id = result.song_rating_id;
+        band_song_id: 4
+      }}, function(result) {
+        test_util.check_list(result, expected, 'all_song_ratings', ['id', 'band_member_id', 'band_song_id', 'rating']);
+        song_rating_id = result.all_song_ratings[0].id;
         done();
       });
     });
@@ -199,25 +207,8 @@ describe('song_rating_table', function() {
         should.exist(result.song_rating);
         result.song_rating.id.should.eql(song_rating_id);
         result.song_rating.band_member_id.should.eql(1);
-        result.song_rating.band_song_id.should.eql(1);
+        result.song_rating.band_song_id.should.eql(4);
         result.song_rating.rating.should.eql(4);
-        done();
-      });
-    });
-
-    it('should delete the song_rating', function(done) {
-      song_rating.deleteById(song_rating_id, function(result) {
-        should.exist(result);
-        should.exist(result.song_rating);
-        result.song_rating.should.eql(1);
-        done();
-      });
-    });
-
-    it('should insert some rows', function(done) {
-      var sql = fs.readFileSync('./test/support/addSongRatings.sql', 'utf8');
-      dbh.doSqlExec(sql, function(err) {
-        should.not.exist(err);
         done();
       });
     });

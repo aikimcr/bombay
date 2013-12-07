@@ -1,4 +1,5 @@
 function BandMember(id, band_id, person_id, band_admin) {
+  Table.call(this, './band_member');
   this.id = ko.observable(id || -1);
   this.band_id = ko.observable(band_id || -1);
   this.person_id = ko.observable(person_id || -1);
@@ -24,6 +25,14 @@ BandMember.loadById = function(id, callback) {
       result.band_member.band_admin
     ));
   });
+};
+
+BandMember.prototype.confirm_text = function() {
+  return 'Delete band member ' + this.person().name() + ' from ' + this.band().name() + '?';
+};
+
+BandMember.prototype.reload_list = function() {
+  manager.band_members.load();
 };
 
 // The BandMember List Object

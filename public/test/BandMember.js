@@ -8,7 +8,7 @@ var band_member_model = {
   }]
 };
 
-describe('BandMember', function() {
+describe('BandMember Table', function() {
   describe('#Instantiate', function() {
     var band_member;
     var expected_id = 1;
@@ -141,6 +141,48 @@ describe('BandMember', function() {
       band_member.should.have.property('band_admin');
       ko.isObservable(band_member.band_admin).should.be.true;
       band_member.band_admin().should.eql(band_member_model.all_band_members[1].band_admin);
+      done();
+    });
+  });
+
+  describe('Delete', function() {
+    var band_member;
+    var expected_id = 1;
+    var expected_band_id = 1;
+    var expected_person_id = 1;
+    var expected_band_admin = 1;
+    var svc;
+
+    before(function(done) {
+      svc = service.getInstance();
+      svc.resetCalls();
+      done();
+    });
+
+    it('should create a band_member object', function(done) {
+      band_member = new BandMember(expected_id, expected_band_id, expected_person_id, expected_band_admin);
+      should.exist(band_member);
+      done();
+    });
+
+    it('should call the band_member API', function(done) {
+      svc.delete.result = {band_member: 1};
+      svc.get.result = band_member_model;
+      band_member.delete(function (result) {
+        should.exist(result);
+        result.should.have.property('band_member');
+        result.band_member.should.eql(1);
+        result.should.not.have.property('err');
+        done();
+      });
+    });
+
+    it('should have called the delete service', function(done) {
+      svc.delete.calls.should.be.eql(1);
+      svc.delete.params.should.eql([[
+        './band_member?id=1',
+        'function'
+      ]]);
       done();
     });
   });

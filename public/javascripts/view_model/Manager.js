@@ -47,9 +47,13 @@ function Manager(for_test) {
     }
   }.bind(this));
 
+  this.current_memberships = ko.computed(function() {
+    return this.band_members.filterByKey('person_id', this.current_person().id());
+  }.bind(this));
+
   this.current_bands = ko.computed(function() {
     return ko.utils.arrayMap(
-      this.band_members.filterByKey('person_id', this.current_person().id()),
+      this.current_memberships(),
       function(band_member) { return band_member.band() }
     );
   }.bind(this));
