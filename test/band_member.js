@@ -106,8 +106,8 @@ describe('band_member_table', function() {
         band_admin: true,
       }, function(result) {
         should.exist(result);
-        should.exist(result.band_member_id);
-        should.not.exist(result.err);
+        result.should.have.property('band_member_id');
+        result.should.not.have.property('err');
         band_member_id = result.band_member_id;
         done();
       });
@@ -116,11 +116,33 @@ describe('band_member_table', function() {
     it('should get the band_member', function(done) {
       band_member.getById(band_member_id, function(result) {
         should.exist(result);
-        should.exist(result.band_member);
+        result.should.have.property('band_member');
         result.band_member.id.should.eql(band_member_id);
         result.band_member.band_id.should.eql(1);
         result.band_member.person_id.should.eql(1);
         result.band_member.band_admin.should.eql(true);
+        done();
+      });
+    });
+
+    it('should update the band_member', function(done) {
+      band_member.update({id: band_member_id, band_admin: false}, function(result) {
+        should.exist(result);
+        result.should.have.property('band_member');
+        result.should.not.have.property('err');
+        result.band_member.should.eql(1);
+        done();
+      });
+    });
+
+    it('should get the band_member again', function(done) {
+      band_member.getById(band_member_id, function(result) {
+        should.exist(result);
+        result.should.have.property('band_member');
+        result.band_member.id.should.eql(band_member_id);
+        result.band_member.band_id.should.eql(1);
+        result.band_member.person_id.should.eql(1);
+        result.band_member.band_admin.should.eql(false);
         done();
       });
     });

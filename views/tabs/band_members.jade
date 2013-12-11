@@ -2,7 +2,7 @@ section.app_context(id="band_members")
   a(href="#band_members") Band Members
   div.app_context_item
     div.display
-      div.control(data-bind="if: $root.current_person().system_admin")
+      div.control(data-bind="if: $root.current_band_member().band_admin")
         button.edit_button(id="add_band_member", data-bind="click: forms.add_band_member.show.bind(forms.add_band_member)") +
         label(for="add_band_member") Add Members
 
@@ -13,12 +13,14 @@ section.app_context(id="band_members")
               th Person Name
               th Email
               th Admin
-              th(data-bind="if: $root.current_person().system_admin")
+              th(data-bind="if: $root.current_band_member().band_admin")
 
           tbody(data-bind="foreach: current_members")
             tr
               td(data-bind="text: person().full_name")
               td(data-bind="text: person().email")
-              td(data-bind="text: band_admin")
-              td(data-bind="if: $root.current_person().system_admin")
+              td
+                input(name="band_admin", type="checkbox", data-bind="checked: band_admin, enable: $root.current_band_member().band_admin && $root.current_band_member().id != id, event: { change: $root.update_table_object }");
+
+              td(data-bind="if: $root.current_band_member().band_admin")
                 button.edit_button(data-bind="click: $root.delete_table_object") -

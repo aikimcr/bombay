@@ -8,7 +8,7 @@ var band_song_model = {
   }]
 };
 
-describe('BandSong', function() {
+describe('BandSong Table', function() {
   describe('#Instantiate', function() {
     var band_song;
     var expected_id = 1;
@@ -141,6 +141,48 @@ describe('BandSong', function() {
       band_song.should.have.property('status');
       ko.isObservable(band_song.status).should.be.true;
       band_song.status().should.eql(band_song_model.all_band_songs[1].status);
+      done();
+    });
+  });
+
+  describe('Delete', function() {
+    var band_song;
+    var expected_id = 1;
+    var expected_band_id = 1;
+    var expected_song_id = 1;
+    var expected_song_status = 1;
+    var svc;
+
+    before(function(done) {
+      svc = service.getInstance();
+      svc.resetCalls();
+      done();
+    });
+
+    it('should create a band_song object', function(done) {
+      song = new BandSong(expected_id, expected_band_id, expected_song_id, expected_song_status);
+      should.exist(song);
+      done();
+    });
+
+    it('should call the song API', function(done) {
+      svc.delete.result = {band_song: 1};
+      svc.get.result = song_model;
+      song.delete(function (result) {
+        should.exist(result);
+        result.should.have.property('band_song');
+        result.band_song.should.eql(1);
+        result.should.not.have.property('err');
+        done();
+      });
+    });
+
+    it('should have called the delete service', function(done) {
+      svc.delete.calls.should.be.eql(1);
+      svc.delete.params.should.eql([[
+        './band_song?id=1',
+        'function'
+      ]]);
       done();
     });
   });

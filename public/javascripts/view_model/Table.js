@@ -1,12 +1,27 @@
-function Table(delete_url) {
-  this.delete_url = delete_url;
+function Table(service_url) {
+  this.service_url = service_url;
 }
+
+Table.prototype.update = function(data, callback) {
+  var svc = service.getInstance();
+  Object.keys(data).forEach(function(fn) {
+    if (fn == 'id') next;
+    var value = data[fn];
+    if (value === false || value == 'false') value = 0;
+    if (value === true || value == 'true') value = 1;
+    data[fn] = value;
+  });
+  data['id'] = this.id();
+  svc.put(this.service_url, function(result) {
+    if (callback) callback(result);
+  }.bind(this), data);
+};
 
 Table.prototype.delete = function(callback, opt_event) {
   manager.confirm_dialog.show(this.confirm_text(), opt_event, function(delete_it) {
     if (delete_it) {
       var svc = service.getInstance();
-      svc.delete(this.delete_url + '?id=' + this.id(), function(result) {
+      svc.delete(this.service_url + '?id=' + this.id(), function(result) {
         if (result.err) {
           if (callback) callback(result);
         } else {

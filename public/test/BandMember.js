@@ -145,6 +145,48 @@ describe('BandMember Table', function() {
     });
   });
 
+  describe('Update', function() {
+    var band_member;
+    var expected_id = 1;
+    var expected_band_id = 1;
+    var expected_person_id = 1;
+    var expected_band_admin = 0;
+    var svc;
+
+    before(function(done) {
+      svc = service.getInstance();
+      svc.resetCalls();
+      done();
+    });
+
+    it('should create a band_member object', function(done) {
+      band_member = new BandMember(expected_id, expected_band_id, expected_person_id, expected_band_admin);
+      should.exist(band_member);
+      done();
+    });
+
+    it('should call the band_member API', function(done) {
+      svc.put.result = {band_member: 1};
+      band_member.update({band_admin: true}, function (result) {
+        should.exist(result);
+        result.should.have.property('band_member');
+        result.band_member.should.eql(1);
+        result.should.not.have.property('err');
+        done();
+      });
+    });
+
+    it('should have called the update service', function(done) {
+      svc.put.calls.should.be.eql(1);
+      svc.put.params.should.eql([[
+        './band_member',
+        'function',
+        {id: expected_band_id, band_admin: 1},
+      ]]);
+      done();
+    });
+  });
+
   describe('Delete', function() {
     var band_member;
     var expected_id = 1;
@@ -167,7 +209,6 @@ describe('BandMember Table', function() {
 
     it('should call the band_member API', function(done) {
       svc.delete.result = {band_member: 1};
-      svc.get.result = band_member_model;
       band_member.delete(function (result) {
         should.exist(result);
         result.should.have.property('band_member');

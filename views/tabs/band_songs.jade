@@ -2,7 +2,7 @@ section.app_context(id="band_songs")
   a(href="#band_songs") Band Songs
   div.app_context_item
     div.display
-      div.control
+      div.control(data-bind="if: $root.current_band_member().band_admin")
         button.edit_button(id="add_band_songs", data-bind="click: forms.add_band_song.show.bind(forms.add_band_song)") +
         label(for="add_band_songs") Add Band Song
 
@@ -24,5 +24,5 @@ section.app_context(id="band_songs")
               td(data-bind="text: status")
               td(data-bind="text: member_rating")
               td(data-bind="text: average_rating")
-              td
-                button.edit_button(data-bind="click: $root.deleteBandSong") -
+              td(data-bind="if: $root.current_band_member().band_admin")
+                button.edit_button(data-bind="click: $root.delete_table_object") -

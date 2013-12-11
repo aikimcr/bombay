@@ -125,6 +125,19 @@ function Manager(for_test) {
 
   this.confirm_dialog = new confirm_dialog();
 
+  this.update_table_object = function(data, event) {
+    var target = event.target;
+    var name = target.name;
+    var value = target.type == 'checkbox' ? target.checked : target.value;
+    var changeset = {};
+    changeset[name] = value;
+    data.update(changeset, function(result) {
+      if (result && !result.err) {
+        data.reload_list();
+      }
+    });
+  };
+
   this.delete_table_object = function(data, event) {
     data.delete(function(result) {
       if (result && !result.err) {
