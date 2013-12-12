@@ -57,7 +57,7 @@ BandSong.loadById = function(id, callback) {
       result.band_song.id,
       result.band_song.band_id,
       result.band_song.song_id,
-      result.band_song.status
+      result.band_song.song_status
     ));
   });
 };
@@ -81,7 +81,7 @@ BandSongList.prototype.build_object_ = function(model) {
     model.id,
     model.band_id,
     model.song_id,
-    model.status
+    model.song_status
   );
 };
 

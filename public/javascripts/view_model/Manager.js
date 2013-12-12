@@ -3,6 +3,16 @@ var manager;
 function Manager(for_test) {
   manager = this;
 
+  this.song_status_map = [
+    { value: -2, value_text: 'Retired' },
+    { value: -1, value_text: 'Proposed' },
+    { value: 0, value_text: 'New' },
+    { value: 1, value_text: 'Learning' },
+    { value: 2, value_text: 'Run Through' },
+    { value: 3, value_text: 'Ready' },
+    { value: 4, value_text: 'Standard' }
+  ];
+
   this.bands = new BandList();
   this.persons = new PersonList();
   this.artists = new ArtistList();

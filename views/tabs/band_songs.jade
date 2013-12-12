@@ -21,7 +21,16 @@ section.app_context(id="band_songs")
             tr
               td(data-bind="text: song().name")
               td(data-bind="text: song().artist().name")
-              td(data-bind="text: status")
+              td
+                select(name="song_status", data-bind="value: status, enable: $root.current_band_member().band_admin, event: { change: $root.update_table_object }")
+                 option(value=-2) Retired
+                 option(value=-1) Proposed
+                 option(value=0) New
+                 option(value=1) Learning
+                 option(value=2) Run Through
+                 option(value=3) Ready
+                 option(value=4) Standard
+
               td(data-bind="text: member_rating")
               td(data-bind="text: average_rating")
               td(data-bind="if: $root.current_band_member().band_admin")
