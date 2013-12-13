@@ -297,3 +297,25 @@ body {
   margin-left: 10px;
   margin-right: 40px;
 }
+.rating_container {
+  width: 100px;
+}
+.rating_clicker {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background-color: #fff;
+  color: #fff;
+  text-align: center;
+}
+.rating_clicker:hover {
+  background-color: #f00;
+}
+.rating_clicker_hover {
+  background-color: #008000;
+  color: #008000;
+}
+.rating_clicker_selected {
+  background-color: #000;
+  color: #000;
+}

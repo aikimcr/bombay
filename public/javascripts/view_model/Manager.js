@@ -1,5 +1,50 @@
 var manager;
 
+ko.bindingHandlers.clickRating = {
+    init: function(element, valueAccessor) {
+      element.classList.add('rating_container');
+      for (var i = 1; i <= 5; i++) {
+        var clicker = document.createElement('div');
+        clicker.innerHTML = i;
+        clicker.classList.add('rating_clicker');
+        element.appendChild(clicker);
+      }
+
+      element.addEventListener('mouseover', function(event) {
+        var clickers = event.target.parentElement.children;
+        var index = parseInt(event.target.innerHTML);
+
+        for(var i=0; i < clickers.length; i++) {
+          clickers[i].classList.remove('rating_clicker_hover');
+          if (i < index) clickers[i].classList.add('rating_clicker_hover');
+        }
+      });
+      element.addEventListener('mouseout', function(event) {
+        var clickers = event.target.parentElement.children;
+        var index = parseInt(event.target.innerHTML);
+
+        for(var i=0; i < clickers.length; i++) {
+          clickers[i].classList.remove('rating_clicker_hover');
+        }
+      });
+      element.addEventListener('click', function(event) {
+        var index = parseInt(event.target.innerHTML);
+        var observable = valueAccessor();
+        observable(index);
+      });
+    },
+    update: function(element, valueAccessor) {
+      var observable = valueAccessor();
+      var index = observable();
+      var clickers = element.children;
+
+      for(var i=0; i < clickers.length; i++) {
+        clickers[i].classList.remove('rating_clicker_selected');
+        if (i < index) clickers[i].classList.add('rating_clicker_selected');
+      }
+    }
+};
+
 function Manager(for_test) {
   manager = this;
 
@@ -154,6 +199,23 @@ function Manager(for_test) {
         data.reload_list();
       }
     }, event);
+  };
+
+  this.click_rating = function(data, event) {
+    window.console.log(event);
+    var left0 = event.target.offsetLeft;
+    var left_click = event.x;
+    var click_point = event.offsetX;
+    var click_value = (click_point / 100) * 5;
+    var click_int = parseInt(click_value + .5);
+    window.console.log('-' + left0 + ', ' + left_click + ', ' + event.offsetX + ', ' + click_point + ', ' + click_value + ', ' + click_int);
+    var clickers = event.target.parentElement.children;
+    var index = parseInt(event.target.innerHTML);
+
+    for(var i=0; i < clickers.length; i++) {
+      clickers[i].classList.remove('rating_clicker_selected');
+      if (i < index) clickers[i].classList.add('rating_clicker_selected');
+    }
   };
 }
 

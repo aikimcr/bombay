@@ -19,21 +19,30 @@ function BandSong(id, band_id, song_id, status) {
   }.bind(this));
 
   // Calculations
-  this.member_rating = ko.computed(function() {
-    var ratings = this.song_ratings();
-    if (ratings.length == 0) {
-      return '**no ratings**';
-    } else {
+  this.member_rating = ko.computed({
+    read: function() {
+      var ratings = this.song_ratings();
+      if (ratings.length == 0) {
+        return '**no ratings**';
+      } else {
+        var member_rating = ko.utils.arrayFirst(ratings, function(rating) {
+          return rating.band_member_id() == manager.current_band_member().id();
+        }.bind(this));
+        if (member_rating) {
+          return member_rating.rating();
+        } else {
+          return '**unrated**';
+        }
+      }
+    }.bind(this),
+    write: function(value) {
+      var ratings = this.song_ratings();
       var member_rating = ko.utils.arrayFirst(ratings, function(rating) {
         return rating.band_member_id() == manager.current_band_member().id();
       }.bind(this));
-      if (member_rating) {
-        return member_rating.rating();
-      } else {
-        return '**unrated**';
-      }
-    }
-  }.bind(this));
+      member_rating.rating(value);
+    }.bind(this)
+  });
 
   this.average_rating = ko.computed(function () {
     var ratings = this.song_ratings();
