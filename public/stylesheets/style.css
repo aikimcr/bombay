@@ -300,6 +300,13 @@ body {
 .rating_container {
   width: 100px;
 }
+.rating_value {
+  display: inline-block;
+  height: 20px;
+  background-color: #000;
+  color: #fff;
+  text-align: center;
+}
 .rating_clicker {
   display: inline-block;
   width: 20px;

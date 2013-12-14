@@ -32,6 +32,6 @@ section.app_context(id="band_songs")
                  option(value=4) Standard
 
               td(data-bind="clickRating: member_rating")
-              td(data-bind="text: average_rating")
+              td(data-bind="showRating: average_rating")
               td(data-bind="if: $root.current_band_member().band_admin")
                 button.edit_button(data-bind="click: $root.delete_table_object") -

@@ -40,6 +40,11 @@ function BandSong(id, band_id, song_id, status) {
       var member_rating = ko.utils.arrayFirst(ratings, function(rating) {
         return rating.band_member_id() == manager.current_band_member().id();
       }.bind(this));
+      member_rating.update({id: this.id, rating: value}, function(result) {
+        if (result && !result.err) {
+          this.reload_list();
+        }
+      }.bind(this));
       member_rating.rating(value);
     }.bind(this)
   });
@@ -77,6 +82,7 @@ BandSong.prototype.confirm_text = function() {
 
 BandSong.prototype.reload_list = function() {
   manager.band_songs.load();
+  manager.song_ratings.load();
 };
 
 // The BandSong List Object

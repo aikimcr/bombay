@@ -5,7 +5,7 @@ function Table(service_url) {
 Table.prototype.update = function(data, callback) {
   var svc = service.getInstance();
   Object.keys(data).forEach(function(fn) {
-    if (fn == 'id') next;
+    if (fn == 'id') return;
     var value = data[fn];
     if (value === false || value == 'false') value = 0;
     if (value === true || value == 'true') value = 1;

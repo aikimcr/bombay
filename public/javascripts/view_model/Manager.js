@@ -45,6 +45,22 @@ ko.bindingHandlers.clickRating = {
     }
 };
 
+ko.bindingHandlers.showRating = {
+    init: function(element, valueAccessor) {
+      element.classList.add('rating_container');
+      var rating = document.createElement('div');
+      rating.classList.add('rating_value');
+      element.appendChild(rating);
+    },
+    update: function(element, valueAccessor) {
+      var observable = valueAccessor();
+      var value = parseInt((observable() * 10) + .5) / 10;
+      var width = parseInt(value * 20) + 'px';
+      element.firstChild.style.width = width;
+      element.firstChild.innerHTML = value;
+    },
+};
+
 function Manager(for_test) {
   manager = this;
 
@@ -199,23 +215,6 @@ function Manager(for_test) {
         data.reload_list();
       }
     }, event);
-  };
-
-  this.click_rating = function(data, event) {
-    window.console.log(event);
-    var left0 = event.target.offsetLeft;
-    var left_click = event.x;
-    var click_point = event.offsetX;
-    var click_value = (click_point / 100) * 5;
-    var click_int = parseInt(click_value + .5);
-    window.console.log('-' + left0 + ', ' + left_click + ', ' + event.offsetX + ', ' + click_point + ', ' + click_value + ', ' + click_int);
-    var clickers = event.target.parentElement.children;
-    var index = parseInt(event.target.innerHTML);
-
-    for(var i=0; i < clickers.length; i++) {
-      clickers[i].classList.remove('rating_clicker_selected');
-      if (i < index) clickers[i].classList.add('rating_clicker_selected');
-    }
   };
 }
 

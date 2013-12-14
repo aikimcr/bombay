@@ -1,4 +1,5 @@
 function SongRating(id, band_member_id, band_song_id, rating) {
+  Table.call(this, './song_rating');
   this.id = ko.observable(id);
   this.band_member_id = ko.observable(band_member_id);
   this.band_song_id = ko.observable(band_song_id);
