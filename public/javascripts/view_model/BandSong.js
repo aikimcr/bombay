@@ -88,8 +88,37 @@ BandSong.prototype.reload_list = function() {
 // The BandSong List Object
 function BandSongList() {
   TableList.call(this, './band_song', 'all_band_songs');
+  this.sort_type('name_asc');
 }
 util.inherits(BandSongList, TableList);
+
+BandSongList.prototype.set_sort_compare_list = function() {
+  return {
+    'name_asc': function(a, b) {
+      if (a.song().name() < b.song().name()) return -1;
+      if (a.song().name() > b.song().name()) return 1;
+      if (a.song().artist().name() < b.song().artist().name()) return -1;
+      if (a.song().artist().name() > b.song().artist().name()) return 1;
+      return 0;
+    },
+    'name_desc': function(a, b) {
+      if (a.song().name() > b.song().name()) return -1;
+      if (a.song().name() < b.song().name()) return 1;
+      if (a.song().artist().name() > b.song().artist().name()) return -1;
+      if (a.song().artist().name() < b.song().artist().name()) return 1;
+      return 0;
+    },
+  };
+};
+
+BandSongList.prototype.set_filter_list = function() {
+  return [
+    function(item) {
+      if (!manager.current_band) return false;
+      return item.band_id() == manager.current_band().id();
+    },
+  ];
+};
 
 BandSongList.prototype.build_object_ = function(model) {
   return new BandSong(

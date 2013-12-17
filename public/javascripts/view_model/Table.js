@@ -38,7 +38,33 @@ function TableList(load_url, model_key) {
   this.list = ko.observableArray([]);
   this.load_url = load_url;
   this.model_key = model_key;
+  this.sort_compare_list = this.set_sort_compare_list();
+  this.filter_list = this.set_filter_list();
+  this.sort_type = ko.observable('__default');
+
+  this.filtered_list = ko.computed(function() {
+    var sort_compare = this.sort_compare_list[this.sort_type()];
+    var filtered = ko.utils.arrayFilter(this.list(), function(item) {
+      return this.applyFilters(item);
+    }.bind(this));
+    return filtered.sort(sort_compare);
+  }.bind(this));
 }
+
+TableList.prototype.applyFilters = function(item) {
+  for(var i=0; i < this.filter_list.length; i++) {
+    if (!this.filter_list[i](item)) return false;
+  }
+  return true;
+};
+
+TableList.prototype.set_sort_compare_list = function() {
+  return {__default: function(a, b) { return 0; }};
+};
+
+TableList.prototype.set_filter_list = function() {
+  return [function(item) { return true; }];
+};
 
 TableList.prototype.load = function() {
   this.list([]);
