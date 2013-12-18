@@ -313,11 +313,11 @@ describe('BandSongList', function() {
       manager.song_ratings.list([]);
       manager.song_ratings.load_({
         all_song_ratings: [{
-          id: 1, band_member_id: 1, band_song_id: 45, rating: 3
+          id: 1, band_member_id: 1, band_song_id: 45, rating: 2
         }, {
           id: 2, band_member_id: 1, band_song_id: 16, rating: 4
         }, {
-          id: 3, band_member_id: 1, band_song_id: 63, rating: 2
+          id: 3, band_member_id: 1, band_song_id: 63, rating: 3
         }, {
           id: 1, band_member_id: 2, band_song_id: 45, rating: 3
         }, {
@@ -351,8 +351,8 @@ describe('BandSongList', function() {
         song_name: 'Help',
         artist_name: 'Aardvarks Rule',
         song_status: 4,
-        member_rating: 2,
-        average_rating: 1.5
+        member_rating: 3,
+        average_rating: 2
       }, {
         song_name: 'Help',
         artist_name: 'The Beatles',
@@ -363,8 +363,8 @@ describe('BandSongList', function() {
         song_name: 'Zelda Goes To Hollywood',
         artist_name: 'Aardvarks Rule',
         song_status: -1,
-        member_rating: 3,
-        average_rating: 3
+        member_rating: 2,
+        average_rating: 2.5
       }]);
       done();
     });
@@ -376,8 +376,8 @@ describe('BandSongList', function() {
         song_name: 'Zelda Goes To Hollywood',
         artist_name: 'Aardvarks Rule',
         song_status: -1,
-        member_rating: 3,
-        average_rating: 3
+        member_rating: 2,
+        average_rating: 2.5
       }, {
         song_name: 'Help',
         artist_name: 'The Beatles',
@@ -388,8 +388,108 @@ describe('BandSongList', function() {
         song_name: 'Help',
         artist_name: 'Aardvarks Rule',
         song_status: 4,
+        member_rating: 3,
+        average_rating: 2
+      }]);
+      done();
+    });
+
+    it('should be sorted by artist_name and name ascending', function(done) {
+      band_song_list.sort_type('artist_asc');
+      var got = band_song_list.filtered_list().map(map_song);
+      got.should.eql([{
+        song_name: 'Help',
+        artist_name: 'Aardvarks Rule',
+        song_status: 4,
+        member_rating: 3,
+        average_rating: 2
+      }, {
+        song_name: 'Zelda Goes To Hollywood',
+        artist_name: 'Aardvarks Rule',
+        song_status: -1,
         member_rating: 2,
-        average_rating: 1.5
+        average_rating: 2.5
+      }, {
+        song_name: 'Help',
+        artist_name: 'The Beatles',
+        song_status: 0,
+        member_rating: 4,
+        average_rating: 4.5
+      }]);
+      done();
+    });
+
+    it('should be sorted by artist_name and name descending', function(done) {
+      band_song_list.sort_type('artist_desc');
+      var got = band_song_list.filtered_list().map(map_song);
+      got.should.eql([{
+        song_name: 'Help',
+        artist_name: 'The Beatles',
+        song_status: 0,
+        member_rating: 4,
+        average_rating: 4.5
+      }, {
+        song_name: 'Zelda Goes To Hollywood',
+        artist_name: 'Aardvarks Rule',
+        song_status: -1,
+        member_rating: 2,
+        average_rating: 2.5
+      }, {
+        song_name: 'Help',
+        artist_name: 'Aardvarks Rule',
+        song_status: 4,
+        member_rating: 3,
+        average_rating: 2
+      }]);
+      done();
+    });
+
+    it('should be sorted by member_rating, name and artist_name ascending', function(done) {
+      band_song_list.sort_type('rating_asc');
+      var got = band_song_list.filtered_list().map(map_song);
+      got.should.eql([{
+        song_name: 'Zelda Goes To Hollywood',
+        artist_name: 'Aardvarks Rule',
+        song_status: -1,
+        member_rating: 2,
+        average_rating: 2.5
+      }, {
+        song_name: 'Help',
+        artist_name: 'Aardvarks Rule',
+        song_status: 4,
+        member_rating: 3,
+        average_rating: 2
+      }, {
+        song_name: 'Help',
+        artist_name: 'The Beatles',
+        song_status: 0,
+        member_rating: 4,
+        average_rating: 4.5
+      }]);
+      done();
+    });
+
+    it('should be sorted by member_rating, name and artist_name descending', function(done) {
+      band_song_list.sort_type('rating_desc');
+      var got = band_song_list.filtered_list().map(map_song);
+      got.should.eql([{
+        song_name: 'Help',
+        artist_name: 'The Beatles',
+        song_status: 0,
+        member_rating: 4,
+        average_rating: 4.5
+      }, {
+        song_name: 'Help',
+        artist_name: 'Aardvarks Rule',
+        song_status: 4,
+        member_rating: 3,
+        average_rating: 2
+      }, {
+        song_name: 'Zelda Goes To Hollywood',
+        artist_name: 'Aardvarks Rule',
+        song_status: -1,
+        member_rating: 2,
+        average_rating: 2.5
       }]);
       done();
     });
