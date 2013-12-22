@@ -282,6 +282,23 @@ describe('PersonFilters', function() {
     done();
   });
 
+  it('should have a list of sort types', function(done) {
+    manager.persons.sort_types().should.eql([{
+      value: 'email_asc', label: 'Email (A-Z)',
+    }, {
+      value: 'email_desc', label: 'Email (Z-A)',
+    }, {
+      value: 'full_name_asc', label: 'Full Name (A-Z)'
+    }, {
+      value: 'full_name_desc', label: 'Full Name (Z-A)'
+    }, {
+      value: 'name_asc', label: 'Name (A-Z)'
+    }, {
+      value: 'name_desc', label: 'Name (Z-A)'
+    }]);
+    done();
+  });
+
   it('should have persons', function(done) {
     person_list().length.should.eql(4);
     done();

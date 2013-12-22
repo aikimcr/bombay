@@ -49,6 +49,12 @@ BandList.prototype.set_sort_compare_list = function() {
       return 0;
     },
   };
+
+  this.sort_compare_labels = [{
+    value: 'name_asc', label: 'Name (A-Z)',
+  }, {
+    value: 'name_desc', label: 'Name (Z-A)'
+  }];
 };
 
 BandList.prototype.set_filter_list = function() {

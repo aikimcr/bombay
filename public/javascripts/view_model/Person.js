@@ -69,6 +69,20 @@ PersonList.prototype.set_sort_compare_list = function() {
       return 0;
     },
   };
+
+  this.sort_compare_labels = [{
+    value: 'email_asc', label: 'Email (A-Z)',
+  }, {
+    value: 'email_desc', label: 'Email (Z-A)',
+  }, {
+    value: 'full_name_asc', label: 'Full Name (A-Z)'
+  }, {
+    value: 'full_name_desc', label: 'Full Name (Z-A)'
+  }, {
+    value: 'name_asc', label: 'Name (A-Z)'
+  }, {
+    value: 'name_desc', label: 'Name (Z-A)'
+  }];
 };
 
 PersonList.prototype.set_filter_list = function() {

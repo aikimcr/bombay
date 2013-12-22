@@ -191,3 +191,97 @@ describe('ArtistList', function() {
     });
   });
 });
+
+describe('ArtistFilters', function() {
+  var artist_list = function() {
+    return manager.artists.filtered_list().map(function(artist) {
+      return {id: artist.id(), name: artist.name()};
+    });
+  };
+
+  before(function(done) {
+    load_test_models();
+    done();
+  });
+
+  it('should have a list of sort types', function(done) {
+    manager.artists.sort_types().should.eql([{
+      value: 'name_asc', label: 'Name (A-Z)'
+    }, {
+      value: 'name_desc', label: 'Name (Z-A)'
+    }]);
+    done();
+  });
+
+  it('should have artists', function(done) {
+    artist_list().length.should.eql(8);
+    done();
+  });
+
+  it('should have the artists sorted by name, ascending', function(done) {
+    artist_list().should.eql([{
+      id: 3, name: 'AC/DC'
+    }, {
+      id: 5, name: 'Black Sabbath'
+    }, {
+      id: 1, name: 'David Bowie'
+    }, {
+      id: 8, name: 'Deep Purple'
+    }, {
+      id: 6, name: 'Katy Perry'
+    }, {
+      id: 4, name: 'Led Zeppelin'
+    }, {
+      id: 7, name: 'Madonna'
+    }, {
+      id: 2, name: 'The Beatles'
+    }]);
+    done();
+  });
+
+  it('should have the artists sorted by name, descending', function(done) {
+    manager.artists.sort_type('name_desc');
+    artist_list().should.eql([{
+      id: 2, name: 'The Beatles'
+    }, {
+      id: 7, name: 'Madonna'
+    }, {
+      id: 4, name: 'Led Zeppelin'
+    }, {
+      id: 6, name: 'Katy Perry'
+    }, {
+      id: 8, name: 'Deep Purple'
+    }, {
+      id: 1, name: 'David Bowie'
+    }, {
+      id: 5, name: 'Black Sabbath'
+    }, {
+      id: 3, name: 'AC/DC'
+    }]);
+    done();
+  });
+
+  it('should return only Katy Perry', function(done) {
+    manager.artists.filter_values.name('katy');
+    artist_list().should.eql([{
+      id: 6, name: 'Katy Perry'
+    }]);
+    done();
+  });
+
+  it('should return only artists with an "L" in the name', function(done) {
+    manager.artists.sort_type('name_desc');
+    manager.artists.filter_values.name('L');
+    artist_list().should.eql([{
+      id: 2, name: 'The Beatles'
+    }, {
+      id: 4, name: 'Led Zeppelin'
+    }, {
+      id: 8, name: 'Deep Purple'
+    }, {
+      id: 5, name: 'Black Sabbath'
+    }]);
+    manager.artists.filter_values.name('');
+    done();
+  });
+});

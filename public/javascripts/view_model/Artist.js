@@ -33,6 +33,43 @@ function ArtistList() {
 }
 util.inherits(ArtistList, TableList);
 
+ArtistList.prototype.set_sort_compare_list = function() {
+  this.sort_type('name_asc');
+  this.sort_compare_list = {
+    'name_asc': function(a, b) {
+      if (a.name() < b.name()) return -1;
+      if (a.name() > b.name()) return 1;
+      return 0;
+    },
+    'name_desc': function(a, b) {
+      if (a.name() > b.name()) return -1;
+      if (a.name() < b.name()) return 1;
+      return 0;
+    },
+  };
+
+  this.sort_compare_labels = [{
+    value: 'name_asc', label: 'Name (A-Z)',
+  }, {
+    value: 'name_desc', label: 'Name (Z-A)'
+  }];
+};
+
+ArtistList.prototype.set_filter_list = function() {
+  this.filter_values = {
+    'name': ko.observable('')
+  };
+
+  this.filter_list = {
+    'name': function(item) {
+      if (this.filter_values['name']() == '') return true;
+      return item.name().toLowerCase().match(this.filter_values['name']().toLowerCase());
+    }.bind(this)
+  };
+
+  this.filter_order = ['name'];
+};
+
 ArtistList.prototype.build_object_ = function(model) {
   return new Artist(model.id, model.name);
 };

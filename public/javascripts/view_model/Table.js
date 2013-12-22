@@ -51,6 +51,14 @@ function TableList(load_url, model_key) {
   }.bind(this));
 }
 
+TableList.prototype.sort_types = function() {
+  return this.sort_compare_labels.sort(function(a, b) {
+    if (a.label > b.label) return 1;
+    if (a.label < b.label) return -1;
+    return 0;
+  });
+};
+
 TableList.prototype.applyFilters = function(item) {
   for(var i=0; i < this.filter_order.length; i++) {
     var filter = this.filter_list[this.filter_order[i]];
@@ -61,6 +69,7 @@ TableList.prototype.applyFilters = function(item) {
 
 TableList.prototype.set_sort_compare_list = function() {
   this.sort_compare_list = {__default: function(a, b) { return 0; }};
+  this.sort_compare_labels = {};
 };
 
 TableList.prototype.set_filter_list = function() {

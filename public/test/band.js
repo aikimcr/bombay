@@ -204,6 +204,15 @@ describe('BandFilters', function() {
     done();
   });
 
+  it('should have a list of sort types', function(done) {
+    manager.bands.sort_types().should.eql([{
+      value: 'name_asc', label: 'Name (A-Z)'
+    }, {
+      value: 'name_desc', label: 'Name (Z-A)'
+    }]);
+    done();
+  });
+
   it('should have bands', function(done) {
     band_list().length.should.eql(4);
     done();
