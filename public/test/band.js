@@ -191,3 +191,66 @@ describe('Band List', function() {
     });
   });
 });
+
+describe('BandFilters', function() {
+  var band_list = function() {
+    return manager.bands.filtered_list().map(function(band) {
+      return {id: band.id(), name: band.name()};
+    });
+  };
+
+  before(function(done) {
+    load_test_models();
+    done();
+  });
+
+  it('should have bands', function(done) {
+    band_list().length.should.eql(4);
+    done();
+  });
+
+  it('should have the bands sorted by name, ascending', function(done) {
+    band_list().should.eql([{
+      id: 2, name: 'Aces and Eights'
+    }, {
+      id: 3, name: 'Cover Story'
+    }, {
+      id: 4, name: 'Time Out'
+    }, {
+      id: 1, name: 'Wild At Heart'
+    }]);
+    done();
+  });
+
+  it('should have the bands sorted by name, descending', function(done) {
+    manager.bands.sort_type('name_desc');
+    band_list().should.eql([{
+      id: 1, name: 'Wild At Heart'
+    }, {
+      id: 4, name: 'Time Out'
+    }, {
+      id: 3, name: 'Cover Story'
+    }, {
+      id: 2, name: 'Aces and Eights'
+    }]);
+    done();
+  });
+
+  it('should return only Cover Story', function(done) {
+    manager.bands.filter_values.name('cover');
+    band_list().should.eql([{
+      id: 3, name: 'Cover Story'
+    }]);
+    done();
+  });
+
+  it('should return only bands with an "A" in the name', function(done) {
+    manager.bands.filter_values.name('A');
+    band_list().should.eql([{
+      id: 1, name: 'Wild At Heart'
+    }, {
+      id: 2, name: 'Aces and Eights'
+    }]);
+    done();
+  });
+});

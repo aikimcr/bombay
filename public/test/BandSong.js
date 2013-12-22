@@ -444,7 +444,7 @@ describe('BandSongList', function() {
       done();
     });
 
-    it('should be sorted by member_rating, name and artist_name ascending', function(done) {
+    it('should be sorted by member_rating, average_rating, name and artist_name ascending', function(done) {
       band_song_list.sort_type('rating_asc');
       var got = band_song_list.filtered_list().map(map_song);
       got.should.eql([{
@@ -469,7 +469,7 @@ describe('BandSongList', function() {
       done();
     });
 
-    it('should be sorted by member_rating, name and artist_name descending', function(done) {
+    it('should be sorted by member_rating, average_rating, name and artist_name descending', function(done) {
       band_song_list.sort_type('rating_desc');
       var got = band_song_list.filtered_list().map(map_song);
       got.should.eql([{
@@ -490,6 +490,26 @@ describe('BandSongList', function() {
         song_status: -1,
         member_rating: 2,
         average_rating: 2.5
+      }]);
+      done();
+    });
+
+    it('should get only the songs named "Help"', function(done) {
+      band_song_list.sort_type('name_asc');
+      band_song_list.filter_list['name'].set('Help');
+      var got = band_song_list.filtered_list().map(map_song);
+      got.should.eql([{
+        song_name: 'Help',
+        artist_name: 'Aardvarks Rule',
+        song_status: 4,
+        member_rating: 3,
+        average_rating: 2
+      }, {
+        song_name: 'Help',
+        artist_name: 'The Beatles',
+        song_status: 0,
+        member_rating: 4,
+        average_rating: 4.5
       }]);
       done();
     });

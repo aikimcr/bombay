@@ -38,9 +38,9 @@ function TableList(load_url, model_key) {
   this.list = ko.observableArray([]);
   this.load_url = load_url;
   this.model_key = model_key;
-  this.sort_compare_list = this.set_sort_compare_list();
-  this.filter_list = this.set_filter_list();
   this.sort_type = ko.observable('__default');
+  this.set_sort_compare_list();
+  this.set_filter_list();
 
   this.filtered_list = ko.computed(function() {
     var sort_compare = this.sort_compare_list[this.sort_type()];
@@ -52,18 +52,23 @@ function TableList(load_url, model_key) {
 }
 
 TableList.prototype.applyFilters = function(item) {
-  for(var i=0; i < this.filter_list.length; i++) {
-    if (!this.filter_list[i](item)) return false;
+  for(var i=0; i < this.filter_order.length; i++) {
+    var filter = this.filter_list[this.filter_order[i]];
+    if (!filter(item)) return false;
   }
   return true;
 };
 
 TableList.prototype.set_sort_compare_list = function() {
-  return {__default: function(a, b) { return 0; }};
+  this.sort_compare_list = {__default: function(a, b) { return 0; }};
 };
 
 TableList.prototype.set_filter_list = function() {
-  return [function(item) { return true; }];
+  this.filter_values = {};
+  this.filter_list = {
+    __default: function(item) { return true; }
+  };
+  this.filter_order = ['__default'];
 };
 
 TableList.prototype.load = function() {

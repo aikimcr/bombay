@@ -35,6 +35,72 @@ function PersonList() {
 }
 util.inherits(PersonList, TableList);
 
+PersonList.prototype.set_sort_compare_list = function() {
+  this.sort_type('full_name_asc');
+  this.sort_compare_list = {
+    'name_asc': function(a, b) {
+      if (a.name() < b.name()) return -1;
+      if (a.name() > b.name()) return 1;
+      return 0;
+    },
+    'name_desc': function(a, b) {
+      if (a.name() > b.name()) return -1;
+      if (a.name() < b.name()) return 1;
+      return 0;
+    },
+    'full_name_asc': function(a, b) {
+      if (a.full_name() < b.full_name()) return -1;
+      if (a.full_name() > b.full_name()) return 1;
+      return 0;
+    },
+    'full_name_desc': function(a, b) {
+      if (a.full_name() > b.full_name()) return -1;
+      if (a.full_name() < b.full_name()) return 1;
+      return 0;
+    },
+    'email_asc': function(a, b) {
+      if (a.email() < b.email()) return -1;
+      if (a.email() > b.email()) return 1;
+      return 0;
+    },
+    'email_desc': function(a, b) {
+      if (a.email() > b.email()) return -1;
+      if (a.email() < b.email()) return 1;
+      return 0;
+    },
+  };
+};
+
+PersonList.prototype.set_filter_list = function() {
+  this.filter_values = {
+    'name': ko.observable(''),
+    'full_name': ko.observable(''),
+    'email': ko.observable(''),
+    'system_admin': ko.observable(null)
+  };
+
+  this.filter_list = {
+    'name': function(item) {
+      if (this.filter_values['name']() == '') return true;
+      return item.name().toLowerCase().match(this.filter_values['name']().toLowerCase());
+    }.bind(this),
+    'full_name': function(item) {
+      if (this.filter_values['full_name']() == '') return true;
+      return item.full_name().toLowerCase().match(this.filter_values['full_name']().toLowerCase());
+    }.bind(this),
+    'email': function(item) {
+      if (this.filter_values['email']() == '') return true;
+      return item.email().toLowerCase().match(this.filter_values['email']().toLowerCase());
+    }.bind(this),
+    'system_admin': function(item) {
+      if (this.filter_values['system_admin']() == null) return true;
+      return !!item.system_admin() === !!this.filter_values['system_admin']();
+    }.bind(this)
+  };
+
+  this.filter_order = ['name', 'full_name', 'email', 'system_admin'];
+};
+
 PersonList.prototype.build_object_ = function(model) {
   return new Person(
     model.id,

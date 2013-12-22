@@ -269,3 +269,170 @@ describe('PersonList', function() {
     });
   });
 });
+
+describe('PersonFilters', function() {
+  var person_list = function() {
+    return manager.persons.filtered_list().map(function(person) {
+      return {id: person.id(), name: person.name(), full_name: person.full_name(), email: person.email(), system_admin: !!person.system_admin()};
+    });
+  };
+
+  before(function(done) {
+    load_test_models();
+    done();
+  });
+
+  it('should have persons', function(done) {
+    person_list().length.should.eql(4);
+    done();
+  });
+
+  it('should have the persons sorted by full_name, ascending', function(done) {
+    person_list().should.eql([{
+      id: 1, name: 'admin', full_name: 'Administrator', email: 'admin@foo.com', system_admin: true
+    }, {
+      id: 3, name: 'bbunny', full_name: 'Bugs Bunny', email: 'bbunny@foo.com', system_admin: false
+    }, {
+      id: 2, name: 'dduck', full_name: 'Daffy Duck', email: 'dduck@foo.com', system_admin: false
+    }, {
+      id: 4, name: 'efudd', full_name: 'Elmer Fudd', email: 'efudd@foo.com', system_admin: false
+    }]);
+    done();
+  });
+
+  it('should have the persons sorted by full_name, descending', function(done) {
+    manager.persons.sort_type('full_name_desc');
+    person_list().should.eql([{
+      id: 4, name: 'efudd', full_name: 'Elmer Fudd', email: 'efudd@foo.com', system_admin: false
+    }, {
+      id: 2, name: 'dduck', full_name: 'Daffy Duck', email: 'dduck@foo.com', system_admin: false
+    }, {
+      id: 3, name: 'bbunny', full_name: 'Bugs Bunny', email: 'bbunny@foo.com', system_admin: false
+    }, {
+      id: 1, name: 'admin', full_name: 'Administrator', email: 'admin@foo.com', system_admin: true
+    }]);
+    done();
+  });
+
+  it('should have the persons sorted by name, ascending', function(done) {
+    manager.persons.sort_type('name_asc');
+    person_list().should.eql([{
+      id: 1, name: 'admin', full_name: 'Administrator', email: 'admin@foo.com', system_admin: true
+    }, {
+      id: 3, name: 'bbunny', full_name: 'Bugs Bunny', email: 'bbunny@foo.com', system_admin: false
+    }, {
+      id: 2, name: 'dduck', full_name: 'Daffy Duck', email: 'dduck@foo.com', system_admin: false
+    }, {
+      id: 4, name: 'efudd', full_name: 'Elmer Fudd', email: 'efudd@foo.com', system_admin: false
+    }]);
+    done();
+  });
+
+  it('should have the persons sorted by name, descending', function(done) {
+    manager.persons.sort_type('name_desc');
+    person_list().should.eql([{
+      id: 4, name: 'efudd', full_name: 'Elmer Fudd', email: 'efudd@foo.com', system_admin: false
+    }, {
+      id: 2, name: 'dduck', full_name: 'Daffy Duck', email: 'dduck@foo.com', system_admin: false
+    }, {
+      id: 3, name: 'bbunny', full_name: 'Bugs Bunny', email: 'bbunny@foo.com', system_admin: false
+    }, {
+      id: 1, name: 'admin', full_name: 'Administrator', email: 'admin@foo.com', system_admin: true
+    }]);
+    done();
+  });
+
+  it('should have the persons sorted by email, ascending', function(done) {
+    manager.persons.sort_type('email_asc');
+    person_list().should.eql([{
+      id: 1, name: 'admin', full_name: 'Administrator', email: 'admin@foo.com', system_admin: true
+    }, {
+      id: 3, name: 'bbunny', full_name: 'Bugs Bunny', email: 'bbunny@foo.com', system_admin: false
+    }, {
+      id: 2, name: 'dduck', full_name: 'Daffy Duck', email: 'dduck@foo.com', system_admin: false
+    }, {
+      id: 4, name: 'efudd', full_name: 'Elmer Fudd', email: 'efudd@foo.com', system_admin: false
+    }]);
+    done();
+  });
+
+  it('should have the persons sorted by email, descending', function(done) {
+    manager.persons.sort_type('email_desc');
+    person_list().should.eql([{
+      id: 4, name: 'efudd', full_name: 'Elmer Fudd', email: 'efudd@foo.com', system_admin: false
+    }, {
+      id: 2, name: 'dduck', full_name: 'Daffy Duck', email: 'dduck@foo.com', system_admin: false
+    }, {
+      id: 3, name: 'bbunny', full_name: 'Bugs Bunny', email: 'bbunny@foo.com', system_admin: false
+    }, {
+      id: 1, name: 'admin', full_name: 'Administrator', email: 'admin@foo.com', system_admin: true
+    }]);
+    done();
+  });
+
+  it('should return only Elmer Fudd', function(done) {
+    manager.persons.sort_type('name_desc');
+    manager.persons.filter_values.full_name('Fudd');
+    person_list().should.eql([{
+      id: 4, name: 'efudd', full_name: 'Elmer Fudd', email: 'efudd@foo.com', system_admin: false
+    }]);
+    manager.persons.filter_values.full_name('');
+    done();
+  });
+
+  it('should return only persons with an "F" in the full_name', function(done) {
+    manager.persons.sort_type('name_desc');
+    manager.persons.filter_values.full_name('F');
+    person_list().should.eql([{
+      id: 4, name: 'efudd', full_name: 'Elmer Fudd', email: 'efudd@foo.com', system_admin: false
+    }, {
+      id: 2, name: 'dduck', full_name: 'Daffy Duck', email: 'dduck@foo.com', system_admin: false
+    }]);
+    manager.persons.filter_values.full_name('');
+    done();
+  });
+
+  it('should return only Bugs Bunny', function(done) {
+    manager.persons.sort_type('name_desc');
+    manager.persons.filter_values.name('Bunny');
+    person_list().should.eql([{
+      id: 3, name: 'bbunny', full_name: 'Bugs Bunny', email: 'bbunny@foo.com', system_admin: false
+    }]);
+    manager.persons.filter_values.name('');
+    done();
+  });
+
+  it('should return only Daffy Duck', function(done) {
+    manager.persons.sort_type('name_desc');
+    manager.persons.filter_values.email('DDu');
+    person_list().should.eql([{
+      id: 2, name: 'dduck', full_name: 'Daffy Duck', email: 'dduck@foo.com', system_admin: false
+    }]);
+    manager.persons.filter_values.email('');
+    done();
+  });
+
+  it('should return only Administrator', function(done) {
+    manager.persons.sort_type('name_desc');
+    manager.persons.filter_values.system_admin(true);
+    person_list().should.eql([{
+      id: 1, name: 'admin', full_name: 'Administrator', email: 'admin@foo.com', system_admin: true
+    }]);
+    manager.persons.filter_values.system_admin(null);
+    done();
+  });
+
+  it('should not return Administrator', function(done) {
+    manager.persons.sort_type('name_desc');
+    manager.persons.filter_values.system_admin(false);
+    person_list().should.eql([{
+      id: 4, name: 'efudd', full_name: 'Elmer Fudd', email: 'efudd@foo.com', system_admin: false
+    }, {
+      id: 2, name: 'dduck', full_name: 'Daffy Duck', email: 'dduck@foo.com', system_admin: false
+    }, {
+      id: 3, name: 'bbunny', full_name: 'Bugs Bunny', email: 'bbunny@foo.com', system_admin: false
+    }]);
+    manager.persons.filter_values.system_admin(null);
+    done();
+  });
+});

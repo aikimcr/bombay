@@ -93,7 +93,7 @@ function BandSongList() {
 util.inherits(BandSongList, TableList);
 
 BandSongList.prototype.set_sort_compare_list = function() {
-  return {
+  this.sort_compare_list = {
     'name_asc': function(a, b) {
       if (a.song().name() < b.song().name()) return -1;
       if (a.song().name() > b.song().name()) return 1;
@@ -125,23 +125,37 @@ BandSongList.prototype.set_sort_compare_list = function() {
     'rating_asc': function(a, b) {
       if (a.member_rating() < b.member_rating()) return -1;
       if (a.member_rating() > b.member_rating()) return 1;
+      if (a.average_rating() < b.average_rating()) return -1;
+      if (a.average_rating() > b.average_rating()) return 1;
       return this.sort_compare_list['name_asc'](a, b);
     }.bind(this),
     'rating_desc': function(a, b) {
       if (a.member_rating() > b.member_rating()) return -1;
       if (a.member_rating() < b.member_rating()) return 1;
+      if (a.average_rating() > b.average_rating()) return -1;
+      if (a.average_rating() < b.average_rating()) return 1;
       return this.sort_compare_list['name_desc'](a, b);
     }.bind(this),
   };
 };
 
 BandSongList.prototype.set_filter_list = function() {
-  return [
-    function(item) {
+  this.filter_values = {
+    'name': ko.observable('')
+  };
+
+  this.filter_list = {
+    'band': function(item) {
       if (!manager.current_band) return false;
       return item.band_id() == manager.current_band().id();
-    },
-  ];
+    }, 
+    'name': function(item) {
+      if (this.filter_values['name']() == '') return true;
+      return item.name().match(this.filter_values['name']());
+    }.bind(this)
+  };
+
+  this.filter_order = ['band', 'name'];
 };
 
 BandSongList.prototype.build_object_ = function(model) {
