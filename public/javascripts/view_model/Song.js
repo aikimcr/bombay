@@ -50,6 +50,66 @@ function SongList() {
 }
 util.inherits(SongList, TableList);
 
+SongList.prototype.set_sort_compare_list = function() {
+  this.sort_type('name_asc');
+  this.sort_compare_list = {
+    'name_asc': function(a, b) {
+      if (a.name() < b.name()) return -1;
+      if (a.name() > b.name()) return 1;
+      if (a.artist().name() < b.artist().name()) return -1;
+      if (a.artist().name() > b.artist().name()) return 1;
+      return 0;
+    },
+    'name_desc': function(a, b) {
+      if (a.name() > b.name()) return -1;
+      if (a.name() < b.name()) return 1;
+      if (a.artist().name() > b.artist().name()) return -1;
+      if (a.artist().name() < b.artist().name()) return 1;
+      return 0;
+    },
+    'artist_name_asc': function(a, b) {
+      if (a.artist().name() < b.artist().name()) return -1;
+      if (a.artist().name() > b.artist().name()) return 1;
+      if (a.name() < b.name()) return -1;
+      if (a.name() > b.name()) return 1;
+      return 0;
+    },
+    'artist_name_desc': function(a, b) {
+      if (a.artist().name() > b.artist().name()) return -1;
+      if (a.artist().name() < b.artist().name()) return 1;
+      if (a.name() > b.name()) return -1;
+      if (a.name() < b.name()) return 1;
+      return 0;
+    }
+  };
+
+  this.sort_compare_labels = [{
+    value: 'name_asc', label: 'Name (A-Z)',
+  }, {
+    value: 'name_desc', label: 'Name (Z-A)'
+  }];
+};
+
+SongList.prototype.set_filter_list = function() {
+  this.filter_values = {
+    name: ko.observable(''),
+    artist_name: ko.observable('')
+  };
+
+  this.filter_list = {
+    'name': function(item) {
+      if (this.filter_values['name']() == '') return true;
+      return item.name().toLowerCase().match(this.filter_values['name']().toLowerCase());
+    }.bind(this),
+    'artist_name': function(item) {
+      if (this.filter_values['artist_name']() == '') return true;
+      return item.artist().name().toLowerCase().match(this.filter_values['artist_name']().toLowerCase());
+    }.bind(this)
+  };
+
+  this.filter_order = ['name', 'artist_name'];
+};
+
 SongList.prototype.build_object_ = function(model) {
   return new Song(model.id, model.name, model.artist_id);
 };
