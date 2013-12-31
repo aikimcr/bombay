@@ -283,3 +283,529 @@ describe('BandMemberList', function() {
     });
   });
 });
+
+describe('BandMemberFilters', function() {
+  var band_member_list = function() {
+    return manager.band_members.filtered_list().map(function(band_member) {
+      return {
+        id: band_member.id(),
+        band_id: band_member.band().id(),
+        band_name: band_member.band().name(),
+        person_id: band_member.person().id(),
+        person_name: band_member.person().name(),
+        person_full_name: band_member.person().full_name(),
+        person_email: band_member.person().email(),
+        band_admin: !!band_member.band_admin()
+      };
+    });
+  };
+
+  before(function(done) {
+    load_test_models();
+    done();
+  });
+
+  it('should have a list of sort types', function(done) {
+    manager.band_members.sort_types().should.eql([{
+      value: 'band_name_asc', label: 'Band Name (A-Z)'
+    }, {
+      value: 'band_name_desc', label: 'Band Name (Z-A)'
+    }, {
+      value: 'person_full_email_asc', label: 'Member Email (A-Z)'
+    }, {
+      value: 'person_full_email_desc', label: 'Member Email (Z-A)'
+    }, {
+      value: 'person_full_name_asc', label: 'Member Full Name (A-Z)'
+    }, {
+      value: 'person_full_name_desc', label: 'Member Full Name (Z-A)'
+    }, {
+      value: 'person_name_asc', label: 'Member Login Name (A-Z)'
+    }, {
+      value: 'person_name_desc', label: 'Member Login Name (Z-A)'
+    }]);
+    done();
+  });
+
+  it('should have band_members', function(done) {
+    band_member_list().length.should.eql(9);
+    done();
+  });
+
+  it('should have the band_members sorted by person_name and band_name, ascending', function(done) {
+    manager.band_members.sort_type('person_name_asc');
+    band_member_list().should.eql([{
+      id: 9,
+      band_id: 4,
+      band_name: 'Time Out',
+      person_id: 1,
+      person_name: 'admin',
+      person_full_name: 'Administrator',
+      person_email: 'admin@foo.com',
+      band_admin: false
+    }, {
+      id: 1,
+      band_id: 1,
+      band_name: 'Wild At Heart',
+      person_id: 1,
+      person_name: 'admin',
+      person_full_name: 'Administrator',
+      person_email: 'admin@foo.com',
+      band_admin: false
+    }, {
+      id: 5,
+      band_id: 2,
+      band_name: 'Aces and Eights',
+      person_id: 3,
+      person_name: 'bbunny',
+      person_full_name: 'Bugs Bunny',
+      person_email: 'bbunny@foo.com',
+      band_admin: true
+    }, {
+      id: 7,
+      band_id: 3,
+      band_name: 'Cover Story',
+      person_id: 3,
+      person_name: 'bbunny',
+      person_full_name: 'Bugs Bunny',
+      person_email: 'bbunny@foo.com',
+      band_admin: false
+    }, {
+      id: 3,
+      band_id: 1,
+      band_name: 'Wild At Heart',
+      person_id: 3,
+      person_name: 'bbunny',
+      person_full_name: 'Bugs Bunny',
+      person_email: 'bbunny@foo.com',
+      band_admin: false
+    }, {
+      id: 4,
+      band_id: 2,
+      band_name: 'Aces and Eights',
+      person_id: 2,
+      person_name: 'dduck',
+      person_full_name: 'Daffy Duck',
+      person_email: 'dduck@foo.com',
+      band_admin: false
+    }, {
+      id: 2,
+      band_id: 1,
+      band_name: 'Wild At Heart',
+      person_id: 2,
+      person_name: 'dduck',
+      person_full_name: 'Daffy Duck',
+      person_email: 'dduck@foo.com',
+      band_admin: true
+    }, {
+      id: 6,
+      band_id: 2,
+      band_name: 'Aces and Eights',
+      person_id: 4,
+      person_name: 'efudd',
+      person_full_name: 'Elmer Fudd',
+      person_email: 'efudd@foo.com',
+      band_admin: false
+    }, {
+      id: 8,
+      band_id: 3,
+      band_name: 'Cover Story',
+      person_id: 4,
+      person_name: 'efudd',
+      person_full_name: 'Elmer Fudd',
+      person_email: 'efudd@foo.com',
+      band_admin: true
+    }]);
+    done();
+  });
+
+  it('should have the band_members sorted by person_name, descending', function(done) {
+    manager.band_members.sort_type('person_name_desc');
+    band_member_list().should.eql([{
+      id: 8,
+      band_id: 3,
+      band_name: 'Cover Story',
+      person_id: 4,
+      person_name: 'efudd',
+      person_full_name: 'Elmer Fudd',
+      person_email: 'efudd@foo.com',
+      band_admin: true
+    }, {
+      id: 6,
+      band_id: 2,
+      band_name: 'Aces and Eights',
+      person_id: 4,
+      person_name: 'efudd',
+      person_full_name: 'Elmer Fudd',
+      person_email: 'efudd@foo.com',
+      band_admin: false
+    }, {
+      id: 2,
+      band_id: 1,
+      band_name: 'Wild At Heart',
+      person_id: 2,
+      person_name: 'dduck',
+      person_full_name: 'Daffy Duck',
+      person_email: 'dduck@foo.com',
+      band_admin: true
+    }, {
+      id: 4,
+      band_id: 2,
+      band_name: 'Aces and Eights',
+      person_id: 2,
+      person_name: 'dduck',
+      person_full_name: 'Daffy Duck',
+      person_email: 'dduck@foo.com',
+      band_admin: false
+    }, {
+      id: 3,
+      band_id: 1,
+      band_name: 'Wild At Heart',
+      person_id: 3,
+      person_name: 'bbunny',
+      person_full_name: 'Bugs Bunny',
+      person_email: 'bbunny@foo.com',
+      band_admin: false
+    }, {
+      id: 7,
+      band_id: 3,
+      band_name: 'Cover Story',
+      person_id: 3,
+      person_name: 'bbunny',
+      person_full_name: 'Bugs Bunny',
+      person_email: 'bbunny@foo.com',
+      band_admin: false
+    }, {
+      id: 5,
+      band_id: 2,
+      band_name: 'Aces and Eights',
+      person_id: 3,
+      person_name: 'bbunny',
+      person_full_name: 'Bugs Bunny',
+      person_email: 'bbunny@foo.com',
+      band_admin: true
+    }, {
+      id: 1,
+      band_id: 1,
+      band_name: 'Wild At Heart',
+      person_id: 1,
+      person_name: 'admin',
+      person_full_name: 'Administrator',
+      person_email: 'admin@foo.com',
+      band_admin: false
+    }, {
+      id: 9,
+      band_id: 4,
+      band_name: 'Time Out',
+      person_id: 1,
+      person_name: 'admin',
+      person_full_name: 'Administrator',
+      person_email: 'admin@foo.com',
+      band_admin: false
+    }]);
+    done();
+  });
+
+  it('should have the band_members sorted by band_name, ascending', function(done) {
+    manager.band_members.sort_type('band_name_asc');
+    band_member_list().should.eql([{
+      id: 5,
+      band_id: 2,
+      band_name: 'Aces and Eights',
+      person_id: 3,
+      person_name: 'bbunny',
+      person_full_name: 'Bugs Bunny',
+      person_email: 'bbunny@foo.com',
+      band_admin: true
+    }, {
+      id: 4,
+      band_id: 2,
+      band_name: 'Aces and Eights',
+      person_id: 2,
+      person_name: 'dduck',
+      person_full_name: 'Daffy Duck',
+      person_email: 'dduck@foo.com',
+      band_admin: false
+    }, {
+      id: 6,
+      band_id: 2,
+      band_name: 'Aces and Eights',
+      person_id: 4,
+      person_name: 'efudd',
+      person_full_name: 'Elmer Fudd',
+      person_email: 'efudd@foo.com',
+      band_admin: false
+    }, {
+      id: 7,
+      band_id: 3,
+      band_name: 'Cover Story',
+      person_id: 3,
+      person_name: 'bbunny',
+      person_full_name: 'Bugs Bunny',
+      person_email: 'bbunny@foo.com',
+      band_admin: false
+    }, {
+      id: 8,
+      band_id: 3,
+      band_name: 'Cover Story',
+      person_id: 4,
+      person_name: 'efudd',
+      person_full_name: 'Elmer Fudd',
+      person_email: 'efudd@foo.com',
+      band_admin: true
+    }, {
+      id: 9,
+      band_id: 4,
+      band_name: 'Time Out',
+      person_id: 1,
+      person_name: 'admin',
+      person_full_name: 'Administrator',
+      person_email: 'admin@foo.com',
+      band_admin: false
+    }, {
+      id: 1,
+      band_id: 1,
+      band_name: 'Wild At Heart',
+      person_id: 1,
+      person_name: 'admin',
+      person_full_name: 'Administrator',
+      person_email: 'admin@foo.com',
+      band_admin: false
+    }, {
+      id: 3,
+      band_id: 1,
+      band_name: 'Wild At Heart',
+      person_id: 3,
+      person_name: 'bbunny',
+      person_full_name: 'Bugs Bunny',
+      person_email: 'bbunny@foo.com',
+      band_admin: false
+    }, {
+      id: 2,
+      band_id: 1,
+      band_name: 'Wild At Heart',
+      person_id: 2,
+      person_name: 'dduck',
+      person_full_name: 'Daffy Duck',
+      person_email: 'dduck@foo.com',
+      band_admin: true
+    }]);
+    done();
+  });
+
+  it('should have the band_members sorted by band_name, descending', function(done) {
+    manager.band_members.sort_type('band_name_desc');
+    band_member_list().should.eql([{
+      id: 2,
+      band_id: 1,
+      band_name: 'Wild At Heart',
+      person_id: 2,
+      person_name: 'dduck',
+      person_full_name: 'Daffy Duck',
+      person_email: 'dduck@foo.com',
+      band_admin: true
+    }, {
+      id: 3,
+      band_id: 1,
+      band_name: 'Wild At Heart',
+      person_id: 3,
+      person_name: 'bbunny',
+      person_full_name: 'Bugs Bunny',
+      person_email: 'bbunny@foo.com',
+      band_admin: false
+    }, {
+      id: 1,
+      band_id: 1,
+      band_name: 'Wild At Heart',
+      person_id: 1,
+      person_name: 'admin',
+      person_full_name: 'Administrator',
+      person_email: 'admin@foo.com',
+      band_admin: false
+    }, {
+      id: 9,
+      band_id: 4,
+      band_name: 'Time Out',
+      person_id: 1,
+      person_name: 'admin',
+      person_full_name: 'Administrator',
+      person_email: 'admin@foo.com',
+      band_admin: false
+    }, {
+      id: 8,
+      band_id: 3,
+      band_name: 'Cover Story',
+      person_id: 4,
+      person_name: 'efudd',
+      person_full_name: 'Elmer Fudd',
+      person_email: 'efudd@foo.com',
+      band_admin: true
+    }, {
+      id: 7,
+      band_id: 3,
+      band_name: 'Cover Story',
+      person_id: 3,
+      person_name: 'bbunny',
+      person_full_name: 'Bugs Bunny',
+      person_email: 'bbunny@foo.com',
+      band_admin: false
+    }, {
+      id: 6,
+      band_id: 2,
+      band_name: 'Aces and Eights',
+      person_id: 4,
+      person_name: 'efudd',
+      person_full_name: 'Elmer Fudd',
+      person_email: 'efudd@foo.com',
+      band_admin: false
+    }, {
+      id: 4,
+      band_id: 2,
+      band_name: 'Aces and Eights',
+      person_id: 2,
+      person_name: 'dduck',
+      person_full_name: 'Daffy Duck',
+      person_email: 'dduck@foo.com',
+      band_admin: false
+    }, {
+      id: 5,
+      band_id: 2,
+      band_name: 'Aces and Eights',
+      person_id: 3,
+      person_name: 'bbunny',
+      person_full_name: 'Bugs Bunny',
+      person_email: 'bbunny@foo.com',
+      band_admin: true
+    }]);
+    done();
+  });
+
+  it('should return only dduck', function(done) {
+    manager.band_members.sort_type('person_name_desc');
+    manager.band_members.filter_values.person_name('duck');
+    band_member_list().should.eql([{
+      id: 2,
+      band_id: 1,
+      band_name: 'Wild At Heart',
+      person_id: 2,
+      person_name: 'dduck',
+      person_full_name: 'Daffy Duck',
+      person_email: 'dduck@foo.com',
+      band_admin: true
+    }, {
+      id: 4,
+      band_id: 2,
+      band_name: 'Aces and Eights',
+      person_id: 2,
+      person_name: 'dduck',
+      person_full_name: 'Daffy Duck',
+      person_email: 'dduck@foo.com',
+      band_admin: false
+    }]);
+    manager.band_members.filter_values.person_name('');
+    done();
+  });
+
+  it('should return only Daffy Duck', function(done) {
+    manager.band_members.sort_type('person_name_desc');
+    manager.band_members.filter_values.person_full_name('daFFy');
+    band_member_list().should.eql([{
+      id: 2,
+      band_id: 1,
+      band_name: 'Wild At Heart',
+      person_id: 2,
+      person_name: 'dduck',
+      person_full_name: 'Daffy Duck',
+      person_email: 'dduck@foo.com',
+      band_admin: true
+    }, {
+      id: 4,
+      band_id: 2,
+      band_name: 'Aces and Eights',
+      person_id: 2,
+      person_name: 'dduck',
+      person_full_name: 'Daffy Duck',
+      person_email: 'dduck@foo.com',
+      band_admin: false
+    }]);
+    manager.band_members.filter_values.person_full_name('');
+    done();
+  });
+
+  it('should return only dduck@foo.com', function(done) {
+    manager.band_members.sort_type('person_name_desc');
+    manager.band_members.filter_values.person_email('ddu');
+    band_member_list().should.eql([{
+      id: 2,
+      band_id: 1,
+      band_name: 'Wild At Heart',
+      person_id: 2,
+      person_name: 'dduck',
+      person_full_name: 'Daffy Duck',
+      person_email: 'dduck@foo.com',
+      band_admin: true
+    }, {
+      id: 4,
+      band_id: 2,
+      band_name: 'Aces and Eights',
+      person_id: 2,
+      person_name: 'dduck',
+      person_full_name: 'Daffy Duck',
+      person_email: 'dduck@foo.com',
+      band_admin: false
+    }]);
+    manager.band_members.filter_values.person_email('');
+    done();
+  });
+
+  it('should return only Time Out', function(done) {
+    manager.band_members.sort_type('person_name_desc');
+    manager.band_members.filter_values.band_name('ime ou');
+    band_member_list().should.eql([{
+      id: 9,
+      band_id: 4,
+      band_name: 'Time Out',
+      person_id: 1,
+      person_name: 'admin',
+      person_full_name: 'Administrator',
+      person_email: 'admin@foo.com',
+      band_admin: false
+    }]);
+    manager.band_members.filter_values.band_name('');
+    done();
+  });
+
+  it('should return only band admins', function(done) {
+    manager.band_members.sort_type('band_name_desc');
+    manager.band_members.filter_values.band_admin(true);
+    band_member_list().should.eql([{
+      id: 2,
+      band_id: 1,
+      band_name: 'Wild At Heart',
+      person_id: 2,
+      person_name: 'dduck',
+      person_full_name: 'Daffy Duck',
+      person_email: 'dduck@foo.com',
+      band_admin: true
+    }, {
+      id: 8,
+      band_id: 3,
+      band_name: 'Cover Story',
+      person_id: 4,
+      person_name: 'efudd',
+      person_full_name: 'Elmer Fudd',
+      person_email: 'efudd@foo.com',
+      band_admin: true
+    }, {
+      id: 5,
+      band_id: 2,
+      band_name: 'Aces and Eights',
+      person_id: 3,
+      person_name: 'bbunny',
+      person_full_name: 'Bugs Bunny',
+      person_email: 'bbunny@foo.com',
+      band_admin: true
+    }]);
+    manager.band_members.filter_values.band_admin(null);
+    done();
+  });
+});

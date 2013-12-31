@@ -143,7 +143,7 @@ function load_test_models() {
     }, {
       id: 8, band_id: 3, person_id: 4, band_admin: 1
     }, {
-      id: 9, band_id: 4, person_id: 0, band_admin: 0
+      id: 9, band_id: 4, person_id: 1, band_admin: 0
     }]
   });
 

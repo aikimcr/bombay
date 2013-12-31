@@ -234,6 +234,10 @@ describe('SongFilters', function() {
 
   it('should have a list of sort types', function(done) {
     manager.songs.sort_types().should.eql([{
+      value: 'artist_name_asc', label: 'Artist Name (A-Z)'
+    }, {
+      value: 'artist_name_desc', label: 'Artist Name (Z-A)'
+    }, {
       value: 'name_asc', label: 'Name (A-Z)'
     }, {
       value: 'name_desc', label: 'Name (Z-A)'
