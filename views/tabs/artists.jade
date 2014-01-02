@@ -6,6 +6,24 @@ section.app_context(id="artists")
         button.edit_button(id="add_artists", data-bind="click: forms.add_artist.show.bind(forms.add_artist)") +
         label(for="add_artists") Add Artist
 
+      div.filters
+        table
+          thead
+            tr
+              th Sort Type
+              th Filters
+
+          tbody
+            tr
+              td
+                div.sort
+                  select(data-bind="options: artists.sort_compare_labels, value: artists.sort_type, optionsText: 'label', optionsValue: 'value'")
+
+              td
+                div.filter
+                  label(for="artists_name_filter") Name
+                  input(name="artists_name_filter", type="text", data-bind="value: artists.filter_values.name")
+              
       div.list
         table
           thead
@@ -14,7 +32,7 @@ section.app_context(id="artists")
               th Song Count
               th
 
-          tbody(data-bind="foreach: artists.list")
+          tbody(data-bind="foreach: artists.filtered_list")
             tr
               td(data-bind="text: name")
               td(data-bind="text: song_count")

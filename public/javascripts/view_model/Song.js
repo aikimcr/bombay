@@ -97,7 +97,7 @@ SongList.prototype.set_sort_compare_list = function() {
 SongList.prototype.set_filter_list = function() {
   this.filter_values = {
     name: ko.observable(''),
-    artist_name: ko.observable('')
+    artist_id: ko.observable(null)
   };
 
   this.filter_list = {
@@ -105,13 +105,13 @@ SongList.prototype.set_filter_list = function() {
       if (this.filter_values['name']() == '') return true;
       return item.name().toLowerCase().match(this.filter_values['name']().toLowerCase());
     }.bind(this),
-    'artist_name': function(item) {
-      if (this.filter_values['artist_name']() == '') return true;
-      return item.artist().name().toLowerCase().match(this.filter_values['artist_name']().toLowerCase());
+    'artist_id': function(item) {
+      if (this.filter_values.artist_id() == null) return true;
+      return item.artist_id() == this.filter_values.artist_id();
     }.bind(this)
   };
 
-  this.filter_order = ['name', 'artist_name'];
+  this.filter_order = ['name', 'artist_id'];
 };
 
 SongList.prototype.build_object_ = function(model) {

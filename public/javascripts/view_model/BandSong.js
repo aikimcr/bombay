@@ -163,16 +163,16 @@ BandSongList.prototype.set_filter_list = function() {
 
   this.filter_list = {
     'song_name': function(item) {
-      if (this.filter_values['song_name']() == '') return true;
-      return item.song().name().toLowerCase().match(this.filter_values['song_name']().toLowerCase());
+      if (this.filter_values.song_name() == '') return true;
+      return item.song().name().toLowerCase().match(this.filter_values.song_name().toLowerCase());
     }.bind(this),
     'artist_id': function(item) {
-      if (this.filter_values['artist_id']() == null) return true;
-      return item.song().artist_id() == this.filter_values['artist_id']();
+      if (this.filter_values.artist_id() == null) return true;
+      return item.song().artist_id() == this.filter_values.artist_id();
     }.bind(this),
     'average_rating': function(item) {
-      if (this.filter_values['average_rating']() == null) return true;
-      return item.average_rating() == this.filter_values['average_rating']();
+      if (this.filter_values.average_rating() == null) return true;
+      return item.average_rating() == this.filter_values.average_rating();
     }.bind(this)
   };
 

@@ -69,7 +69,7 @@ TableList.prototype.applyFilters = function(item) {
 
 TableList.prototype.set_sort_compare_list = function() {
   this.sort_compare_list = {__default: function(a, b) { return 0; }};
-  this.sort_compare_labels = {};
+  this.sort_compare_labels = ko.observableArray([]);
 };
 
 TableList.prototype.set_filter_list = function() {

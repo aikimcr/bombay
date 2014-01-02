@@ -5,6 +5,10 @@ function Person(id, name, full_name, email, system_admin) {
   this.full_name = ko.observable(full_name || '');
   this.email = ko.observable(email || '');
   this.system_admin = ko.observable(system_admin || false);
+
+  this.memberships = ko.computed(function() {
+    return manager.band_members.filterByKey('person_id', this.id());
+  }.bind(this));
 }
 util.inherits(Person, Table);
 
@@ -95,20 +99,20 @@ PersonList.prototype.set_filter_list = function() {
 
   this.filter_list = {
     'name': function(item) {
-      if (this.filter_values['name']() == '') return true;
-      return item.name().toLowerCase().match(this.filter_values['name']().toLowerCase());
+      if (this.filter_values.name() == '') return true;
+      return item.name().toLowerCase().match(this.filter_values.name().toLowerCase());
     }.bind(this),
     'full_name': function(item) {
-      if (this.filter_values['full_name']() == '') return true;
-      return item.full_name().toLowerCase().match(this.filter_values['full_name']().toLowerCase());
+      if (this.filter_values.full_name() == '') return true;
+      return item.full_name().toLowerCase().match(this.filter_values.full_name().toLowerCase());
     }.bind(this),
     'email': function(item) {
-      if (this.filter_values['email']() == '') return true;
-      return item.email().toLowerCase().match(this.filter_values['email']().toLowerCase());
+      if (this.filter_values.email() == '') return true;
+      return item.email().toLowerCase().match(this.filter_values.email().toLowerCase());
     }.bind(this),
     'system_admin': function(item) {
-      if (this.filter_values['system_admin']() == null) return true;
-      return !!item.system_admin() === !!this.filter_values['system_admin']();
+      if (this.filter_values.system_admin() == null) return true;
+      return !!item.system_admin() === !!this.filter_values.system_admin();
     }.bind(this)
   };
 

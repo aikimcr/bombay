@@ -62,8 +62,8 @@ ArtistList.prototype.set_filter_list = function() {
 
   this.filter_list = {
     'name': function(item) {
-      if (this.filter_values['name']() == '') return true;
-      return item.name().toLowerCase().match(this.filter_values['name']().toLowerCase());
+      if (this.filter_values.name() == '') return true;
+      return item.name().toLowerCase().match(this.filter_values.name().toLowerCase());
     }.bind(this)
   };
 

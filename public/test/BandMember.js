@@ -318,10 +318,12 @@ describe('BandMemberFilters', function() {
       value: 'person_full_name_asc', label: 'Member Full Name (A-Z)'
     }, {
       value: 'person_full_name_desc', label: 'Member Full Name (Z-A)'
+/*
     }, {
       value: 'person_name_asc', label: 'Member Login Name (A-Z)'
     }, {
       value: 'person_name_desc', label: 'Member Login Name (Z-A)'
+*/
     }]);
     done();
   });
@@ -331,8 +333,8 @@ describe('BandMemberFilters', function() {
     done();
   });
 
-  it('should have the band_members sorted by person_name and band_name, ascending', function(done) {
-    manager.band_members.sort_type('person_name_asc');
+  it('should have the band_members sorted by person_full_name and band_name, ascending', function(done) {
+    manager.band_members.sort_type('person_full_name_asc');
     band_member_list().should.eql([{
       id: 9,
       band_id: 4,
@@ -419,7 +421,7 @@ describe('BandMemberFilters', function() {
   });
 
   it('should have the band_members sorted by person_name, descending', function(done) {
-    manager.band_members.sort_type('person_name_desc');
+    manager.band_members.sort_type('person_full_name_desc');
     band_member_list().should.eql([{
       id: 8,
       band_id: 3,

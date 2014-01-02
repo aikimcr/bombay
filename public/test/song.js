@@ -359,24 +359,11 @@ describe('SongFilters', function() {
   });
 
   it('should return only Lazy', function(done) {
-    manager.songs.filter_values.artist_name('purple');
+    manager.songs.filter_values.artist_id(8);
     song_list().should.eql([{
       id: 8, name: 'Lazy', artist_id: 8, artist_name: 'Deep Purple'
     }]);
-    done();
-  });
-
-  it('should return only songs with a "P" in the artist_name', function(done) {
-    manager.songs.sort_type('name_desc');
-    manager.songs.filter_values.artist_name('p');
-    song_list().should.eql([{
-      id: 4, name: 'You Shook Me', artist_id: 4, artist_name: 'Led Zeppelin'
-    }, {
-      id: 8, name: 'Lazy', artist_id: 8, artist_name: 'Deep Purple'
-    }, {
-      id: 6, name: 'California Girls', artist_id: 6, artist_name: 'Katy Perry'
-    }]);
-    manager.songs.filter_values.name('');
+    manager.songs.filter_values.artist_id(null);
     done();
   });
 });

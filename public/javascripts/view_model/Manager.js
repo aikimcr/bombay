@@ -118,13 +118,21 @@ function Manager(for_test) {
     }
   }.bind(this));
 
+  this.membership_sorts = ko.computed(function() {
+    return ko.utils.arrayFilter(this.band_members.sort_compare_labels, function(sort_compare) {
+      return sort_compare.value.match('band_name_');
+    }.bind(this))
+  }.bind(this));
+
   this.current_memberships = ko.computed(function() {
-    return this.band_members.filterByKey('person_id', this.current_person().id());
+    return ko.utils.arrayFilter(this.band_members.filtered_list(), function(band_member) {
+      return band_member.person_id() == this.current_person().id();
+    }.bind(this));
   }.bind(this));
 
   this.current_bands = ko.computed(function() {
     return ko.utils.arrayMap(
-      this.current_memberships(),
+      this.current_person().memberships(), 
       function(band_member) { return band_member.band() }
     );
   }.bind(this));
@@ -139,9 +147,17 @@ function Manager(for_test) {
     }.bind(this));
   }.bind(this));
 
+  this.band_member_sorts = ko.computed(function() {
+    return ko.utils.arrayFilter(this.band_members.sort_compare_labels, function(sort_compare) {
+      return sort_compare.value.match('person_') || sort_compare.value.match('band_admin_');
+    }.bind(this));
+  }.bind(this));
+
   this.current_members = ko.computed(function() {
     if (this.current_band()) {
-      return this.current_band().band_members();
+      return ko.utils.arrayFilter(this.band_members.filtered_list(), function(band_member) {
+        return band_member.band_id() == this.current_band().id();
+      }.bind(this));
     } else {
       return [];
     }
@@ -163,7 +179,9 @@ function Manager(for_test) {
 
   this.current_band_songs = ko.computed(function() {
     if (this.current_band()) {
-      return this.band_songs.filterByKey('band_id', this.current_band().id());
+      return ko.utils.arrayFilter(this.band_songs.filtered_list(), function(band_song) {
+        return band_song.band_id() == this.current_band().id();
+      }.bind(this));
     } else {
       return [];
     }

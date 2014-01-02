@@ -4,12 +4,6 @@ function SongRating(id, band_member_id, band_song_id, rating) {
   this.band_member_id = ko.observable(band_member_id);
   this.band_song_id = ko.observable(band_song_id);
   this.rating = ko.observable(rating);
-
-/*
-  this.band_member_name = ko.computed(function () {
-    return manager.getById(manager.people, this.band_member_id()).full_name();
-  }.bind(this));
-*/
 }
 util.inherits(SongRating, Table);
 

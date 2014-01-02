@@ -6,6 +6,24 @@ section.app_context(id="bands", data-bind="if: $root.current_person().system_adm
         button.edit_button(id="add_bands", data-bind="click: forms.add_band.show.bind(forms.add_band)") +
         label(for="add_bands") Add Band
 
+      div.filters
+        table
+          thead
+            tr
+              th Sort Type
+              th Filters
+
+          tbody
+            tr
+              td
+                div.sort
+                  select(data-bind="options: bands.sort_compare_labels, value: bands.sort_type, optionsText: 'label', optionsValue: 'value'")
+
+              td
+                div.filter
+                  label(for="bands_name_filter") Name
+                  input(name="bands_name_filter", type="text", data-bind="value: bands.filter_values.name")
+              
       div.list
         table
           thead
@@ -14,7 +32,7 @@ section.app_context(id="bands", data-bind="if: $root.current_person().system_adm
               th Member Count
               th
 
-          tbody(data-bind="foreach: bands.list")
+          tbody(data-bind="foreach: bands.filtered_list")
             tr
               td(data-bind="text: name")
               td(data-bind="text: band_member_count")
