@@ -140,7 +140,7 @@ describe('BandSong Table', function() {
       band_song.song_id().should.eql(band_song_model.all_band_songs[1].song_id);
       band_song.should.have.property('status');
       ko.isObservable(band_song.status).should.be.true;
-      band_song.status().should.eql(band_song_model.all_band_songs[1].status);
+      band_song.status().should.eql(band_song_model.all_band_songs[1].song_status);
       done();
     });
   });
@@ -259,259 +259,367 @@ describe('BandSongList', function() {
       done();
     });
   });
+});
 
-  describe('Filters', function() {
-    before(function(done) {
-      manager.current_band().id(1);
-      done();
+describe('BandSongFilters', function() {
+  var band_song_list = function() {
+    return manager.band_songs.filtered_list().map(function(band_song) {
+      return {
+        id: band_song.id(),
+        band_id: band_song.band().id(),
+        band_name: band_song.band().name(),
+        song_id: band_song.song().id(),
+        song_name: band_song.song().name(),
+        artist_name: band_song.song().artist().name(),
+        song_status: band_song.status()
+      };
     });
+  };
 
-    before(function(done) {
-      manager.current_person().id(1);
-      done();
-    });
+  before(function(done) {
+    load_test_models();
+    done();
+  });
 
-    before(function(done) {
-      manager.band_members.list([]);
-      manager.band_members.load_({
-        all_band_members: [{
-          id: 1, band_id: 1, person_id: 1, band_admin: 0
-        }, {
-          id: 2, band_id: 1, person_id: 2, band_admin: 0
-        }]
-      });
-      done();
-    });
+  it('should have a list of sort types', function(done) {
+    manager.band_songs.sort_types().should.eql([{
+      value: 'artist_name_asc', label: 'Artist Name (A-Z)'
+    }, {
+      value: 'artist_name_desc', label: 'Artist Name (Z-A)'
+    }, {
+      value: 'average_rating_desc', label: 'Average Rating (High to Low)'
+    }, {
+      value: 'average_rating_asc', label: 'Average Rating (Low to High)'
+    }, {
+      value: 'song_name_asc', label: 'Song Name (A-Z)'
+    }, {
+      value: 'song_name_desc', label: 'Song Name (Z-A)'
+    }]);
+    done();
+  });
 
-    before(function(done) {
-      manager.artists.list([]);
-      manager.artists.load_({
-        all_artists: [{
-          id: 2, name: 'Aardvarks Rule'
-        }, {
-          id: 4, name: 'The Beatles'
-        }]
-      });
-      done();
-    });
+  it('should have band_songs', function(done) {
+    band_song_list().length.should.eql(8);
+    done();
+  });
 
-    before(function(done) {
-      manager.songs.list([]);
-      manager.songs.load_({
-        all_songs: [{
-          id: 2, name: 'Zelda Goes To Hollywood', artist_id: 2
-        }, {
-          id: 10, name: 'Help', artist_id: 4
-        }, {
-          id: 5, name: 'Help', artist_id: 2
-        }]
-      });
-      done();
-    });
+  it('should have the band_songs sorted by song_name and artist_name, ascending', function(done) {
+    manager.band_songs.sort_type('song_name_asc');
+    band_song_list().should.eql([{
+      id: 6,
+      band_id: 2,
+      band_name: 'Aces and Eights',
+      song_id: 6,
+      song_name: 'California Girls',
+      artist_name: 'Katy Perry',
+      song_status: 0
+    }, {
+      id: 5,
+      band_id: 2,
+      band_name: 'Aces and Eights',
+      song_id: 5,
+      song_name: 'Changes',
+      artist_name: 'Black Sabbath',
+      song_status: 4
+    }, {
+      id: 1,
+      band_id: 1,
+      band_name: 'Wild At Heart',
+      song_id: 1,
+      song_name: 'Changes',
+      artist_name: 'David Bowie',
+      song_status: 0
+    }, {
+      id: 2,
+      band_id: 1,
+      band_name: 'Wild At Heart',
+      song_id: 2,
+      song_name: 'Help',
+      artist_name: 'The Beatles',
+      song_status: 1
+    }, {
+      id: 8,
+      band_id: 2,
+      band_name: 'Aces and Eights',
+      song_id: 8,
+      song_name: 'Lazy',
+      artist_name: 'Deep Purple',
+      song_status: -1
+    }, {
+      id: 7,
+      band_id: 2,
+      band_name: 'Aces and Eights',
+      song_id: 7,
+      song_name: 'Material Girl',
+      artist_name: 'Madonna',
+      song_status: 2
+    }, {
+      id: 4,
+      band_id: 1,
+      band_name: 'Wild At Heart',
+      song_id: 4,
+      song_name: 'You Shook Me',
+      artist_name: 'Led Zeppelin',
+      song_status: 3
+    }, {
+      id: 3,
+      band_id: 1,
+      band_name: 'Wild At Heart',
+      song_id: 3,
+      song_name: 'You Shook Me All Night Long',
+      artist_name: 'AC/DC',
+      song_status: -1
+    }]);
+    done();
+  });
 
-    before(function(done) {
-      manager.song_ratings.list([]);
-      manager.song_ratings.load_({
-        all_song_ratings: [{
-          id: 1, band_member_id: 1, band_song_id: 45, rating: 2
-        }, {
-          id: 2, band_member_id: 1, band_song_id: 16, rating: 4
-        }, {
-          id: 3, band_member_id: 1, band_song_id: 63, rating: 3
-        }, {
-          id: 1, band_member_id: 2, band_song_id: 45, rating: 3
-        }, {
-          id: 2, band_member_id: 2, band_song_id: 16, rating: 5
-        }, {
-          id: 3, band_member_id: 2, band_song_id: 63, rating: 1
-        }]
-      });
-      done();
-    });
-    
-    var map_song = function(band_song) {
-        return {
-          song_name: band_song.song().name(),
-          artist_name: band_song.song().artist().name(),
-          song_status: band_song.status(),
-          member_rating: band_song.member_rating(),
-          average_rating: band_song.average_rating()
-        };
-    };
+  it('should have the band_songs sorted by song_name and artist name, descending', function(done) {
+    manager.band_songs.sort_type('song_name_desc');
+    band_song_list().should.eql([{
+      id: 3,
+      band_id: 1,
+      band_name: 'Wild At Heart',
+      song_id: 3,
+      song_name: 'You Shook Me All Night Long',
+      artist_name: 'AC/DC',
+      song_status: -1
+    }, {
+      id: 4,
+      band_id: 1,
+      band_name: 'Wild At Heart',
+      song_id: 4,
+      song_name: 'You Shook Me',
+      artist_name: 'Led Zeppelin',
+      song_status: 3
+    }, {
+      id: 7,
+      band_id: 2,
+      band_name: 'Aces and Eights',
+      song_id: 7,
+      song_name: 'Material Girl',
+      artist_name: 'Madonna',
+      song_status: 2
+    }, {
+      id: 8,
+      band_id: 2,
+      band_name: 'Aces and Eights',
+      song_id: 8,
+      song_name: 'Lazy',
+      artist_name: 'Deep Purple',
+      song_status: -1
+    }, {
+      id: 2,
+      band_id: 1,
+      band_name: 'Wild At Heart',
+      song_id: 2,
+      song_name: 'Help',
+      artist_name: 'The Beatles',
+      song_status: 1
+    }, {
+      id: 1,
+      band_id: 1,
+      band_name: 'Wild At Heart',
+      song_id: 1,
+      song_name: 'Changes',
+      artist_name: 'David Bowie',
+      song_status: 0
+    }, {
+      id: 5,
+      band_id: 2,
+      band_name: 'Aces and Eights',
+      song_id: 5,
+      song_name: 'Changes',
+      artist_name: 'Black Sabbath',
+      song_status: 4
+    }, {
+      id: 6,
+      band_id: 2,
+      band_name: 'Aces and Eights',
+      song_id: 6,
+      song_name: 'California Girls',
+      artist_name: 'Katy Perry',
+      song_status: 0
+    }]);
+    done();
+  });
 
-    it('should have all the band_songs for the band', function(done) {
-      band_song_list.filtered_list().should.have.length(3);
-      done();
-    });
+  it('should have the band_songs sorted by artist_name and song_name, ascending', function(done) {
+    manager.band_songs.sort_type('artist_name_asc');
+    band_song_list().should.eql([{
+      id: 3,
+      band_id: 1,
+      band_name: 'Wild At Heart',
+      song_id: 3,
+      song_name: 'You Shook Me All Night Long',
+      artist_name: 'AC/DC',
+      song_status: -1
+    }, {
+      id: 5,
+      band_id: 2,
+      band_name: 'Aces and Eights',
+      song_id: 5,
+      song_name: 'Changes',
+      artist_name: 'Black Sabbath',
+      song_status: 4
+    }, {
+      id: 1,
+      band_id: 1,
+      band_name: 'Wild At Heart',
+      song_id: 1,
+      song_name: 'Changes',
+      artist_name: 'David Bowie',
+      song_status: 0
+    }, {
+      id: 8,
+      band_id: 2,
+      band_name: 'Aces and Eights',
+      song_id: 8,
+      song_name: 'Lazy',
+      artist_name: 'Deep Purple',
+      song_status: -1
+    }, {
+      id: 6,
+      band_id: 2,
+      band_name: 'Aces and Eights',
+      song_id: 6,
+      song_name: 'California Girls',
+      artist_name: 'Katy Perry',
+      song_status: 0
+    }, {
+      id: 4,
+      band_id: 1,
+      band_name: 'Wild At Heart',
+      song_id: 4,
+      song_name: 'You Shook Me',
+      artist_name: 'Led Zeppelin',
+      song_status: 3
+    }, {
+      id: 7,
+      band_id: 2,
+      band_name: 'Aces and Eights',
+      song_id: 7,
+      song_name: 'Material Girl',
+      artist_name: 'Madonna',
+      song_status: 2
+    }, {
+      id: 2,
+      band_id: 1,
+      band_name: 'Wild At Heart',
+      song_id: 2,
+      song_name: 'Help',
+      artist_name: 'The Beatles',
+      song_status: 1
+    }]);
+    done();
+  });
 
-    it('should be sorted by name and artist_name ascending', function(done) {
-      band_song_list.sort_type('name_asc');
-      var got = band_song_list.filtered_list().map(map_song);
-      got.should.eql([{
-        song_name: 'Help',
-        artist_name: 'Aardvarks Rule',
-        song_status: 4,
-        member_rating: 3,
-        average_rating: 2
-      }, {
-        song_name: 'Help',
-        artist_name: 'The Beatles',
-        song_status: 0,
-        member_rating: 4,
-        average_rating: 4.5
-      }, {
-        song_name: 'Zelda Goes To Hollywood',
-        artist_name: 'Aardvarks Rule',
-        song_status: -1,
-        member_rating: 2,
-        average_rating: 2.5
-      }]);
-      done();
-    });
+  it('should have the band_songs sorted by artist_name and song_name, descending', function(done) {
+    manager.band_songs.sort_type('artist_name_desc');
+    band_song_list().should.eql([{
+      id: 2,
+      band_id: 1,
+      band_name: 'Wild At Heart',
+      song_id: 2,
+      song_name: 'Help',
+      artist_name: 'The Beatles',
+      song_status: 1
+    }, {
+      id: 7,
+      band_id: 2,
+      band_name: 'Aces and Eights',
+      song_id: 7,
+      song_name: 'Material Girl',
+      artist_name: 'Madonna',
+      song_status: 2
+    }, {
+      id: 4,
+      band_id: 1,
+      band_name: 'Wild At Heart',
+      song_id: 4,
+      song_name: 'You Shook Me',
+      artist_name: 'Led Zeppelin',
+      song_status: 3
+    }, {
+      id: 6,
+      band_id: 2,
+      band_name: 'Aces and Eights',
+      song_id: 6,
+      song_name: 'California Girls',
+      artist_name: 'Katy Perry',
+      song_status: 0
+    }, {
+      id: 8,
+      band_id: 2,
+      band_name: 'Aces and Eights',
+      song_id: 8,
+      song_name: 'Lazy',
+      artist_name: 'Deep Purple',
+      song_status: -1
+    }, {
+      id: 1,
+      band_id: 1,
+      band_name: 'Wild At Heart',
+      song_id: 1,
+      song_name: 'Changes',
+      artist_name: 'David Bowie',
+      song_status: 0
+    }, {
+      id: 5,
+      band_id: 2,
+      band_name: 'Aces and Eights',
+      song_id: 5,
+      song_name: 'Changes',
+      artist_name: 'Black Sabbath',
+      song_status: 4
+    }, {
+      id: 3,
+      band_id: 1,
+      band_name: 'Wild At Heart',
+      song_id: 3,
+      song_name: 'You Shook Me All Night Long',
+      artist_name: 'AC/DC',
+      song_status: -1
+    }]);
+    done();
+  });
 
-    it('should be sorted by name and artist_name descending', function(done) {
-      band_song_list.sort_type('name_desc');
-      var got = band_song_list.filtered_list().map(map_song);
-      got.should.eql([{
-        song_name: 'Zelda Goes To Hollywood',
-        artist_name: 'Aardvarks Rule',
-        song_status: -1,
-        member_rating: 2,
-        average_rating: 2.5
-      }, {
-        song_name: 'Help',
-        artist_name: 'The Beatles',
-        song_status: 0,
-        member_rating: 4,
-        average_rating: 4.5
-      }, {
-        song_name: 'Help',
-        artist_name: 'Aardvarks Rule',
-        song_status: 4,
-        member_rating: 3,
-        average_rating: 2
-      }]);
-      done();
-    });
+  it('should return only songs with name "Changes"', function(done) {
+    manager.band_songs.sort_type('song_name_desc');
+    manager.band_songs.filter_values.song_name('hangE');
+    band_song_list().should.eql([{
+      id: 1,
+      band_id: 1,
+      band_name: 'Wild At Heart',
+      song_id: 1,
+      song_name: 'Changes',
+      artist_name: 'David Bowie',
+      song_status: 0
+    }, {
+      id: 5,
+      band_id: 2,
+      band_name: 'Aces and Eights',
+      song_id: 5,
+      song_name: 'Changes',
+      artist_name: 'Black Sabbath',
+      song_status: 4
+    }]);
+    manager.band_songs.filter_values.song_name('');
+    done();
+  });
 
-    it('should be sorted by artist_name and name ascending', function(done) {
-      band_song_list.sort_type('artist_asc');
-      var got = band_song_list.filtered_list().map(map_song);
-      got.should.eql([{
-        song_name: 'Help',
-        artist_name: 'Aardvarks Rule',
-        song_status: 4,
-        member_rating: 3,
-        average_rating: 2
-      }, {
-        song_name: 'Zelda Goes To Hollywood',
-        artist_name: 'Aardvarks Rule',
-        song_status: -1,
-        member_rating: 2,
-        average_rating: 2.5
-      }, {
-        song_name: 'Help',
-        artist_name: 'The Beatles',
-        song_status: 0,
-        member_rating: 4,
-        average_rating: 4.5
-      }]);
-      done();
-    });
-
-    it('should be sorted by artist_name and name descending', function(done) {
-      band_song_list.sort_type('artist_desc');
-      var got = band_song_list.filtered_list().map(map_song);
-      got.should.eql([{
-        song_name: 'Help',
-        artist_name: 'The Beatles',
-        song_status: 0,
-        member_rating: 4,
-        average_rating: 4.5
-      }, {
-        song_name: 'Zelda Goes To Hollywood',
-        artist_name: 'Aardvarks Rule',
-        song_status: -1,
-        member_rating: 2,
-        average_rating: 2.5
-      }, {
-        song_name: 'Help',
-        artist_name: 'Aardvarks Rule',
-        song_status: 4,
-        member_rating: 3,
-        average_rating: 2
-      }]);
-      done();
-    });
-
-    it('should be sorted by member_rating, average_rating, name and artist_name ascending', function(done) {
-      band_song_list.sort_type('rating_asc');
-      var got = band_song_list.filtered_list().map(map_song);
-      got.should.eql([{
-        song_name: 'Zelda Goes To Hollywood',
-        artist_name: 'Aardvarks Rule',
-        song_status: -1,
-        member_rating: 2,
-        average_rating: 2.5
-      }, {
-        song_name: 'Help',
-        artist_name: 'Aardvarks Rule',
-        song_status: 4,
-        member_rating: 3,
-        average_rating: 2
-      }, {
-        song_name: 'Help',
-        artist_name: 'The Beatles',
-        song_status: 0,
-        member_rating: 4,
-        average_rating: 4.5
-      }]);
-      done();
-    });
-
-    it('should be sorted by member_rating, average_rating, name and artist_name descending', function(done) {
-      band_song_list.sort_type('rating_desc');
-      var got = band_song_list.filtered_list().map(map_song);
-      got.should.eql([{
-        song_name: 'Help',
-        artist_name: 'The Beatles',
-        song_status: 0,
-        member_rating: 4,
-        average_rating: 4.5
-      }, {
-        song_name: 'Help',
-        artist_name: 'Aardvarks Rule',
-        song_status: 4,
-        member_rating: 3,
-        average_rating: 2
-      }, {
-        song_name: 'Zelda Goes To Hollywood',
-        artist_name: 'Aardvarks Rule',
-        song_status: -1,
-        member_rating: 2,
-        average_rating: 2.5
-      }]);
-      done();
-    });
-
-    it('should get only the songs named "Help"', function(done) {
-      band_song_list.sort_type('name_asc');
-      band_song_list.filter_list['name'].set('Help');
-      var got = band_song_list.filtered_list().map(map_song);
-      got.should.eql([{
-        song_name: 'Help',
-        artist_name: 'Aardvarks Rule',
-        song_status: 4,
-        member_rating: 3,
-        average_rating: 2
-      }, {
-        song_name: 'Help',
-        artist_name: 'The Beatles',
-        song_status: 0,
-        member_rating: 4,
-        average_rating: 4.5
-      }]);
-      done();
-    });
+  it('should return only songs by Deep Purple', function(done) {
+    manager.band_songs.sort_type('song_name_desc');
+    manager.band_songs.filter_values.artist_id(8);
+    band_song_list().should.eql([{
+      id: 8,
+      band_id: 2,
+      band_name: 'Aces and Eights',
+      song_id: 8,
+      song_name: 'Lazy',
+      artist_name: 'Deep Purple',
+      song_status: -1
+    }]);
+    manager.band_songs.filter_values.artist_id(null);
+    done();
   });
 });

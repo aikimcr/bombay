@@ -93,69 +93,90 @@ function BandSongList() {
 util.inherits(BandSongList, TableList);
 
 BandSongList.prototype.set_sort_compare_list = function() {
+  this.sort_type('song_name_asc');
   this.sort_compare_list = {
-    'name_asc': function(a, b) {
+    'song_name_asc': function(a, b) {
       if (a.song().name() < b.song().name()) return -1;
       if (a.song().name() > b.song().name()) return 1;
       if (a.song().artist().name() < b.song().artist().name()) return -1;
       if (a.song().artist().name() > b.song().artist().name()) return 1;
       return 0;
     },
-    'name_desc': function(a, b) {
+    'song_name_desc': function(a, b) {
       if (a.song().name() > b.song().name()) return -1;
       if (a.song().name() < b.song().name()) return 1;
       if (a.song().artist().name() > b.song().artist().name()) return -1;
       if (a.song().artist().name() < b.song().artist().name()) return 1;
       return 0;
     },
-    'artist_asc': function(a, b) {
+    'artist_name_asc': function(a, b) {
       if (a.song().artist().name() < b.song().artist().name()) return -1;
       if (a.song().artist().name() > b.song().artist().name()) return 1;
       if (a.song().name() < b.song().name()) return -1;
       if (a.song().name() > b.song().name()) return 1;
       return 0;
     },
-    'artist_desc': function(a, b) {
+    'artist_name_desc': function(a, b) {
       if (a.song().artist().name() > b.song().artist().name()) return -1;
       if (a.song().artist().name() < b.song().artist().name()) return 1;
       if (a.song().name() > b.song().name()) return -1;
       if (a.song().name() < b.song().name()) return 1;
       return 0;
     },
-    'rating_asc': function(a, b) {
-      if (a.member_rating() < b.member_rating()) return -1;
-      if (a.member_rating() > b.member_rating()) return 1;
+    'average_rating_asc': function(a, b) {
       if (a.average_rating() < b.average_rating()) return -1;
       if (a.average_rating() > b.average_rating()) return 1;
+      if (a.member_rating() < b.member_rating()) return -1;
+      if (a.member_rating() > b.member_rating()) return 1;
       return this.sort_compare_list['name_asc'](a, b);
     }.bind(this),
-    'rating_desc': function(a, b) {
-      if (a.member_rating() > b.member_rating()) return -1;
-      if (a.member_rating() < b.member_rating()) return 1;
+    'average_rating_desc': function(a, b) {
       if (a.average_rating() > b.average_rating()) return -1;
       if (a.average_rating() < b.average_rating()) return 1;
+      if (a.member_rating() > b.member_rating()) return -1;
+      if (a.member_rating() < b.member_rating()) return 1;
       return this.sort_compare_list['name_desc'](a, b);
     }.bind(this),
   };
+
+  this.sort_compare_labels = [{
+    value: 'song_name_asc', label: 'Song Name (A-Z)'
+  }, {
+    value: 'song_name_desc', label: 'Song Name (Z-A)'
+  }, {
+    value: 'artist_name_asc', label: 'Artist Name (A-Z)'
+  }, {
+    value: 'artist_name_desc', label: 'Artist Name (Z-A)'
+  }, {
+    value: 'average_rating_asc', label: 'Average Rating (Low to High)'
+  }, {
+    value: 'average_rating_desc', label: 'Average Rating (High to Low)'
+  }];
 };
 
 BandSongList.prototype.set_filter_list = function() {
   this.filter_values = {
-    'name': ko.observable('')
+    'song_name': ko.observable(''),
+    'artist_id': ko.observable(null),
+    'average_rating': ko.observable(null)
   };
 
   this.filter_list = {
-    'band': function(item) {
-      if (!manager.current_band) return false;
-      return item.band_id() == manager.current_band().id();
-    }, 
-    'name': function(item) {
-      if (this.filter_values['name']() == '') return true;
-      return item.name().match(this.filter_values['name']());
+    'song_name': function(item) {
+      if (this.filter_values['song_name']() == '') return true;
+      return item.song().name().toLowerCase().match(this.filter_values['song_name']().toLowerCase());
+    }.bind(this),
+    'artist_id': function(item) {
+      if (this.filter_values['artist_id']() == null) return true;
+      return item.song().artist_id() == this.filter_values['artist_id']();
+    }.bind(this),
+    'average_rating': function(item) {
+      if (this.filter_values['average_rating']() == null) return true;
+      return item.average_rating() == this.filter_values['average_rating']();
     }.bind(this)
   };
 
-  this.filter_order = ['band', 'name'];
+  this.filter_order = ['song_name', 'artist_id', 'average_rating'];
 };
 
 BandSongList.prototype.build_object_ = function(model) {

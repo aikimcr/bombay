@@ -149,21 +149,21 @@ function load_test_models() {
 
   load_test_model(manager.band_songs, {
     all_band_songs: [{
-      id: 1, band_id: 1, song_id: 1, status: 0
+      id: 1, band_id: 1, song_id: 1, song_status: 0
     }, {
-      id: 2, band_id: 1, song_id: 2, status: 1
+      id: 2, band_id: 1, song_id: 2, song_status: 1
     }, {
-      id: 3, band_id: 1, song_id: 3, status: -1
+      id: 3, band_id: 1, song_id: 3, song_status: -1
     }, {
-      id: 4, band_id: 1, song_id: 4, status: 3
+      id: 4, band_id: 1, song_id: 4, song_status: 3
     }, {
-      id: 5, band_id: 2, song_id: 5, status: 4
+      id: 5, band_id: 2, song_id: 5, song_status: 4
     }, {
-      id: 6, band_id: 2, song_id: 6, status: 0
+      id: 6, band_id: 2, song_id: 6, song_status: 0
     }, {
-      id: 7, band_id: 2, song_id: 7, status: 2
+      id: 7, band_id: 2, song_id: 7, song_status: 2
     }, {
-      id: 8, band_id: 2, song_id: 8, status: -1
+      id: 8, band_id: 2, song_id: 8, song_status: -1
     }]
   });
 
