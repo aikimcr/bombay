@@ -44,7 +44,7 @@ section.app_context(id="band_songs")
               td(data-bind="text: song().name")
               td(data-bind="text: song().artist().name")
               td
-                select(name="song_status", data-bind="value: status, enable: $root.current_band_member().band_admin, event: { change: $root.update_table_object }")
+                select(name="song_status", data-bind="value: song_status, enable: $root.current_band_member().band_admin, event: { change: $root.update_table_object }")
                  option(value=-2) Retired
                  option(value=-1) Proposed
                  option(value=0) New
