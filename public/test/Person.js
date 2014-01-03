@@ -171,6 +171,60 @@ describe('Person Table', function() {
     });
   });
 
+  describe('Refresh', function() {
+    var person;
+    var expected_id = 16;
+    var expected_name = 'Not a bird';
+    var expected_full_name = 'Not little';
+    var expected_email = 'bigness@foo.com';
+    var expected_sysadmin = false;
+    var svc;
+
+    before(function(done) {
+      svc = service.getInstance();
+      svc.resetCalls();
+      done();
+    });
+
+    it('should create a person object', function(done) {
+      person = new Person(
+        expected_id,
+        expected_name,
+        expected_full_name,
+        expected_email,
+        expected_sysadmin
+      );
+      should.exist(person);
+      done();
+    });
+
+    it('should call the person API', function(done) {
+      svc.get.result = { person: person_model.all_persons[0] };
+      person.refresh(function(result) {
+        should.exist(result);
+        result.should.not.have.property('err');
+        done();
+      });
+    });
+
+    it('should have called the service', function(done) {
+      svc.get.calls.should.be.eql(1);
+      svc.get.params.should.eql([[
+        './person?id=16',
+        'function'
+      ]]);
+      done();
+    });
+
+    it('should have changed the fields', function(done) {
+      person.name().should.eql(person_model.all_persons[0].name);
+      person.full_name().should.eql(person_model.all_persons[0].full_name);
+      person.email().should.eql(person_model.all_persons[0].email);
+      person.system_admin().should.eql(person_model.all_persons[0].system_admin);
+      done();
+    });
+  });
+
   describe('Delete', function() {
     var person;
     var expected_id = 1;

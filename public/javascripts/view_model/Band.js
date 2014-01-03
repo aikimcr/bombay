@@ -6,11 +6,11 @@ function Band(id, name) {
 
   this.band_members = ko.computed(function() {
     return manager.band_members.filterByKey('band_id', this.id());
-  }.bind(this));
+  }.bind(this)).extend({throttle: 500});
 
   this.band_member_count = ko.computed(function() {
     return this.band_members().length;
-  }.bind(this))
+  }.bind(this)).extend({throttle: 500});
 }
 util.inherits(Band, Table);
 
@@ -19,6 +19,18 @@ Band.loadById = function(id, callback) {
   svc.get('./band?id=' + id, function(result) {
     callback(new Band(result.band.id, result.band.name));
   });
+};
+
+Band.prototype.refresh = function(callback) {
+  var svc = service.getInstance();
+  svc.get('./band?id=' + this.id(), function(result) {
+    if (result.err) {
+      callback(result);
+    } else {
+      this.name(result.band.name);
+      callback({});
+    }
+  }.bind(this));
 };
 
 Band.prototype.confirm_text = function() {

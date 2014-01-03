@@ -6,26 +6,26 @@ function Song(id, name, artist_id) {
 
   this.artist = ko.computed(function() {
     return manager.artists.getById(this.artist_id()) || new Artist();
-  }.bind(this));
+  }.bind(this)).extend({throttle: 500});
 
   this.band_songs = ko.computed(function() {
     return manager.band_songs.filterByKey('song_id', this.id());
-  }.bind(this));
+  }.bind(this)).extend({throttle: 500});
 
   this.description = ko.computed(function () {
     if (!this.name() || !this.artist()) { return ''; }
     return this.name() + ' by ' + this.artist().name();
-  }.bind(this));
+  }.bind(this)).extend({throttle: 500});
 
   this.bands = ko.computed(function () {
     return ko.utils.arrayMap(this.band_songs(), function(band_song) {
       return band_song.band();
     }.bind(this));
-  }.bind(this));
+  }.bind(this)).extend({throttle: 500});
 
   this.band_count = ko.computed(function () {
     return this.bands().length;
-  }.bind(this));
+  }.bind(this)).extend({throttle: 500});
 }
 util.inherits(Song, Table);
 
@@ -34,6 +34,19 @@ Song.loadById = function(id, callback) {
   svc.get('./song?id=' + id, function(result) {
     callback(new Song(result.song.id, result.song.name, result.song.artist_id));
   });
+};
+
+Song.prototype.refresh = function(callback) {
+  var svc = service.getInstance();
+  svc.get('./song?id=' + this.id(), function(result) {
+    if (result.err) {
+      callback(result);
+    } else {
+      this.name(result.song.name);
+      this.artist_id(result.song.artist_id);
+      callback({});
+    }
+  }.bind(this));
 };
 
 Song.prototype.confirm_text = function() {

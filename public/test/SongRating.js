@@ -144,6 +144,57 @@ describe('SongRating', function() {
       done();
     });
   });
+
+  describe('Refresh', function() {
+    var song_rating;
+    var expected_id = 45;
+    var expected_band_member_id = 1;
+    var expected_band_song_id = 1;
+    var expected_rating = 5;
+    var svc;
+
+    before(function(done) {
+      svc = service.getInstance();
+      svc.resetCalls();
+      done();
+    });
+
+    it('should create a song_rating object', function(done) {
+      song_rating = new SongRating(
+        expected_id,
+        expected_band_member_id,
+        expected_band_song_id,
+        expected_rating
+      );
+      should.exist(song_rating);
+      done();
+    });
+
+    it('should call the song_rating API', function(done) {
+      svc.get.result = { song_rating: song_rating_model.all_song_ratings[0] };
+      song_rating.refresh(function(result) {
+        should.exist(result);
+        result.should.not.have.property('err');
+        done();
+      });
+    });
+
+    it('should have called the service', function(done) {
+      svc.get.calls.should.be.eql(1);
+      svc.get.params.should.eql([[
+        './song_rating?id=45',
+        'function'
+      ]]);
+      done();
+    });
+
+    it('should have changed the fields', function(done) {
+      song_rating.band_member_id().should.eql(song_rating_model.all_song_ratings[0].band_member_id);
+      song_rating.band_song_id().should.eql(song_rating_model.all_song_ratings[0].band_song_id);
+      song_rating.rating().should.eql(song_rating_model.all_song_ratings[0].rating);
+      done();
+    });
+  });
 });
 
 describe('SongRatingList', function() {

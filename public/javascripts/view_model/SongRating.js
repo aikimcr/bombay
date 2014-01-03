@@ -19,6 +19,20 @@ SongRating.loadById = function(id, callback) {
   });
 };
 
+SongRating.prototype.refresh = function(callback) {
+  var svc = service.getInstance();
+  svc.get('./song_rating?id=' + this.id(), function(result) {
+    if (result.err) {
+      callback(result);
+    } else {
+      this.band_member_id(result.song_rating.band_member_id);
+      this.band_song_id(result.song_rating.band_song_id);
+      this.rating(result.song_rating.rating);
+      callback({});
+    }
+  }.bind(this));
+};
+
 // The SongRating List Object
 function SongRatingList() {
   TableList.call(this, './song_rating', 'all_song_ratings');

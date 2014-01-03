@@ -102,6 +102,48 @@ describe('Band Table', function() {
     });
   });
 
+  describe('Refresh', function() {
+    var band;
+    var expected_id = 45;
+    var expected_name = 'Not a bird';
+    var svc;
+
+    before(function(done) {
+      svc = service.getInstance();
+      svc.resetCalls();
+      done();
+    });
+
+    it('should create a band object', function(done) {
+      band = new Band(expected_id, expected_name);
+      should.exist(band);
+      done();
+    });
+
+    it('should call the band API', function(done) {
+      svc.get.result = { band: band_model.all_bands[0] };
+      band.refresh(function(result) {
+        should.exist(result);
+        result.should.not.have.property('err');
+        done();
+      });
+    });
+
+    it('should have called the service', function(done) {
+      svc.get.calls.should.be.eql(1);
+      svc.get.params.should.eql([[
+        './band?id=45',
+        'function'
+      ]]);
+      done();
+    });
+
+    it('should have changed the name', function(done) {
+      band.name().should.eql(band_model.all_bands[0].name);
+      done();
+    });
+  });
+
   describe('Delete', function() {
     var band;
     var expected_id = 1;

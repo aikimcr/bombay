@@ -5,10 +5,11 @@ function Artist(id, name) {
 
   this.songs = ko.computed(function() {
     return manager.songs.filterByKey('artist_id', this.id());
-  }.bind(this));
+  }.bind(this)).extend({throttle: 500});
+
   this.song_count = ko.computed(function() {
     return this.songs().length;
-  }.bind(this));
+  }.bind(this)).extend({throttle: 500});
 }
 util.inherits(Artist, Table);
 
@@ -17,6 +18,18 @@ Artist.loadById = function(id, callback) {
   svc.get('./artist?id=' + id, function(result) {
     callback(new Artist(result.artist.id, result.artist.name));
   });
+};
+
+Artist.prototype.refresh = function(callback) {
+  var svc = service.getInstance();
+  svc.get('./artist?id=' + this.id(), function(result) {
+    if (result.err) {
+      callback(result);
+    } else {
+      this.name(result.artist.name);
+      callback({});
+    }
+  }.bind(this));
 };
 
 Artist.prototype.confirm_text = function() {

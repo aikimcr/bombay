@@ -102,6 +102,48 @@ describe('Artist Table', function() {
     });
   });
 
+  describe('Refresh', function() {
+    var artist;
+    var expected_id = 13;
+    var expected_name = 'In A Forest';
+    var svc;
+
+    before(function(done) {
+      svc = service.getInstance();
+      svc.resetCalls();
+      done();
+    });
+
+    it('should create a artist object', function(done) {
+      artist = new Artist(expected_id, expected_name);
+      should.exist(artist);
+      done();
+    });
+
+    it('should call the artist API', function(done) {
+      svc.get.result = { artist: artist_model.all_artists[0] };
+      artist.refresh(function(result) {
+        should.exist(result);
+        result.should.not.have.property('err');
+        done();
+      });
+    });
+
+    it('should have called the service', function(done) {
+      svc.get.calls.should.be.eql(1);
+      svc.get.params.should.eql([[
+        './artist?id=13',
+        'function'
+      ]]);
+      done();
+    });
+
+    it('should have changed the name', function(done) {
+      artist.name().should.eql(artist_model.all_artists[0].name);
+      done();
+    });
+  });
+
   describe('Delete', function() {
     var artist;
     var expected_id = 1;

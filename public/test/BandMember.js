@@ -187,6 +187,57 @@ describe('BandMember Table', function() {
     });
   });
 
+  describe('Refresh', function() {
+    var band_member;
+    var expected_id = 45;
+    var expected_band_id = 1;
+    var expected_person_id = 1;
+    var expected_band_admin = 0;
+    var svc;
+
+    before(function(done) {
+      svc = service.getInstance();
+      svc.resetCalls();
+      done();
+    });
+
+    it('should create a band_member object', function(done) {
+      band_member = new BandMember(
+        expected_id,
+        expected_band_id,
+        expected_person_id,
+        expected_band_admin
+      );
+      should.exist(band_member);
+      done();
+    });
+
+    it('should call the band_member API', function(done) {
+      svc.get.result = { band_member: band_member_model.all_band_members[0] };
+      band_member.refresh(function(result) {
+        should.exist(result);
+        result.should.not.have.property('err');
+        done();
+      });
+    });
+
+    it('should have called the service', function(done) {
+      svc.get.calls.should.be.eql(1);
+      svc.get.params.should.eql([[
+        './band_member?id=45',
+        'function'
+      ]]);
+      done();
+    });
+
+    it('should have changed the fields', function(done) {
+      band_member.band_id().should.eql(band_member_model.all_band_members[0].band_id);
+      band_member.person_id().should.eql(band_member_model.all_band_members[0].person_id);
+      band_member.band_admin().should.eql(band_member_model.all_band_members[0].band_admin);
+      done();
+    });
+  });
+
   describe('Delete', function() {
     var band_member;
     var expected_id = 1;

@@ -1,22 +1,22 @@
-function BandSong(id, band_id, song_id, status) {
+function BandSong(id, band_id, song_id, song_status) {
   Table.call(this, './band_song');
   this.id = ko.observable(id || -1);
   this.band_id = ko.observable(band_id || -1);
   this.song_id = ko.observable(song_id || -1);
-  this.status = ko.observable(status);
+  this.song_status = ko.observable(song_status);
 
   // Joins
   this.band = ko.computed(function() {
     return manager.bands.getById(this.band_id()) || new Band();
-  }.bind(this));
+  }.bind(this)).extend({throttle: 500});
 
   this.song = ko.computed(function() {
     return manager.songs.getById(this.song_id()) || new Song();
-  }.bind(this));
+  }.bind(this)).extend({throttle: 500});
 
   this.song_ratings = ko.computed(function() {
     return manager.song_ratings.filterByKey('band_song_id', this.id());
-  }.bind(this));
+  }.bind(this)).extend({throttle: 500});
 
   // Calculations
   this.member_rating = ko.computed({
@@ -42,12 +42,16 @@ function BandSong(id, band_id, song_id, status) {
       }.bind(this));
       member_rating.update({id: this.id, rating: value}, function(result) {
         if (result && !result.err) {
-          this.reload_list();
+          this.refresh(function(result) {
+            if (result.err) {
+              window.console.log(result.err);
+            }
+          });
         }
       }.bind(this));
       member_rating.rating(value);
     }.bind(this)
-  });
+  }).extend({throttle: 500});
 
   this.average_rating = ko.computed(function () {
     var ratings = this.song_ratings();
@@ -60,7 +64,7 @@ function BandSong(id, band_id, song_id, status) {
     });
 
     return rating_sum / ratings.length;
-  }.bind(this));
+  }.bind(this)).extend({throttle: 500});
 }
 util.inherits(BandSong, Table);
 
@@ -74,6 +78,20 @@ BandSong.loadById = function(id, callback) {
       result.band_song.song_status
     ));
   });
+};
+
+BandSong.prototype.refresh = function(callback) {
+  var svc = service.getInstance();
+  svc.get('./band_song?id=' + this.id(), function(result) {
+    if (result.err) {
+      callback(result);
+    } else {
+      this.band_id(result.band_song.band_id);
+      this.song_id(result.band_song.song_id);
+      this.song_status(result.band_song.song_status);
+      callback({});
+    }
+  }.bind(this));
 };
 
 BandSong.prototype.confirm_text = function() {
@@ -128,14 +146,14 @@ BandSongList.prototype.set_sort_compare_list = function() {
       if (a.average_rating() > b.average_rating()) return 1;
       if (a.member_rating() < b.member_rating()) return -1;
       if (a.member_rating() > b.member_rating()) return 1;
-      return this.sort_compare_list['name_asc'](a, b);
+      return this.sort_compare_list['song_name_asc'](a, b);
     }.bind(this),
     'average_rating_desc': function(a, b) {
       if (a.average_rating() > b.average_rating()) return -1;
       if (a.average_rating() < b.average_rating()) return 1;
       if (a.member_rating() > b.member_rating()) return -1;
       if (a.member_rating() < b.member_rating()) return 1;
-      return this.sort_compare_list['name_desc'](a, b);
+      return this.sort_compare_list['song_name_desc'](a, b);
     }.bind(this),
   };
 

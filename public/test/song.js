@@ -121,6 +121,50 @@ describe('Song Table', function() {
     });
   });
 
+  describe('Refresh', function() {
+    var song;
+    var expected_id = 45;
+    var expected_name = 'Not a bird';
+    var expected_artist_id = 7;
+    var svc;
+
+    before(function(done) {
+      svc = service.getInstance();
+      svc.resetCalls();
+      done();
+    });
+
+    it('should create a song object', function(done) {
+      song = new Song(expected_id, expected_name, expected_artist_id);
+      should.exist(song);
+      done();
+    });
+
+    it('should call the song API', function(done) {
+      svc.get.result = { song: song_model.all_songs[0] };
+      song.refresh(function(result) {
+        should.exist(result);
+        result.should.not.have.property('err');
+        done();
+      });
+    });
+
+    it('should have called the service', function(done) {
+      svc.get.calls.should.be.eql(1);
+      svc.get.params.should.eql([[
+        './song?id=45',
+        'function'
+      ]]);
+      done();
+    });
+
+    it('should have changed the name', function(done) {
+      song.name().should.eql(song_model.all_songs[0].name);
+      song.artist_id().should.eql(song_model.all_songs[0].artist_id);
+      done();
+    });
+  });
+
   describe('Delete', function() {
     var song;
     var expected_id = 1;

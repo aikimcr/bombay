@@ -14,14 +14,14 @@ describe('BandSong Table', function() {
     var expected_id = 1;
     var expected_band_id = 12;
     var expected_song_id = 10;
-    var expected_status = 3;
+    var expected_song_status = 3;
 
     it('should create a band_song object', function(done) {
       band_song = new BandSong(
         expected_id,
         expected_band_id,
         expected_song_id,
-        expected_status
+        expected_song_status
       );
       should.exist(band_song);
       done();
@@ -72,18 +72,18 @@ describe('BandSong Table', function() {
       done();
     });
 
-    it('should have a status', function(done) {
-      band_song.should.have.property('status');
+    it('should have a song_status', function(done) {
+      band_song.should.have.property('song_status');
       done();
     });
 
-    it('should have observable status', function(done) {
-      ko.isObservable(band_song.status).should.be.true;
+    it('should have observable song_status', function(done) {
+      ko.isObservable(band_song.song_status).should.be.true;
       done();
     });
 
-    it('should have status set to expected', function(done) {
-      band_song.status().should.eql(expected_status);
+    it('should have song_status set to expected', function(done) {
+      band_song.song_status().should.eql(expected_song_status);
       done();
     });
 
@@ -138,9 +138,60 @@ describe('BandSong Table', function() {
       band_song.should.have.property('song_id');
       ko.isObservable(band_song.song_id).should.be.true;
       band_song.song_id().should.eql(band_song_model.all_band_songs[1].song_id);
-      band_song.should.have.property('status');
-      ko.isObservable(band_song.status).should.be.true;
-      band_song.status().should.eql(band_song_model.all_band_songs[1].song_status);
+      band_song.should.have.property('song_status');
+      ko.isObservable(band_song.song_status).should.be.true;
+      band_song.song_status().should.eql(band_song_model.all_band_songs[1].song_status);
+      done();
+    });
+  });
+
+  describe('Refresh', function() {
+    var band_song;
+    var expected_id = 45;
+    var expected_band_id = 1;
+    var expected_song_id = 1;
+    var expected_song_status = 0;
+    var svc;
+
+    before(function(done) {
+      svc = service.getInstance();
+      svc.resetCalls();
+      done();
+    });
+
+    it('should create a band_song object', function(done) {
+      band_song = new BandSong(
+        expected_id,
+        expected_band_id,
+        expected_song_id,
+        expected_song_status
+      );
+      should.exist(band_song);
+      done();
+    });
+
+    it('should call the band_song API', function(done) {
+      svc.get.result = { band_song: band_song_model.all_band_songs[0] };
+      band_song.refresh(function(result) {
+        should.exist(result);
+        result.should.not.have.property('err');
+        done();
+      });
+    });
+
+    it('should have called the service', function(done) {
+      svc.get.calls.should.be.eql(1);
+      svc.get.params.should.eql([[
+        './band_song?id=45',
+        'function'
+      ]]);
+      done();
+    });
+
+    it('should have changed the fields', function(done) {
+      band_song.band_id().should.eql(band_song_model.all_band_songs[0].band_id);
+      band_song.song_id().should.eql(band_song_model.all_band_songs[0].song_id);
+      band_song.song_status().should.eql(band_song_model.all_band_songs[0].song_status);
       done();
     });
   });
@@ -241,7 +292,7 @@ describe('BandSongList', function() {
       done();
     });
 
-    it('should have an id, band_id, song_id and status in each record', function(done) {
+    it('should have an id, band_id, song_id and song_status in each record', function(done) {
       band_song_list.list().forEach(function(band_song, index) {
         band_song.should.have.property('id');
         ko.isObservable(band_song.id).should.be.true;
@@ -252,9 +303,9 @@ describe('BandSongList', function() {
         band_song.should.have.property('song_id');
         ko.isObservable(band_song.song_id).should.be.true;
         band_song.song_id().should.eql(band_song_model.all_band_songs[index].song_id);
-        band_song.should.have.property('status');
-        ko.isObservable(band_song.status).should.be.true;
-        band_song.status().should.eql(band_song_model.all_band_songs[index].song_status);
+        band_song.should.have.property('song_status');
+        ko.isObservable(band_song.song_status).should.be.true;
+        band_song.song_status().should.eql(band_song_model.all_band_songs[index].song_status);
       });
       done();
     });
@@ -271,7 +322,7 @@ describe('BandSongFilters', function() {
         song_id: band_song.song().id(),
         song_name: band_song.song().name(),
         artist_name: band_song.song().artist().name(),
-        song_status: band_song.status()
+        song_status: band_song.song_status()
       };
     });
   };

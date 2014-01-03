@@ -42,7 +42,7 @@ section.app_context(id="band_members")
               td(data-bind="text: person().full_name")
               td(data-bind="text: person().email")
               td
-                input(name="band_admin", type="checkbox", data-bind="checked: band_admin, enable: $root.current_band_member().band_admin && $root.current_band_member().id != id, event: { change: $root.update_table_object }");
+                input(name="band_admin", type="checkbox", data-bind="checked: band_admin, enable: $root.current_band_member().band_admin, event: { change: $root.update_table_object }");
 
               td(data-bind="if: $root.current_band_member().band_admin")
                 button.edit_button(data-bind="click: $root.delete_table_object") -

@@ -7,11 +7,11 @@ function BandMember(id, band_id, person_id, band_admin) {
 
   this.band = ko.computed(function() {
     return manager.bands.getById(this.band_id()) || new Band();
-  }.bind(this));
+  }.bind(this)).extend({throttle: 500});
 
   this.person = ko.computed(function() {
     return manager.persons.getById(this.person_id()) || new Person();
-  }.bind(this));
+  }.bind(this)).extend({throttle: 500});
 }
 util.inherits(BandMember, Table);
 
@@ -25,6 +25,20 @@ BandMember.loadById = function(id, callback) {
       result.band_member.band_admin
     ));
   });
+};
+
+BandMember.prototype.refresh = function(callback) {
+  var svc = service.getInstance();
+  svc.get('./band_member?id=' + this.id(), function(result) {
+    if (result.err) {
+      callback(result);
+    } else {
+      this.band_id(result.band_member.band_id);
+      this.person_id(result.band_member.person_id);
+      this.band_admin(result.band_member.band_admin);
+      callback({});
+    }
+  }.bind(this));
 };
 
 BandMember.prototype.confirm_text = function() {

@@ -8,7 +8,7 @@ function Person(id, name, full_name, email, system_admin) {
 
   this.memberships = ko.computed(function() {
     return manager.band_members.filterByKey('person_id', this.id());
-  }.bind(this));
+  }.bind(this)).extend({throttle: 500});
 }
 util.inherits(Person, Table);
 
@@ -23,6 +23,21 @@ Person.loadById = function(id, callback) {
       result.person.system_admin
     ));
   });
+};
+
+Person.prototype.refresh = function(callback) {
+  var svc = service.getInstance();
+  svc.get('./person?id=' + this.id(), function(result) {
+    if (result.err) {
+      callback(result);
+    } else {
+      this.name(result.person.name);
+      this.full_name(result.person.full_name);
+      this.email(result.person.email);
+      this.system_admin(result.person.system_admin);
+      callback({});
+    }
+  }.bind(this));
 };
 
 Person.prototype.confirm_text = function() {
