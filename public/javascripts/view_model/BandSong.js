@@ -48,7 +48,7 @@ function BandSong(id, band_id, song_id, song_status) {
             }
           });
         }
-      }.bind(this));
+      }.bind(member_rating));
       member_rating.rating(value);
     }.bind(this)
   }).extend({throttle: 500});
@@ -86,9 +86,9 @@ BandSong.prototype.refresh = function(callback) {
     if (result.err) {
       callback(result);
     } else {
-      this.band_id(result.band_song.band_id);
-      this.song_id(result.band_song.song_id);
-      this.song_status(result.band_song.song_status);
+      if (this.band_id() != result.band_song.band_id) this.band_id(result.band_song.band_id);
+      if (this.song_id() != result.band_song.song_id) this.song_id(result.band_song.song_id);
+      if (this.song_status() != result.band_song.song_status) this.song_status(result.band_song.song_status);
       callback({});
     }
   }.bind(this));

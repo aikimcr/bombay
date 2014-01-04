@@ -25,9 +25,9 @@ SongRating.prototype.refresh = function(callback) {
     if (result.err) {
       callback(result);
     } else {
-      this.band_member_id(result.song_rating.band_member_id);
-      this.band_song_id(result.song_rating.band_song_id);
-      this.rating(result.song_rating.rating);
+      if (this.band_member_id() != result.song_rating.band_member_id) this.band_member_id(result.song_rating.band_member_id);
+      if (this.band_song_id() != result.song_rating.band_song_id) this.band_song_id(result.song_rating.band_song_id);
+      if (this.rating() != result.song_rating.rating) this.rating(result.song_rating.rating);
       callback({});
     }
   }.bind(this));

@@ -33,9 +33,9 @@ BandMember.prototype.refresh = function(callback) {
     if (result.err) {
       callback(result);
     } else {
-      this.band_id(result.band_member.band_id);
-      this.person_id(result.band_member.person_id);
-      this.band_admin(result.band_member.band_admin);
+      if (this.band_id() != result.band_member.band_id) this.band_id(result.band_member.band_id);
+      if (this.person_id() != result.band_member.person_id) this.person_id(result.band_member.person_id);
+      if (this.band_admin() != result.band_member.band_admin) this.band_admin(result.band_member.band_admin);
       callback({});
     }
   }.bind(this));

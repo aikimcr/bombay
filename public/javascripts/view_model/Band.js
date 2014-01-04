@@ -27,7 +27,7 @@ Band.prototype.refresh = function(callback) {
     if (result.err) {
       callback(result);
     } else {
-      this.name(result.band.name);
+      if (this.name() != result.band.name) this.name(result.band.name);
       callback({});
     }
   }.bind(this));

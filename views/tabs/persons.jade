@@ -1,0 +1,56 @@
+section.app_context(id="persons", data-bind="if: $root.current_person().system_admin")
+  a(href="#persons") All Persons
+  div.app_context_item
+    div.display
+      div.control
+        button.edit_button(id="add_persons", data-bind="click: forms.add_person.show.bind(forms.add_person)") +
+        label(for="add_persons") Add Person
+
+      div.filters
+        table
+          thead
+            tr
+              th Sort Type
+              th Filters
+
+          tbody
+            tr
+              td
+                div.sort
+                  select(data-bind="options: persons.sort_compare_labels, value: persons.sort_type, optionsText: 'label', optionsValue: 'value'")
+
+              td
+                div.filter
+                  label(for="persons_name_filter") Name
+                  input(name="persons_name_filter", type="text", data-bind="value: persons.filter_values.name")
+              
+                div.filter
+                  label(for="persons_full_name_filter") Full Name
+                  input(name="persons_full_name_filter", type="text", data-bind="value: persons.filter_values.full_name")
+              
+                div.filter
+                  label(for="persons_email_filter") Email
+                  input(name="persons_email_filter", type="text", data-bind="value: persons.filter_values.email")
+              
+      div.list
+        table
+          thead
+            tr
+              th Name
+              th Full Name
+              th Email
+              th Admin
+              th Memberships
+              th
+
+          tbody(data-bind="foreach: persons.filtered_list")
+            tr
+              td(data-bind="text: name")
+              td(data-bind="text: full_name")
+              td(data-bind="text: email")
+              td
+                input(name="system_admin", type="checkbox", data-bind="checked: system_admin, event: { change: $root.update_table_object }");
+
+              td(data-bind="text: membership_count")
+              td(data-bind="ifnot: membership_count")
+                button.edit_button(data-bind="click: $root.delete_table_object") -

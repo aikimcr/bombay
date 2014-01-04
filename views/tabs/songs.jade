@@ -21,11 +21,11 @@ section.app_context(id="songs")
 
               td
                 div.filter
-                  label(for="songs_name_filter") Name
+                  label(for="songs_name_filter") Song Name
                   input(name="songs_name_filter", type="text", data-bind="value: songs.filter_values.name")
 
                 div.filter
-                  label(for="songs_artist_id_filter") Name
+                  label(for="songs_artist_id_filter") Artist
                   select(name="songs_artist_id_filter", data-bind="options: manager.artists.list, value: songs.filter_values.artist_id, optionsText: 'name', optionsValue: 'id', optionsCaption: '-'")
               
       div.list

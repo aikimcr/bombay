@@ -42,8 +42,8 @@ Song.prototype.refresh = function(callback) {
     if (result.err) {
       callback(result);
     } else {
-      this.name(result.song.name);
-      this.artist_id(result.song.artist_id);
+      if (this.name() != result.song.name) this.name(result.song.name);
+      if (this.artist_id() != result.song.artist_id) this.artist_id(result.song.artist_id);
       callback({});
     }
   }.bind(this));

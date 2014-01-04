@@ -26,7 +26,7 @@ Artist.prototype.refresh = function(callback) {
     if (result.err) {
       callback(result);
     } else {
-      this.name(result.artist.name);
+      if (this.name() != result.artist.name) this.name(result.artist.name);
       callback({});
     }
   }.bind(this));

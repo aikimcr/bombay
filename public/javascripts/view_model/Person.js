@@ -9,6 +9,10 @@ function Person(id, name, full_name, email, system_admin) {
   this.memberships = ko.computed(function() {
     return manager.band_members.filterByKey('person_id', this.id());
   }.bind(this)).extend({throttle: 500});
+
+  this.membership_count = ko.computed(function() {
+    return this.memberships().length;
+  }.bind(this)).extend({throttle: 500});
 }
 util.inherits(Person, Table);
 
@@ -31,10 +35,10 @@ Person.prototype.refresh = function(callback) {
     if (result.err) {
       callback(result);
     } else {
-      this.name(result.person.name);
-      this.full_name(result.person.full_name);
-      this.email(result.person.email);
-      this.system_admin(result.person.system_admin);
+      if (this.name() != result.person.name) this.name(result.person.name);
+      if (this.full_name() != result.person.full_name) this.full_name(result.person.full_name);
+      if (this.email() != result.person.email) this.email(result.person.email);
+      if (this.system_admin() != result.person.system_admin) this.system_admin(result.person.system_admin);
       callback({});
     }
   }.bind(this));
