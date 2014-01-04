@@ -4,7 +4,7 @@ JS_DIR = ./public/javascripts
 JS_LIB = $(JS_DIR)/lib
 TEST_CLIENT_LIB = ./public/test/lib
 
-KNOCKOUT_URL = http://knockoutjs.com/downloads/knockout-3.0.0.js
+KNOCKOUT_URL = http\://knockoutjs.com/downloads/knockout-3.0.0.js
 KNOCKOUT_JS = $(JS_LIB)/knockout-3.0.0.js
 
 CHAI_JS = $(TEST_CLIENT_LIB)/chai.js
@@ -35,7 +35,7 @@ test_setup: $(TEST_FILES)
 database: $(DATABASE)
 
 $(KNOCKOUT_JS): $(JS_LIB)
-        curl -o $(KNOCKOUT_JS) $(KNOCKOUT_URL)
+	curl -o $(KNOCKOUT_JS) $(KNOCKOUT_URL)
 
 $(JS_LIB):
 	mkdir $(JS_LIB)
