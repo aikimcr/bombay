@@ -6,7 +6,12 @@ div#edit_profile_form(data-bind="visible: forms.edit_profile.isVisible")
         div.close_button
           button.close_button(data-bind="click: forms.edit_profile.hide.bind(forms.edit_profile)") X
 
+      div.control
+        button.edit_button(id="show_change_password", data-bind="click: forms.change_password.show.bind(forms.change_password)") +
+        label(for="show_change_password") Change Password
+
       div.dialog_body
+        div.title(data-bind="text: forms.edit_profile.message");
         form(data-bind="submit: function() { Form.putChange(forms.edit_profile, current_person); }")
           input(data-bind="value: forms.edit_profile.name", type="text", placeholder="New Login Name")
           input(data-bind="value: forms.edit_profile.full_name", type="text", placeholder="Full Name")

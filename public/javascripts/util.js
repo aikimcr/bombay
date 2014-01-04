@@ -33,3 +33,17 @@ util.getBandId = function() {
   if (band_selector) { return band_selector.value; }
   return null;
 };
+
+util.strMapCharsToStr = function(str1, str2) {
+  var pi = 0;
+  var result = '';
+
+  for (var si = 0; si < str2.length; si++) {
+    var cc = str1.charCodeAt(pi) ^ str2.charCodeAt(si);
+    result += String.fromCharCode(cc);
+    pi++;
+    if (pi >= str1.length) pi = 0;
+  }
+
+  return result;
+};

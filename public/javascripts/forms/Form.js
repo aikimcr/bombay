@@ -1,15 +1,38 @@
 function Form(opt_other_models) {
   this.isVisible = ko.observable(false);
   this.other_models = opt_other_models ? opt_other_models : [];
+  this.message = ko.observable('');
 }
 
 Form.prototype.show = function() {
   this.isVisible(true);
-}
+};
 
 Form.prototype.hide = function() {
   this.isVisible(false);
-}
+};
+
+Form.prototype.init = function() {
+  this.message('');
+};
+
+Form.prototype.validate = function() {
+  return true;
+};
+
+Form.prototype.setError = function(err) {
+  if (typeof err == 'object') {
+    if (err.code) {
+      this.message(err.code);
+    } else if (err.errno) {
+      this.message(err.errno);
+    } else {
+      this.message(err.toString());
+    }
+  } else {
+    this.message(err);
+  }
+};
 
 Form.postChange = function(form, model) {
   form.postChange_(function (result) {
@@ -18,21 +41,32 @@ Form.postChange = function(form, model) {
       omodel.load();
     }.bind(this));
   }.bind(form));
-}
+};
 
 Form.putChange = function(form, object) {
-  var changeset = form.changeset();
-  object().update(changeset, function(result) {
-    if (result && !result.err) {
-      object().reload_list();
-      object().refresh(function(result) {
+  if (form.validate()) {
+    var changeset = form.changeset();
+    object().update(changeset, function(result) {
+      if (result) {
         if (result.err) {
-          window.console.log(result.err);
+          this.setError(result.err);
+        } else {
+          object().reload_list();
+          object().refresh(function(result) {
+            if (result.err) {
+              this.setError(result.err);
+            } else {
+              this.init();
+              this.message('Change accepted');
+            }
+          }.bind(this));
         }
-      });
-    }
-  }.bind(this));
-}
+      } else {
+        this.setError('Unknown error on update');
+      }
+    }.bind(form));
+  }
+};
 
 function AddBand() {
   Form.call(this);
@@ -88,6 +122,7 @@ EditProfile.prototype.show = function() {
 };
 
 EditProfile.prototype.init = function() {
+  Form.prototype.init.call(this);
   this.name(manager.current_person().name());
   this.full_name(manager.current_person().full_name());
   this.email(manager.current_person().email());
@@ -99,6 +134,58 @@ EditProfile.prototype.changeset = function(callback) {
     full_name: this.full_name(),
     email: this.email(),
   };
+};
+
+function ChangePassword() {
+  Form.call(this);
+  this.old_password = ko.observable('');
+  this.new_password = ko.observable('');
+  this.confirm_new_password = ko.observable('');
+}
+util.inherits(ChangePassword, Form);
+
+ChangePassword.prototype.show = function() {
+  this.init();
+  Form.prototype.show.call(this);
+};
+
+ChangePassword.prototype.init = function() {
+  Form.prototype.init.call(this);
+  this.old_password('');
+  this.new_password('');
+  this.confirm_new_password('');
+};
+
+ChangePassword.prototype.validate = function() {
+  if (this.old_password() == '') {
+    this.setError('Please provide your old password');
+    return false;
+  }
+
+  if (this.new_password() == '') {
+    this.setError('Please provide a new password');
+    return false;
+  }
+
+  if (this.confirm_new_password() == '') {
+    this.setError('Please confirm your new password');
+    return false;
+  }
+
+  if (this.confirm_new_password() != this.new_password()) {
+    this.setError('New password and confirmation do not match');
+    return false;
+  }
+
+  return true;
+};
+
+ChangePassword.prototype.changeset = function(callback) {
+  var change_token = util.strMapCharsToStr(this.old_password(), JSON.stringify([
+    this.old_password(),
+    this.new_password()
+  ]));
+  return { token: encodeURIComponent(change_token) };
 };
 
 function AddArtist() {
