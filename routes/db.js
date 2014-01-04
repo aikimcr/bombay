@@ -80,9 +80,35 @@ exports.postPersonTable = function(req, res) {
 
 exports.putPersonTable = function(req, res) {
   var dbh = new db.Handle();
-  dbh.person().update(req.query, function(result) {
-    res.json(result);
-  });
+
+  if (req.query.token) {
+    var token = req.query.token;
+    delete req.query.token;
+    dbh.person().getById(req.query.id, function(result) {
+      var wrong_old = 'Old password did not match';
+      var db_pw = result.person.password;
+      var decrypted = util.strMapCharsToStr(db_pw, token);
+      var pws;
+      try {
+        pws = JSON.parse(decrypted);
+      } catch(e) {
+        pws = ['', ''];
+      }
+
+      if (pws[0] == db_pw) {
+        req.query.password = pws[1];
+        dbh.person().update(req.query, function(result) {
+          res.json(result);
+        });
+      } else {
+        res.json({err: wrong_old});
+      }
+    });
+  } else {
+    dbh.person().update(req.query, function(result) {
+      res.json(result);
+    });
+  }
 };
 
 exports.deletePersonTable = function(req, res) {

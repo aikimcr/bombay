@@ -5,6 +5,7 @@ var test_util = require('test/lib/util');
 
 var db = require('lib/db');
 var routes = require('routes/db');
+var util = require('lib/util');
 
 db.setLogDbErrors(false);
 
@@ -604,6 +605,77 @@ describe('routes', function() {
         };
         dbh.person().getById(1, function(result) {
           test_util.check_item(result, expected, 'person', ['id', 'name', 'full_name', 'email', 'system_admin']);
+          done();
+        });
+      });
+    });
+
+    describe('#password', function() {
+      var old_password = 'admin';
+      var new_password = 'xyzzy';
+      var change_token;
+
+      before(function(done) {
+        change_token = util.strMapCharsToStr(old_password, JSON.stringify([old_password, new_password]));
+        done();
+      });
+
+      it('should update the password', function(done) {
+        req.query = {id: 1, token: change_token};
+        var res = {
+          json: function(result) {
+            person_id = test_util.check_result(result, 'person');
+            done();
+          }
+        };
+        routes.putPersonTable(req, res);
+      });
+
+      it('should get the new password', function(done) {
+        var expected = {id: 1, password: new_password};
+        dbh.person().getById(1, function(result) {
+          test_util.check_item(result, expected, 'person', ['id', 'password']);
+          done();
+        });
+      });
+
+      it('should reject the new password because old password is wrong', function(done) {
+        req.query = {id: 1, token: change_token};
+        var res = {
+          json: function(result) {
+            should.exist(result);
+            result.should.have.property('err');
+            result.err.should.eql('Old password did not match');
+            done();
+          }
+        };
+        routes.putPersonTable(req, res);
+      });
+
+      it('should get the new password', function(done) {
+        var expected = {id: 1, password: new_password};
+        dbh.person().getById(1, function(result) {
+          test_util.check_item(result, expected, 'person', ['id', 'password']);
+          done();
+        });
+      });
+
+      it('should update the password again', function(done) {
+        var new_change_token = util.strMapCharsToStr(new_password, JSON.stringify([new_password, old_password]));
+        req.query = {id: 1, token: new_change_token};
+        var res = {
+          json: function(result) {
+            person_id = test_util.check_result(result, 'person');
+            done();
+          }
+        };
+        routes.putPersonTable(req, res);
+      });
+
+      it('should get the old password', function(done) {
+        var expected = {id: 1, password: old_password};
+        dbh.person().getById(1, function(result) {
+          test_util.check_item(result, expected, 'person', ['id', 'password']);
           done();
         });
       });
