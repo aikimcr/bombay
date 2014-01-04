@@ -206,6 +206,7 @@ function Manager(for_test) {
     this.forms.add_band = new AddBand();
     this.forms.join_band = new JoinBand();
     this.forms.add_person = new AddPerson();
+    this.forms.edit_profile = new EditProfile();
     this.forms.add_band_member = new AddBandMember();
     this.forms.add_artist = new AddArtist();
     this.forms.add_song = new AddSong();

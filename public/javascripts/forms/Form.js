@@ -20,6 +20,20 @@ Form.postChange = function(form, model) {
   }.bind(form));
 }
 
+Form.putChange = function(form, object) {
+  var changeset = form.changeset();
+  object().update(changeset, function(result) {
+    if (result && !result.err) {
+      object().reload_list();
+      object().refresh(function(result) {
+        if (result.err) {
+          window.console.log(result.err);
+        }
+      });
+    }
+  }.bind(this));
+}
+
 function AddBand() {
   Form.call(this);
   this.name = ko.observable(null);
@@ -58,6 +72,33 @@ AddPerson.prototype.postChange_ = function(callback) {
     this.email(null);
     this.system_admin(false);
   }.bind(this), params);
+};
+
+function EditProfile() {
+  Form.call(this);
+  this.name = ko.observable(manager.current_person().name());
+  this.full_name = ko.observable(manager.current_person().full_name());
+  this.email = ko.observable(manager.current_person().email());
+}
+util.inherits(EditProfile, Form);
+
+EditProfile.prototype.show = function() {
+  this.init();
+  Form.prototype.show.call(this);
+};
+
+EditProfile.prototype.init = function() {
+  this.name(manager.current_person().name());
+  this.full_name(manager.current_person().full_name());
+  this.email(manager.current_person().email());
+};
+
+EditProfile.prototype.changeset = function(callback) {
+  return {
+    name: this.name(),
+    full_name: this.full_name(),
+    email: this.email(),
+  };
 };
 
 function AddArtist() {

@@ -1,0 +1,14 @@
+div#edit_profile_form(data-bind="visible: forms.edit_profile.isVisible")
+  div.dialog_background
+    div.dialog
+      div.title_bar
+        div.title Edit Profile
+        div.close_button
+          button.close_button(data-bind="click: forms.edit_profile.hide.bind(forms.edit_profile)") X
+
+      div.dialog_body
+        form(data-bind="submit: function() { Form.putChange(forms.edit_profile, current_person); }")
+          input(data-bind="value: forms.edit_profile.name", type="text", placeholder="New Login Name")
+          input(data-bind="value: forms.edit_profile.full_name", type="text", placeholder="Full Name")
+          input(data-bind="value: forms.edit_profile.email", type="email", placeholder="E-Mail")
+          input(type="submit", value="Update")

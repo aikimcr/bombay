@@ -8,7 +8,8 @@ block content
       div
         select(data-bind="options: $root.current_bands, value: current_band, optionsText: 'name'")
 
-      div(data-bind="text: $root.current_person().full_name")
+      div
+        button(data-bind="text: $root.current_person().full_name, click: forms.edit_profile.show.bind(forms.edit_profile)")
 
     div.band_selector
       a(href="./logout") Logout
@@ -26,6 +27,7 @@ block content
     include forms/add_band.jade
     include forms/join_band.jade
     include forms/add_person.jade
+    include forms/edit_profile.jade
     include forms/add_band_member.jade
     include forms/add_artist.jade
     include forms/add_song.jade
