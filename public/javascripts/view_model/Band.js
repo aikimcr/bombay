@@ -11,6 +11,18 @@ function Band(id, name) {
   this.band_member_count = ko.computed(function() {
     return this.band_members().length;
   }.bind(this)).extend({throttle: 500});
+
+  this.band_songs = ko.computed(function() {
+    return manager.band_songs.filterByKey('band_id', this.id());
+  }.bind(this)).extend({throttle: 500});
+
+  this.band_song_count = ko.computed(function() {
+    return this.band_songs().length;
+  }.bind(this)).extend({throttle: 500});
+
+  this.isPopulated = ko.computed(function() {
+    return this.band_member_count() || this.band_song_count();
+  }.bind(this)).extend({throttle: 500});
 }
 util.inherits(Band, Table);
 

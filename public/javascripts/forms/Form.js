@@ -36,10 +36,15 @@ Form.prototype.setError = function(err) {
 
 Form.postChange = function(form, model) {
   form.postChange_(function (result) {
-    model.load();
-    this.other_models.forEach(function(omodel) {
-      omodel.load();
-    }.bind(this));
+    if (result.err) {
+      this.setError(result.err);
+    } else {
+      this.message('Record Added');
+      model.load();
+      this.other_models.forEach(function(omodel) {
+        omodel.load();
+      }.bind(this));
+    }
   }.bind(form));
 };
 

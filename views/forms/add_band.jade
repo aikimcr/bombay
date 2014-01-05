@@ -7,6 +7,7 @@ div#add_band_form(data-bind="visible: forms.add_band.isVisible")
           button.close_button(data-bind="click: forms.add_band.hide.bind(forms.add_band)") X
 
       div.dialog_body
+        div.title(data-bind="text: forms.add_band.message");
         form(data-bind="submit: function() { Form.postChange(forms.add_band, bands); }")
           input(data-bind="value: forms.add_band.name", type="text", placeholder="New Band Name")
           input(type="submit", value="Add")

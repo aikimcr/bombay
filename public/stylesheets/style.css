@@ -92,15 +92,6 @@ body {
   position: absolute;
   top: 10px;
 }
-.app_context_item > .form {
-  left: 10px;
-}
-.app_context_item > .table {
-  right: 10px;
-}
-.app_context_item .creator {
-  margin-bottom: 10px;
-}
 .app_context_item .display {
   font-size: 120%;
 }
@@ -176,9 +167,6 @@ body {
   border-style: none solid none none;
   border-width: 0 1px 0 0;
 }
-.display .list td.band_admin {
-  text-align: center;
-}
 .display .list th,
 .display .list td {
   text-align: left;
@@ -219,17 +207,6 @@ body {
   top: 0;
   left: 0;
   position: absolute;
-}
-.dialog_background .dialog_box {
-  width: 300px;
-  top: 375px;
-  left: 450px;
-  position: absolute;
-  background-color: #b8dfda;
-  border-style: solid;
-  border-color: #3f8c83;
-  border-radius: 10px;
-  padding: 20px;
 }
 .dialog {
   width: 600px;

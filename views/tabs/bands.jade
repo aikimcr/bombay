@@ -30,11 +30,13 @@ section.app_context(id="bands", data-bind="if: $root.current_person().system_adm
             tr
               th Name
               th Member Count
+              th Song Count
               th
 
           tbody(data-bind="foreach: bands.filtered_list")
             tr
               td(data-bind="text: name")
               td(data-bind="text: band_member_count")
-              td(data-bind="ifnot: band_member_count")
+              td(data-bind="text: band_song_count")
+              td(data-bind="ifnot: isPopulated")
                 button.edit_button(data-bind="click: $root.delete_table_object") -
