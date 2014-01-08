@@ -76,6 +76,7 @@ describe('util', function() {
     });
 
     it('should decrypt the original text', function(done) {
+      console.log(encrypted);
       decrypted = util.decrypt(privkey, encrypted);
       should.exist(decrypted);
       decrypted.should.eql(original_text);
@@ -92,7 +93,7 @@ describe('util', function() {
       done();
     });
 
-    it('should get the private key', function(done) {
+    it('should get the private key and parse it', function(done) {
       var pem = util.get_pem_file(privkey_file);
       should.exist(pem);
       pem.should.eql(privkey);

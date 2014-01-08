@@ -81,7 +81,6 @@ exports.postPersonTable = function(req, res) {
 exports.putPersonTable = function(req, res) {
   var dbh = new db.Handle();
 
-console.log(req.query);
   if (req.query.token) {
     var token = req.query.token;
     delete req.query.token;

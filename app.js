@@ -7,9 +7,12 @@ var express = require('express')
   , http = require('http')
   , path = require('path')
   , db = require('lib/db')
+  , util = require('lib/util')
   , index = require('routes/index')
   , route_db = require('routes/db')
+  , encryption = require('routes/encryption')
   , login = require('routes/login')
+  , base64_decode = require('base64').decode
   , passport = require('passport')
   , LocalStrategy = require('passport-local').Strategy
   , flash = require('connect-flash');
@@ -17,7 +20,7 @@ var express = require('express')
 passport.use(new LocalStrategy(
   function(username, password, done) {
     var dbh = new db.Handle();
-    //console.log(username + ', ' + password);
+    console.log(username + ', ' + password);
 
     dbh.person().getAllWithArgs({
       fields: ['id', 'name', 'password'],
@@ -25,7 +28,12 @@ passport.use(new LocalStrategy(
     }, function(result) {
       var person = result.all_persons[0];
       if (person) {
-        if (username == person.name && password == person.password) {
+        var pem = util.get_pem_file('crypto/rsa_private.pem');
+        console.log(pem);
+        var decrypt_password = base64_decode(util.decrypt(pem, password));
+        var decrypt_person = util.decrypt(pem, person.password);
+        console.log(password + ', ' + decrypt_password);
+        if (username == person.name && decrypt_password == decrypt_person) {
           console.log(username + ' logged in');
           return done(null, person);
         }
@@ -138,6 +146,8 @@ app.post('/login', passport.authenticate('local', { successRedirect: '/',
                                                     failureFlash: true })
 );
 
+// Encryption handlers
+app.get('/encryption', encryption.encryption);
 app.get('/logout', function(req, res) {
   //console.log(req.session);
   req.logout();

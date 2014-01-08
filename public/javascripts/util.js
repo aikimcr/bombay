@@ -26,7 +26,7 @@ util.encrypt = function(key_in, input) {
   var asn = new pidCrypt.ASN1.decode(pidCryptUtil.toByteArray(key));
   var tree = asn.toHexTree();
   rsa.setPublicKeyFromASN(tree);
-  return rsa.encrypt(input);
+  return pidCryptUtil.encodeBase64(pidCryptUtil.convertFromHex(rsa.encrypt(input)));
 };
 
 util.decrypt = function(key_in, input) {
@@ -35,5 +35,7 @@ util.decrypt = function(key_in, input) {
   var asn = new pidCrypt.ASN1.decode(pidCryptUtil.toByteArray(key));
   var tree = asn.toHexTree();
   rsa.setPrivateKeyFromASN(tree);
-  return rsa.decrypt(input);
+  var buffer = pidCryptUtil.decodeBase64(pidCryptUtil.stripLineFeeds(input));
+  var hex = pidCryptUtil.convertToHex(buffer);
+  return rsa.decrypt(hex);
 };

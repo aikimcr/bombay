@@ -5,6 +5,13 @@ html
     link(rel='stylesheet', href='/stylesheets/style.css')
     block scripts
       script(src='./javascripts/lib/knockout-3.0.0.js')
+      script(src='./javascripts/lib/javascripts/pidcrypt.js')
+      script(src='./javascripts/lib/javascripts/pidcrypt_util.js')
+      script(src='./javascripts/lib/javascripts/asn1.js')
+      script(src='./javascripts/lib/javascripts/jsbn.js')
+      script(src='./javascripts/lib/javascripts/rng.js')
+      script(src='./javascripts/lib/javascripts/prng4.js')
+      script(src='./javascripts/lib/javascripts/rsa.js')
       script(src='./javascripts/util.js')
       script(src='./javascripts/confirm_dialog.js')
       script(src='./javascripts/service.js');
@@ -19,6 +26,7 @@ html
       script(src="./javascripts/view_model/SongRating.js")
       script(src="./javascripts/view_model/Manager.js")
       script(src="./javascripts/forms/Form.js")
+      script(src="./javascripts/forms/Login.js")
       script(src='./javascripts/startup.js')
 
   body(onload='app_start()')

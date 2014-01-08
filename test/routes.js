@@ -5,6 +5,7 @@ var test_util = require('test/lib/util');
 
 var db = require('lib/db');
 var routes = require('routes/db');
+var encryption = require('routes/encryption');
 var util = require('lib/util');
 
 db.setLogDbErrors(false);
@@ -1008,6 +1009,48 @@ describe('routes', function() {
           done();
         });
       });
+    });
+  });
+
+  describe('route_encryption', function() {
+    var original_text = 'Plover is a shore bird';
+    var pub_pem;
+    var parsed_pem;
+    var pubkey;
+    var encrypted;
+
+    before(function(done) {
+      pub_pem = util.get_pem_file('crypto/rsa_public.pem');
+      parsed_pem = util.parse_pem(pub_pem);
+      done();
+    });
+
+    it('should get the public key', function(done) {
+      req.query = {action: 'pubkey'};
+      var res = {
+        json: function(result) {
+          should.exist(result);
+          result.should.have.property('public_key');
+          result.public_key.should.eql(parsed_pem);
+          pubkey = result.public_key;
+          done();
+        }
+      };
+      encryption.encryption(req, res);
+    });
+
+    it('should check the encrypted value', function(done) {
+      encrypted = util.encrypt(pub_pem, 'Plover');
+      req.query = {action: 'check', clear: 'Plover', encrypted: encrypted};
+      var res = {
+        json: function(result) {
+          should.exist(result);
+          result.should.have.property('match');
+          result.match.should.eql(true);
+          done();
+        }
+      };
+      encryption.encryption(req, res);
     });
   });
 });

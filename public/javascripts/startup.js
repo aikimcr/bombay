@@ -3,5 +3,11 @@ function app_start() {
 
   if (app_container) {
     ko.applyBindings(new Manager());
+  } else {
+    var login_form = document.querySelector('form[action="./login"]');
+
+    if (login_form) {
+      login_form.addEventListener('submit', validateLogin);
+    }
   }
 }

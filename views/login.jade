@@ -3,6 +3,7 @@ extends layout
 block content
   div.error_msg #{errors}
   form(action="./login", method="post")
+    input(type="hidden", name="pubkey", value="#{pubkey}")
     table
       tr
         td

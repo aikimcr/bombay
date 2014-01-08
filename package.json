@@ -21,7 +21,8 @@
     "flow": "*",
     "connect-flash": "*",
     "knockout": "*",
-    "ursa": "*"
+    "ursa": "*",
+    "base64": "*"
   },
   "repository": {
     "type": "git",
