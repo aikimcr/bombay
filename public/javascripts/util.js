@@ -6,34 +6,6 @@ util.inherits = function(target, source) {
     target.prototype[k] = source.prototype[k];
 }
 
-util.removeAllChildren = function(element) {
-  while(element.children.length > 0) {
-    element.removeChild(element.firstChild);
-  }
-};
-
-util.appendTextElement = function(parent, element_text) {
-  if (parent) {
-    var tmp = document.createElement('div');
-    tmp.innerHTML = element_text;
-
-    while(tmp.children.length > 0) {
-      var element = tmp.removeChild(tmp.firstChild);
-      parent.appendChild(element);
-    }
-  }
-};
-
-util.getBandSelector = function() {
-  return document.querySelector('.band_selector select[name="band"]');
-};
-
-util.getBandId = function() {
-  var band_selector = util.getBandSelector();
-  if (band_selector) { return band_selector.value; }
-  return null;
-};
-
 util.strMapCharsToStr = function(str1, str2) {
   var pi = 0;
   var result = '';
@@ -46,4 +18,22 @@ util.strMapCharsToStr = function(str1, str2) {
   }
 
   return result;
+};
+
+util.encrypt = function(key_in, input) {
+  var rsa = new pidCrypt.RSA();
+  var key = pidCryptUtil.decodeBase64(key_in);
+  var asn = new pidCrypt.ASN1.decode(pidCryptUtil.toByteArray(key));
+  var tree = asn.toHexTree();
+  rsa.setPublicKeyFromASN(tree);
+  return rsa.encrypt(input);
+};
+
+util.decrypt = function(key_in, input) {
+  var rsa = new pidCrypt.RSA();
+  var key = pidCryptUtil.decodeBase64(key_in);
+  var asn = new pidCrypt.ASN1.decode(pidCryptUtil.toByteArray(key));
+  var tree = asn.toHexTree();
+  rsa.setPrivateKeyFromASN(tree);
+  return rsa.decrypt(input);
 };

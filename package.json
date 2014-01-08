@@ -20,7 +20,8 @@
     "passport-local": "*",
     "flow": "*",
     "connect-flash": "*",
-    "knockout": "*"
+    "knockout": "*",
+    "ursa": "*"
   },
   "repository": {
     "type": "git",

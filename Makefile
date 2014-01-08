@@ -7,6 +7,9 @@ TEST_CLIENT_LIB = ./public/test/lib
 KNOCKOUT_URL = http\://knockoutjs.com/downloads/knockout-3.0.0.js
 KNOCKOUT_JS = $(JS_LIB)/knockout-3.0.0.js
 
+PIDDER_URL=http\://sourceforge.net/projects/pidcrypt/files/pidcrypt/pidCrypt.crypto.library.005/pidCrypt.crypto.library.005.zip/download
+PIDDER_ZIP = $(JS_LIB)/pidCrypt.crypto.library.005.zip
+
 CHAI_JS = $(TEST_CLIENT_LIB)/chai.js
 CHAI_SRC = $(NODE_MODULES)/chai/chai.js
 
@@ -23,7 +26,7 @@ TEST_FILES = $(MOCHA_JS) $(MOCHA_CSS) $(CHAI_JS) $(SHOULD_JS)
 SCHEMA = ./sql/schema.sql
 DATABASE = ./bombay.db
 
-all: $(NODE_MODULES) $(KNOCKOUT_JS)
+all: $(NODE_MODULES) $(KNOCKOUT_JS) $(PIDDER_ZIP)
 
 install: $(NODE_MODULES) $(KNOCKOUT_JS) test
 
@@ -36,6 +39,9 @@ database: $(DATABASE)
 
 $(KNOCKOUT_JS): $(JS_LIB)
 	curl -o $(KNOCKOUT_JS) $(KNOCKOUT_URL)
+
+$(PIDDER_ZIP): $(JS_LIB)
+	curl -L -o $(PIDDER_ZIP) $(PIDDER_URL)
 
 $(JS_LIB):
 	mkdir $(JS_LIB)
