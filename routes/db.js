@@ -5,6 +5,7 @@
 var flow = require('flow');
 var db = require('lib/db');
 var util = require('lib/util');
+var base64_decode = require('base64').decode;
 
 exports.getSessionInfo = function(req, res) {
   var session = req.session.passport;
@@ -86,17 +87,23 @@ exports.putPersonTable = function(req, res) {
     delete req.query.token;
     dbh.person().getById(req.query.id, function(result) {
       var wrong_old = 'Old password did not match';
-      var db_pw = result.person.password;
-      var decrypted = util.strMapCharsToStr(db_pw, token);
+      var encrypted_db_pw = result.person.password;
+      var public_pem = util.get_pem_file('crypto/rsa_public.pem');
+      var private_pem = util.get_pem_file('crypto/rsa_private.pem');
+      var db_pwd;
+      var decrypted;
       var pws;
       try {
+        decrypted = base64_decode(util.decrypt(private_pem, token));
+        db_pw = util.decrypt(private_pem, encrypted_db_pw);
         pws = JSON.parse(decrypted);
       } catch(e) {
+        console.log(e);
         pws = ['', ''];
       }
 
       if (pws[0] == db_pw) {
-        req.query.password = pws[1];
+        req.query.password = util.encrypt(public_pem, pws[1]);
         dbh.person().update(req.query, function(result) {
           res.json(result);
         });

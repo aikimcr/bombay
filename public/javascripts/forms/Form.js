@@ -186,11 +186,13 @@ ChangePassword.prototype.validate = function() {
 };
 
 ChangePassword.prototype.changeset = function(callback) {
-  var change_token = util.strMapCharsToStr(this.old_password(), JSON.stringify([
+  var pk = document.querySelector('input[name="pubkey"]').value;
+  var ct = JSON.stringify([
     this.old_password(),
     this.new_password()
-  ]));
-  return { token: encodeURIComponent(change_token) };
+  ]);
+  var encrypted_ct = encodeURIComponent(util.encrypt(pk, ct));
+  return { token: encrypted_ct };
 };
 
 function AddArtist() {

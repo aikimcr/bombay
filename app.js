@@ -20,7 +20,8 @@ var express = require('express')
 passport.use(new LocalStrategy(
   function(username, password, done) {
     var dbh = new db.Handle();
-    console.log(username + ', ' + password);
+    password = decodeURIComponent(password);
+    // console.log(username + ', ' + password);
 
     dbh.person().getAllWithArgs({
       fields: ['id', 'name', 'password'],
@@ -29,10 +30,18 @@ passport.use(new LocalStrategy(
       var person = result.all_persons[0];
       if (person) {
         var pem = util.get_pem_file('crypto/rsa_private.pem');
-        console.log(pem);
-        var decrypt_password = base64_decode(util.decrypt(pem, password));
-        var decrypt_person = util.decrypt(pem, person.password);
-        console.log(password + ', ' + decrypt_password);
+        //console.log(pem);
+        var decrypt_password = password;
+        var decrypt_person = person.password;
+
+        // console.log(decrypt_person + ', ' + decrypt_password);
+        try {
+          decrypt_password = base64_decode(util.decrypt(pem, password));
+          decrypt_person = util.decrypt(pem, person.password);
+        } catch(e) {
+          console.log(e);
+        };
+        // console.log(decrypt_person + ', ' + decrypt_password);
         if (username == person.name && decrypt_password == decrypt_person) {
           console.log(username + ' logged in');
           return done(null, person);
