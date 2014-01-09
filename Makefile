@@ -7,8 +7,13 @@ TEST_CLIENT_LIB = ./public/test/lib
 KNOCKOUT_URL = http\://knockoutjs.com/downloads/knockout-3.0.0.js
 KNOCKOUT_JS = $(JS_LIB)/knockout-3.0.0.js
 
-PIDDER_URL=http\://sourceforge.net/projects/pidcrypt/files/pidcrypt/pidCrypt.crypto.library.005/pidCrypt.crypto.library.005.zip/download
+PIDDER_URL = http\://sourceforge.net/projects/pidcrypt/files/pidcrypt/pidCrypt.crypto.library.005/pidCrypt.crypto.library.005.zip/download
 PIDDER_ZIP = $(JS_LIB)/pidCrypt.crypto.library.005.zip
+PIDDER_DIR = $(JS_LIB)/javascripts
+
+CRYPTO_DIR = ./crypto
+PRIVATE_KEY = $(CRYPTO_DIR)/rsa_private.pem
+PUBLIC_KEY = $(CRYPTO_DIR)/rsa_public.pem
 
 CHAI_JS = $(TEST_CLIENT_LIB)/chai.js
 CHAI_SRC = $(NODE_MODULES)/chai/chai.js
@@ -26,7 +31,7 @@ TEST_FILES = $(MOCHA_JS) $(MOCHA_CSS) $(CHAI_JS) $(SHOULD_JS)
 SCHEMA = ./sql/schema.sql
 DATABASE = ./bombay.db
 
-all: $(NODE_MODULES) $(KNOCKOUT_JS) $(PIDDER_ZIP)
+all: $(NODE_MODULES) $(KNOCKOUT_JS) $(PIDDER_DIR) $(PUBLIC_KEY)
 
 install: $(NODE_MODULES) $(KNOCKOUT_JS) test
 
@@ -42,6 +47,20 @@ $(KNOCKOUT_JS): $(JS_LIB)
 
 $(PIDDER_ZIP): $(JS_LIB)
 	curl -L -o $(PIDDER_ZIP) $(PIDDER_URL)
+
+$(PIDDER_DIR): $(PIDDER_ZIP)
+	unzip -d $(JS_LIB) $(PIDDER_ZIP)
+
+$(CRYPTO_DIR):
+	mkdir $@
+
+$(PRIVATE_KEY): $(CRYPTO_DIR)
+	if [ -f $@ ]; then mv -f $@ $@.old; fi
+	openssl genrsa -out $@
+
+$(PUBLIC_KEY): $(PRIVATE_KEY)
+	if [ -f $@ ]; then mv -f $@ $@.old; fi
+	openssl rsa -in $? -pubout -out $@
 
 $(JS_LIB):
 	mkdir $(JS_LIB)

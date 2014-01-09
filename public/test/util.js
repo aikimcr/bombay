@@ -83,7 +83,7 @@ describe('util', function() {
         }
       };
 
-      ajax.open('GET', '/encryption?action=check&clear=' + original_text + '&encrypted=' + encrypted);
+      ajax.open('GET', '/encryption?action=check&clear=' + original_text + '&encrypted=' + encodeURIComponent(encrypted));
       ajax.send();
     });
   });
