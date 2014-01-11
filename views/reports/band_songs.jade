@@ -1,0 +1,82 @@
+doctype 5
+html
+  head
+    title= title
+    link(rel='stylesheet', href='/stylesheets/report.css')
+
+div.report_title= title
+div.report
+  div.report_section
+    div.report_subsection
+      table.report_song_table
+        caption Top Ten Rated Songs
+        thead
+          tr
+            th.string.name Song Name
+            th.string.name Artist Name
+            th.number Average Rating
+            th.number Agreement
+
+        tbody
+          each song in tables.average_hi_to_lo
+            tr
+              td.string.name #{song.song_name}
+              td.string.name #{song.artist_name}
+              td.number #{song.average_rating.toFixed(2)}
+              td.number #{song.agreement}%
+
+    div.report_subsection
+      table.report_song_table
+        caption Top Ten Agreed Upon Songs
+        thead
+          tr
+            th.string.name Song Name
+            th.string.name Artist Name
+            th.number Agreement
+            th.number Average Rating
+
+        tbody
+          each song in tables.variance_lo_to_hi
+            tr
+              td.string.name #{song.song_name}
+              td.string.name #{song.artist_name}
+              td.number #{song.agreement}%
+              td.number #{song.average_rating.toFixed(2)}
+
+  div.report_section
+    div.report_subsection
+      table.report_song_table
+        caption Bottom Ten Rated Songs
+        thead
+          tr
+            th.string.name Song Name
+            th.string.name Artist Name
+            th.number Average Rating
+            th.number Agreement
+
+        tbody
+          each song in tables.average_lo_to_hi
+            tr
+              td.string.name #{song.song_name}
+              td.string.name #{song.artist_name}
+              td.number #{song.average_rating.toFixed(2)}
+              td.number #{song.agreement}%
+
+    div.report_subsection
+      table.report_song_table
+        caption Bottom Ten Agreed Upon Songs
+        thead
+          tr
+            th.string.name Song Name
+            th.string.name Artist Name
+            th.number Agreement
+            th.number Average Rating
+
+        tbody
+          each song in tables.variance_hi_to_lo
+            tr
+              td.string.name #{song.song_name}
+              td.string.name #{song.artist_name}
+              td.number #{song.agreement}%
+              td.number #{song.average_rating.toFixed(2)}
+

@@ -1,0 +1,82 @@
+container-width = 1200px
+container-height = 700px
+
+text-color = black
+base-color = white
+main-border-color = black
+
+stripe-color-even = grey
+stripe-color-odd = white
+
+report-width = 1400px
+
+body
+  font: 12px "Lucida Grande", Helvetica, Arial, sans-serif
+  background-color: base-color
+  color: text-color
+
+div.report_title
+  font-size: 200%
+  font-weight: bold
+  text-align: center
+  width: report-width
+
+div.report
+  display: block
+  width: report-width
+
+div.report_section
+  display: block
+  width: report-width
+
+div.report_subsection
+  display: inline-block
+  width: (report-width/2) - 50
+  margin: 25px
+
+table.report_song_table
+  width: 100%
+  border-style: solid
+  border-color: main-border-color
+  border-width: 5px
+
+  caption
+    font-size: 150%
+    font-style: italic
+
+  thead
+    font-size: 110%
+    font-weight: bold
+
+    th
+      padding: 5px 5px 0 10px
+      border-style none solid solid none
+      border-width 0 1px 5px 0
+      background-color: black
+      color: white
+  
+  tbody
+    td
+      padding: 10px 5px 0 10px
+      border-style: none solid none none
+      border-width: 0 1px 0 0
+
+    tr:nth-child(even)
+      background-color: stripe-color-even
+  
+    tr:nth-child(odd)
+      background-color: stripe-color-odd
+  
+  th:last-child, td:last-child
+    border-right-style: none
+    border-right-width: 0
+
+ 
+.string
+  text-align: left
+
+.number
+  text-align: right
+
+.name
+  width: 240px

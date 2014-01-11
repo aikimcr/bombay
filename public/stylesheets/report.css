@@ -1,0 +1,70 @@
+body {
+  font: 12px "Lucida Grande", Helvetica, Arial, sans-serif;
+  background-color: #fff;
+  color: #000;
+}
+div.report_title {
+  font-size: 200%;
+  font-weight: bold;
+  text-align: center;
+  width: 1400px;
+}
+div.report {
+  display: block;
+  width: 1400px;
+}
+div.report_section {
+  display: block;
+  width: 1400px;
+}
+div.report_subsection {
+  display: inline-block;
+  width: 650px;
+  margin: 25px;
+}
+table.report_song_table {
+  width: 100%;
+  border-style: solid;
+  border-color: #000;
+  border-width: 5px;
+}
+table.report_song_table caption {
+  font-size: 150%;
+  font-style: italic;
+}
+table.report_song_table thead {
+  font-size: 110%;
+  font-weight: bold;
+}
+table.report_song_table thead th {
+  padding: 5px 5px 0 10px;
+  border-style: none solid solid none;
+  border-width: 0 1px 5px 0;
+  background-color: #000;
+  color: #fff;
+}
+table.report_song_table tbody td {
+  padding: 10px 5px 0 10px;
+  border-style: none solid none none;
+  border-width: 0 1px 0 0;
+}
+table.report_song_table tbody tr:nth-child(even) {
+  background-color: #808080;
+}
+table.report_song_table tbody tr:nth-child(odd) {
+  background-color: #fff;
+}
+table.report_song_table th:last-child,
+table.report_song_table td:last-child {
+  border-right-style: none;
+  border-right-width: 0;
+}
+.string {
+  text-align: left;
+}
+.number {
+  text-align: right;
+}
+.name {
+  width: 240px;
+}

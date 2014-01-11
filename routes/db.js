@@ -2,7 +2,6 @@
 /*
  * Database manipulation methods.
  */
-var flow = require('flow');
 var db = require('lib/db');
 var util = require('lib/util');
 var base64_decode = require('base64').decode;
