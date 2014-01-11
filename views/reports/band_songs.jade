@@ -1,19 +1,26 @@
 doctype 5
 html
   head
-    title= title
-    link(rel='stylesheet', href='/stylesheets/report.css')
+    title #{band_name} Songs Report for #{formatted_time}
+    style #{style_info}
 
-div.report_title= title
+div.report_title Songs Report
+div.report_title #{band_name}
+div.report_title #{formatted_time}
 div.report
   div.report_summary
-    div.report_summary_text Overall Average Rating #{average_rating}
-    div.report_summary_text Overall Average Agreement #{average_agreement}
+    div.report_summary_text
+      div Overall Average Rating: #{average_rating}
+      div Overall Average Agreement: #{average_agreement}%
+
+    div.report_summary_text
+      div Total Members in Band: #{member_count}
+      div Total Songs in Band: #{song_count}
 
   div.report_section
     div.report_subsection
       table.report_song_table
-        caption Top Ten Rated Songs
+        caption Ten Highest Rated Songs
         thead
           tr
             th.string.name Song Name
@@ -31,7 +38,7 @@ div.report
 
     div.report_subsection
       table.report_song_table
-        caption Top Ten Agreed Upon Songs
+        caption Ten Most Agreed Upon Songs
         thead
           tr
             th.string.name Song Name
@@ -50,7 +57,7 @@ div.report
   div.report_section
     div.report_subsection
       table.report_song_table
-        caption Bottom Ten Rated Songs
+        caption Ten Lowest Rated Songs
         thead
           tr
             th.string.name Song Name
@@ -68,7 +75,7 @@ div.report
 
     div.report_subsection
       table.report_song_table
-        caption Bottom Ten Agreed Upon Songs
+        caption Ten Least Agreed Upon Songs
         thead
           tr
             th.string.name Song Name

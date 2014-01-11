@@ -1,10 +1,18 @@
 #! /usr/local/bin/node
 
-var db = require('lib/db');
-var SqlGenerator = require('sql-generator');
+// Node Standard includes
 var fs = require('fs');
+var path = require('path');
+
+// Third-party packages
+var SqlGenerator = require('sql-generator');
 var flow = require('flow');
 var jade = require('jade');
+
+// Bombay packages
+var db = require('lib/db');
+var path_util = require('lib/path_util');
+var util = require('lib/util');
 
 var dbh = new db.Handle();
 
@@ -84,16 +92,24 @@ function calc_other_averages(where, callback) {
 
     var average_rating = Math.round((rating_total / count) * 100) / 100;
     var average_agreement = Math.round(agreement_total / count);
-    callback(average_rating, average_agreement);
+    callback(count, average_rating, average_agreement);
+  });
+}
+
+function calc_member_count(band_id, callback) {
+  var sqlgen = new SqlGenerator();
+  var stmt = sqlgen.select('band_member', 'count(*) as count', {band_id: band_id});
+  dbh.doSqlGet(stmt.sql, stmt.values, 'members', function(result) {
+    callback(result.members.count);
   });
 }
 
 function render_report(options, callback) {
   options.title = 'Band Songs Report for ' + options.band_name + ' generated ' + options.snapshot_time;
-  jade.renderFile('./views/reports/band_songs.jade', options, callback);
+  jade.renderFile(path.join(path_util.view_path(), 'reports', 'band_songs.jade'), options, callback);
 }
 
-function generate_band_report(snapshot_id, band_id) {
+function generate_band_report(snapshot_id, band_id, style_info) {
   var where =  { snapshot_id: snapshot_id, band_id: band_id } ;
   var tables = {};
   var collect = flow.define(
@@ -135,13 +151,23 @@ function generate_band_report(snapshot_id, band_id) {
       this.band_name = band_name;
       calc_other_averages(where, this);
     },
-    function(average_rating, average_agreement) {
-      
+    function(song_count, average_rating, average_agreement) {
+      this.song_count = song_count; 
+      this.average_rating = average_rating;
+      this.average_agreement = average_agreement;
+      calc_member_count(band_id, this);
+    },
+    function(member_count) {
+      var formatted_time = util.format_sql_timestamp(this.snapshot_time);
       render_report({
+        style_info: style_info,
+        formatted_time: formatted_time.formatted,
         snapshot_time: this.snapshot_time,
         band_name: this.band_name,
-        average_rating: average_rating,
-        average_agreement: average_agreement,
+        song_count: this.song_count,
+        member_count: member_count,
+        average_rating: this.average_rating,
+        average_agreement: this.average_agreement,
         tables: tables
       }, this);
     },
@@ -149,7 +175,7 @@ function generate_band_report(snapshot_id, band_id) {
 //      var report_file = this.band_name + '_' + this.snapshot_time + '.html';
       var report_file = this.band_name + '.html';
       report_file = encodeURIComponent(report_file.replace(/[\s-+:]/g, '_'));
-      fs.writeFile('./public/html/' + report_file, report_text, {encoding: 'utf8'}, function(err) {
+      fs.writeFile(path.join(path_util.html_path(), report_file), report_text, {encoding: 'utf8'}, function(err) {
         if (err) throw err;
         this(report_file);
       }.bind(this));
@@ -164,7 +190,8 @@ function generate_band_report(snapshot_id, band_id) {
 
 var report = flow.define(
   function() {
-    var build_stats_sql = fs.readFileSync('sql/songsbyrating.sql', {encoding: 'utf8'});
+    var sql_file = path.join(path_util.sql_path(), 'songsbyrating.sql');
+    var build_stats_sql = fs.readFileSync(sql_file, {encoding: 'utf8'});
     dbh.doSqlExec(build_stats_sql, function(result) {
       if (!result) { this(); }
     }.bind(this));
@@ -183,9 +210,11 @@ var report = flow.define(
     }.bind(this));
   },
   function(snapshot_id) {
+    var style_sheet = path.join(path_util.css_path(), 'report.css');
+    var style_info = fs.readFileSync(style_sheet, {encoding: 'utf8'});
     dbh.band().getAll(function(result) {
       result.all_bands.forEach(function(band) {
-        generate_band_report(snapshot_id, band.id);
+        generate_band_report(snapshot_id, band.id, style_info);
       });
     }.bind(this));
   }
