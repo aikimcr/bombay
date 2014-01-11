@@ -66,13 +66,31 @@ function calc_agreement(tables, callback) {
   callback();
 }
 
-function render_report(snapshot_time, band_name, tables, callback) {
-  jade.renderFile('./views/reports/band_songs.jade', {
-    title: 'Band Songs Report for ' + band_name + ' generated ' + snapshot_time,
-    snapshot_time: snapshot_time,
-    band_name: band_name,
-    tables: tables
-  }, callback);
+function calc_other_averages(where, callback) {
+  var sqlgen = new SqlGenerator();
+  var stmt = sqlgen.select('song_rating_snapshot', 'average_rating, variance', where);
+  dbh.doSqlQuery(stmt.sql, stmt.values, 'stats', function(result) {
+    var count = 0;
+    var rating_total = 0;
+    var agreement_total = 0;
+
+    result.stats.forEach(function(row) {
+      count++;
+      rating_total += row.average_rating;
+      var stddev = Math.sqrt(row.variance);
+      var agreement = ((2 - stddev) / 2) * 100;
+      agreement_total += agreement;
+    });
+
+    var average_rating = Math.round((rating_total / count) * 100) / 100;
+    var average_agreement = Math.round(agreement_total / count);
+    callback(average_rating, average_agreement);
+  });
+}
+
+function render_report(options, callback) {
+  options.title = 'Band Songs Report for ' + options.band_name + ' generated ' + options.snapshot_time;
+  jade.renderFile('./views/reports/band_songs.jade', options, callback);
 }
 
 function generate_band_report(snapshot_id, band_id) {
@@ -115,7 +133,17 @@ function generate_band_report(snapshot_id, band_id) {
     },
     function(band_name) {
       this.band_name = band_name;
-      render_report(this.snapshot_time, this.band_name, tables, this);
+      calc_other_averages(where, this);
+    },
+    function(average_rating, average_agreement) {
+      
+      render_report({
+        snapshot_time: this.snapshot_time,
+        band_name: this.band_name,
+        average_rating: average_rating,
+        average_agreement: average_agreement,
+        tables: tables
+      }, this);
     },
     function(err, report_text) {
 //      var report_file = this.band_name + '_' + this.snapshot_time + '.html';
