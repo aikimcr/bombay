@@ -1,3 +1,5 @@
+BEGIN TRANSACTION;
+
 DROP TABLE IF EXISTS snapshot;
 CREATE TABLE snapshot (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -25,3 +27,8 @@ CREATE TRIGGER del_song_rating_snapshot BEFORE DELETE ON snapshot FOR EACH ROW
 BEGIN
   DELETE FROM song_rating_snapshot WHERE song_rating_snapshot.snapshot_id = OLD.id;
 END;
+
+INSERT INTO schema_change (name, timestamp)
+       VALUES ('Add snapshot tables for reporting', datetime('now'));
+
+COMMIT;

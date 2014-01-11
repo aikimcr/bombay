@@ -158,10 +158,10 @@ function generate_band_report(snapshot_id, band_id, style_info) {
       calc_member_count(band_id, this);
     },
     function(member_count) {
-      var formatted_time = util.format_sql_timestamp(this.snapshot_time);
+      var formatted_time = new Date(this.snapshot_time + ' UTC');
       render_report({
         style_info: style_info,
-        formatted_time: formatted_time.formatted,
+        formatted_time: formatted_time.toLocaleString(),
         snapshot_time: this.snapshot_time,
         band_name: this.band_name,
         song_count: this.song_count,
