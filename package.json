@@ -22,7 +22,8 @@
     "connect-flash": "*",
     "knockout": "*",
     "ursa": "*",
-    "base64": "*"
+    "base64": "*",
+    "emailjs": "*"
   },
   "repository": {
     "type": "git",

@@ -3,6 +3,7 @@
 // Node Standard includes
 var fs = require('fs');
 var path = require('path');
+var node_util = require('util');
 
 // Third-party packages
 var SqlGenerator = require('sql-generator');
@@ -13,6 +14,7 @@ var jade = require('jade');
 var db = require('lib/db');
 var path_util = require('lib/path_util');
 var util = require('lib/util');
+var mail_util = require('lib/mail_util');
 
 var dbh = new db.Handle();
 
@@ -104,6 +106,19 @@ function calc_member_count(band_id, callback) {
   });
 }
 
+function get_to_addresses(band_id, callback) {
+  var sql = 'select email from person where email is not null and id in (select person_id from band_member where band_id = ?)';
+  dbh.doSqlQuery(sql, [band_id], 'persons', function(result) {
+    var persons = result.persons.map(function(person) {
+      return person.email;
+    });
+    var valid_emails = persons.filter(function(email) {
+      return email.match(/[^@]+@[^@]+/);
+    });
+    callback(valid_emails.join(','));
+  });
+};
+
 function render_report(options, callback) {
   options.title = 'Band Songs Report for ' + options.band_name + ' generated ' + options.snapshot_time;
   jade.renderFile(path.join(path_util.view_path(), 'reports', 'band_songs.jade'), options, callback);
@@ -158,30 +173,48 @@ function generate_band_report(snapshot_id, band_id, style_info) {
       calc_member_count(band_id, this);
     },
     function(member_count) {
-      var formatted_time = new Date(this.snapshot_time + ' UTC');
+      this.member_count = member_count;
+      get_to_addresses(band_id, this);
+    },
+    function(to_addresses) {
+      this.to_addresses = to_addresses;
+      this.formatted_time = new Date(this.snapshot_time + ' UTC');
       render_report({
         style_info: style_info,
-        formatted_time: formatted_time.toLocaleString(),
+        formatted_time: this.formatted_time.toLocaleString(),
         snapshot_time: this.snapshot_time,
         band_name: this.band_name,
         song_count: this.song_count,
-        member_count: member_count,
+        member_count: this.member_count,
         average_rating: this.average_rating,
         average_agreement: this.average_agreement,
         tables: tables
       }, this);
     },
     function(err, report_text) {
-//      var report_file = this.band_name + '_' + this.snapshot_time + '.html';
-      var report_file = this.band_name + '.html';
+      var report_subject = node_util.format('%s Songs Report from %s', this.band_name, this.formatted_time.toLocaleString());
+      var report_name = 'songs_report.html'
+
+      var report_file = this.band_name + '_' + this.snapshot_time + '.html';
       report_file = encodeURIComponent(report_file.replace(/[\s-+:]/g, '_'));
-      fs.writeFile(path.join(path_util.html_path(), report_file), report_text, {encoding: 'utf8'}, function(err) {
+      var report_full_path = path.join(path_util.html_path(), report_file);
+
+      fs.writeFile(report_full_path, report_text, {encoding: 'utf8'}, function(err) {
         if (err) throw err;
-        this(report_file);
+        this(report_file, report_full_path, report_subject, report_name);
       }.bind(this));
     },
-    function(report_file) {
-      console.log('http://localhost:3000/html/' + report_file);
+    function(report_file, report_full_path, report_subject, report_name) {
+      console.log('"' + this.to_addresses + '"');
+      if (this.to_addresses.length > 0) {
+        mail_util.send_report({
+          to_address: this.to_addresses,
+          report_file: report_file,
+          report_full_path: report_full_path,
+          report_subject: report_subject,
+          report_name: report_name
+        }, report_full_path);
+      }
     }
   );
 
