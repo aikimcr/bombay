@@ -28,12 +28,14 @@ section.app_context(id="artists")
         table
           thead
             tr
+              th
               th Name
               th Song Count
               th
 
           tbody(data-bind="foreach: artists.filtered_list")
             tr
+              td(data-bind="click: $root.edit_table_object.bind($root.forms.edit_artist)") &#x270e;
               td(data-bind="text: name")
               td(data-bind="text: song_count")
               td(data-bind="ifnot: song_count")

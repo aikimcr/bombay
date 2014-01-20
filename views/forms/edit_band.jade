@@ -1,0 +1,13 @@
+div#add_band_form(data-bind="visible: forms.edit_band.isVisible")
+  div.dialog_background
+    div.dialog
+      div.title_bar
+        div.title Edit Band
+        div.close_button
+          button.close_button(data-bind="click: forms.edit_band.hide.bind(forms.edit_band)") X
+
+      div.dialog_body
+        div.title(data-bind="text: forms.edit_band.message");
+        form(data-bind="submit: function() { Form.putChange(forms.edit_band, forms.edit_band.band); }")
+          input(data-bind="value: forms.edit_band.name", type="text", placeholder="Band Name")
+          input(type="submit", value="Submit Changes")

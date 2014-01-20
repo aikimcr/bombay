@@ -48,20 +48,20 @@ Form.postChange = function(form, model) {
   }.bind(form));
 };
 
-Form.putChange = function(form, object) {
+Form.putChange = function(form, opt_object) {
   if (form.validate()) {
+    var object = opt_object == null ? form.object() : opt_object();
     var changeset = form.changeset();
-    object().update(changeset, function(result) {
+    object.update(changeset, function(result) {
       if (result) {
         if (result.err) {
           this.setError(result.err);
         } else {
-          object().reload_list();
-          object().refresh(function(result) {
+          object.refresh(function(result) {
             if (result.err) {
               this.setError(result.err);
             } else {
-              this.init();
+              this.init(object);
               this.message('Change accepted');
             }
           }.bind(this));
@@ -85,6 +85,38 @@ AddBand.prototype.postChange_ = function(callback) {
     callback(result);
     this.name(null);
   }.bind(this), {name: this.name()});
+};
+
+function EditBand() {
+  Form.call(this);
+  this.name = ko.observable(null);
+  this.band = ko.observable(null);
+}
+util.inherits(EditBand, Form);
+
+EditBand.prototype.postChange_ = function(callback) {
+  var svc = service.getInstance();
+  svc.set('./band', function(result) {
+    callback(result);
+    this.name(null);
+  }.bind(this), {name: this.name()});
+};
+
+EditBand.prototype.show = function(band) {
+  this.init(band);
+  Form.prototype.show.call(this);
+};
+
+EditBand.prototype.init = function(band) {
+  this.band(band);
+  Form.prototype.init.call(this);
+  this.name(this.band().name());
+};
+
+EditBand.prototype.changeset = function(callback) {
+  return {
+    name: this.name(),
+  };
 };
 
 function AddPerson() {
@@ -209,6 +241,38 @@ AddArtist.prototype.postChange_ = function(callback) {
   }.bind(this), {name: this.name()});
 };
 
+function EditArtist() {
+  Form.call(this);
+  this.name = ko.observable(null);
+  this.artist = ko.observable(null);
+}
+util.inherits(EditArtist, Form);
+
+EditArtist.prototype.postChange_ = function(callback) {
+  var svc = service.getInstance();
+  svc.set('./artist', function(result) {
+    callback(result);
+    this.name(null);
+  }.bind(this), {name: this.name()});
+};
+
+EditArtist.prototype.show = function(artist) {
+  this.init(artist);
+  Form.prototype.show.call(this);
+};
+
+EditArtist.prototype.init = function(artist) {
+  this.artist(artist);
+  Form.prototype.init.call(this);
+  this.name(this.artist().name());
+};
+
+EditArtist.prototype.changeset = function(callback) {
+  return {
+    name: this.name(),
+  };
+};
+
 function AddSong() {
   Form.call(this);
   this.name = ko.observable(null);
@@ -223,6 +287,45 @@ AddSong.prototype.postChange_ = function(callback) {
     this.name(null);
     this.artist(null);
   }.bind(this), {name: this.name(), artist_id: this.artist().id()});
+};
+
+function EditSong() {
+  Form.call(this);
+  this.name = ko.observable(null);
+  this.artist = ko.observable(null);
+  this.song = ko.observable(null);
+}
+util.inherits(EditSong, Form);
+
+EditSong.prototype.object = function() {
+  return this.song();
+};
+
+EditSong.prototype.postChange_ = function(callback) {
+  var svc = service.getInstance();
+  svc.set('./song', function(result) {
+    callback(result);
+    this.name(null);
+  }.bind(this), {name: this.name()});
+};
+
+EditSong.prototype.show = function(song) {
+  this.init(song);
+  Form.prototype.show.call(this);
+};
+
+EditSong.prototype.init = function(song) {
+  this.song(song);
+  Form.prototype.init.call(this);
+  this.name(this.song().name());
+  this.artist(manager.artists.getById(this.song().artist_id()));
+};
+
+EditSong.prototype.changeset = function(callback) {
+  return {
+    name: this.name(),
+    artist_id: this.artist().id()
+  };
 };
 
 function JoinBand() {

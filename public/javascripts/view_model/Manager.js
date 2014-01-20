@@ -204,17 +204,26 @@ function Manager(for_test) {
   this.forms = {};
   if (!for_test) {
     this.forms.add_band = new AddBand();
+    this.forms.edit_band = new EditBand();
     this.forms.join_band = new JoinBand();
     this.forms.add_person = new AddPerson();
     this.forms.edit_profile = new EditProfile();
     this.forms.change_password = new ChangePassword();
     this.forms.add_band_member = new AddBandMember();
     this.forms.add_artist = new AddArtist();
+    this.forms.edit_artist = new EditArtist();
     this.forms.add_song = new AddSong();
+    this.forms.edit_song = new EditSong();
     this.forms.add_band_song = new AddBandSong();
   }
 
   this.confirm_dialog = new confirm_dialog();
+
+  this.edit_table_object = function(data, event) {
+    window.console.log(event);
+    window.console.log(data);
+    this.show(data);
+  };
 
   this.update_table_object = function(data, event) {
     var target = event.target;
