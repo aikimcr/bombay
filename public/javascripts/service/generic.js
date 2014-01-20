@@ -39,7 +39,7 @@ service.generic.prototype.set = function(data) {
   this.service_.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
   var buffer = [];
   Object.keys(data).forEach(function(key) {
-    buffer.push(key + '=' + data[key]);
+    buffer.push(key + '=' + encodeURIComponent(data[key]));
   });
   this.service_.send(buffer.join('&'));
 };
@@ -47,7 +47,7 @@ service.generic.prototype.set = function(data) {
 service.generic.prototype.put = function(data) {
   var query_args = [];
   Object.keys(data).forEach(function(key) {
-    query_args.push(key + '=' + data[key]);
+    query_args.push(key + '=' + encodeURIComponent(data[key]));
   });
   this.service_.open('PUT', this.url + '?' + query_args.join('&'));
   this.service_.send();

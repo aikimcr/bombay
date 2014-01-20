@@ -6,23 +6,23 @@ function Band(id, name) {
 
   this.band_members = ko.computed(function() {
     return manager.band_members.filterByKey('band_id', this.id());
-  }.bind(this)).extend({throttle: 500});
+  }.bind(this)).extend({throttle: 250});
 
   this.band_member_count = ko.computed(function() {
     return this.band_members().length;
-  }.bind(this)).extend({throttle: 500});
+  }.bind(this)).extend({throttle: 250});
 
   this.band_songs = ko.computed(function() {
     return manager.band_songs.filterByKey('band_id', this.id());
-  }.bind(this)).extend({throttle: 500});
+  }.bind(this)).extend({throttle: 250});
 
   this.band_song_count = ko.computed(function() {
     return this.band_songs().length;
-  }.bind(this)).extend({throttle: 500});
+  }.bind(this)).extend({throttle: 250});
 
   this.isPopulated = ko.computed(function() {
     return this.band_member_count() || this.band_song_count();
-  }.bind(this)).extend({throttle: 500});
+  }.bind(this)).extend({throttle: 250});
 }
 util.inherits(Band, Table);
 

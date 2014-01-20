@@ -8,15 +8,15 @@ function BandSong(id, band_id, song_id, song_status) {
   // Joins
   this.band = ko.computed(function() {
     return manager.bands.getById(this.band_id()) || new Band();
-  }.bind(this)).extend({throttle: 500});
+  }.bind(this)).extend({throttle: 250});
 
   this.song = ko.computed(function() {
     return manager.songs.getById(this.song_id()) || new Song();
-  }.bind(this)).extend({throttle: 500});
+  }.bind(this)).extend({throttle: 250});
 
   this.song_ratings = ko.computed(function() {
     return manager.song_ratings.filterByKey('band_song_id', this.id());
-  }.bind(this)).extend({throttle: 500});
+  }.bind(this)).extend({throttle: 250});
 
   // Calculations
   this.member_rating = ko.computed({
@@ -51,7 +51,7 @@ function BandSong(id, band_id, song_id, song_status) {
       }.bind(member_rating));
       member_rating.rating(value);
     }.bind(this)
-  }).extend({throttle: 500});
+  }).extend({throttle: 250});
 
   this.average_rating = ko.computed(function () {
     var ratings = this.song_ratings();
@@ -64,7 +64,7 @@ function BandSong(id, band_id, song_id, song_status) {
     });
 
     return rating_sum / ratings.length;
-  }.bind(this)).extend({throttle: 500});
+  }.bind(this)).extend({throttle: 250});
 }
 util.inherits(BandSong, Table);
 

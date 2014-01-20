@@ -116,7 +116,7 @@ function Manager(for_test) {
     } else {
       return new BandMember();
     }
-  }.bind(this)).extend({ throttle: 500 });
+  }.bind(this)).extend({ throttle: 250 });
 
   this.membership_sorts = ko.computed(function() {
     return ko.utils.arrayFilter(this.band_members.sort_compare_labels, function(sort_compare) {
@@ -128,14 +128,14 @@ function Manager(for_test) {
     return ko.utils.arrayFilter(this.band_members.filtered_list(), function(band_member) {
       return band_member.person_id() == this.current_person().id();
     }.bind(this));
-  }.bind(this)).extend({ throttle: 500 });
+  }.bind(this)).extend({ throttle: 250 });
 
   this.current_bands = ko.computed(function() {
     return ko.utils.arrayMap(
       this.current_person().memberships(), 
       function(band_member) { return band_member.band() }
     );
-  }.bind(this)).extend({ throttle: 500 });
+  }.bind(this)).extend({ throttle: 250 });
 
   this.other_bands = ko.computed(function() {
     return ko.utils.arrayFilter(this.bands.list(), function(band) {
@@ -145,7 +145,7 @@ function Manager(for_test) {
       }.bind(this));
       return !member;
     }.bind(this));
-  }.bind(this)).extend({ throttle: 500 });
+  }.bind(this)).extend({ throttle: 250 });
 
   this.band_member_sorts = ko.computed(function() {
     return ko.utils.arrayFilter(this.band_members.sort_compare_labels, function(sort_compare) {
@@ -161,7 +161,7 @@ function Manager(for_test) {
     } else {
       return [];
     }
-  }.bind(this)).extend({ throttle: 500 });
+  }.bind(this)).extend({ throttle: 250 });
 
   this.non_band_members = ko.computed(function() {
     if (this.current_band()) {
@@ -175,7 +175,7 @@ function Manager(for_test) {
     } else {
       return this.persons.list();
     }
-  }.bind(this)).extend({ throttle: 500 });
+  }.bind(this)).extend({ throttle: 250 });
 
   this.current_band_songs = ko.computed(function() {
     if (this.current_band()) {
@@ -185,7 +185,7 @@ function Manager(for_test) {
     } else {
       return [];
     }
-  }.bind(this)).extend({ throttle: 500 });
+  }.bind(this)).extend({ throttle: 250 });
 
   this.non_band_songs = ko.computed(function() {
     if (this.current_band()) {
@@ -199,7 +199,7 @@ function Manager(for_test) {
     } else {
       return this.songs.list();
     }
-  }.bind(this)).extend({ throttle: 500 });
+  }.bind(this)).extend({ throttle: 250 });
 
   this.forms = {};
   if (!for_test) {

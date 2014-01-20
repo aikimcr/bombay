@@ -8,11 +8,11 @@ function Person(id, name, full_name, email, system_admin) {
 
   this.memberships = ko.computed(function() {
     return manager.band_members.filterByKey('person_id', this.id());
-  }.bind(this)).extend({throttle: 500});
+  }.bind(this)).extend({throttle: 250});
 
   this.membership_count = ko.computed(function() {
     return this.memberships().length;
-  }.bind(this)).extend({throttle: 500});
+  }.bind(this)).extend({throttle: 250});
 }
 util.inherits(Person, Table);
 
