@@ -22,7 +22,7 @@ section.app_context(id="artists")
               td
                 div.filter
                   label(for="artists_name_filter") Name
-                  input(name="artists_name_filter", type="text", data-bind="value: artists.filter_values.name")
+                  input(name="artists_name_filter", type="text", data-bind="value: artists.filter_values.name, valueUpdate: 'afterkeydown'")
               
       div.list
         table

@@ -22,11 +22,11 @@ section.app_context(id="band_members")
               td
                 div.filter
                   label(for="band_members_person_name_filter") Person Name
-                  input(name="band_members_person_name_filter", type="text", data-bind="value: band_members.filter_values.person_name")
+                  input(name="band_members_person_name_filter", type="text", data-bind="value: band_members.filter_values.person_name, valueUpdate: 'afterkeydown'")
 
                 div.filter
                   label(for="band_members_person_email_filter") Person Email
-                  input(name="band_members_person_email_filter", type="text", data-bind="value: band_members.filter_values.person_email")
+                  input(name="band_members_person_email_filter", type="text", data-bind="value: band_members.filter_values.person_email, valueUpdate: 'afterkeydown'")
               
       div.list
         table

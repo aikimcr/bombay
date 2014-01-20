@@ -22,7 +22,7 @@ section.app_context(id="bands", data-bind="if: $root.current_person().system_adm
               td
                 div.filter
                   label(for="bands_name_filter") Name
-                  input(name="bands_name_filter", type="text", data-bind="value: bands.filter_values.name")
+                  input(name="bands_name_filter", type="text", data-bind="value: bands.filter_values.name, valueUpdate: 'afterkeydown'")
               
       div.list
         table

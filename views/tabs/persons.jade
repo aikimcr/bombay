@@ -22,15 +22,15 @@ section.app_context(id="persons", data-bind="if: $root.current_person().system_a
               td
                 div.filter
                   label(for="persons_name_filter") Name
-                  input(name="persons_name_filter", type="text", data-bind="value: persons.filter_values.name")
+                  input(name="persons_name_filter", type="text", data-bind="value: persons.filter_values.name, valueUpdate: 'afterkeydown'")
               
                 div.filter
                   label(for="persons_full_name_filter") Full Name
-                  input(name="persons_full_name_filter", type="text", data-bind="value: persons.filter_values.full_name")
+                  input(name="persons_full_name_filter", type="text", data-bind="value: persons.filter_values.full_name, valueUpdate: 'afterkeydown'")
               
                 div.filter
                   label(for="persons_email_filter") Email
-                  input(name="persons_email_filter", type="text", data-bind="value: persons.filter_values.email")
+                  input(name="persons_email_filter", type="text", data-bind="value: persons.filter_values.email, valueUpdate: 'afterkeydown'")
               
       div.list
         table
