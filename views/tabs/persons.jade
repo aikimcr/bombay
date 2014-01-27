@@ -49,7 +49,7 @@ section.app_context(id="persons", data-bind="if: $root.current_person().system_a
               td(data-bind="text: full_name")
               td(data-bind="text: email")
               td
-                input(name="system_admin", type="checkbox", data-bind="checked: system_admin, event: { change: $root.update_table_object }");
+                input(name="system_admin", type="checkbox", data-bind="checked: system_admin, event: { change: $root.update_table_object }")
 
               td(data-bind="text: membership_count")
               td(data-bind="ifnot: membership_count")

@@ -93,15 +93,17 @@ exports.putPersonTable = function(req, res) {
       var decrypted;
       var pws;
       try {
-        decrypted = base64_decode(util.decrypt(private_pem, token));
-        db_pw = util.decrypt(private_pem, encrypted_db_pw);
+        decrypted = base64_decode(util.decrypt(private_pem, decodeURIComponent(token)));
+        if (decrypted == '') throw new Error('Bad Token: ' + token);
+        db_pwd = util.decrypt(private_pem, encrypted_db_pw);
+        if (db_pwd == '') throw new Error('Bad DB Password: ' + encrypted_db_pw);
         pws = JSON.parse(decrypted);
       } catch(e) {
         console.log(e);
         pws = ['', ''];
       }
 
-      if (pws[0] == db_pw) {
+      if (pws[0] == db_pwd) {
         req.query.password = util.encrypt(public_pem, pws[1]);
         dbh.person().update(req.query, function(result) {
           res.json(result);
