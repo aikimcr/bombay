@@ -617,8 +617,23 @@ describe('routes', function() {
       var change_token;
 
       before(function(done) {
-        change_token = util.strMapCharsToStr(old_password, JSON.stringify([old_password, new_password]));
+        var pem = util.get_pem_file('crypto/rsa_public.pem');
+        var ct = JSON.stringify([old_password, new_password]);
+        change_token = encodeURIComponent(util.encrypt(pem, ct));
         done();
+      });
+
+      before(function(done) {
+        var pem = util.get_pem_file('crypto/rsa_public.pem');
+        dbh.person().update({
+          id: 1,
+          password: util.encrypt(pem, old_password)
+        }, function(result) {
+          if (result.err) {
+            throw new Error(result.err);
+          }
+          done();
+        });
       });
 
       it('should update the password', function(done) {
@@ -635,6 +650,8 @@ describe('routes', function() {
       it('should get the new password', function(done) {
         var expected = {id: 1, password: new_password};
         dbh.person().getById(1, function(result) {
+          var pem = util.get_pem_file('crypto/rsa_private.pem');
+          result.person.password = util.decrypt(pem, result.person.password);
           test_util.check_item(result, expected, 'person', ['id', 'password']);
           done();
         });
@@ -656,13 +673,17 @@ describe('routes', function() {
       it('should get the new password', function(done) {
         var expected = {id: 1, password: new_password};
         dbh.person().getById(1, function(result) {
+          var pem = util.get_pem_file('crypto/rsa_private.pem');
+          result.person.password = util.decrypt(pem, result.person.password);
           test_util.check_item(result, expected, 'person', ['id', 'password']);
           done();
         });
       });
 
       it('should update the password again', function(done) {
-        var new_change_token = util.strMapCharsToStr(new_password, JSON.stringify([new_password, old_password]));
+        var pem = util.get_pem_file('crypto/rsa_public.pem');
+        var ct = JSON.stringify([new_password, old_password]);
+        var new_change_token = encodeURIComponent(util.encrypt(pem, ct));
         req.query = {id: 1, token: new_change_token};
         var res = {
           json: function(result) {
@@ -676,6 +697,8 @@ describe('routes', function() {
       it('should get the old password', function(done) {
         var expected = {id: 1, password: old_password};
         dbh.person().getById(1, function(result) {
+          var pem = util.get_pem_file('crypto/rsa_private.pem');
+          result.person.password = util.decrypt(pem, result.person.password);
           test_util.check_item(result, expected, 'person', ['id', 'password']);
           done();
         });

@@ -93,7 +93,7 @@ exports.putPersonTable = function(req, res) {
       var decrypted;
       var pws;
       try {
-        decrypted = base64_decode(util.decrypt(private_pem, decodeURIComponent(token)));
+        decrypted = decodeURIComponent(util.decrypt(private_pem, decodeURIComponent(token)));
         if (decrypted == '') throw new Error('Bad Token: ' + token);
         db_pwd = util.decrypt(private_pem, encrypted_db_pw);
         if (db_pwd == '') throw new Error('Bad DB Password: ' + encrypted_db_pw);

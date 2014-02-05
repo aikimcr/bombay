@@ -69,20 +69,48 @@ describe('artist_table', function() {
     var artist_id;
     it('should create the artist', function(done) {
       artist.create({name: 'Mott the Hoople'}, function(result) {
+        artist_id = test_util.check_result(result, 'artist_id');
+        done();
+      });
+    });
+
+    it('should return an error message', function(done) {
+      artist.create({name: 'Mott the Hoople'}, function(result) {
         should.exist(result);
-        should.exist(result.artist_id);
-        should.not.exist(result.err);
-        artist_id = result.artist_id;
+        result.should.have.property('err');
+        result.err.should.eql('Artist \'Mott the Hoople\' already exists');
         done();
       });
     });
 
     it('should get the artist', function(done) {
+      var expected = {id: artist_id, name: 'Mott the Hoople'};
       artist.getById(artist_id, function(result) {
+        test_util.check_item(result, expected, 'artist', ['id', 'name']);
+        done();
+      });
+    });
+
+    it('should update the artist', function(done) {
+      artist.update({id: artist_id, name: 'Britney Spears'}, function(result) {
+        test_util.check_result(result, 'artist');
+        done();
+      });
+    });
+
+    it('should return an error message', function(done) {
+      artist.update({id: artist_id + 1, name: 'Britney Spears'}, function(result) {
         should.exist(result);
-        should.exist(result.artist);
-        result.artist.id.should.eql(artist_id);
-        result.artist.name.should.eql('Mott the Hoople');
+        result.should.have.property('err');
+        result.err.should.eql('Artist \'Britney Spears\' already exists');
+        done();
+      });
+    });
+
+    it('should get the artist', function(done) {
+      var expected = {id: artist_id, name: 'Britney Spears'};
+      artist.getById(artist_id, function(result) {
+        test_util.check_item(result, expected, 'artist', ['id', 'name']);
         done();
       });
     });

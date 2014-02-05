@@ -117,6 +117,15 @@ describe('band_table', function() {
       });
     });
 
+    it('should return an error message', function(done) {
+      band.create({name: 'Cover Story'}, function(result) {
+        should.exist(result);
+        result.should.have.property('err');
+        result.err.should.eql('Band \'Cover Story\' already exists');
+        done();
+      });
+    });
+
     it('should get the band', function(done) {
       var expected = {id: band_id, name: 'Cover Story'};
       band.getById(band_id, function(result) {
@@ -128,6 +137,15 @@ describe('band_table', function() {
     it('should update the band', function(done) {
       band.update({id: band_id, name: 'Groove On The Side'}, function(result) {
         test_util.check_result(result, 'band');
+        done();
+      });
+    });
+
+    it('should return an error message', function(done) {
+      band.update({id: band_id + 1, name: 'Groove On The Side'}, function(result) {
+        should.exist(result);
+        result.should.have.property('err');
+        result.err.should.eql('Band \'Groove On The Side\' already exists');
         done();
       });
     });

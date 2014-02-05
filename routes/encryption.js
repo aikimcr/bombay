@@ -12,7 +12,7 @@ exports.encryption = function(req, res) {
     var pem = util.get_pem_file('crypto/rsa_private.pem');
     try {
       var decrypted = util.decrypt(pem, req.query.encrypted);
-      console.log(req.query.clear + ", " + decrypted);
+      //console.log(req.query.clear + ", " + decrypted);
       if (decrypted = req.query.clear) {
         res.json({match: true});
       } else {

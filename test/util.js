@@ -76,7 +76,6 @@ describe('util', function() {
     });
 
     it('should decrypt the original text', function(done) {
-      console.log(encrypted);
       decrypted = util.decrypt(privkey, encrypted);
       should.exist(decrypted);
       decrypted.should.eql(original_text);
