@@ -99,23 +99,96 @@ describe('song_table', function() {
     });
 
     var song_id;
+    var other_song_id;
+    it('should return an error message', function(done) {
+      var data = {
+        artist_id: 2
+      };
+      song.create(data, function(result) {
+        should.exist(result);
+        result.should.have.property('err');
+        result.err.should.eql('Song Create missing key(s): name');
+        done();
+      });
+    });
+
+    it('should return an error message', function(done) {
+      var data = {
+        name: 'La Grange',
+      };
+      song.create(data, function(result) {
+        should.exist(result);
+        result.should.have.property('err');
+        result.err.should.eql('Song Create missing key(s): artist_id');
+        done();
+      });
+    });
+
+    it('should return an error message', function(done) {
+      var data = {
+      };
+      song.create(data, function(result) {
+        should.exist(result);
+        result.should.have.property('err');
+        result.err.should.eql('Song Create missing key(s): name,artist_id');
+        done();
+      });
+    });
+
     it('should create the song', function(done) {
-      song.create({
+      var data = {
         name: 'La Grange',
         artist_id: 2,
-      }, function(result) {
+      };
+      song.create(data, function(result) {
         song_id = test_util.check_result(result, 'song_id');
         done();
       });
     });
 
-    it('should get the song', function(done) {
-      song.getById(song_id, function(result) {
+    it('should return an error message', function(done) {
+      var data = {
+        name: 'La Grange',
+        artist_id: 2,
+      };
+      song.create(data, function(result) {
         should.exist(result);
-        should.exist(result.song);
-        result.song.id.should.eql(song_id);
-        result.song.name.should.eql('La Grange');
-        result.song.artist_id.should.eql(2);
+        result.should.have.property('err');
+        result.err.should.eql('Song \'La Grange\' by \'ZZ Top\' already exists');
+        done();
+      });
+    });
+
+    it('should create another song', function(done) {
+      var data = {
+        name: 'Precious and Grace',
+        artist_id: 2,
+      };
+      song.create(data, function(result) {
+        other_song_id = test_util.check_result(result, 'song_id');
+        done();
+      });
+    });
+
+    it('should create another song', function(done) {
+      var data = {
+        name: 'La Grange',
+        artist_id: 1,
+      };
+      song.create(data, function(result) {
+        other_song_id = test_util.check_result(result, 'song_id');
+        done();
+      });
+    });
+
+    it('should get the first song', function(done) {
+      var expected = {
+        id: song_id,
+        name: 'La Grange',
+        artist_id: 2,
+      };
+      song.getById(song_id, function(result) {
+        test_util.check_item(result, expected, 'song', ['id', 'name', 'artist_id']);
         done();
       });
     });
@@ -127,13 +200,23 @@ describe('song_table', function() {
       });
     });
 
-    it('should get the song', function(done) {
-      song.getById(song_id, function(result) {
+    it('should return an error message', function(done) {
+      song.update({id: other_song_id, name: 'TV Dinners', artist_id: 2}, function(result) {
         should.exist(result);
-        should.exist(result.song);
-        result.song.id.should.eql(song_id);
-        result.song.name.should.eql('TV Dinners');
-        result.song.artist_id.should.eql(2);
+        result.should.have.property('err');
+        result.err.should.eql('Song \'TV Dinners\' by \'ZZ Top\' already exists');
+        done();
+      });
+    });
+
+    it('should get the song', function(done) {
+      var expected = {
+        id: song_id,
+        name: 'TV Dinners',
+        artist_id: 2,
+      };
+      song.getById(song_id, function(result) {
+        test_util.check_item(result, expected, 'song', ['id', 'name', 'artist_id']);
         done();
       });
     });
@@ -142,7 +225,7 @@ describe('song_table', function() {
       song.deleteById(song_id, function(result) {
         should.exist(result);
         should.exist(result.song);
-        result.song.should.eql(1);
+        result.song.should.eql(3);
         done();
       });
     });

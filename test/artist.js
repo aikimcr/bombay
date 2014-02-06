@@ -67,6 +67,15 @@ describe('artist_table', function() {
     });
 
     var artist_id;
+    it('should return an error message', function(done) {
+      artist.create({}, function(result) {
+        should.exist(result);
+        result.should.have.property('err');
+        result.err.should.eql('Artist Create missing key(s): name');
+        done();
+      });
+    });
+
     it('should create the artist', function(done) {
       artist.create({name: 'Mott the Hoople'}, function(result) {
         artist_id = test_util.check_result(result, 'artist_id');

@@ -99,50 +99,131 @@ describe('band_member_table', function() {
     });
 
     var band_member_id;
-    it('should create the band_member', function(done) {
-      band_member.create({
-        band_id: 1,
+    var other_band_member_id;
+    it('should return an error message', function(done) {
+      var data = {
         person_id: 1,
-        band_admin: true,
-      }, function(result) {
+        band_admin: true
+      };
+      band_member.create(data, function(result) {
         should.exist(result);
-        result.should.have.property('band_member_id');
-        result.should.not.have.property('err');
-        band_member_id = result.band_member_id;
+        result.should.have.property('err');
+        result.err.should.eql('Band Member Create missing key(s): band_id');
         done();
       });
     });
 
-    it('should get the band_member', function(done) {
-      band_member.getById(band_member_id, function(result) {
+    it('should return an error message', function(done) {
+      var data = {
+        band_admin: true
+      };
+      band_member.create(data, function(result) {
         should.exist(result);
-        result.should.have.property('band_member');
-        result.band_member.id.should.eql(band_member_id);
-        result.band_member.band_id.should.eql(1);
-        result.band_member.person_id.should.eql(1);
-        result.band_member.band_admin.should.eql(true);
+        result.should.have.property('err');
+        result.err.should.eql('Band Member Create missing key(s): person_id,band_id');
+        done();
+      });
+    });
+
+    it('should create the band_member', function(done) {
+      var data = {
+        band_id: 1,
+        person_id: 1,
+        band_admin: true
+      };
+      band_member.create(data, function(result) {
+        band_member_id = test_util.check_result(result, 'band_member_id');
+        done();
+      });
+    });
+
+    it('should return an error message', function(done) {
+      var data = {
+        band_id: 1,
+        person_id: 1,
+        band_admin: false
+      };
+      band_member.create(data, function(result) {
+        should.exist(result);
+        result.should.have.property('err');
+        result.err.should.eql('Band Member \'admin\' in \'Wild At Heart\' already exists');
+        done();
+      });
+    });
+
+    it('should create another band_member', function(done) {
+      var data = {
+        band_id: 2,
+        person_id: 1,
+        band_admin: false
+      };
+      band_member.create(data, function(result) {
+        other_band_member_id = test_util.check_result(result, 'band_member_id');
+        done();
+      });
+    });
+
+    it('should create another band_member', function(done) {
+      var data = {
+        band_id: 1,
+        person_id: 2,
+        band_admin: false
+      };
+      band_member.create(data, function(result) {
+        other_band_member_id = test_util.check_result(result, 'band_member_id');
+        done();
+      });
+    });
+
+    it('should get the first band_member', function(done) {
+      var expected = {
+        id: band_member_id,
+        band_id: 1,
+        person_id: 1,
+        band_admin: true
+      };
+      band_member.getById(band_member_id, function(result) {
+        test_util.check_item(
+          result, expected, 'band_member',
+          ['id', 'band_id', 'person_id', 'band_admin']
+        );
         done();
       });
     });
 
     it('should update the band_member', function(done) {
       band_member.update({id: band_member_id, band_admin: false}, function(result) {
+        test_util.check_result(result, 'band_member');
+        done();
+      });
+    });
+
+    it('should return an error message', function(done) {
+      var data = {
+        id: other_band_member_id,
+        band_id: 1,
+        person_id: 1
+      };
+      band_member.update(data, function(result) {
         should.exist(result);
-        result.should.have.property('band_member');
-        result.should.not.have.property('err');
-        result.band_member.should.eql(1);
+        result.should.have.property('err');
+        result.err.should.eql('Band Member \'admin\' in \'Wild At Heart\' already exists');
         done();
       });
     });
 
     it('should get the band_member again', function(done) {
+      var expected = {
+        id: band_member_id,
+        band_id: 1,
+        person_id: 1,
+        band_admin: false
+      };
       band_member.getById(band_member_id, function(result) {
-        should.exist(result);
-        result.should.have.property('band_member');
-        result.band_member.id.should.eql(band_member_id);
-        result.band_member.band_id.should.eql(1);
-        result.band_member.person_id.should.eql(1);
-        result.band_member.band_admin.should.eql(false);
+        test_util.check_item(
+          result, expected, 'band_member',
+          ['id', 'band_id', 'person_id', 'band_admin']
+        );
         done();
       });
     });
@@ -151,7 +232,7 @@ describe('band_member_table', function() {
       band_member.deleteById(band_member_id, function(result) {
         should.exist(result);
         should.exist(result.band_member);
-        result.band_member.should.eql(1);
+        result.band_member.should.eql(3);
         done();
       });
     });

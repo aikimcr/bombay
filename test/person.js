@@ -25,30 +25,58 @@ describe('person_table', function() {
     });
 
     var person_id;
+    it('should return an error message', function(done) {
+      var data = {
+        full_name: 'Johnny Guitar',
+        email: 'jguitar@musichero.foo',
+        system_admin: false,
+      };
+      person.create(data, function(result) {
+        should.exist(result);
+        result.should.have.property('err');
+        result.err.should.eql('Person Create missing key(s): name');
+        done();
+      });
+    });
+
     it('should create the person', function(done) {
-      person.create({
+      var data = {
         name: 'jguitar',
         full_name: 'Johnny Guitar',
         email: 'jguitar@musichero.foo',
         system_admin: false,
-      }, function(result) {
+      };
+      person.create(data, function(result) {
+        person_id = test_util.check_result(result, 'person_id');
+        done();
+      });
+    });
+
+    it('should return an error message', function(done) {
+      var data = {
+        name: 'jguitar',
+        full_name: 'Johnny Guitar',
+        email: 'jguitar@musichero.foo',
+        system_admin: false,
+      };
+      person.create(data, function(result) {
         should.exist(result);
-        should.exist(result.person_id);
-        should.not.exist(result.err);
-        person_id = result.person_id;
+        result.should.have.property('err');
+        result.err.should.eql('Person \'jguitar\' already exists');
         done();
       });
     });
 
     it('should get the person', function(done) {
+      var expected = {
+        id: person_id,
+        name: 'jguitar',
+        full_name: 'Johnny Guitar',
+        email: 'jguitar@musichero.foo',
+        system_admin: false,
+      };
       person.getById(person_id, function(result) {
-        should.exist(result);
-        should.exist(result.person);
-        result.person.id.should.eql(person_id);
-        result.person.name.should.eql('jguitar');
-        result.person.full_name.should.eql('Johnny Guitar');
-        result.person.email.should.eql('jguitar@musichero.foo');
-        result.person.system_admin.should.eql(false);
+        test_util.check_item(result, expected, 'person', ['id', 'name', 'full_name', 'email', 'system_admin']);
         done();
       });
     });
@@ -64,22 +92,68 @@ describe('person_table', function() {
       };
 
       person.update(data, function(result) {
+        test_util.check_result(result, 'person');
+        done();
+      });
+    });
+
+    it('should return an error message', function(done) {
+      var data = {
+        id: person_id + 1,
+        name: 'fukulele',
+        full_name: 'Fred Ukulele',
+        password: 'grassshack',
+        email: 'fukulele@slackkey.hi',
+        system_admin: true
+      };
+
+      person.update(data, function(result) {
         should.exist(result);
-        should.not.exist(result.err);
-        person.getById(person_id, function(result) {
-	  should.exist(result);
-	  should.exist(result.person);
-	  should.not.exist(result.err);
-	  result.person.should.eql({
-            id: person_id,
-            name: 'fukulele',
-            full_name: 'Fred Ukulele',
-            password: 'grassshack',
-            email: 'fukulele@slackkey.hi',
-            system_admin: true
-	  });
-	  done();
-        });
+        result.should.have.property('err');
+        result.err.should.eql('Person \'fukulele\' already exists');
+        done();
+      });
+    });
+
+    it('should get the person', function(done) {
+      var expected = {
+        id: person_id,
+        name: 'fukulele',
+        full_name: 'Fred Ukulele',
+        password: 'grassshack',
+        email: 'fukulele@slackkey.hi',
+        system_admin: true
+      };
+      person.getById(person_id, function(result) {
+        test_util.check_item(result, expected, 'person', ['id', 'name', 'full_name', 'email', 'system_admin']);
+        done();
+      });
+    });
+
+    it('should update the persons full name', function(done) {
+      var data = {
+        id: person_id,
+        full_name: 'Fred C Ukulele',
+      };
+
+      person.update(data, function(result) {
+        test_util.check_result(result, 'person');
+        done();
+      });
+    });
+
+    it('should get the person', function(done) {
+      var expected = {
+        id: person_id,
+        name: 'fukulele',
+        full_name: 'Fred C Ukulele',
+        password: 'grassshack',
+        email: 'fukulele@slackkey.hi',
+        system_admin: true
+      };
+      person.getById(person_id, function(result) {
+        test_util.check_item(result, expected, 'person', ['id', 'name', 'full_name', 'email', 'system_admin']);
+        done();
       });
     });
 

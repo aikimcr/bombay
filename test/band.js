@@ -110,6 +110,15 @@ describe('band_table', function() {
     });
 
     var band_id;
+    it('should return an error message', function(done) {
+      band.create({}, function(result) {
+        should.exist(result);
+        result.should.have.property('err');
+        result.err.should.eql('Band Create missing key(s): name');
+        done();
+      });
+    });
+
     it('should create the band', function(done) {
       band.create({name: 'Cover Story'}, function(result) {
         band_id = test_util.check_result(result, 'band_id');

@@ -144,28 +144,115 @@ describe('band_song_table', function() {
     });
 
     var band_song_id;
-    it('should create the band_song', function(done) {
-      band_song.create({
-        band_id: 1,
+    var other_band_song_id;
+    it('should return an error message', function(done) {
+      var data = {
         song_id: 1,
         song_status: 3,
-      }, function(result) {
+      };
+      band_song.create(data, function(result) {
         should.exist(result);
-        should.exist(result.band_song_id);
-        should.not.exist(result.err);
-        band_song_id = result.band_song_id;
+        result.should.have.property('err');
+        result.err.should.eql('Band Song Create missing key(s): band_id');
         done();
       });
     });
 
-    it('should get the band_song', function(done) {
-      band_song.getById(band_song_id, function(result) {
+    it('should return an error message', function(done) {
+      var data = {
+        song_status: 3,
+      };
+      band_song.create(data, function(result) {
         should.exist(result);
-        should.exist(result.band_song);
-        result.band_song.id.should.eql(band_song_id);
-        result.band_song.band_id.should.eql(1);
-        result.band_song.song_id.should.eql(1);
-        result.band_song.song_status.should.eql(3);
+        result.should.have.property('err');
+        result.err.should.eql('Band Song Create missing key(s): song_id,band_id');
+        done();
+      });
+    });
+
+    it('should create the band_song', function(done) {
+      var data = {
+        band_id: 1,
+        song_id: 1,
+        song_status: 3,
+      };
+      band_song.create(data, function(result) {
+        band_song_id = test_util.check_result(result, 'band_song_id');
+        done();
+      });
+    });
+
+    it('should return an error message', function(done) {
+      var data = {
+        band_id: 1,
+        song_id: 1,
+        song_status: 4,
+      };
+      band_song.create(data, function(result) {
+        should.exist(result);
+        result.should.have.property('err');
+        result.err.should.eql('Band Song \'Space Oddity\' in \'Wild At Heart\' already exists');
+        done();
+      });
+    });
+
+    it('should create another band_song', function(done) {
+      var data = {
+        band_id: 2,
+        song_id: 1,
+        song_status: 4,
+      };
+      band_song.create(data, function(result) {
+        other_band_song_id = test_util.check_result(result, 'band_song_id');
+        done();
+      });
+    });
+
+    it('should create another band_song', function(done) {
+      var data = {
+        band_id: 1,
+        song_id: 2,
+        song_status: 4,
+      };
+      band_song.create(data, function(result) {
+        other_band_song_id = test_util.check_result(result, 'band_song_id');
+        done();
+      });
+    });
+
+    it('should get the first band_song', function(done) {
+      var expected = {
+        id: band_song_id,
+        band_id: 1,
+        song_id: 1,
+        song_status: 3,
+      };
+      band_song.getById(band_song_id, function(result) {
+        test_util.check_item(
+          result, expected, 'band_song',
+          ['id', 'band_id', 'song_id', 'song_status']
+        );
+        done();
+      });
+    });
+
+    it('should update the band_song', function(done) {
+      band_song.update({id: band_song_id, song_status: 1}, function(result) {
+        test_util.check_result(result, 'band_song');
+        done();
+      });
+    });
+
+    it('should return an error message', function(done) {
+      var data = {
+        id: other_band_song_id,
+        band_id: 1,
+        song_id: 1,
+      };
+      band_song.update(data, function(result) {
+        should.exist(result);
+        result.should.have.property('err');
+        result.err.should.eql('Band Song \'Space Oddity\' in \'Wild At Heart\' already exists');
         done();
       });
     });
@@ -174,7 +261,7 @@ describe('band_song_table', function() {
       band_song.deleteById(band_song_id, function(result) {
         should.exist(result);
         should.exist(result.band_song);
-        result.band_song.should.eql(1);
+        result.band_song.should.eql(3);
         done();
       });
     });
