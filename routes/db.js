@@ -9,7 +9,11 @@ var base64_decode = require('base64').decode;
 exports.getSessionInfo = function(req, res) {
   var session = req.session.passport;
   var dbh = new db.Handle();
-  dbh.person().getById(session.user, function(result) {
+  //var node_util = require('util');
+  //console.log(node_util.inspect(session));
+  var user = JSON.parse(session.user);
+  //console.log(user);
+  dbh.person().getById(user.id, function(result) {
     res.json(result);
   });
 };

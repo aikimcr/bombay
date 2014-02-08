@@ -61,6 +61,7 @@ describe('routes', function() {
     });
   });
 
+  // Blow away the defaults and add some predictable ones.
   before(function(done) {
     var sql = fs.readFileSync('./test/support/addSongRatings.sql', 'utf8');
     dbh.doSqlExec(sql, function(err) {
