@@ -7,6 +7,7 @@ div#add_artist_form(data-bind="visible: forms.add_artist.isVisible")
           button.close_button(data-bind="click: forms.add_artist.hide.bind(forms.add_artist)") X
 
       div.dialog_body
+        div.title(data-bind="text: forms.add_artist.message")
         form(data-bind="submit: function() { Form.postChange(forms.add_artist, artists); }")
           input(data-bind="value: forms.add_artist.name", type="text", placeholder="New Artist Name")
           input(type="submit", value="Add")
