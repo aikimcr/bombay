@@ -20,6 +20,12 @@ DROP TABLE IF EXISTS band;
 
 DROP TABLE IF EXISTS schema_change;
 
+DROP TRIGGER IF EXISTS del_song_rating_snapshot;
+DROP TABLE IF EXISTS song_rating_snapshot;
+DROP TABLE IF EXISTS snapshot;
+
+DROP TABLE IF EXISTS request;
+
 CREATE TABLE band (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name VARCHAR,
@@ -106,13 +112,11 @@ BEGIN
   DELETE FROM song_rating WHERE song_rating.band_song_id = OLD.id;
 END;
 
-DROP TABLE IF EXISTS snapshot;
 CREATE TABLE snapshot (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   timestamp VARCHAR DEFAULT CURRENT_TIMESTAMP
 );
 
-DROP TABLE IF EXISTS song_rating_snapshot;
 CREATE TABLE song_rating_snapshot (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   snapshot_id INTEGER NOT NULL,
@@ -128,11 +132,20 @@ CREATE TABLE song_rating_snapshot (
   FOREIGN KEY (band_id) REFERENCES band(id) ON DELETE CASCADE
 );
 
-DROP TRIGGER IF EXISTS del_song_rating_snapshot;
 CREATE TRIGGER del_song_rating_snapshot BEFORE DELETE ON snapshot FOR EACH ROW
 BEGIN
   DELETE FROM song_rating_snapshot WHERE song_rating_snapshot.snapshot_id = OLD.id;
 END;
+
+CREATE TABLE request (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  description VARCHAR,
+  timestamp VARCHAR DEFAULT CURRENT_TIMESTAMP,
+  request_type INTEGER NOT NULL,
+  status INTEGER,
+  band_id INTEGER,
+  person_id INTEGER
+);
 
 CREATE TABLE setlist (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -172,3 +185,12 @@ CREATE TABLE schema_change (
 
 INSERT INTO person (name, full_name, password, system_admin) 
   VALUES ('admin', 'Administrator', 'admin', 1);
+
+INSERT INTO schema_change (name, timestamp)
+       VALUES ('Convert song_rating to use band_member_id', datetime('now'));
+
+INSERT INTO schema_change (name, timestamp)
+       VALUES ('Add snapshot tables for reporting', datetime('now'));
+
+INSERT INTO schema_change (name, timestamp)
+       VALUES ('Add request table', datetime('now'));
