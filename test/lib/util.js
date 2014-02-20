@@ -10,6 +10,7 @@ exports.check_record = function(got_record, expected_record, fields) {
   should.exist(got_record);
   fields.forEach(function(f) {
     got_record.should.have.property(f);
+    should.exist(got_record[f], f + ' is undefined');
     got_record[f].should.eql(expected_record[f], f + ' not equal');
   });
 };

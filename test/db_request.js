@@ -5,7 +5,7 @@ var fs = require('fs');
 
 var test_util = require('test/lib/util');
 
-var constants = require('lib/constants').constants;
+var constants = require('lib/constants');
 var db = require('lib/db');
 var dbh;
 
@@ -25,7 +25,7 @@ function insert_test_requests(band_id) {
   }, {
     description: 'Please join my band',
     timestamp: '2014-01-10 15:33:20', request_type: constants.request_type.add_band_member,
-    status: constants.request_status.resolved, band_id: band_id, person_id: 4
+    status: constants.request_status.accepted, band_id: band_id, person_id: 4
   }];
 
   var field_list = '(description, timestamp, request_type, status, band_id, person_id)';
@@ -82,7 +82,8 @@ describe('request_table', function() {
         description: 'Bugs Bunny wants to join Cover Story',
         timestamp: '2014-01-12 19:34:03',
         request_type: constants.request_type.join_band,
-        status: constants.request_status.pending,        band_id: 1,
+        status: constants.request_status.pending,
+        band_id: 1,
         person_id: 1
       };
       request.getById(request_id, function(result) {
