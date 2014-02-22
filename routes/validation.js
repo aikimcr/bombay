@@ -70,12 +70,10 @@ function getBandMember(person_id, band_id, callback) {
 }
 
 function getRequestBandMember(req, callback) {
-if (GLOBAL.breakit) debugger;//XXX
   if (req.path.match(/band_member/)) {
     getBandMemberById(exports.findParam(req, 'id'), callback);
   } else if (req.path.match(/song_rating/)) {
     getSongRatingById(exports.findParam(req, 'id'), function(song_rating) {
-if (GLOBAL.breakit) debugger;//XXX
       getBandMemberById(song_rating.band_member_id, callback);
     })
   } else {
@@ -86,10 +84,8 @@ if (GLOBAL.breakit) debugger;//XXX
 function getCurrentBandMember(req, user, callback) {
   var band_id = exports.findParam(req, 'band_id');
 
-if (GLOBAL.breakit) debugger;//XXX
   if (band_id == null) {
     var req_band_member = getRequestBandMember(req, function(req_band_member) {
-if (GLOBAL.breakit) debugger;//XXX
       if (req_band_member) {
         getBandMember(user.id, req_band_member.band_id, callback);
       } else {
@@ -132,9 +128,7 @@ exports.requireBandAdmin = function(req, res, next) {
   if (isSysAdmin(user)) {
     next();
   } else {
-if (GLOBAL.breakit) debugger;//XXX
     getCurrentBandMember(req, user, function(band_member) {
-if (GLOBAL.breakit) debugger;//XXX
       if (isBandAdmin(band_member)) {
         next();
       } else {
@@ -145,24 +139,19 @@ if (GLOBAL.breakit) debugger;//XXX
 };
 
 exports.requireSelfOrAdmin = function(req, res, next) {
-if (GLOBAL.breakit) debugger;//XXX
   var user = getUser(req);
   if (user == null) {
     res.json(permission_error);
   } else if (isSysAdmin(user)) {
     next();
   } else if (req.path.match(/person/) && exports.findParam(req, 'id') === user.id) {
-if (GLOBAL.breakit) debugger;//XXX
     next();
   } else {
-if (GLOBAL.breakit) debugger;//XXX
     getCurrentBandMember(req, user, function(current_member) {
-if (GLOBAL.breakit) debugger;//XXX
       if (isBandAdmin(current_member)) {
         next();
       } else {
         getRequestBandMember(req, function(band_member) {
-if (GLOBAL.breakit) debugger;//XXX
           if (band_member == null) {
             res.json(permission_error);
           } else if (isBandAdmin(band_member) || band_member.person_id == user.id) {
