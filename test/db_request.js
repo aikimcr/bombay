@@ -21,7 +21,7 @@ function insert_test_requests(band_id) {
   }, {
     description: 'Let me join your band',
     timestamp: '2014-01-10 15:33:20', request_type: constants.request_type.join_band,
-    status: constants.request_status.ignored, band_id: band_id, person_id: 2
+    status: constants.request_status.rejected, band_id: band_id, person_id: 2
   }, {
     description: 'Please join my band',
     timestamp: '2014-01-10 15:33:20', request_type: constants.request_type.add_band_member,
@@ -132,35 +132,35 @@ describe('request_table', function() {
       var expected = [{
         id: 3, description: 'Let me join your band',
         timestamp: '2014-01-10 15:33:20', request_type: constants.request_type.join_band,
-        status: 3, band_id: 1, person_id: 2
+        status: constants.request_status.rejected, band_id: 1, person_id: 2
       }, {
         id: 4, description: 'Please join my band',
         timestamp: '2014-01-10 15:33:20', request_type: constants.request_type.add_band_member,
-        status: 2, band_id: 1, person_id: 4
+        status: constants.request_status.accepted, band_id: 1, person_id: 4
       }, {
         id: 7, description: 'Let me join your band',
         timestamp: '2014-01-10 15:33:20', request_type: constants.request_type.join_band,
-        status: 3, band_id: 2, person_id: 2
+        status: constants.request_status.rejected, band_id: 2, person_id: 2
       }, {
         id: 8, description: 'Please join my band',
         timestamp: '2014-01-10 15:33:20', request_type: constants.request_type.add_band_member,
-        status: 2, band_id: 2, person_id: 4
+        status: constants.request_status.accepted, band_id: 2, person_id: 4
       }, {
         id: 1, description: 'Let me join your band',
         timestamp: '2014-01-12 15:33:20', request_type: constants.request_type.join_band,
-        status: 1, band_id: 1, person_id: 2
+        status: constants.request_status.pending, band_id: 1, person_id: 2
       }, {
         id: 5, description: 'Let me join your band',
         timestamp: '2014-01-12 15:33:20', request_type: constants.request_type.join_band,
-        status: 1, band_id: 2, person_id: 2
+        status: constants.request_status.pending, band_id: 2, person_id: 2
       }, {
         id: 2, description: 'Please join my band',
         timestamp: '2014-01-13 15:33:20', request_type: constants.request_type.add_band_member,
-        status: 1, band_id: 1, person_id: 3
+        status: constants.request_status.pending, band_id: 1, person_id: 3
       }, {
         id: 6, description: 'Please join my band',
         timestamp: '2014-01-13 15:33:20', request_type: constants.request_type.add_band_member,
-        status: 1, band_id: 2, person_id: 3
+        status: constants.request_status.pending, band_id: 2, person_id: 3
       }];
       request.getAll(function(result) {
         test_util.check_list(result, expected, 'all_requests', [
@@ -175,11 +175,11 @@ describe('request_table', function() {
       var expected = [{
         id: 7, description: 'Let me join your band',
         timestamp: '2014-01-10 15:33:20', request_type: constants.request_type.join_band,
-        status: 3, band_id: 2, person_id: 2
+        status: constants.request_status.rejected, band_id: 2, person_id: 2
       }, {
         id: 5, description: 'Let me join your band',
         timestamp: '2014-01-12 15:33:20', request_type: constants.request_type.join_band,
-        status: 1, band_id: 2, person_id: 2
+        status: constants.request_status.pending, band_id: 2, person_id: 2
       }];
       request.getAllWithArgs({where: {
         request_type: constants.request_type.join_band,

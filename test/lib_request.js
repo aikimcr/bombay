@@ -144,25 +144,23 @@ describe('manage_requests', function() {
         band_id: 1,
         person_id: 3,
       };
-debugger;//XXX
       last_req.accept(function(result) {
-debugger;//XXX
         check_request(result, expected, 'JoinBandRequest', now);
         done();
       });
     });
 
     it('should find a matching band_member', function(done) {
-      var expected = {
+      var expected = [{
         band_id: 1,
         person_id: 3,
         band_admin: false
-      };
+      }];
       dbh.band_member().getAllWithArgs({
         where: { band_id: 1, person_id: 3}
       }, function(result) {
-        test_util.check_item(
-          result, expected, 'band_member',
+        test_util.check_list(
+          result, expected, 'all_band_members',
           ['band_id', 'person_id', 'band_admin']
         );
         done();

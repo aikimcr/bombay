@@ -9,7 +9,7 @@ var validate = require('routes/validation');
 var db = require('lib/db');
 var dbh;
 
-GLOBAL.breakit = false;
+GLOBAL.breakit = false;//XXX
 
 describe('validation', function() {
   before(function(done) {
@@ -518,6 +518,8 @@ describe('validation', function() {
     });
 
     it('should call next - user and song match (query)', function(done) {
+GLOBAL.breakit = true;
+debugger;//XXX THis one
       req.session.passport.user = JSON.stringify({id: 1, system_admin: false});
       req.query.id = 1;
       req.path = '/song_rating';
