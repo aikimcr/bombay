@@ -339,7 +339,6 @@ JoinBand.prototype.postChange_ = function(callback) {
   var params = {
     band_id: this.band().id(),
     person_id: manager.current_person().id(),
-    band_admin: false
   };
   svc.set('./band_member', function(result) {
     callback(result);
@@ -358,7 +357,6 @@ AddBandMember.prototype.postChange_ = function(callback) {
   var params = {
     band_id: manager.current_band().id(),
     person_id: this.person().id(),
-    band_admin: false
   };
   svc.set('./band_member', function(result) {
     callback(result);

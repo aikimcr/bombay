@@ -371,7 +371,7 @@ describe('routes', function() {
 
   describe('#post', function() {
     describe('#band', function() {
-      // Band creation should a a system_admin function.  The 
+      // Band creation should be a system_admin function.  The 
       // process should be to create a band, create a person then
       // make that person a band_member with band_admin privileges
       // for the new band.
@@ -1076,5 +1076,70 @@ describe('routes', function() {
       };
       encryption.encryption(req, res);
     });
+  });
+});
+
+describe('requests', function() {
+  var dbh;
+  before(function(done) {
+    db.setDbPath('./bombay_test.db');
+    dbh = new db.Handle()
+    var sql = fs.readFileSync('./sql/schema.sql', 'utf8');
+    dbh.doSqlExec([sql], done);
+  });
+
+  before(function(done) {
+    var sql_cmds = [
+      'INSERT INTO band (id, name) VALUES (1, \'Wild At Heart\');',
+      'INSERT INTO person (id, name, full_name) VALUES (1, \'bbunny\', \'Bugs Bunny\');',
+      'INSERT INTO person (id, name, full_name) VALUES (2, \'efudd\', \'Elmer Fudd\');',
+      'INSERT INTO band_member (id, band_id, person_id, band_admin) VALUES (1, 1, 1, 1);',
+    ];
+    var sql = sql_cmds.join('\n');
+    dbh.doSqlExec(sql, function(err) {
+      done();
+    });
+  });
+
+  var req;
+  beforeEach(function(done) {
+    req = {
+      session: {
+        passport: {
+          user: 1
+        }
+      },
+      query: {
+      },
+      params: {
+      },
+    };
+    done();
+  });
+
+  var res;
+  beforeEach(function(done) {
+    res = {
+      json: function(result) {
+        done('No JSON function set');
+      }
+    };
+    done();
+  });
+
+  var request_id;
+  it('should create a join request', function(done) {
+    req.body = {band_id: 1, person_id: 2};
+    var res = {
+      json: function(result) {
+        var request_id = test_util.check_result(result, 'request_id');
+        done();
+      }
+    };
+    routes.joinBand(req, res);
+  });
+
+  it('should get the request', function(done) {
+    
   });
 });
