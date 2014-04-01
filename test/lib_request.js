@@ -77,7 +77,7 @@ describe('manage_requests', function() {
         person_id: 3,
       };
       request.getById(request_id, function(result) {
-        check_request(result, expected, now);
+        test_util.check_request(result, expected, now);
         last_req = result.request;
         done();
       });
@@ -93,7 +93,7 @@ describe('manage_requests', function() {
         person_id: 3,
       }];
       request.getMyRequests(2, function(result) {
-        check_request_list(result.all_requests, expected, now);
+        test_util.check_request_list(result.all_requests, expected, now);
         done();
       });
     });
@@ -108,7 +108,7 @@ describe('manage_requests', function() {
         person_id: 3,
       };
       last_req.reject(function(result) {
-        check_request(result, expected, now);
+        test_util.check_request(result, expected, now);
         done();
       });
     });
@@ -134,7 +134,7 @@ describe('manage_requests', function() {
         person_id: 3,
       };
       last_req.reopen(function(result) {
-        check_request(result, expected, now);
+        test_util.check_request(result, expected, now);
         done();
       });
     });
@@ -160,7 +160,7 @@ describe('manage_requests', function() {
         person_id: 3,
       };
       last_req.accept(function(result) {
-        check_request(result, expected, now);
+        test_util.check_request(result, expected, now);
         done();
       });
     });
@@ -248,7 +248,7 @@ describe('manage_requests', function() {
         person_id: 3,
       };
       request.getById(request_id, function(result) {
-        check_request(result, expected, now);
+        test_util.check_request(result, expected, now);
         last_req = result.request;
         done();
       });
@@ -264,7 +264,7 @@ describe('manage_requests', function() {
         person_id: 3,
       }];
       request.getMyRequests(2, function(result) {
-        check_request_list(result.all_requests, expected, now);
+        test_util.check_request_list(result.all_requests, expected, now);
         done();
       });
     });
@@ -279,7 +279,7 @@ describe('manage_requests', function() {
         person_id: 3,
       };
       last_req.reject(function(result) {
-        check_request(result, expected, now);
+        test_util.check_request(result, expected, now);
         done();
       });
     });
@@ -305,7 +305,7 @@ describe('manage_requests', function() {
         person_id: 3,
       };
       last_req.reopen(function(result) {
-        check_request(result, expected, now);
+        test_util.check_request(result, expected, now);
         done();
       });
     });
@@ -331,7 +331,7 @@ describe('manage_requests', function() {
         person_id: 3,
       };
       last_req.accept(function(result) {
-        check_request(result, expected, now);
+        test_util.check_request(result, expected, now);
         done();
       });
     });
@@ -426,7 +426,7 @@ describe('manage_requests', function() {
         person_id: 2,
       }];
       request.getMyRequests(2, function(result) {
-        check_request_list(result.all_requests, expected, now);
+        test_util.check_request_list(result.all_requests, expected, now);
         done();
       });
     });
@@ -455,7 +455,7 @@ describe('manage_requests', function() {
         person_id: 4,
       }];
       request.getMyRequests(3, function(result) {
-        check_request_list(result.all_requests, expected, now);
+        test_util.check_request_list(result.all_requests, expected, now);
         done();
       });
     });
@@ -470,7 +470,7 @@ describe('manage_requests', function() {
         person_id: 4,
       }];
       request.getMyRequests(4, function(result) {
-        check_request_list(result.all_requests, expected, now);
+        test_util.check_request_list(result.all_requests, expected, now);
         done();
       });
     });
@@ -499,51 +499,9 @@ describe('manage_requests', function() {
         person_id: 4,
       }];
       request.getMyRequests(1, function(result) {
-        check_request_list(result.all_requests, expected, now);
+        test_util.check_request_list(result.all_requests, expected, now);
         done();
       });
     });
   });
 });
-
-function check_request(result, expected, now) {
-  test_util.check_item(result, expected, 'request', [
-    'id', 'description', 'request_type',
-    'status', 'band_id', 'person_id'
-  ]);
-
-  var request_time = new Date(result.request.timestamp + ' UTC');
-  should.exist(request_time);
-  var request_timestring = util.format(
-    '%s-%s-%s %s:%s',
-    request_time.getFullYear(),
-    request_time.getMonth(),
-    request_time.getDay(),
-    request_time.getHours(),
-    request_time.getMinutes()
-  );
-  request_time = new Date(request_timestring);
-
-  var now_time = new Date(now);
-  var now_timestring = util.format(
-    '%s-%s-%s %s:%s',
-    now_time.getFullYear(),
-    now_time.getMonth(),
-    now_time.getDay(),
-    now_time.getHours(),
-    now_time.getMinutes()
-  );
-  now_time = new Date(now_timestring);
-
-  var now_epoch = parseInt(now_time.valueOf());
-  var request_epoch = parseInt(request_time.valueOf());
-  request_epoch.should.eql(now_epoch, 'Request time is ' + result.request.timestamp);
-}
-
-function check_request_list(result, expected, now) {
-  should.exist(result);
-  result.length.should.eql(expected.length);
-  for(var i=0; i < result.length; i++) {
-    check_request({request: result[i]}, expected[i], now);
-  }
-}

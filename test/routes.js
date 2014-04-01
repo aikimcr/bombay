@@ -3,9 +3,11 @@ var fs = require('fs');
 
 var test_util = require('test/lib/util');
 
+var constants = require('lib/constants');
 var db = require('lib/db');
-var routes = require('routes/db');
 var encryption = require('routes/encryption');
+var request = require('lib/request');
+var routes = require('routes/db');
 var util = require('lib/util');
 
 db.setLogDbErrors(false);
@@ -74,7 +76,7 @@ describe('routes', function() {
     req = {
       session: {
         passport: {
-          user: 1
+          user: JSON.stringify({ id: 1, system_admin: false })
         }
       },
       query: {
@@ -1079,7 +1081,7 @@ describe('routes', function() {
   });
 });
 
-describe('requests', function() {
+describe('request_routes', function() {
   var dbh;
   before(function(done) {
     db.setDbPath('./bombay_test.db');
@@ -1091,9 +1093,12 @@ describe('requests', function() {
   before(function(done) {
     var sql_cmds = [
       'INSERT INTO band (id, name) VALUES (1, \'Wild At Heart\');',
-      'INSERT INTO person (id, name, full_name) VALUES (1, \'bbunny\', \'Bugs Bunny\');',
+      'INSERT INTO person (id, name, full_name) VALUES (3, \'bbunny\', \'Bugs Bunny\');',
       'INSERT INTO person (id, name, full_name) VALUES (2, \'efudd\', \'Elmer Fudd\');',
-      'INSERT INTO band_member (id, band_id, person_id, band_admin) VALUES (1, 1, 1, 1);',
+      'INSERT INTO person (id, name, full_name) VALUES (4, \'dduck\', \'Daffy Duck\');',
+      'INSERT INTO person (id, name, full_name) VALUES (5, \'tbird\', \'Tweety Bird\');',
+      'INSERT INTO person (id, name, full_name) VALUES (6, \'scat\', \'Sylvester Cat\');',
+      'INSERT INTO band_member (id, band_id, person_id, band_admin) VALUES (1, 1, 3, 1);',
     ];
     var sql = sql_cmds.join('\n');
     dbh.doSqlExec(sql, function(err) {
@@ -1106,7 +1111,7 @@ describe('requests', function() {
     req = {
       session: {
         passport: {
-          user: 1
+          user: JSON.stringify({ id: 3, system_admin: false })
         }
       },
       query: {
@@ -1127,19 +1132,327 @@ describe('requests', function() {
     done();
   });
 
+  it('should not find a matching band_member', function(done) {
+    dbh.band_member().getAllWithArgs({
+      where: { band_id: 1, person_id: 2}
+    }, function(result) {
+      should.exist(result);
+      result.should.have.property('all_band_members');
+      result.all_band_members.should.eql([]);
+      done();
+    });
+  });
+
+  var all_request_ids = [];
   var request_id;
   it('should create a join request', function(done) {
-    req.body = {band_id: 1, person_id: 2};
+    req.body = {band_id: 1, person_id: 2, action: 'join_band'};
     var res = {
       json: function(result) {
-        var request_id = test_util.check_result(result, 'request_id');
+        should.exist(result);
+        result.should.not.have.property('err');
+        result.should.have.property('request');
+        result.request.should.have.property('id');
+        request_id = result.request.id;
+        all_request_ids.push(request_id);
         done();
       }
     };
-    routes.joinBand(req, res);
+    routes.createRequest(req, res);
+  });
+
+  it('should not find a matching band_member', function(done) {
+    dbh.band_member().getAllWithArgs({
+      where: { band_id: 1, person_id: 2}
+    }, function(result) {
+      should.exist(result);
+      result.should.have.property('all_band_members');
+      result.all_band_members.should.eql([]);
+      done();
+    });
+  });
+
+  var last_req;
+  var now = new Date();
+  it('should get the request', function(done) {
+    var expected = {
+      id: request_id,
+      description: 'Elmer Fudd is asking to join Wild At Heart',
+      request_type: constants.request_type.join_band,
+      status: constants.request_status.pending,
+      band_id: 1,
+      person_id: 2,
+    };
+    req.query = {id: request_id};
+    var res = {
+      json: function(result) {
+        test_util.check_request(result, expected, now);
+        last_req = result.request;
+        done();
+      }
+    };
+    routes.getRequest(req, res);
+  });
+
+  it('should reject the request', function(done) {
+    var expected = {
+      id: request_id,
+      description: 'Elmer Fudd is asking to join Wild At Heart',
+      request_type: constants.request_type.join_band,
+      status: constants.request_status.rejected,
+      band_id: 1,
+      person_id: 2,
+    };
+    req.query = {id: request_id, action: 'reject'};
+    var res = {
+      json: function(result) {
+        test_util.check_request(result, expected, now);
+        done();
+      }
+    };
+    routes.updateRequest(req, res);
+  });
+
+  it('should not find a matching band_member', function(done) {
+    dbh.band_member().getAllWithArgs({
+      where: { band_id: 1, person_id: 2}
+    }, function(result) {
+      should.exist(result);
+      result.should.have.property('all_band_members');
+      result.all_band_members.should.eql([]);
+      done();
+    });
+  });
+
+  it('should reopen the request', function(done) {
+    var expected = {
+      id: request_id,
+      description: 'Elmer Fudd is asking to join Wild At Heart',
+      request_type: constants.request_type.join_band,
+      status: constants.request_status.pending,
+      band_id: 1,
+      person_id: 2,
+    };
+    req.query = {id: request_id, action: 'reopen'};
+    var res = {
+      json: function(result) {
+        test_util.check_request(result, expected, now);
+        done();
+      }
+    };
+    routes.updateRequest(req, res);
+  });
+
+  it('should not find a matching band_member', function(done) {
+    dbh.band_member().getAllWithArgs({
+      where: { band_id: 1, person_id: 2}
+    }, function(result) {
+      should.exist(result);
+      result.should.have.property('all_band_members');
+      result.all_band_members.should.eql([]);
+      done();
+    });
+  });
+
+  it('should accept the request', function(done) {
+    var expected = {
+      id: request_id,
+      description: 'Elmer Fudd is asking to join Wild At Heart',
+      request_type: constants.request_type.join_band,
+      status: constants.request_status.accepted,
+      band_id: 1,
+      person_id: 2,
+    };
+    req.query = {id: request_id, action: 'accept'};
+    var res = {
+      json: function(result) {
+        test_util.check_request(result, expected, now);
+        done();
+      }
+    };
+    routes.updateRequest(req, res);
+  });
+
+  it('should find a matching band_member', function(done) {
+    var expected = [{
+      band_id: 1,
+      person_id: 2,
+      band_admin: false
+    }];
+    dbh.band_member().getAllWithArgs({
+      where: { band_id: 1, person_id: 2}
+    }, function(result) {
+      test_util.check_list(
+        result, expected, 'all_band_members',
+        ['band_id', 'person_id', 'band_admin']
+      );
+      done();
+    });
+  });
+
+  it('should not find a matching band_member', function(done) {
+    dbh.band_member().getAllWithArgs({
+      where: { band_id: 1, person_id: 4}
+    }, function(result) {
+      should.exist(result);
+      result.should.have.property('all_band_members');
+      result.all_band_members.should.eql([]);
+      done();
+    });
+  });
+
+  it('should create an add member request', function(done) {
+    req.body = {band_id: 1, person_id: 4, action: 'add_band_member'};
+    var res = {
+      json: function(result) {
+        should.exist(result);
+        result.should.not.have.property('err');
+        result.should.have.property('request');
+        result.request.should.have.property('id');
+        request_id = result.request.id;
+        all_request_ids.push(request_id);
+        done();
+      }
+    };
+    routes.createRequest(req, res);
+  });
+
+  it('should not find a matching band_member', function(done) {
+    dbh.band_member().getAllWithArgs({
+      where: { band_id: 1, person_id: 4}
+    }, function(result) {
+      should.exist(result);
+      result.should.have.property('all_band_members');
+      result.all_band_members.should.eql([]);
+      done();
+    });
   });
 
   it('should get the request', function(done) {
-    
+    var expected = {
+      id: request_id,
+      description: 'Wild At Heart is inviting Daffy Duck to join',
+      request_type: constants.request_type.add_band_member,
+      status: constants.request_status.pending,
+      band_id: 1,
+      person_id: 4,
+    };
+    req.query = {id: request_id};
+    var res = {
+      json: function(result) {
+        test_util.check_request(result, expected, now);
+        last_req = result.request;
+        done();
+      }
+    };
+    routes.getRequest(req, res);
+  });
+
+  it('should not find a matching band_member', function(done) {
+    dbh.band_member().getAllWithArgs({
+      where: { band_id: 1, person_id: 4}
+    }, function(result) {
+      should.exist(result);
+      result.should.have.property('all_band_members');
+      result.all_band_members.should.eql([]);
+      done();
+    });
+  });
+
+  it('should accept the request', function(done) {
+    var expected = {
+      id: request_id,
+      description: 'Wild At Heart is inviting Daffy Duck to join',
+      request_type: constants.request_type.add_band_member,
+      status: constants.request_status.accepted,
+      band_id: 1,
+      person_id: 4,
+    };
+    req.query = {id: request_id, action: 'accept'};
+    var res = {
+      json: function(result) {
+        test_util.check_request(result, expected, now);
+        done();
+      }
+    };
+    routes.updateRequest(req, res);
+  });
+
+  it('should find a matching band_member', function(done) {
+    var expected = [{
+      band_id: 1,
+      person_id: 4,
+      band_admin: false
+    }];
+    dbh.band_member().getAllWithArgs({
+      where: { band_id: 1, person_id: 4}
+    }, function(result) {
+      test_util.check_list(
+        result, expected, 'all_band_members',
+        ['band_id', 'person_id', 'band_admin']
+      );
+      done();
+    });
+  });
+
+  it('should create a request to add Tweety Bird to Wild At Heart', function(done) {
+    request.addBandMember({band_id: 1, person_id: 5}, function(result) {
+      should.exist(result);
+      result.should.not.have.property('err');
+      result.should.have.property('request');
+      result.request.should.have.property('id');
+      all_request_ids.push(result.request.id);
+      done();
+    });
+  });
+
+  it('should create a request for Sylvester Cat to join Wild At Heart', function(done) {
+    request.joinBand({band_id: 1, person_id: 6}, function(result) {
+      should.exist(result);
+      result.should.not.have.property('err');
+      result.should.have.property('request');
+      result.request.should.have.property('id');
+      all_request_ids.push(result.request.id);
+      done();
+    });
+  });
+
+  it('should get the requests', function(done) {
+    var expected = [{
+      id: all_request_ids[0],
+      description: 'Elmer Fudd is asking to join Wild At Heart',
+      request_type: constants.request_type.join_band,
+      status: constants.request_status.accepted,
+      band_id: 1,
+      person_id: 2,
+    }, {
+      id: all_request_ids[1],
+      description: 'Wild At Heart is inviting Daffy Duck to join',
+      request_type: constants.request_type.add_band_member,
+      status: constants.request_status.accepted,
+      band_id: 1,
+      person_id: 4,
+    }, {
+      id: all_request_ids[2],
+      description: 'Wild At Heart is inviting Tweety Bird to join',
+      request_type: constants.request_type.add_band_member,
+      status: constants.request_status.pending,
+      band_id: 1,
+      person_id: 5,
+    }, {
+      id: all_request_ids[3],
+      description: 'Sylvester Cat is asking to join Wild At Heart',
+      request_type: constants.request_type.join_band,
+      status: constants.request_status.pending,
+      band_id: 1,
+      person_id: 6,
+    }];
+    var res = {
+      json: function(result) {
+        test_util.check_request_list(result.all_requests, expected, now);
+        done();
+      }
+    };
+    routes.getRequest(req, res);
   });
 });
