@@ -3,8 +3,8 @@ var fs = require('fs');
 
 var test_util = require('test/lib/util');
 
-var constants = require('lib/constants');
 var db = require('lib/db');
+var constants = require('lib/constants');
 var encryption = require('routes/encryption');
 var request = require('lib/request');
 var routes = require('routes/db');
@@ -1143,10 +1143,24 @@ describe('request_routes', function() {
     });
   });
 
+  it('attempt to create a join request should fail', function(done) {
+    req.body = {band_id: 1, person_id: 2, action: 'join_band'};
+    var res = {
+      json: function(result) {
+        should.exist(result);
+        result.should.have.property('err');
+        result.err.should.eql('Join requests can only be for logged in user');
+        done();
+      }
+    };
+    routes.createRequest(req, res);
+  });
+
   var all_request_ids = [];
   var request_id;
   it('should create a join request', function(done) {
     req.body = {band_id: 1, person_id: 2, action: 'join_band'};
+    req.session.passport.user = JSON.stringify({ id: 2, system_admin: false })
     var res = {
       json: function(result) {
         should.exist(result);
@@ -1204,6 +1218,7 @@ describe('request_routes', function() {
       person_id: 2,
     };
     req.query = {id: request_id, action: 'reject'};
+    req.session.passport.user = JSON.stringify({ id: 3, system_admin: false })
     var res = {
       json: function(result) {
         test_util.check_request(result, expected, now);
@@ -1234,6 +1249,7 @@ describe('request_routes', function() {
       person_id: 2,
     };
     req.query = {id: request_id, action: 'reopen'};
+    req.session.passport.user = JSON.stringify({ id: 2, system_admin: false })
     var res = {
       json: function(result) {
         test_util.check_request(result, expected, now);
@@ -1264,6 +1280,7 @@ describe('request_routes', function() {
       person_id: 2,
     };
     req.query = {id: request_id, action: 'accept'};
+    req.session.passport.user = JSON.stringify({ id: 3, system_admin: false })
     var res = {
       json: function(result) {
         test_util.check_request(result, expected, now);
@@ -1301,8 +1318,23 @@ describe('request_routes', function() {
     });
   });
 
+  it('should fail attempting to create an add member request', function(done) {
+    req.body = {band_id: 1, person_id: 4, action: 'add_band_member'};
+    req.session.passport.user = JSON.stringify({ id: 2, system_admin: false })
+    var res = {
+      json: function(result) {
+        should.exist(result);
+        result.should.have.property('err');
+        result.err.should.eql('Only band Admin may add members');
+        done();
+      }
+    };
+    routes.createRequest(req, res);
+  });
+
   it('should create an add member request', function(done) {
     req.body = {band_id: 1, person_id: 4, action: 'add_band_member'};
+    req.session.passport.user = JSON.stringify({ id: 3, system_admin: false })
     var res = {
       json: function(result) {
         should.exist(result);
@@ -1369,6 +1401,7 @@ describe('request_routes', function() {
       person_id: 4,
     };
     req.query = {id: request_id, action: 'accept'};
+    req.session.passport.user = JSON.stringify({ id: 4, system_admin: false })
     var res = {
       json: function(result) {
         test_util.check_request(result, expected, now);

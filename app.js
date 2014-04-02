@@ -209,6 +209,10 @@ app.delete(
   route_db.deleteSongRatingTable
 );
 
+app.get('/request', validation.requireLogin, route_db.getRequest);
+app.post('/request', validation.requireLogin, route_db.createRequest);
+app.put('/request', validation.requireLogin, route_db.updateRequest);
+
 // Authentication handlers
 app.get('/login', login.login);
 app.post('/login', passport.authenticate('local', { successRedirect: '/',

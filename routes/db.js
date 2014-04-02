@@ -3,6 +3,7 @@
  * Database manipulation methods.
  */
 var db = require('lib/db');
+var constants = require('lib/constants');
 var util = require('lib/util');
 var request = require('lib/request');
 var base64_decode = require('base64').decode;
@@ -331,16 +332,32 @@ exports.createRequest = function(req, res) {
   var action = req.body.action;
   delete req.body.action;
 
-  if (action == 'join_band') {
-    request.joinBand(req.body, function(result) {
-      res.json(result);
-    });
-  } else if (action == 'add_band_member') {
-    request.addBandMember(req.body, function(result) {
-      res.json(result);
-    });
+  var  user = util.getUser(req);
+
+  if (user) {
+    if (action == 'join_band') {
+      if (user.id == req.body.person_id) {
+        request.joinBand(req.body, function(result) {
+          res.json(result);
+        });
+      } else {
+        res.json({err: 'Join requests can only be for logged in user'});
+      }
+    } else if (action == 'add_band_member') {
+      util.getBandMember(user.id, req.body.band_id, function(band_member) {
+        if (user.system_admin || (band_member && band_member.band_admin)) {
+          request.addBandMember(req.body, function(result) {
+            res.json(result);
+          });
+        } else {
+          res.json({err: 'Only band Admin may add members'});
+        }
+      });
+    } else {
+      res.json({err: 'unrecognized action: ' + action});
+    }
   } else {
-    res.json({err: 'unrecognized action: ' + action});
+    res.json(403, {err: 'Not logged in'});
   }
 };
 
@@ -353,9 +370,8 @@ exports.getRequest = function(req, res) {
       res.json(result);
     });
   } else {
-    if (req.session.passport.user) {
-      var  user = JSON.parse(req.session.passport.user);
-
+    var  user = util.getUser(req);
+    if (user) {
       request.getMyRequests(user.id, function(result) {
         res.json(result);
       });
@@ -369,28 +385,58 @@ exports.updateRequest = function(req, res) {
   var request_id = req.params.id;
   if (!request_id) request_id = req.query.id;
 
-  request.getById(request_id, function(result) {
-    if (result.err) {
-      res.json(result);
-    } else {
-      var action = req.params.action;
-      if (!action) action = req.query.action;
+  var  user = util.getUser(req);
 
-      if (action == 'reject') {
-        result.request.reject(function(result) {
-          res.json(result);
-        });
-      } else if (action == 'reopen') {
-        result.request.reopen(function(result) {
-          res.json(result);
-        });
-      } else if (action == 'accept') {
-        result.request.accept(function(result) {
-          res.json(result);
-        });
+
+  if (user) {
+    request.getById(request_id, function(result) {
+      if (result.err) {
+        res.json(result);
       } else {
-        res.json({err: 'unrecognized action: ' + action});
+        util.getBandMember(user.id, result.request.band_id, function(band_member) {
+          var action = req.params.action;
+          if (!action) action = req.query.action;
+
+          if (action == 'reject') {
+            if ((result.request.request_type == constants.request_type.join_band &&
+                 band_member && band_member.band_admin) ||
+                (result.request.request_type == constants.request_type.add_band_member &&
+                 result.request.person_id == user.id)) {
+              result.request.reject(function(result) {
+                res.json(result);
+              });
+            } else {
+              res.json({err: 'Permission denied'});
+            }
+          } else if (action == 'reopen') {
+            if ((result.request.request_type == constants.request_type.join_band &&
+                 result.request.person_id == user.id) ||
+                (result.request.request_type == constants.request_type.add_band_member &&
+                 band_member && band_member.band_admin)) {
+              result.request.reopen(function(result) {
+                res.json(result);
+              });
+            } else {
+              res.json({err: 'Permission denied'});
+            }
+          } else if (action == 'accept') {
+            if ((result.request.request_type == constants.request_type.join_band &&
+                 band_member && band_member.band_admin) ||
+                (result.request.request_type == constants.request_type.add_band_member &&
+                 result.request.person_id == user.id)) {
+              result.request.accept(function(result) {
+                res.json(result);
+              });
+            } else {
+              res.json({err: 'Permission denied'});
+            }
+          } else {
+            res.json({err: 'unrecognized action: ' + action});
+          }
+        });
       }
-    }
-  });
+    });
+  } else {
+    res.json(403, {err: 'Not logged in'});
+  }
 };
