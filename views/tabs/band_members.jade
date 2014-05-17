@@ -1,5 +1,5 @@
-section.app_context(id="band_members")
-  a(href="#band_members") Band Members
+div.app_context(id="band_members", data-bind="visible: $root.current_tab().value == 4")
+  div.app_context_header Band Members
   div.app_context_item
     div.display
       div.control(data-bind="if: $root.current_band_member().band_admin")

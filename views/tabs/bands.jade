@@ -1,5 +1,5 @@
-section.app_context(id="bands", data-bind="if: $root.current_person().system_admin")
-  a(href="#bands") All Bands
+div.app_context(id="bands", data-bind="if: $root.current_person().system_admin, visible: $root.current_tab().value == 1")
+  div.app_context_header All Bands
   div.app_context_item
     div.display
       div.control

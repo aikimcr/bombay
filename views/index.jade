@@ -3,6 +3,10 @@ extends layout
 block content
   div.messages #{messages}
   div.navigation
+    div.tab_selector
+      div
+        select(data-bind="options: $root.tab_list, value: current_tab, optionsText: 'value_text'")
+
     div.band_selector
       div Current Band
       div
@@ -22,9 +26,7 @@ block content
     include tabs/artists.jade
     include tabs/songs.jade
     include tabs/band_songs.jade
-    section.app_context
-      div.app_context_item
-        div Select a tab to manage items.
+    include tabs/dashboard.jade
 
   div.forms
     include forms/add_band.jade

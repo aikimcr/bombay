@@ -1,0 +1,38 @@
+div.app_context(id="dashboard", data-bind="visible: $root.current_tab().value == 0")
+  div.app_context_header Dashboard
+  div.app_context_item
+    div.display
+      div.control
+
+      div.filters
+//        table
+//          thead
+//            tr
+//              th Sort Type
+//              th Filters
+//
+//          tbody
+//            tr
+//              td
+//                div.sort
+//
+//              td
+//                div.filter
+
+              
+      div.list
+        table
+          thead
+            tr
+              th Time
+              th Person
+              th Band
+              th Type
+
+          tbody(data-bind='foreach: current_requests')
+            tr
+              td(data-bind='text: request().timestamp()')
+              td(data-bind='text: request().person_name()')
+              td(data-bind='text: request().band_name()')
+              td(data-bind='text: request().type()')
+

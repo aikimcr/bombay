@@ -81,9 +81,29 @@ function Manager(for_test) {
   this.band_members = new BandMemberList();
   this.band_songs = new BandSongList();
   this.song_ratings = new SongRatingList();
+  this.requests = new RequestList();
 
   this.current_person = ko.observable(new Person(-1, '', '', '', '', false));
   this.current_band = ko.observable(new Band(-1, ''));
+
+  this.tab_list = ko.computed(function() {
+    var result = tab_list = [
+      { value: 3, value_text: 'My Bands' },
+      { value: 4, value_text: 'Band Members' },
+      { value: 5, value_text: 'Artists' },
+      { value: 6, value_text: 'All Songs' },
+      { value: 7, value_text: 'Band Songs' }
+    ];
+
+    if (this.current_person().system_admin()) {
+      result.unshift({ value: 2, value_text: 'All People' });
+      result.unshift({ value: 1, value_text: 'All Bands', });
+    }
+
+    result.unshift({ value: 0, value_text: 'Dashboard' });
+
+    return result;
+  }.bind(this));
 
   if (!for_test) {
     var svc = service.getInstance();
@@ -104,7 +124,10 @@ function Manager(for_test) {
     this.band_members.load();
     this.band_songs.load();
     this.song_ratings.load();
+    this.requests.load();
   }
+
+  this.current_tab = ko.observable(this.tab_list[0]);
 
   this.current_band_member = ko.computed(function() {
     if (this.current_band()) {
@@ -199,6 +222,10 @@ function Manager(for_test) {
     } else {
       return this.songs.list();
     }
+  }.bind(this)).extend({ throttle: 250 });
+
+  this.current_requests = ko.computed(function() {
+    return this.requests.filtered_list();
   }.bind(this)).extend({ throttle: 250 });
 
   this.forms = {};

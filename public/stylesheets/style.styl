@@ -1,5 +1,6 @@
 container-width = 1200px
 container-height = 700px
+display-width = container-width - 100px
 
 text-color = white
 base-color = black
@@ -38,16 +39,13 @@ body
 .navigation
   background-color: panel-background-color
   color: panel-text-color
-  padding: 0 10px 0 10px
+  margin-bottom: 0
+  padding: 0 20px 0 20px
   border: 1px solid main-border-color
-  display: inline-block
   border-radius: 10px 10px 0 0
   height: 31px
+  width: container-width - (20px + 20px + 1px + 1px)
   vertical-align:top
-  position: absolute
-  top: 5px
-  right: 201px
-  z-index: 1
   div
     text-align: left
     display: inline-block
@@ -63,85 +61,31 @@ body
     display: inline-block
 
 .app_container
-  width: container-width
-  height: container-height
-  position: relative
-  display: inline-block
+  color: panel-text-color
+  background-color: panel-background-color
+  border 1px solid main-border-color
+  border-radius: 0 0 10px 10px
+  width: container-width - (1px + 1px)
+  height: container-height - (1px + 1px)
 
 // app_context styles
 .app_context
-  position: relative
-
-.app_context > a
-  text-decoration: none
   color: panel-text-color
-  float: left
-  padding: 5px 10px 5px 10px
-  border: 2px solid main-border-color
-  margin-right: 10px
-  position: static
-  border-radius: 10px 10px 0 0
-
-.app_context:not(:target) > a
-  background-color: base-color
-  color: text-color
-  z-index: 0
-
-.app_context:target > a
   background-color: panel-background-color
-  border-bottom-color: panel-background-color
-  color: panel-text-color
-  z-index: 0
+  width: container-width - 10px
+  height: container-height - 10px
 
-.app_context > div
+.app_context_header
+  color: panel-text_color
   background-color: panel-background-color
-  z-index: 2
-  left: 0
-  top: 29px
-  bottom: 0
-  right: 0
-  padding: 20px
-  border 1px solid main-border-color
-  position: absolute
-  overflow: hidden
-  height: 640px
-  border-radius: 0 0 10px 10px
-
-.app_context:not(:target) > div
-  z-index: -1
-
-.app_context:target > div
-  z-index: 0
+  padding: 10px 10px 0 10px
+  font-weight: bold
+  font-size: 150%
 
 // app_context_item styles
 .app_context_item
   padding: 10px
-  color: panel-text-color
-
-.app_context_item > div
-  position: absolute
-  top: 10px
-
-.app_context_item .display
-  font-size: 120%
-
-  .filters
-    font-size: 90%
-    border-style: solid
-    border-width: 1px
-    margin: 5px 0 5px 0
-
-    .sort
-      border-style: solid
-      border-width: 1px
-      display: inline-block
-      padding: 1px
-
-    .filter
-      border-style: solid
-      border-width: 1px
-      display: inline-block
-      padding: 1px
+  overflow: hidden
 
 .close_button, .edit_button
   display: inline-block
@@ -163,15 +107,34 @@ body
 
 //
 .control
-  width: 860px
+  width: display-width
   display: block
 
 .display
-  width: 860px
+  font-size: 120%
+  width: display-width
+
+  .filters
+    font-size: 90%
+    border-style: solid
+    border-width: 1px
+    margin: 5px 0 5px 0
+
+    .sort
+      border-style: solid
+      border-width: 1px
+      display: inline-block
+      padding: 1px
+
+    .filter
+      border-style: solid
+      border-width: 1px
+      display: inline-block
+      padding: 1px
 
   .list
     overflow: auto
-    width: 840px
+    width: display-width - 20px;
     height: 550px
   
     table

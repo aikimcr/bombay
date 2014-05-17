@@ -1,5 +1,5 @@
-section.app_context(id="band_songs")
-  a(href="#band_songs") Band Songs
+div.app_context(id="band_songs", data-bind="visible: $root.current_tab().value == 7")
+  div.app_context_header Band Songs
   div.app_context_item
     div.display
       div.control
