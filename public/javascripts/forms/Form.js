@@ -338,7 +338,6 @@ JoinBand.prototype.postChange_ = function(callback) {
   var svc = service.getInstance();
   var params = {
     band_id: this.band().id(),
-    person_id: manager.current_person().id(),
   };
   svc.set('./band_member', function(result) {
     callback(result);

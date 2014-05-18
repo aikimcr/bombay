@@ -230,9 +230,31 @@ exports.getBandMemberTable = function(req, res) {
 
 exports.postBandMemberTable = function(req, res) {
   var dbh = new db.Handle();
-  dbh.band_member().create(req.body, function(result) {
-    res.json(result);
-  });
+  var user = util.getUser(req);
+  var person_id = req.body.person_id;
+
+  if (person_id) {
+    util.getBandMember(user.id, req.body.band_id, function(band_member) {
+      if (user.system_admin || (band_member && band_member.band_admin)) {
+        request.addBandMember({
+          band_id: req.body.band_id,
+          person_id: req.body.person_id,
+          band_admin: false
+        }, function(result) {
+          res.json(result);
+        });
+      } else {
+        res.json({err: 'Only band Admin may add members'});
+      }
+    });
+  } else {
+    request.joinBand({
+      band_id: req.body.band_id,
+      person_id: user.id
+    }, function(result) {
+      res.json(result);
+    });
+  }
 };
 
 exports.putBandMemberTable = function(req, res) {
@@ -387,7 +409,6 @@ exports.updateRequest = function(req, res) {
 
   var  user = util.getUser(req);
 
-
   if (user) {
     request.getById(request_id, function(result) {
       if (result.err) {
@@ -399,7 +420,7 @@ exports.updateRequest = function(req, res) {
 
           if (action == 'reject') {
             if ((result.request.request_type == constants.request_type.join_band &&
-                 band_member && band_member.band_admin) ||
+                 (user.system_admin || (band_member && band_member.band_admin))) ||
                 (result.request.request_type == constants.request_type.add_band_member &&
                  result.request.person_id == user.id)) {
               result.request.reject(function(result) {
@@ -421,7 +442,7 @@ exports.updateRequest = function(req, res) {
             }
           } else if (action == 'accept') {
             if ((result.request.request_type == constants.request_type.join_band &&
-                 band_member && band_member.band_admin) ||
+                 (user.system_admin || (band_member && band_member.band_admin))) ||
                 (result.request.request_type == constants.request_type.add_band_member &&
                  result.request.person_id == user.id)) {
               result.request.accept(function(result) {

@@ -276,6 +276,18 @@ function Manager(for_test) {
       }
     }, event);
   };
+
+  this.request_msg = ko.observable('');
+  this.send_request_action = function(data, event) {
+    request_action = event.target.parentElement.querySelector('select').value;
+    data.change_status(request_action, function(result) {
+      if (result.err) {
+        this.request_msg(result.err);
+      } else {
+        data.reload_list();
+      }
+    }.bind(this), event);
+  }.bind(this);
 }
 
 function app_start() {

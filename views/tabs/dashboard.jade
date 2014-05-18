@@ -4,35 +4,43 @@ div.app_context(id="dashboard", data-bind="visible: $root.current_tab().value ==
     div.display
       div.control
 
-      div.filters
-//        table
-//          thead
-//            tr
-//              th Sort Type
-//              th Filters
-//
-//          tbody
-//            tr
-//              td
-//                div.sort
-//
-//              td
-//                div.filter
-
-              
-      div.list
+      div.filters(style="display: none")
         table
           thead
             tr
+              th Sort Type
+              th Filters
+
+          tbody
+            tr
+              td
+                div.sort
+
+              td
+                div.filter
+
+              
+      div.list
+        div.title Requests
+        div.title(data-bind="text: request_msg")
+        table
+          thead
+            tr
+              th
               th Time
               th Person
               th Band
               th Type
+              th Status
 
           tbody(data-bind='foreach: current_requests')
             tr
-              td(data-bind='text: request().timestamp()')
-              td(data-bind='text: request().person_name()')
-              td(data-bind='text: request().band_name()')
-              td(data-bind='text: request().type()')
+              td
+                select(data-bind="options: actions_list, optionsText: 'label', optionsValue: 'value'")
+                button.edit_button(id="request_action", data-bind="click: $root.send_request_action") Submit
 
+              td(data-bind="text: timestamp")
+              td(data-bind="text: person_name()")
+              td(data-bind="text: band_name()")
+              td(data-bind="text: pretty_request_type()")
+              td(data-bind="text: pretty_status()")

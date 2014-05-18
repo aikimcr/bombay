@@ -1,14 +1,15 @@
-function Request(id, type, timestamp, person_id, band_id) {
+function Request(id, request_type, timestamp, person_id, band_id, opt_status) {
   Table.call(this, './request');
   this.id = ko.observable(id || -1);
-  this.type = ko.observable(type);
+  this.request_type = ko.observable(request_type);
   this.timestamp = ko.observable(timestamp);
   this.person_id = ko.observable(person_id);
   this.band_id = ko.observable(band_id);
+  this.status = ko.observable(opt_status || constants.request_status.pending);
 
   this.person = ko.computed(function() {
     return manager.persons.getById(this.person_id());
-  });
+  }.bind(this)).extend({throttle: 250});
 
   this.person_name = ko.computed(function() {
     var person = this.person();
@@ -18,11 +19,11 @@ function Request(id, type, timestamp, person_id, band_id) {
     } else {
       return "<Deleted>";
     }
-  });
+  }.bind(this)).extend({throttle: 250});
 
   this.band = ko.computed(function() {
     return manager.bands.getById(this.band_id());
-  });
+  }.bind(this)).extend({throttle: 250});
 
   this.band_name = ko.computed(function() {
     var band = this.band();
@@ -32,7 +33,31 @@ function Request(id, type, timestamp, person_id, band_id) {
     } else {
       return "<Deleted>";
     }
-  });
+  }.bind(this)).extend({throttle: 250});
+
+  this.pretty_request_type = ko.computed(function() {
+    return constants.pretty_request_type[this.request_type()];
+  }.bind(this)).extend({throttle: 250});
+
+  this.pretty_status = ko.computed(function() {
+    return constants.pretty_request_status[this.status()];
+  }.bind(this)).extend({throttle: 250});
+
+  this.actions_list = ko.computed(function() {
+    if (this.status() == constants.request_status.accepted) {
+      return [];
+    } else if (this.status() == constants.request_status.rejected) {
+      return [];
+    } else {
+      return [{
+        value: 'accept',
+        label: 'Accept'
+      }, {
+        value: 'reject',
+        label: 'Reject'
+      }];
+    }
+  }.bind(this)).extend({throttle: 250});
 }
 util.inherits(Request, Table);
 
@@ -70,8 +95,18 @@ Request.prototype.confirm_text = function() {
 
 Request.prototype.reload_list = function() {
   manager.requests.load();
+  manager.band_members.load();
 };
 
+Request.prototype.change_status = function(action, callback) {
+  var svc = service.getInstance();
+  svc.put(this.service_url, function(result) {
+    if (callback) callback(result);
+  }, {
+    action: action,
+    id: this.id()
+  });
+};
 
 // The Request List Object
 function RequestList() {
@@ -120,9 +155,10 @@ RequestList.prototype.set_filter_list = function() {
 RequestList.prototype.build_object_ = function(model) {
   return new Request(
     model.id,
-    model.type,
+    model.request_type,
     model.timestamp,
     model.person_id,
-    model.band_id
+    model.band_id,
+    model.status
   );
 };
