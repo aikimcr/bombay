@@ -116,9 +116,11 @@ exports.requireLogin = function(req, res, next) {
 };
 
 exports.requireSysAdmin = function(req, res, next) {
-  if (isSysAdmin(getUser(req))) {
+  var user = getUser(req);
+  if (isSysAdmin(user)) {
     next();
   } else {
+    console.log('User ' + user.id + ' is not system administrator');
     res.json(permission_error);
   }
 };
@@ -132,6 +134,7 @@ exports.requireBandAdmin = function(req, res, next) {
       if (isBandAdmin(band_member)) {
         next();
       } else {
+        console.log('User ' + user.id + ' is not band administrator');
         res.json(permission_error);
       }
     });
@@ -141,6 +144,7 @@ exports.requireBandAdmin = function(req, res, next) {
 exports.requireSelfOrAdmin = function(req, res, next) {
   var user = getUser(req);
   if (user == null) {
+    console.log('User not found');
     res.json(permission_error);
   } else if (isSysAdmin(user)) {
     next();
@@ -153,10 +157,12 @@ exports.requireSelfOrAdmin = function(req, res, next) {
       } else {
         getRequestBandMember(req, function(band_member) {
           if (band_member == null) {
+            console.log('User ' + user.id + ' is not a member of band');
             res.json(permission_error);
           } else if (isBandAdmin(band_member) || band_member.person_id == user.id) {
             next();
           } else {
+            console.log('User ' + user.id + ' is not administrator and does not match ' + band_member.person_id);
             res.json(permission_error);
           }
         });

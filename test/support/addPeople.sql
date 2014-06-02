@@ -10,3 +10,5 @@ INSERT INTO person (id, name, full_name, system_admin, email, password)
   VALUES (3, 'ddrums',  'Danny Drums',       0, 'ddrums@musichero.foo',    'backbeat');
 INSERT INTO person (id, name, full_name, system_admin, email, password)
   VALUES (4, 'jguitar', 'Johnny Guitar',     0, 'jguitar@musichero.foo',   'tonefreak');
+INSERT INTO person (id, name, full_name, system_admin, email, password)
+  VALUES (5, 'kkeys',   'Kevin Keys',        0, 'kkeys@musichero.foo',     'concerto');

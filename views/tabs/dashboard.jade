@@ -36,8 +36,9 @@ div.app_context(id="dashboard", data-bind="visible: $root.current_tab().value ==
           tbody(data-bind='foreach: current_requests')
             tr
               td
-                select(data-bind="options: actions_list, optionsText: 'label', optionsValue: 'value'")
-                button.edit_button(id="request_action", data-bind="click: $root.send_request_action") Submit
+                div(data-bind="visible: actions_list().length")
+                  select(data-bind="options: actions_list, optionsText: 'label', optionsValue: 'value', optionsCaption: '-Select Action-'")
+                  button.edit_button(id="request_action", data-bind="click: $root.send_request_action") Submit
 
               td(data-bind="text: timestamp")
               td(data-bind="text: person_name()")

@@ -213,6 +213,13 @@ describe('person_table', function() {
 	email: 'jguitar@musichero.foo',
 	system_admin: false
       }, {
+        id: 5,
+        name: 'kkeys',
+        full_name: 'Kevin Keys',
+        password: 'concerto',
+        email: 'kkeys@musichero.foo',
+        system_admin: false
+      }, {
 	id: 1,
 	name: 'admin',
 	full_name: 'System Admin User',
@@ -242,6 +249,13 @@ describe('person_table', function() {
 	password: 'tonefreak',
 	email: 'jguitar@musichero.foo',
 	system_admin: false
+      }, {
+        id: 5,
+        name: 'kkeys',
+        full_name: 'Kevin Keys',
+        password: 'concerto',
+        email: 'kkeys@musichero.foo',
+        system_admin: false
       }];
       person.getAllWithArgs({
         where: { email: { like: '%musichero%' } },

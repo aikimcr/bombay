@@ -9,6 +9,7 @@ var encryption = require('routes/encryption');
 var request = require('lib/request');
 var routes = require('routes/db');
 var util = require('lib/util');
+var constants = require('lib/constants');
 
 db.setLogDbErrors(false);
 
@@ -145,6 +146,13 @@ describe('routes', function() {
 	  email: 'jguitar@musichero.foo',
 	  system_admin: false
         }, {
+          id: 5,
+          name: 'kkeys',
+          full_name: 'Kevin Keys',
+          password: 'concerto',
+          email: 'kkeys@musichero.foo',
+          system_admin: false
+        }, {
 	  id: 1,
 	  name: 'admin',
 	  full_name: 'System Admin User',
@@ -265,6 +273,8 @@ describe('routes', function() {
 	  id: 2, band_id: 2, person_id: 1, band_admin: true
         }, {
 	  id: 3, band_id: 3, person_id: 2, band_admin: false
+        }, {
+          id: 6, band_id: 3, person_id: 5, band_admin: true
         }, {
 	  id: 4, band_id: 4, person_id: 2, band_admin: true
         }];
@@ -491,11 +501,25 @@ describe('routes', function() {
 
     describe('#band_member', function() {
       var band_member_id;
-      it('should create a band_member', function(done) {
-        req.body = {band_id: 3, person_id: 1, band_admin: true};
+      it('should create an add_band_member request', function(done) {
+        req.session.passport.user = JSON.stringify({ id: 5, system_admin: false });
+        req.body = {band_id: 3, person_id: 1};
         var res = {
           json: function(result) {
-            band_member_id = test_util.check_result(result, 'band_member_id');
+            should.exist(result.request);
+            should.exist(result.request.request_type);
+            result.request.request_type.should.eql(constants.request_type.add_band_member);
+            should.exist(result.request.band_id);
+            result.request.band_id.should.eql(3);
+            should.exist(result.request.person_id);
+            result.request.person_id.should.eql(1);
+            should.exist(result.request.description);
+            result.request.description.should.eql('Sally Says Go is inviting System Admin User to join');
+            should.exist(result.request.status);
+            result.request.status.should.eql(constants.request_status.pending);
+            should.exist(result.request.id);
+            result.request.id.should.eql(1);
+            should.exist(result.request.timestamp);
             done();
           }
         };
@@ -503,7 +527,7 @@ describe('routes', function() {
       });
 
       it('should return an error', function(done) {
-        req.body = {band_id: 3, person_id: 1, band_admin: true};
+        req.body = {band_id: 3, person_id: 1};
         var res = {
           json: function(result) {
             var error = test_util.check_error_result(result, 'band_member_id');

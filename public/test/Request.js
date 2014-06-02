@@ -20,12 +20,12 @@ describe('Request Table', function() {
     it('should create a request object', function(done) {
       request = new Request(
         expected.id,
-        expected.band_id,
-        expected.person_id,
-        expected.description,
         expected.request_type,
-        expected.status,
-        expected.timestamp
+        expected.timestamp,
+        expected.person_id,
+        expected.band_id,
+        expected.description,
+        expected.status
       );
       check_object_values(request, expected);
       done();

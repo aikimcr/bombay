@@ -280,13 +280,29 @@ function Manager(for_test) {
   this.request_msg = ko.observable('');
   this.send_request_action = function(data, event) {
     request_action = event.target.parentElement.querySelector('select').value;
-    data.change_status(request_action, function(result) {
-      if (result.err) {
-        this.request_msg(result.err);
-      } else {
-        data.reload_list();
-      }
-    }.bind(this), event);
+    if (request_action == 'delete') {
+      data.delete(function(result) {
+        if (result) {
+          if (result.err) {
+            this.request_msg(result.err);
+          } else {
+            data.reload_list();
+            this.request_msg('');
+          }
+        } else {
+          data.reload_list();
+        }
+      }.bind(this), event);
+    } else {
+      data.change_status(request_action, function(result) {
+        if (result.err) {
+          this.request_msg(result.err);
+        } else {
+          data.reload_list();
+          this.request_msg('');
+        }
+      }.bind(this), event);
+    }
   }.bind(this);
 }
 

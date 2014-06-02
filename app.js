@@ -156,7 +156,6 @@ app.get('/band_member', validation.requireLogin, route_db.getBandMemberTable);
 app.post(
   '/band_member',
   validation.requireLogin,
-  validation.requireSelfOrAdmin,
   route_db.postBandMemberTable
 );
 app.put(
@@ -212,6 +211,7 @@ app.delete(
 app.get('/request', validation.requireLogin, route_db.getRequest);
 app.post('/request', validation.requireLogin, route_db.createRequest);
 app.put('/request', validation.requireLogin, route_db.updateRequest);
+app.delete('/request', validation.requireLogin, route_db.deleteRequest);
 
 // Authentication handlers
 app.get('/login', login.login);

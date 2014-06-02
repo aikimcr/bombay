@@ -350,6 +350,28 @@ exports.deleteSongRatingTable = function(req, res) {
 };
 
 // Requests
+function request_is_self(result, user) {
+  return user.system_admin || result.request.person_id == user.id;
+};
+
+function request_require_admin(action, result) {
+  if (action == 'accept') {
+    return result.request.request_type == constants.request_type.join_band;
+  } else if (action == 'reopen' || action == 'delete') {
+    result.request.request_type == constants.request_type.add_band_member;
+  }
+  return false;
+};
+
+function request_require_self(action, result) {
+  if (action == 'accept') {
+    result.request.request_type == constants.request_type.add_band_member;
+  } else if (action == 'reopen' || action == 'delete') {
+    return result.request.request_type == constants.request_type.join_band;
+  }
+  return false;
+}; 
+
 exports.createRequest = function(req, res) {
   var action = req.body.action;
   delete req.body.action;
@@ -407,7 +429,18 @@ exports.updateRequest = function(req, res) {
   var request_id = req.params.id;
   if (!request_id) request_id = req.query.id;
 
-  var  user = util.getUser(req);
+  var user = util.getUser(req);
+  var is_allowed = function(action, result, user, band_member) {
+    if (request_require_admin(action, result)) {
+      return util.is_admin(user, band_member);
+    } else if (request_require_self(action, result)) {
+      return request_is_self(result, user);
+    } else if (action == 'reject') {
+      return request_is_self(result, user) || util.is_admin(user, band_member);
+    } else {
+      return true;
+    }
+  };
 
   if (user) {
     request.getById(request_id, function(result) {
@@ -418,41 +451,57 @@ exports.updateRequest = function(req, res) {
           var action = req.params.action;
           if (!action) action = req.query.action;
 
-          if (action == 'reject') {
-            if ((result.request.request_type == constants.request_type.join_band &&
-                 (user.system_admin || (band_member && band_member.band_admin))) ||
-                (result.request.request_type == constants.request_type.add_band_member &&
-                 result.request.person_id == user.id)) {
-              result.request.reject(function(result) {
-                res.json(result);
-              });
+          if (is_allowed(action, result, user, band_member)) {
+            if (action == 'reject') {
+              result.request.reject(function(result) { res.json(result); });
+            } else if (action == 'reopen') {
+              result.request.reopen(function(result) { res.json(result); });
+            } else if (action == 'accept') {
+              result.request.accept(function(result) { res.json(result); });
             } else {
-              res.json({err: 'Permission denied'});
-            }
-          } else if (action == 'reopen') {
-            if ((result.request.request_type == constants.request_type.join_band &&
-                 result.request.person_id == user.id) ||
-                (result.request.request_type == constants.request_type.add_band_member &&
-                 band_member && band_member.band_admin)) {
-              result.request.reopen(function(result) {
-                res.json(result);
-              });
-            } else {
-              res.json({err: 'Permission denied'});
-            }
-          } else if (action == 'accept') {
-            if ((result.request.request_type == constants.request_type.join_band &&
-                 (user.system_admin || (band_member && band_member.band_admin))) ||
-                (result.request.request_type == constants.request_type.add_band_member &&
-                 result.request.person_id == user.id)) {
-              result.request.accept(function(result) {
-                res.json(result);
-              });
-            } else {
-              res.json({err: 'Permission denied'});
+              res.json({err: 'unrecognized action: ' + action});
             }
           } else {
-            res.json({err: 'unrecognized action: ' + action});
+            res.json({err: 'Permission denied'});
+          }
+        });
+      }
+    });
+  } else {
+    res.json(403, {err: 'Not logged in'});
+  }
+};
+
+exports.deleteRequest = function(req, res) {
+  var dbh = new db.Handle();
+  var user = util.getUser(req);
+
+  var is_allowed = function(result, user, band_member) {
+    if (result.request.status == constants.request_status.pending) return false;
+
+    var action = 'delete';
+    if (request_require_admin(action, result)) {
+      return util.is_admin(user, band_member);
+    } else if (request_require_self(action, result)) {
+      return request_is_self(result, user);
+    } else {
+      return true;
+    }
+  };
+
+  if (user) {
+    request.getById(req.query.id, function(result) {
+      if (result.err) {
+        res.json(result);
+      } else {
+        util.getBandMember(user.id, result.request.band_id, function(band_member) {
+
+          if (is_allowed(result, user, band_member)) {
+            dbh.request().deleteById(req.query.id, function(result) {
+              res.json(result);
+            });
+          } else {
+            res.json({err: 'Permission denied'});
           }
         });
       }

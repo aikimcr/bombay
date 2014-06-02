@@ -193,14 +193,9 @@ function check_object_values(got, expected) {
   var got_keys = Object.keys(got);
   var expected_keys = Object.keys(expected);
 
-  got_keys.length.should.eql(expected_keys.length);
-
   expected_keys.forEach(function(key) {
     got.should.have.property(key);
-    got[key].should.eql(expected[key]);
-  });
-
-  got_keys.forEach(function(key) {
-    expected.should.have.property(key);
+    var got_value = got[key]();
+    got_value.should.eql(expected[key]);
   });
 }

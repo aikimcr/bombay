@@ -1,10 +1,11 @@
-function Request(id, request_type, timestamp, person_id, band_id, opt_status) {
+function Request(id, request_type, timestamp, person_id, band_id, description, opt_status) {
   Table.call(this, './request');
   this.id = ko.observable(id || -1);
   this.request_type = ko.observable(request_type);
   this.timestamp = ko.observable(timestamp);
   this.person_id = ko.observable(person_id);
   this.band_id = ko.observable(band_id);
+  this.description = ko.observable(description);
   this.status = ko.observable(opt_status || constants.request_status.pending);
 
   this.person = ko.computed(function() {
@@ -43,20 +44,68 @@ function Request(id, request_type, timestamp, person_id, band_id, opt_status) {
     return constants.pretty_request_status[this.status()];
   }.bind(this)).extend({throttle: 250});
 
+  this.isSelf = ko.computed(function() {
+    return manager.current_person().id() == this.person_id();
+  }.bind(this)).extend({throttle: 250});
+
+  this.isAdmin = ko.computed(function() {
+    var members = ko.utils.arrayFilter(manager.band_members.list(), function(member) {
+      return member.person_id() == manager.current_person().id() &&
+             member.band_id() == this.band_id() &&
+             member.band_admin();
+    }.bind(this));
+    return members.length > 0;
+  }.bind(this)).extend({throttle: 250});
+
   this.actions_list = ko.computed(function() {
-    if (this.status() == constants.request_status.accepted) {
-      return [];
-    } else if (this.status() == constants.request_status.rejected) {
-      return [];
-    } else {
-      return [{
-        value: 'accept',
-        label: 'Accept'
-      }, {
-        value: 'reject',
-        label: 'Reject'
-      }];
-    }
+    var possible_actions = [{
+      value: 'delete',
+      label: 'Delete',
+      permissions: 'originator',
+      status: 'resolved'
+    }, {
+      value: 'reopen',
+      label: 'Reopen',
+      permissions: 'originator',
+      status: 'rejected'
+    }, {
+      value: 'accept',
+      label: 'Accept',
+      permissions: 'owner',
+      status: 'pending'
+    }, {
+      value: 'reject',
+      label: 'Reject',
+      permissions: 'owner_or_originator',
+      status: 'pending'
+    }];
+
+    var is_originator = function() {
+      return (manager.current_person().system_admin() ||
+              (this.request_type() == constants.request_type.join_band && this.isSelf()) ||
+              (this.request_type() == constants.request_type.add_band_member && this.isAdmin()));
+    }.bind(this);
+
+    var is_owner = function() {
+      return (manager.current_person().system_admin() ||
+              (this.request_type() == constants.request_type.join_band && this.isAdmin()) ||
+              (this.request_type() == constants.request_type.add_band_member && this.isSelf()));
+    }.bind (this);
+
+    return possible_actions.filter(function(action) {
+      if (action.permissions === 'originator' && is_originator() ||
+          action.permissions === 'owner' && is_owner() ||
+          action.permissions === 'owner_or_originator' && (is_owner() || is_originator())) {
+        return ((action.status === 'resolved' &&
+                (this.status() == constants.request_status.accepted ||
+                 this.status() == constants.request_status.rejected)) ||
+                (action.status === 'rejected' &&
+                 this.status() == constants.request_status.rejected) ||
+                (action.status === 'pending' &&
+                 (this.status() == constants.request_status.pending)));
+      }
+      return false;
+    }.bind(this));
   }.bind(this)).extend({throttle: 250});
 }
 util.inherits(Request, Table);
@@ -70,7 +119,8 @@ Request.loadById = function(id, callback) {
       result.request.type,
       result.request.timestamp,
       result.request.person_id,
-      result.request.band_id
+      result.request.band_id,
+      result.request.description
     ));
   });
 };
@@ -90,7 +140,7 @@ Request.prototype.refresh = function(callback) {
 };
 
 Request.prototype.confirm_text = function() {
-  return 'Delete request for ' + this.person_name() + ', ' + this.band_name() + '?';
+  return 'Delete request for ' + this.person().full_name() + ', ' + this.band().name() + '?';
 };
 
 Request.prototype.reload_list = function() {
@@ -159,6 +209,7 @@ RequestList.prototype.build_object_ = function(model) {
     model.timestamp,
     model.person_id,
     model.band_id,
+    model.description,
     model.status
   );
 };

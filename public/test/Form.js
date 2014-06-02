@@ -295,7 +295,7 @@ describe('Form', function() {
       done();
     });
 
-    it('should post to the song API', function(done) {
+    it('should post to the band_member API', function(done) {
       svc.set.result = {band_member_id: 23};
       form.band(new Band(1, 'All Night Music'));
       form.postChange_(function(result) {
@@ -311,7 +311,7 @@ describe('Form', function() {
       svc.set.params.should.eql([[
         './band_member',
         'function',
-        {band_id: 1, person_id: 1, band_admin: false},
+        {band_id: 1},
       ]]);
       done();
     });
@@ -359,7 +359,7 @@ describe('Form', function() {
       svc.set.params.should.eql([[
         './band_member',
         'function',
-        {band_id: 1, person_id: 2, band_admin: false},
+        {band_id: 1, person_id: 2},
       ]]);
       done();
     });

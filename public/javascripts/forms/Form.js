@@ -329,7 +329,7 @@ EditSong.prototype.changeset = function(callback) {
 };
 
 function JoinBand() {
-  Form.call(this, [manager.song_ratings]);
+  Form.call(this, [manager.song_ratings, manager.requests]);
   this.band = ko.observable(null);
 }
 util.inherits(JoinBand, Form);
@@ -346,7 +346,7 @@ JoinBand.prototype.postChange_ = function(callback) {
 };
 
 function AddBandMember() {
-  Form.call(this, [manager.song_ratings]);
+  Form.call(this, [manager.song_ratings, manager.requests]);
   this.person = ko.observable(null);
 }
 util.inherits(AddBandMember, Form);

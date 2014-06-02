@@ -58,6 +58,8 @@ describe('band_member_table', function() {
       }, {
 	id: 3, band_id: 3, person_id: 2, band_admin: false
       }, {
+	id: 6, band_id: 3, person_id: 5, band_admin: true
+      }, {
 	id: 4, band_id: 4, person_id: 2, band_admin: true
       }];
       band_member.getAll(function(result) {
