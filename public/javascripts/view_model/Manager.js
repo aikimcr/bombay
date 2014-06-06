@@ -82,6 +82,7 @@ function Manager(for_test) {
   this.band_songs = new BandSongList();
   this.song_ratings = new SongRatingList();
   this.requests = new RequestList();
+  this.reports = new ReportList();
 
   this.current_person = ko.observable(new Person(-1, '', '', '', '', false));
   this.current_band = ko.observable(new Band(-1, ''));
@@ -125,6 +126,7 @@ function Manager(for_test) {
     this.band_songs.load();
     this.song_ratings.load();
     this.requests.load();
+    this.reports.load();
   }
 
   this.current_tab = ko.observable(this.tab_list[0]);
@@ -226,6 +228,26 @@ function Manager(for_test) {
 
   this.current_requests = ko.computed(function() {
     return this.requests.filtered_list();
+  }.bind(this)).extend({ throttle: 250 });
+
+  this.current_reports = ko.computed(function() {
+    if (this.current_band() && this.current_band().id() > 0) {
+      return this.reports.list()[this.current_band().id()]().sort(function(a, b) {
+        if (! a.name().match(/_([0-9]+)\.html$/)) {
+          if (a.name() == b.name()) return 0;
+          return -1;
+        }
+        if (! b.name().match(/_([0-9]+)\.html$/)) {
+          if (a.name() == b.name()) return 0;
+          return 1;
+        }
+        if (a.name() > b.name()) return -1;
+        if (a.name() < b.name()) return 1;
+        return 0;
+      });
+    } else {
+      return [];
+    }
   }.bind(this)).extend({ throttle: 250 });
 
   this.forms = {};

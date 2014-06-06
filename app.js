@@ -3,21 +3,22 @@
  * Module dependencies.
  */
 
-var express = require('express')
-  , http = require('http')
-  , path = require('path')
-  , db = require('lib/db')
-  , util = require('lib/util')
-  , index = require('routes/index')
-  , route_db = require('routes/db')
-  , encryption = require('routes/encryption')
-  , login = require('routes/login')
-  , base64_decode = require('base64').decode
-  , passport = require('passport')
-  , LocalStrategy = require('passport-local').Strategy
-  , flash = require('connect-flash')
-  , node_util = require('util')
-  , validation = require('routes/validation');
+var express = require('express');
+var http = require('http');
+var path = require('path');
+var db = require('lib/db');
+var util = require('lib/util');
+var index = require('routes/index');
+var route_db = require('routes/db');
+var encryption = require('routes/encryption');
+var reports = require('routes/reports');
+var login = require('routes/login');
+var base64_decode = require('base64').decode;
+var passport = require('passport');
+var LocalStrategy = require('passport-local').Strategy;
+var flash = require('connect-flash');
+var node_util = require('util');
+var validation = require('routes/validation');
 
 passport.use(new LocalStrategy(
   function(username, password, done) {
@@ -219,6 +220,10 @@ app.post('/login', passport.authenticate('local', { successRedirect: '/',
                                                     failureRedirect: '/login',
                                                     failureFlash: true })
 );
+
+// Reports handlers
+app.get('/reports', validation.requireLogin, reports.getReports);
+app.get('/reports/:band_id/:report', validation.requireLogin, reports.sendReport);
 
 // Encryption handlers
 app.get('/encryption', encryption.encryption);

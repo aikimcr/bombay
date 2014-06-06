@@ -20,7 +20,7 @@ div.app_context(id="dashboard", data-bind="visible: $root.current_tab().value ==
                 div.filter
 
               
-      div.list
+      div.list.dashboard_list
         div.title Requests
         div.title(data-bind="text: request_msg")
         table
@@ -45,3 +45,19 @@ div.app_context(id="dashboard", data-bind="visible: $root.current_tab().value ==
               td(data-bind="text: band_name()")
               td(data-bind="text: pretty_request_type()")
               td(data-bind="text: pretty_status()")
+
+      div.list.dashboard_list
+        div.title Reports
+        div.title(data-bind="text: request_msg")
+        table
+          thead
+            tr
+              th Type
+              th Date
+
+          tbody(data-bind='foreach: current_reports')
+            tr
+              td
+                a(data-bind="text: report_type, attr: { href: url }")
+
+              td(data-bind="text: date")

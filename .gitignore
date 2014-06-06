@@ -10,6 +10,7 @@ public/javascripts/lib
 public/test/lib/chai.js
 public/test/lib/mocha.css
 public/test/lib/mocha.js
+reports
 
 *~
 lib-cov

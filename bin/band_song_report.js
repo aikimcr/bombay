@@ -195,9 +195,9 @@ function generate_band_report(snapshot_id, band_id, style_info) {
       var report_subject = node_util.format('%s Songs Report from %s', this.band_name, this.formatted_time.toLocaleString());
       var report_name = 'songs_report.html'
 
-      var report_file = this.band_name + '_' + this.snapshot_time + '.html';
+      var report_file = 'band_song_summary_' + this.snapshot_time + '.html';
       report_file = encodeURIComponent(report_file.replace(/[\s-+:]/g, '_'));
-      var report_full_path = path.join(path_util.html_path(), report_file);
+      var report_full_path = path.join(path_util.reports_path(band_id), report_file);
 
       fs.writeFile(report_full_path, report_text, {encoding: 'utf8'}, function(err) {
         if (err) throw err;
@@ -206,6 +206,8 @@ function generate_band_report(snapshot_id, band_id, style_info) {
     },
     function(report_file, report_full_path, report_subject, report_name) {
       console.log('"' + this.to_addresses + '"');
+/*
+ * XXX mailing is currently broken.  I think it's a problem with Postfix.  Which sucks.  Postfix, I mean.
       if (this.to_addresses.length > 0) {
         mail_util.send_report({
           to_address: this.to_addresses,
@@ -215,6 +217,18 @@ function generate_band_report(snapshot_id, band_id, style_info) {
           report_name: report_name
         }, report_full_path);
       }
+*/
+      this(report_full_path);
+    },
+    function(report_full_path) {
+      var link_file = 'band_song_summary.html';
+      var link_full_path = path.join(path_util.reports_path(band_id), link_file);
+      try {
+        fs.unlinkSync(link_full_path);
+      } catch(error) {
+        console.error(error);
+      };
+      fs.symlinkSync(report_full_path, link_full_path);
     }
   );
 
