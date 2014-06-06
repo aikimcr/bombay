@@ -272,30 +272,42 @@ body
 
 
 .rating_container
-  width: 100px;
+  width: 100px
 
 .rating_value
-  display: inline-block;
-  height: 20px;
-  background-color: black;
-  color: white;
-  text-align: center;
+  display: inline-block
+  height: 20px
+  text-align: center
+  background-image: url(../images/black_star.png)
+  background-size: 20px
+  background-color: white
+  color: white
 
 .rating_clicker
-  display: inline-block;
-  width: 20px;
-  height: 20px;
-  background-color: white;
-  color: white;
-  text-align: center;
+  display: inline-block
+  width: 20px
+  height: 20px
+  text-align: center
+  background-image: url(../images/empty_star.png)
+  background-size: 20px
+  background-color: white
+  color: white
 
-.rating_clicker:hover
-  background-color: red;
+.rating_clicker:hover, .rating_clicker_hover
+  background-image: url(../images/red_star.png)
+  background-size: 20px
+  background-color: white
+  color: black
 
-.rating_clicker_hover
-  background-color: green;
-  color: green
+.rating_clicker:active
+  background-image: url(../images/green_star.png)
+  background-size: 20px
+  background-color: white
+  color: black
 
 .rating_clicker_selected
-  background-color: black;
-  color: black
+  background-image: url(../images/black_star.png)
+  background-size: 20px
+  background-color: white
+  color: white
+  

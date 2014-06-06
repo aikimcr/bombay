@@ -2,17 +2,21 @@ var manager;
 
 ko.bindingHandlers.clickRating = {
     init: function(element, valueAccessor) {
+      var getTargetValue = function(event) {
+        return parseInt(event.target.getAttribute('value'));
+      };
+
       element.classList.add('rating_container');
       for (var i = 1; i <= 5; i++) {
         var clicker = document.createElement('div');
-        clicker.innerHTML = i;
+        clicker.setAttribute('value', i);
         clicker.classList.add('rating_clicker');
         element.appendChild(clicker);
       }
 
       element.addEventListener('mouseover', function(event) {
         var clickers = event.target.parentElement.children;
-        var index = parseInt(event.target.innerHTML);
+        var index = getTargetValue(event);
 
         for(var i=0; i < clickers.length; i++) {
           clickers[i].classList.remove('rating_clicker_hover');
@@ -21,14 +25,14 @@ ko.bindingHandlers.clickRating = {
       });
       element.addEventListener('mouseout', function(event) {
         var clickers = event.target.parentElement.children;
-        var index = parseInt(event.target.innerHTML);
+        var index = getTargetValue(event);
 
         for(var i=0; i < clickers.length; i++) {
           clickers[i].classList.remove('rating_clicker_hover');
         }
       });
       element.addEventListener('click', function(event) {
-        var index = parseInt(event.target.innerHTML);
+        var index = getTargetValue(event);
         var observable = valueAccessor();
         observable(index);
       });
@@ -57,7 +61,6 @@ ko.bindingHandlers.showRating = {
       var value = parseInt((observable() * 10) + .5) / 10;
       var width = parseInt(value * 20) + 'px';
       element.firstChild.style.width = width;
-      element.firstChild.innerHTML = value;
     },
 };
 
