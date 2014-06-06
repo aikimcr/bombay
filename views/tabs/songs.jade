@@ -35,6 +35,7 @@ div.app_context(id="songs", data-bind="visible: $root.current_tab().value == 6")
               th
               th Name
               th Artist Name
+              th Key
               th Bands
               th
 
@@ -43,6 +44,8 @@ div.app_context(id="songs", data-bind="visible: $root.current_tab().value == 6")
               td(data-bind="click: $root.edit_table_object.bind($root.forms.edit_song)") &#x270e;
               td(data-bind="text: name")
               td(data-bind="text: artist().name")
+              td
+                select(name="key_signature", data-bind="value: key_signature, options: manager.key_signature_map, optionsText: 'value_text', optionsValue: 'value', event: { change: $root.update_table_object }")
               td(data-bind="text: band_count")
               td(data-bind="ifnot: band_count")
                 button.edit_button(data-bind="click: $root.delete_table_object") -

@@ -77,6 +77,44 @@ function Manager(for_test) {
     { value: 4, value_text: 'Standard' }
   ];
 
+  this.key_signature_map = [
+    { value: '', value_text: '' },
+    { value: 'Ab', value_text: 'Ab' },
+    { value: 'Abm', value_text: 'Abm' },
+    { value: 'A', value_text: 'A' },
+    { value: 'Am', value_text: 'Am' },
+    { value: 'A#', value_text: 'A#' },
+    { value: 'A#m', value_text: 'A#m' },
+    { value: 'Bb', value_text: 'Bb' },
+    { value: 'Bbm', value_text: 'Bbm' },
+    { value: 'B', value_text: 'B' },
+    { value: 'Bm', value_text: 'Bm' },
+    { value: 'C', value_text: 'C' },
+    { value: 'Cm', value_text: 'Cm' },
+    { value: 'C#', value_text: 'C#' },
+    { value: 'C#m', value_text: 'C#m' },
+    { value: 'Db', value_text: 'Db' },
+    { value: 'Dbm', value_text: 'Dbm' },
+    { value: 'D', value_text: 'D' },
+    { value: 'Dm', value_text: 'Dm' },
+    { value: 'D#', value_text: 'D#' },
+    { value: 'D#m', value_text: 'D#m' },
+    { value: 'Eb', value_text: 'Eb' },
+    { value: 'Ebm', value_text: 'Ebm' },
+    { value: 'E', value_text: 'E' },
+    { value: 'Em', value_text: 'Em' },
+    { value: 'F', value_text: 'F' },
+    { value: 'Fm', value_text: 'Fm' },
+    { value: 'F#', value_text: 'F#' },
+    { value: 'F#m', value_text: 'F#m' },
+    { value: 'Gb', value_text: 'Gb' },
+    { value: 'Gbm', value_text: 'Gbm' },
+    { value: 'G', value_text: 'G' },
+    { value: 'Gm', value_text: 'Gm' },
+    { value: 'G#', value_text: 'G#' },
+    { value: 'G#m', value_text: 'G#m' }
+  ];
+
   this.bands = new BandList();
   this.persons = new PersonList();
   this.artists = new ArtistList();

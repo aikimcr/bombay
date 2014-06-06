@@ -277,6 +277,7 @@ function AddSong() {
   Form.call(this);
   this.name = ko.observable(null);
   this.artist = ko.observable(null);
+  this.key_signature = ko.observable(null);
 }
 util.inherits(AddSong, Form);
 
@@ -374,7 +375,8 @@ AddBandSong.prototype.postChange_ = function(callback) {
   var params = {
     band_id: manager.current_band().id(),
     song_id: this.song().id(),
-    song_status: -1
+    song_status: -1,
+    key_signature: this.song().key_signature()
   };
   svc.set('./band_song', function(result) {
     callback(result);

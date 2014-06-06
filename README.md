@@ -12,7 +12,6 @@ ToDo:
 - Key signature on band songs.
 - Original key signature on songs.
 - Ability to attach links to video/audio on songs.
-- Adding members to a band needs to be a two-step process.  Both the band admin and new member need to be
   involved.
 
 - The setlist management UI is non-existant.

@@ -1,8 +1,9 @@
-function Song(id, name, artist_id) {
+function Song(id, name, artist_id, key_signature) {
   Table.call(this, './song');
   this.id = ko.observable(id || -1);
   this.name = ko.observable(name || '');
   this.artist_id = ko.observable(artist_id || -1);
+  this.key_signature = ko.observable(key_signature || '');
 
   this.artist = ko.computed(function() {
     return manager.artists.getById(this.artist_id()) || new Artist();
@@ -128,5 +129,5 @@ SongList.prototype.set_filter_list = function() {
 };
 
 SongList.prototype.build_object_ = function(model) {
-  return new Song(model.id, model.name, model.artist_id);
+  return new Song(model.id, model.name, model.artist_id, model.key_signature);
 };

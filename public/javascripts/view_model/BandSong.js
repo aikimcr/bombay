@@ -1,9 +1,10 @@
-function BandSong(id, band_id, song_id, song_status) {
+function BandSong(id, band_id, song_id, song_status, key_signature) {
   Table.call(this, './band_song');
   this.id = ko.observable(id || -1);
   this.band_id = ko.observable(band_id || -1);
   this.song_id = ko.observable(song_id || -1);
   this.song_status = ko.observable(song_status);
+  this.key_signature = ko.observable(key_signature || '');
 
   // Joins
   this.band = ko.computed(function() {
@@ -205,7 +206,8 @@ BandSongList.prototype.build_object_ = function(model) {
     model.id,
     model.band_id,
     model.song_id,
-    model.song_status
+    model.song_status,
+    model.key_signature
   );
 };
 
