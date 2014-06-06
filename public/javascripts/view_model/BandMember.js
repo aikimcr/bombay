@@ -49,6 +49,10 @@ BandMember.prototype.reload_list = function() {
   manager.band_members.load();
 };
 
+BandMember.prototype.reload_relatives = function() {
+  manager.song_ratings.load();
+};
+
 // The BandMember List Object
 function BandMemberList() {
   TableList.call(this, './band_member', 'all_band_members');

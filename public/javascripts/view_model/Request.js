@@ -145,7 +145,12 @@ Request.prototype.confirm_text = function() {
 
 Request.prototype.reload_list = function() {
   manager.requests.load();
+};
+
+Request.prototype.reload_relatives = function() {
   manager.band_members.load();
+  manager.band_songs.load();
+  manager.song_ratings.load();
 };
 
 Request.prototype.change_status = function(action, callback) {

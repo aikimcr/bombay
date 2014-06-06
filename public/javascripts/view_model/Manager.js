@@ -298,6 +298,7 @@ function Manager(for_test) {
     data.delete(function(result) {
       if (result && !result.err) {
         data.reload_list();
+        data.reload_relatives();
       }
     }, event);
   };
@@ -312,10 +313,12 @@ function Manager(for_test) {
             this.request_msg(result.err);
           } else {
             data.reload_list();
+            data.reload_relatives();
             this.request_msg('');
           }
         } else {
           data.reload_list();
+          data.reload_relatives();
         }
       }.bind(this), event);
     } else {
@@ -324,6 +327,7 @@ function Manager(for_test) {
           this.request_msg(result.err);
         } else {
           data.reload_list();
+          data.reload_relatives();
           this.request_msg('');
         }
       }.bind(this), event);

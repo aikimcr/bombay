@@ -34,6 +34,8 @@ Table.prototype.delete = function(callback, opt_event) {
   }.bind(this));
 };
 
+Table.prototype.reload_relatives = function() { };
+
 function TableList(load_url, model_key) {
   this.list = ko.observableArray([]);
   this.load_url = load_url;

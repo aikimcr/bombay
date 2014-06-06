@@ -100,6 +100,9 @@ BandSong.prototype.confirm_text = function() {
 
 BandSong.prototype.reload_list = function() {
   manager.band_songs.load();
+};
+
+BandSong.prototype.reload_relatives = function() {
   manager.song_ratings.load();
 };
 
