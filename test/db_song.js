@@ -41,22 +41,22 @@ describe('song_table', function() {
 
     it('should get all the songs', function(done) {
       var expected = [{
-	id: 6, name: 'Help', artist_id: 4
+	id: 6, name: 'Help', artist_id: 4, key_signature: 'Bbm'
       }, {
-	id: 5, name: 'I Wanna Hold Your Hand', artist_id: 4
+	id: 5, name: 'I Wanna Hold Your Hand', artist_id: 4, key_signature: 'G'
       }, {
-	id: 4, name: 'Love Me Do', artist_id: 4
+	id: 4, name: 'Love Me Do', artist_id: 4, key_signature: 'D'
       }, {
-	id: 2, name: 'Rebel, Rebel', artist_id: 5
+	id: 2, name: 'Rebel, Rebel', artist_id: 5, key_signature: 'Am'
       }, {
-	id: 1, name: 'Space Oddity', artist_id: 5
+	id: 1, name: 'Space Oddity', artist_id: 5, key_signature: 'A'
       }, {
-	id: 7, name: 'Stairway To Heaven', artist_id: 3
+	id: 7, name: 'Stairway To Heaven', artist_id: 3, key_signature: 'F#m'
       }, {
-	id: 3, name: 'You Shook Me All Night Long', artist_id: 1      
+	id: 3, name: 'You Shook Me All Night Long', artist_id: 1, key_signature: 'C'
       }];
       song.getAll(function(result) {
-        test_util.check_list(result, expected, 'all_songs', ['id', 'name', 'artist_id']);
+        test_util.check_list(result, expected, 'all_songs', ['id', 'name', 'artist_id', 'key_signature']);
         done();
       });
     });

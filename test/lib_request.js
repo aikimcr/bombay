@@ -411,21 +411,22 @@ describe('manage_requests', function() {
 
     it('should get the requests for Alan Poser', function(done) {
       var expected = [{
-        id: request_id[0],
-        description: 'Wild At Heart is inviting Danny Drums to join',
-        request_type: constants.request_type.add_band_member,
-        status: constants.request_status.pending,
-        band_id: 1,
-        person_id: 3,
-      }, {
         id: request_id[1],
         description: 'Alan Poser is asking to join Live! Dressed! Girls!',
         request_type: constants.request_type.join_band,
         status: constants.request_status.pending,
         band_id: 2,
         person_id: 2,
+      }, {
+        id: request_id[0],
+        description: 'Wild At Heart is inviting Danny Drums to join',
+        request_type: constants.request_type.add_band_member,
+        status: constants.request_status.pending,
+        band_id: 1,
+        person_id: 3,
       }];
       request.getMyRequests(2, function(result) {
+debugger;
         test_util.check_request_list(result.all_requests, expected, now);
         done();
       });
