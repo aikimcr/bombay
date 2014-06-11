@@ -23,7 +23,8 @@
     "knockout": "*",
     "ursa": "*",
     "base64": "*",
-    "emailjs": "*"
+    "emailjs": "*",
+    "orm": "*"
   },
   "repository": {
     "type": "git",
