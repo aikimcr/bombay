@@ -7,6 +7,7 @@ var test_util = require('test/lib/util');
 
 var constants = require('lib/constants');
 var db = require('lib/db');
+var db_orm = require('lib/db_orm');
 var dbh;
 
 var request = require('lib/request');
@@ -15,6 +16,7 @@ describe('manage_requests', function() {
   describe('make a request to join a band', function() {
     before(function(done) {
       db.setDbPath('./bombay_test.db');
+      db_orm.setDBName('bombay_test.db');
       dbh = new db.Handle()
       var sql = fs.readFileSync('./sql/schema.sql', 'utf8');
       dbh.doSqlExec([sql], done);
@@ -186,6 +188,7 @@ describe('manage_requests', function() {
   describe('make a request to add a member', function() {
     before(function(done) {
       db.setDbPath('./bombay_test.db');
+      db_orm.setDBName('bombay_test.db');
       dbh = new db.Handle()
       var sql = fs.readFileSync('./sql/schema.sql', 'utf8');
       dbh.doSqlExec([sql], done);
@@ -357,6 +360,7 @@ describe('manage_requests', function() {
   describe('Get request lists', function() {
     before(function(done) {
       db.setDbPath('./bombay_test.db');
+      db_orm.setDBName('bombay_test.db');
       dbh = new db.Handle()
       var sql = fs.readFileSync('./sql/schema.sql', 'utf8');
       dbh.doSqlExec([sql], done);
@@ -426,7 +430,6 @@ describe('manage_requests', function() {
         person_id: 3,
       }];
       request.getMyRequests(2, function(result) {
-debugger;
         test_util.check_request_list(result.all_requests, expected, now);
         done();
       });
@@ -434,13 +437,6 @@ debugger;
 
     it('should get the requests for Danny Drums', function(done) {
       var expected = [{
-        id: request_id[0],
-        description: 'Wild At Heart is inviting Danny Drums to join',
-        request_type: constants.request_type.add_band_member,
-        status: constants.request_status.pending,
-        band_id: 1,
-        person_id: 3,
-      }, {
         id: request_id[1],
         description: 'Alan Poser is asking to join Live! Dressed! Girls!',
         request_type: constants.request_type.join_band,
@@ -454,6 +450,13 @@ debugger;
         status: constants.request_status.pending,
         band_id: 2,
         person_id: 4,
+      }, {
+        id: request_id[0],
+        description: 'Wild At Heart is inviting Danny Drums to join',
+        request_type: constants.request_type.add_band_member,
+        status: constants.request_status.pending,
+        band_id: 1,
+        person_id: 3,
       }];
       request.getMyRequests(3, function(result) {
         test_util.check_request_list(result.all_requests, expected, now);
@@ -478,13 +481,6 @@ debugger;
 
     it('should get the requests for System Admin User', function(done) {
       var expected = [{
-        id: request_id[0],
-        description: 'Wild At Heart is inviting Danny Drums to join',
-        request_type: constants.request_type.add_band_member,
-        status: constants.request_status.pending,
-        band_id: 1,
-        person_id: 3,
-      }, {
         id: request_id[1],
         description: 'Alan Poser is asking to join Live! Dressed! Girls!',
         request_type: constants.request_type.join_band,
@@ -498,6 +494,13 @@ debugger;
         status: constants.request_status.pending,
         band_id: 2,
         person_id: 4,
+      }, {
+        id: request_id[0],
+        description: 'Wild At Heart is inviting Danny Drums to join',
+        request_type: constants.request_type.add_band_member,
+        status: constants.request_status.pending,
+        band_id: 1,
+        person_id: 3,
       }];
       request.getMyRequests(1, function(result) {
         test_util.check_request_list(result.all_requests, expected, now);

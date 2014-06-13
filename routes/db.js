@@ -259,7 +259,6 @@ exports.getBandSongTable = function(req, res) {
 };
 
 exports.postBandSongTable = function(req, res) {
-console.log(req.body);
   postModel(res, 'BandSong', req.body, 'band_song_id');
 };
 
@@ -274,40 +273,19 @@ exports.deleteBandSongTable = function(req, res) {
 exports.getSongRatingTable = function(req, res) {
   var song_rating_id = req.params.id;
   if (!song_rating_id) song_rating_id = req.query.id;
-
-  var dbh = new db.Handle();
-
-  if (song_rating_id) {
-    dbh.song_rating().getById(song_rating_id, function(result) {
-      res.json(result);
-    });
-  } else {
-    var params = { sort: { order: [ 'band_member_id', 'band_song_id' ] }};
-    dbh.song_rating().getAllWithArgs(params, function(result) {
-      res.json(result);
-    });
-  }
+  getModel(res, 'SongRating', song_rating_id, ['band_member_id', 'band_song_id'], 'song_rating');
 };
 
 exports.postSongRatingTable = function(req, res) {
-  var dbh = new db.Handle();
-  dbh.song_rating().create(req.body, function(result) {
-    res.json(result);
-  });
+  postModel(res, 'SongRating', req.body, 'song_rating_id');
 };
 
 exports.putSongRatingTable = function(req, res) {
-  var dbh = new db.Handle();
-  dbh.song_rating().update(req.query, function(result) {
-    res.json(result);
-  });
+  putModel(res, 'SongRating', req.query, 'song_rating');
 };
 
 exports.deleteSongRatingTable = function(req, res) {
-  var dbh = new db.Handle();
-  dbh.song_rating().deleteById(req.query.id, function(result) {
-    res.json(result);
-  });
+  deleteModel(res, 'SongRating', req.query.id, 'song_rating');
 };
 
 // Requests

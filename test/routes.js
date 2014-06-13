@@ -1111,6 +1111,7 @@ describe('request_routes', function() {
   var dbh;
   before(function(done) {
     db.setDbPath('./bombay_test.db');
+    db_orm.setDBName('bombay_test.db');
     dbh = new db.Handle()
     var sql = fs.readFileSync('./sql/schema.sql', 'utf8');
     dbh.doSqlExec([sql], done);
@@ -1485,6 +1486,13 @@ describe('request_routes', function() {
       band_id: 1,
       person_id: 2,
     }, {
+      id: all_request_ids[3],
+      description: 'Sylvester Cat is asking to join Wild At Heart',
+      request_type: constants.request_type.join_band,
+      status: constants.request_status.pending,
+      band_id: 1,
+      person_id: 6,
+    }, {
       id: all_request_ids[1],
       description: 'Wild At Heart is inviting Daffy Duck to join',
       request_type: constants.request_type.add_band_member,
@@ -1498,13 +1506,6 @@ describe('request_routes', function() {
       status: constants.request_status.pending,
       band_id: 1,
       person_id: 5,
-    }, {
-      id: all_request_ids[3],
-      description: 'Sylvester Cat is asking to join Wild At Heart',
-      request_type: constants.request_type.join_band,
-      status: constants.request_status.pending,
-      band_id: 1,
-      person_id: 6,
     }];
     var res = {
       json: function(result) {
