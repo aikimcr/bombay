@@ -4,6 +4,7 @@ var fs = require('fs');
 var test_util = require('test/lib/util');
 
 var db = require('lib/db');
+var db_orm = require('lib/db_orm');
 var constants = require('lib/constants');
 var encryption = require('routes/encryption');
 var request = require('lib/request');
@@ -17,6 +18,7 @@ describe('routes', function() {
   var dbh;
   before(function(done) {
     db.setDbPath('./bombay_test.db');
+    db_orm.setDBName('bombay_test.db');
     dbh = new db.Handle()
     var sql = fs.readFileSync('./sql/schema.sql', 'utf8');
     dbh.doSqlExec([sql], done);
@@ -541,7 +543,7 @@ describe('routes', function() {
     describe('#band_song', function() {
       var band_song_id;
       it('should create a band_song', function(done) {
-        req.body = {band_id: 3, song_id: 1, song_status: 3};
+        req.body = {band_id: 3, song_id: 1, key_signature: '', song_status: 3};
         var res = {
           json: function(result) {
             band_song_id = test_util.check_result(result, 'band_song_id');

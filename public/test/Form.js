@@ -404,10 +404,11 @@ describe('Form', function() {
 
     it('should have done the call', function(done) {
       svc.set.calls.should.eql(1);
+console.log(svc.set.params);
       svc.set.params.should.eql([[
         './band_song',
         'function',
-        {band_id: 1, song_id: 2, song_status: -1},
+        {band_id: 1, song_id: 2, song_status: -1, key_signature: ''},
       ]]);
       done();
     });
