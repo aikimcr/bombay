@@ -2,7 +2,6 @@
 /*
  * Database manipulation methods.
  */
-var db = require('lib/db');
 var db_orm = require('lib/db_orm');
 var constants = require('lib/constants');
 var util = require('lib/util');
@@ -123,8 +122,6 @@ exports.postPersonTable = function(req, res) {
 };
 
 exports.putPersonTable = function(req, res) {
-  var dbh = new db.Handle();
-
   if (req.query.token) {
     var token = req.query.token;
     delete req.query.token;
@@ -216,7 +213,6 @@ exports.getBandMemberTable = function(req, res) {
 };
 
 exports.postBandMemberTable = function(req, res) {
-  var dbh = new db.Handle();
   var user = util.getUser(req);
   var person_id = req.body.person_id;
 
@@ -412,7 +408,6 @@ exports.updateRequest = function(req, res) {
 };
 
 exports.deleteRequest = function(req, res) {
-  var dbh = new db.Handle();
   var user = util.getUser(req);
 
   var is_allowed = function(result, user, band_member) {
@@ -436,9 +431,7 @@ exports.deleteRequest = function(req, res) {
         util.getBandMember(user.id, result.request.band_id, function(band_member) {
 
           if (is_allowed(result, user, band_member)) {
-            dbh.request().deleteById(req.query.id, function(result) {
-              res.json(result);
-            });
+            deleteModel(res, 'Request', req.query.id, 'request');
           } else {
             res.json({err: 'Permission denied'});
           }

@@ -6,7 +6,7 @@
 var express = require('express');
 var http = require('http');
 var path = require('path');
-var db = require('lib/db');
+var db_orm = require('lib/db_orm');
 var util = require('lib/util');
 var index = require('routes/index');
 var route_db = require('routes/db');
@@ -22,36 +22,34 @@ var validation = require('routes/validation');
 
 passport.use(new LocalStrategy(
   function(username, password, done) {
-    var dbh = new db.Handle();
     password = decodeURIComponent(password);
     // console.log(username + ', ' + password);
 
-    dbh.person().getAllWithArgs({
-      fields: ['id', 'name', 'password', 'system_admin'],
-      where: {name: username}
-    }, function(result) {
-      var person = result.all_persons[0];
-      if (person) {
-        var pem = util.get_pem_file('crypto/rsa_private.pem');
-        //console.log(pem);
-        var decrypt_password = password;
-        var decrypt_person = person.password;
+    db_orm.connect(function(db_model) {
+      db_model.Person.one({name: username}, function(err, person) {
+        if (err) {
+          console.log('Failed login for ' + username + util.inspect(err));
+          return done(null, false, { message: 'Login Incorrect.'});
+        } else {
+          var pem = util.get_pem_file('crypto/rsa_private.pem');
+          //console.log(pem);
+          var decrypt_password = password;
+          var decrypt_person = person.password;
 
-        // console.log(decrypt_person + ', ' + decrypt_password);
-        try {
-          decrypt_password = base64_decode(util.decrypt(pem, password));
-          decrypt_person = util.decrypt(pem, person.password);
-        } catch(e) {
-          console.log(e);
-        };
-        // console.log(decrypt_person + ', ' + decrypt_password);
-        if (username == person.name && decrypt_password == decrypt_person) {
-          console.log(username + ' logged in');
-          return done(null, person);
+          // console.log(decrypt_person + ', ' + decrypt_password);
+          try {
+            decrypt_password = base64_decode(util.decrypt(pem, password));
+            decrypt_person = util.decrypt(pem, person.password);
+          } catch(e) {
+            console.log(e);
+          };
+          // console.log(decrypt_person + ', ' + decrypt_password);
+          if (username == person.name && decrypt_password == decrypt_person) {
+            console.log(username + ' logged in');
+            return done(null, person);
+          }
         }
-      }
-      console.log('Failed login for ' + username);
-      return done(null, false, { message: 'Login Incorrect.'});
+      });
     });
   }
 ));
@@ -64,8 +62,6 @@ passport.deserializeUser(function(user, done) {
   //console.log(user);
   done(null, JSON.parse(user));
 });
-
-db.setDbPath();
 
 var app = express();
 
