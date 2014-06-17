@@ -19,65 +19,57 @@ function handleJSONResponse(res, err, result) {
 }
 
 function getModel(res, model_name, row_id, sort, result_key) {
-  db_orm.connect(function(db_model) {
-    if (row_id) {
-      db_model[model_name].get(row_id, function(err, row) {
-        var result = {};
-        result[result_key] = row;
-        handleJSONResponse(res, err, result);
-      });
-    } else {
-      db_model[model_name].find(sort, function(err, rows) {
-        var result = {};
-        result['all_' + result_key + 's'] = rows;
-        handleJSONResponse(res, err, result);
-      });
-    }
-  });
+  if (row_id) {
+    db_orm[model_name].get(row_id, function(err, row) {
+      var result = {};
+      result[result_key] = row;
+      handleJSONResponse(res, err, result);
+    });
+  } else {
+    db_orm[model_name].find(sort, function(err, rows) {
+      var result = {};
+      result['all_' + result_key + 's'] = rows;
+      handleJSONResponse(res, err, result);
+    });
+  }
 }
 
 function postModel(res, model_name, options, result_key) {
-  db_orm.connect(function(db_model, columns) {
-    var data = {};
-    columns[model_name].forEach(function (column) {
-      if (column != 'id' && column in options) {
-        data[column] = options[column];
-      }
-    });
+  var data = {};
+  db_orm.columns[model_name].forEach(function (column) {
+    if (column != 'id' && column in options) {
+      data[column] = options[column];
+    }
+  });
 
-    db_model[model_name].create([data], function(err, rows) {
-      var result = {};
-      result[result_key] = rows ? rows[0].id : 0;
-      handleJSONResponse(res, err, result);
-    });
+  db_orm[model_name].create([data], function(err, rows) {
+    var result = {};
+    result[result_key] = rows ? rows[0].id : 0;
+    handleJSONResponse(res, err, result);
   });
 }
 
 function putModel(res, model_name, options, result_key) {
-  db_orm.connect(function(db_model, columns) {
-    db_model[model_name].get(options.id, function(err, row) {
-      handleJSONResponse(res, err, function() {
-        var data = JSON.parse(JSON.stringify(options));
-        delete data['id'];
-        row.save(data, function(err) {
-          var result = {};
-          result[result_key] = options.id;
-          handleJSONResponse(res, err, result);
-        });
+  db_orm[model_name].get(options.id, function(err, row) {
+    handleJSONResponse(res, err, function() {
+      var data = JSON.parse(JSON.stringify(options));
+      delete data['id'];
+      row.save(data, function(err) {
+        var result = {};
+        result[result_key] = options.id;
+        handleJSONResponse(res, err, result);
       });
     });
   });
 }
 
 function deleteModel(res, model_name, row_id, result_key) {
-  db_orm.connect(function(db_model, columns) {
-    db_model[model_name].get(row_id, function(err, row) {
-      handleJSONResponse(res, err, function() {
-        row.remove(function(err) {
-          var result = {};
-          result[result_key] = row_id;
-          handleJSONResponse(res, err, result);
-        });
+  db_orm[model_name].get(row_id, function(err, row) {
+    handleJSONResponse(res, err, function() {
+      row.remove(function(err) {
+        var result = {};
+        result[result_key] = row_id;
+        handleJSONResponse(res, err, result);
       });
     });
   });
@@ -126,39 +118,37 @@ exports.putPersonTable = function(req, res) {
     var token = req.query.token;
     delete req.query.token;
 
-    db_orm.connect(function(db_model) {
-      db_model.Person.get(req.query.id, function(err, row) {
-        handleJSONResponse(res, err, function() {
-          var wrong_old = 'Old password did not match';
-          var encrypted_db_pw = row.password;
-          var public_pem = util.get_pem_file('crypto/rsa_public.pem');
-          var private_pem = util.get_pem_file('crypto/rsa_private.pem');
-          var db_pwd;
-          var decrypted;
-          var pws;
-          try {
-            decrypted = decodeURIComponent(util.decrypt(private_pem, decodeURIComponent(token)));
-            if (decrypted == '') throw new Error('Bad Token: ' + token);
-            db_pwd = util.decrypt(private_pem, encrypted_db_pw);
-            if (db_pwd == '') throw new Error('Bad DB Password: ' + encrypted_db_pw);
-            pws = JSON.parse(decrypted);
-          } catch(e) {
-            console.log(e);
-            pws = ['', ''];
-          }
+    db_orm.Person.get(req.query.id, function(err, row) {
+      handleJSONResponse(res, err, function() {
+        var wrong_old = 'Old password did not match';
+        var encrypted_db_pw = row.password;
+        var public_pem = util.get_pem_file('crypto/rsa_public.pem');
+        var private_pem = util.get_pem_file('crypto/rsa_private.pem');
+        var db_pwd;
+        var decrypted;
+        var pws;
+        try {
+          decrypted = decodeURIComponent(util.decrypt(private_pem, decodeURIComponent(token)));
+          if (decrypted == '') throw new Error('Bad Token: ' + token);
+          db_pwd = util.decrypt(private_pem, encrypted_db_pw);
+          if (db_pwd == '') throw new Error('Bad DB Password: ' + encrypted_db_pw);
+          pws = JSON.parse(decrypted);
+        } catch(e) {
+          console.log(e);
+          pws = ['', ''];
+        }
 
-          if (pws[0] == db_pwd) {
-            req.query.password = util.encrypt(public_pem, pws[1]);
-            var data = JSON.parse(JSON.stringify(req.query));
-            delete data['id'];
-            row.save(data, function(err) {
-              var result = {person: req.query.id};
-              handleJSONResponse(res, err, result);
-            });
-          } else {
-            res.json({err: wrong_old});
-          }
-        });
+        if (pws[0] == db_pwd) {
+          req.query.password = util.encrypt(public_pem, pws[1]);
+          var data = JSON.parse(JSON.stringify(req.query));
+          delete data['id'];
+          row.save(data, function(err) {
+            var result = {person: req.query.id};
+            handleJSONResponse(res, err, result);
+          });
+        } else {
+          res.json({err: wrong_old});
+        }
       });
     });
   } else {

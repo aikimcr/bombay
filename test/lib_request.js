@@ -4,6 +4,7 @@ var fs = require('fs');
 var util = require('util');
 
 var test_util = require('test/lib/util');
+process.env.db_name = 'bombay_test.db';
 
 var constants = require('lib/constants');
 var db = require('lib/db');
@@ -16,7 +17,6 @@ describe('manage_requests', function() {
   describe('make a request to join a band', function() {
     before(function(done) {
       db.setDbPath('./bombay_test.db');
-      db_orm.setDBName('bombay_test.db');
       dbh = new db.Handle()
       var sql = fs.readFileSync('./sql/schema.sql', 'utf8');
       dbh.doSqlExec([sql], done);
@@ -188,7 +188,6 @@ describe('manage_requests', function() {
   describe('make a request to add a member', function() {
     before(function(done) {
       db.setDbPath('./bombay_test.db');
-      db_orm.setDBName('bombay_test.db');
       dbh = new db.Handle()
       var sql = fs.readFileSync('./sql/schema.sql', 'utf8');
       dbh.doSqlExec([sql], done);
@@ -360,7 +359,6 @@ describe('manage_requests', function() {
   describe('Get request lists', function() {
     before(function(done) {
       db.setDbPath('./bombay_test.db');
-      db_orm.setDBName('bombay_test.db');
       dbh = new db.Handle()
       var sql = fs.readFileSync('./sql/schema.sql', 'utf8');
       dbh.doSqlExec([sql], done);

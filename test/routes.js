@@ -2,6 +2,7 @@ var should = require('should');
 var fs = require('fs');
 
 var test_util = require('test/lib/util');
+process.env.db_name = 'bombay_test.db';
 
 var db = require('lib/db');
 var db_orm = require('lib/db_orm');
@@ -18,7 +19,6 @@ describe('routes', function() {
   var dbh;
   before(function(done) {
     db.setDbPath('./bombay_test.db');
-    db_orm.setDBName('bombay_test.db');
     dbh = new db.Handle()
     var sql = fs.readFileSync('./sql/schema.sql', 'utf8');
     dbh.doSqlExec([sql], done);
@@ -634,6 +634,7 @@ describe('routes', function() {
           system_admin: true
         };
         dbh.person().getById(1, function(result) {
+debugger;//XXX
           test_util.check_item(result, expected, 'person', ['id', 'name', 'full_name', 'email', 'system_admin']);
           done();
         });
@@ -673,6 +674,7 @@ describe('routes', function() {
             done();
           }
         };
+debugger;//XXX
         routes.putPersonTable(req, res);
       });
 
@@ -1111,7 +1113,6 @@ describe('request_routes', function() {
   var dbh;
   before(function(done) {
     db.setDbPath('./bombay_test.db');
-    db_orm.setDBName('bombay_test.db');
     dbh = new db.Handle()
     var sql = fs.readFileSync('./sql/schema.sql', 'utf8');
     dbh.doSqlExec([sql], done);
