@@ -463,25 +463,22 @@ describe('routes', function() {
         var res = {
           json: function(result) {
             should.exist(result);
-            result.should.not.have.property('err');
-            result.should.have.property('request');
-            result.request.should.have.property('request_type');
-            result.request.request_type.should.eql(constants.request_type.add_band_member);
-            result.request.should.have.property('band_id');
-            result.request.band_id.should.eql(3);
-            result.request.should.have.property('person_id');
-            result.request.person_id.should.eql(1);
-            result.request.should.have.property('description');
-            result.request.description.should.eql('Sally Says Go is inviting System Admin User to join');
-            result.request.should.have.property('status');
-            result.request.status.should.eql(constants.request_status.pending);
-            result.request.should.have.property('id');
-            result.request.id.should.eql(1);
-            result.request.should.have.property('timestamp');
+            result.should.have.property('request_type');
+            result.request_type.should.eql(constants.request_type.add_band_member);
+            result.should.have.property('band_id');
+            result.band_id.should.eql(3);
+            result.should.have.property('person_id');
+            result.person_id.should.eql(1);
+            result.should.have.property('description');
+            result.description.should.eql('Sally Says Go is inviting System Admin User to join');
+            result.should.have.property('status');
+            result.status.should.eql(constants.request_status.pending);
+            result.should.have.property('id');
+            result.id.should.eql(1);
+            result.should.have.property('timestamp');
             done();
           }
         };
-debugger;//XXX
         routes.postBandMemberTable(req, res);
       });
 
@@ -1138,10 +1135,8 @@ describe('request_routes', function() {
     var res = {
       json: function(result) {
         should.exist(result);
-        result.should.not.have.property('err');
-        result.should.have.property('request');
-        result.request.should.have.property('id');
-        request_id = result.request.id;
+        result.should.have.property('id');
+        request_id = result.id;
         all_request_ids.push(request_id);
         done();
       }
@@ -1172,8 +1167,8 @@ describe('request_routes', function() {
     req.query = {id: request_id};
     var res = {
       json: function(result) {
-        test_util.check_request(result, expected, now);
-        last_req = result.request;
+        test_util.check_request(null, result, expected, now);
+        last_req = result;
         done();
       }
     };
@@ -1193,7 +1188,7 @@ describe('request_routes', function() {
     req.session.passport.user = JSON.stringify({ id: 3, system_admin: false })
     var res = {
       json: function(result) {
-        test_util.check_request(result, expected, now);
+        test_util.check_request(null, result, expected, now);
         done();
       }
     };
@@ -1222,7 +1217,7 @@ describe('request_routes', function() {
     req.session.passport.user = JSON.stringify({ id: 2, system_admin: false })
     var res = {
       json: function(result) {
-        test_util.check_request(result, expected, now);
+        test_util.check_request(null, result, expected, now);
         done();
       }
     };
@@ -1251,7 +1246,7 @@ describe('request_routes', function() {
     req.session.passport.user = JSON.stringify({ id: 3, system_admin: false })
     var res = {
       json: function(result) {
-        test_util.check_request(result, expected, now);
+        test_util.check_request(null, result, expected, now);
         done();
       }
     };
@@ -1300,10 +1295,8 @@ describe('request_routes', function() {
     var res = {
       json: function(result) {
         should.exist(result);
-        result.should.not.have.property('err');
-        result.should.have.property('request');
-        result.request.should.have.property('id');
-        request_id = result.request.id;
+        result.should.have.property('id');
+        request_id = result.id;
         all_request_ids.push(request_id);
         done();
       }
@@ -1332,8 +1325,8 @@ describe('request_routes', function() {
     req.query = {id: request_id};
     var res = {
       json: function(result) {
-        test_util.check_request(result, expected, now);
-        last_req = result.request;
+        test_util.check_request(null, result, expected, now);
+        last_req = result;
         done();
       }
     };
@@ -1362,7 +1355,7 @@ describe('request_routes', function() {
     req.session.passport.user = JSON.stringify({ id: 4, system_admin: false })
     var res = {
       json: function(result) {
-        test_util.check_request(result, expected, now);
+        test_util.check_request(null, result, expected, now);
         done();
       }
     };
@@ -1383,23 +1376,21 @@ describe('request_routes', function() {
   });
 
   it('should create a request to add Tweety Bird to Wild At Heart', function(done) {
-    request.addBandMember({band_id: 1, person_id: 5}, function(result) {
+    request.addBandMember({band_id: 1, person_id: 5}, function(err, result) {
+      should.not.exist(err);
       should.exist(result);
-      result.should.not.have.property('err');
-      result.should.have.property('request');
-      result.request.should.have.property('id');
-      all_request_ids.push(result.request.id);
+      result.should.have.property('id');
+      all_request_ids.push(result.id);
       done();
     });
   });
 
   it('should create a request for Sylvester Cat to join Wild At Heart', function(done) {
-    request.joinBand({band_id: 1, person_id: 6}, function(result) {
+    request.joinBand({band_id: 1, person_id: 6}, function(err, result) {
+      should.not.exist(err);
       should.exist(result);
-      result.should.not.have.property('err');
-      result.should.have.property('request');
-      result.request.should.have.property('id');
-      all_request_ids.push(result.request.id);
+      result.should.have.property('id');
+      all_request_ids.push(result.id);
       done();
     });
   });
@@ -1436,7 +1427,7 @@ describe('request_routes', function() {
     }];
     var res = {
       json: function(result) {
-        test_util.check_request_list(result.all_requests, expected, now);
+        test_util.check_request_list(null, result, expected, now);
         done();
       }
     };

@@ -9,7 +9,7 @@ var fs = require('fs');
 exports.db = require('./db');
 
 exports.check_record = function(got_record, expected_record, fields) {
-  should.exist(got_record);
+  should.exist(got_record, 'Got null record');
   fields.forEach(function(f) {
     got_record.should.have.property(f);
     should.exist(got_record[f], f + ' is undefined');
@@ -64,6 +64,7 @@ exports.check_error_result = function(result, data_key) {
 
 exports.check_request = function(err, result, expected) {
   should.not.exist(err);
+  should.exist(result, 'Got null request');
   exports.check_item({request: result}, expected, 'request', [
     'id', 'description', 'request_type',
     'status', 'band_id', 'person_id'
