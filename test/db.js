@@ -3,6 +3,7 @@ var should = require('should');
 var sqlite3 = require('sqlite3');
 var fs = require('fs');
 
+process.env.db_name = 'bombay_test.db';
 var db = require('lib/db');
 
 describe('db_utility', function() {

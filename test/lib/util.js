@@ -6,13 +6,19 @@ var util = require('util');
 
 var db = require('lib/db');
 var fs = require('fs');
+exports.db = require('./db');
 
 exports.check_record = function(got_record, expected_record, fields) {
   should.exist(got_record);
   fields.forEach(function(f) {
     got_record.should.have.property(f);
     should.exist(got_record[f], f + ' is undefined');
-    got_record[f].should.eql(expected_record[f], f + ' not equal');
+    got_record[f].should.eql(expected_record[f], util.format(
+      '%s not equal\nGot %s\nExpected %s\n',
+      f,
+      util.inspect(JSON.parse(JSON.stringify(got_record))),
+      util.inspect(expected_record)
+    ));
   });
 };
 
@@ -33,6 +39,15 @@ exports.check_list = function(got_list, expected_list, data_key, fields) {
   }
 };
 
+exports.check_rows = function(got_rows, expected_rows, fields) {
+  should.exist(got_rows);
+  for(var i = 0; i < expected_rows.length; i++) {
+    var got = got_rows[i];
+    var exp = expected_rows[i];
+    exports.check_record(got, exp, fields);
+  }
+};
+
 exports.check_result = function(result, data_key) {
   should.exist(result);
   result.should.have.property(data_key);
@@ -47,44 +62,48 @@ exports.check_error_result = function(result, data_key) {
   return result.err;
 };
 
-exports.check_request = function(result, expected, now) {
-  exports.check_item(result, expected, 'request', [
+exports.check_request = function(err, result, expected) {
+  should.not.exist(err);
+  exports.check_item({request: result}, expected, 'request', [
     'id', 'description', 'request_type',
     'status', 'band_id', 'person_id'
   ]);
 
-  var request_time = new Date(result.request.timestamp + ' UTC');
+  var request_time = new Date(result.timestamp);
   should.exist(request_time);
   var request_timestring = util.format(
     '%s-%s-%s %s:%s',
-    request_time.getFullYear(),
-    request_time.getMonth(),
-    request_time.getDay(),
-    request_time.getHours(),
-    request_time.getMinutes()
+    request_time.getUTCFullYear(),
+    request_time.getUTCMonth(),
+    request_time.getUTCDay(),
+    request_time.getUTCHours(),
+    request_time.getUTCMinutes()
   );
-  request_time = new Date(request_timestring);
 
-  var now_time = new Date(now);
+  var now = new Date();
   var now_timestring = util.format(
     '%s-%s-%s %s:%s',
-    now_time.getFullYear(),
-    now_time.getMonth(),
-    now_time.getDay(),
-    now_time.getHours(),
-    now_time.getMinutes()
+    now.getUTCFullYear(),
+    now.getUTCMonth(),
+    now.getUTCDay(),
+    now.getUTCHours(),
+    now.getUTCMinutes()
   );
-  now_time = new Date(now_timestring);
 
-  var now_epoch = parseInt(now_time.valueOf());
+  var now_epoch = parseInt(now.valueOf());
   var request_epoch = parseInt(request_time.valueOf());
-  request_epoch.should.eql(now_epoch, 'Request time is ' + result.request.timestamp);
+  request_epoch.should.be.within(now_epoch - 300, request_epoch + 300, util.format(
+    'Request timestamp \'%s\' should be within five minutes of \'%s\'',
+    request_time.toString(),
+    now.toString()
+  ));
 };
 
-exports.check_request_list = function(result, expected, now) {
+exports.check_request_list = function(err, result, expected) {
+  should.not.exist(err);
   should.exist(result);
   result.length.should.eql(expected.length);
   for(var i=0; i < result.length; i++) {
-    exports.check_request({request: result[i]}, expected[i], now);
+    exports.check_request(null, result[i], expected[i]);
   }
 };

@@ -2,9 +2,7 @@ var should = require('should');
 var fs = require('fs');
 
 var test_util = require('test/lib/util');
-process.env.db_name = 'bombay_test.db';
 
-var db = require('lib/db');
 var db_orm = require('lib/db_orm');
 var constants = require('lib/constants');
 var encryption = require('routes/encryption');
@@ -13,65 +11,21 @@ var routes = require('routes/db');
 var util = require('lib/util');
 var constants = require('lib/constants');
 
-db.setLogDbErrors(false);
-
 describe('routes', function() {
-  var dbh;
-  before(function(done) {
-    db.setDbPath('./bombay_test.db');
-    dbh = new db.Handle()
-    var sql = fs.readFileSync('./sql/schema.sql', 'utf8');
-    dbh.doSqlExec([sql], done);
-  });
+  before(function(done) { test_util.db.resetDb(done); });
 
   before(function(done) {
-    var sql = fs.readFileSync('./test/support/addBands.sql', 'utf8');
-    dbh.doSqlExec(sql, function(err) {
-      done();
-    });
-  });
+    test_util.db.loadSql([
+      {file: './test/support/addBands.sql'},
+      {file: './test/support/addPeople.sql'},
+      {file: './test/support/addBandMembers.sql'},
+      {file: './test/support/addArtists.sql'},
+      {file: './test/support/addSongs.sql'},
+      {file: './test/support/addBandSongs.sql'},
 
-  before(function(done) {
-    var sql = fs.readFileSync('./test/support/addPeople.sql', 'utf8');
-    dbh.doSqlExec(sql, function(err) {
-      done();
-    });
-  });
-
-  before(function(done) {
-    var sql = fs.readFileSync('./test/support/addBandMembers.sql', 'utf8');
-    dbh.doSqlExec(sql, function(err) {
-      done();
-    });
-  });
-
-  before(function(done) {
-    var sql = fs.readFileSync('./test/support/addArtists.sql', 'utf8');
-    dbh.doSqlExec(sql, function(err) {
-      done();
-    });
-  });
-
-  before(function(done) {
-    var sql = fs.readFileSync('./test/support/addSongs.sql', 'utf8');
-    dbh.doSqlExec(sql, function(err) {
-      done();
-    });
-  });
-
-  before(function(done) {
-    var sql = fs.readFileSync('./test/support/addBandSongs.sql', 'utf8');
-    dbh.doSqlExec(sql, function(err) {
-      done();
-    });
-  });
-
-  // Blow away the defaults and add some predictable ones.
-  before(function(done) {
-    var sql = fs.readFileSync('./test/support/addSongRatings.sql', 'utf8');
-    dbh.doSqlExec(sql, function(err) {
-      done();
-    });
+      // Blow away the defaults and add some predictable ones.
+      {file: './test/support/addSongRatings.sql'}, 
+    ], done);
   });
 
   var req;
@@ -508,23 +462,26 @@ describe('routes', function() {
         req.body = {band_id: 3, person_id: 1};
         var res = {
           json: function(result) {
-            should.exist(result.request);
-            should.exist(result.request.request_type);
+            should.exist(result);
+            result.should.not.have.property('err');
+            result.should.have.property('request');
+            result.request.should.have.property('request_type');
             result.request.request_type.should.eql(constants.request_type.add_band_member);
-            should.exist(result.request.band_id);
+            result.request.should.have.property('band_id');
             result.request.band_id.should.eql(3);
-            should.exist(result.request.person_id);
+            result.request.should.have.property('person_id');
             result.request.person_id.should.eql(1);
-            should.exist(result.request.description);
+            result.request.should.have.property('description');
             result.request.description.should.eql('Sally Says Go is inviting System Admin User to join');
-            should.exist(result.request.status);
+            result.request.should.have.property('status');
             result.request.status.should.eql(constants.request_status.pending);
-            should.exist(result.request.id);
+            result.request.should.have.property('id');
             result.request.id.should.eql(1);
-            should.exist(result.request.timestamp);
+            result.request.should.have.property('timestamp');
             done();
           }
         };
+debugger;//XXX
         routes.postBandMemberTable(req, res);
       });
 
@@ -606,8 +563,9 @@ describe('routes', function() {
 
       it('should get the band', function(done) {
         var expected = {id: 1, name: 'Groove On The Side'};
-        dbh.band().getById(1, function(result) {
-          test_util.check_item(result, expected, 'band', ['id', 'name']);
+        db_orm.Band.get(1, function(err, row) {
+          should.not.exist(err);
+          test_util.check_record(row, expected, ['id', 'name']);
           done();
         });
       });
@@ -633,9 +591,9 @@ describe('routes', function() {
           email: 'admin@musichero.foo',
           system_admin: true
         };
-        dbh.person().getById(1, function(result) {
-debugger;//XXX
-          test_util.check_item(result, expected, 'person', ['id', 'name', 'full_name', 'email', 'system_admin']);
+        db_orm.Person.get(1, function(err, row) {
+          should.not.exist(err);
+          test_util.check_record(row, expected, ['id', 'name', 'full_name', 'email', 'system_admin']);
           done();
         });
       });
@@ -655,14 +613,12 @@ debugger;//XXX
 
       before(function(done) {
         var pem = util.get_pem_file('crypto/rsa_public.pem');
-        dbh.person().update({
-          id: 1,
-          password: util.encrypt(pem, old_password)
-        }, function(result) {
-          if (result.err) {
-            throw new Error(result.err);
-          }
-          done();
+        db_orm.Person.get(1, function(err, row) {
+          if (err) throw err;
+          row.save({password: util.encrypt(pem, old_password)}, function(err) {
+            if (err) throw err;
+            done();
+          });
         });
       });
 
@@ -674,16 +630,15 @@ debugger;//XXX
             done();
           }
         };
-debugger;//XXX
         routes.putPersonTable(req, res);
       });
 
       it('should get the new password', function(done) {
-        var expected = {id: 1, password: new_password};
-        dbh.person().getById(1, function(result) {
+        db_orm.Person.get(1, function(err, row) {
+          should.not.exist(err);
           var pem = util.get_pem_file('crypto/rsa_private.pem');
-          result.person.password = util.decrypt(pem, result.person.password);
-          test_util.check_item(result, expected, 'person', ['id', 'password']);
+          var password = util.decrypt(pem, row.password);
+          password.should.eql(new_password);
           done();
         });
       });
@@ -702,11 +657,11 @@ debugger;//XXX
       });
 
       it('should get the new password', function(done) {
-        var expected = {id: 1, password: new_password};
-        dbh.person().getById(1, function(result) {
+        db_orm.Person.get(1, function(err, row) {
+          should.not.exist(err);
           var pem = util.get_pem_file('crypto/rsa_private.pem');
-          result.person.password = util.decrypt(pem, result.person.password);
-          test_util.check_item(result, expected, 'person', ['id', 'password']);
+          var password = util.decrypt(pem, row.password);
+          password.should.eql(new_password);
           done();
         });
       });
@@ -726,11 +681,11 @@ debugger;//XXX
       });
 
       it('should get the old password', function(done) {
-        var expected = {id: 1, password: old_password};
-        dbh.person().getById(1, function(result) {
+        db_orm.Person.get(1, function(err, row) {
+          should.not.exist(err);
           var pem = util.get_pem_file('crypto/rsa_private.pem');
-          result.person.password = util.decrypt(pem, result.person.password);
-          test_util.check_item(result, expected, 'person', ['id', 'password']);
+          var password = util.decrypt(pem, row.password);
+          password.should.eql(old_password);
           done();
         });
       });
@@ -750,8 +705,9 @@ debugger;//XXX
 
       it('should get the artist', function(done) {
         var expected = {id: 1, name: 'Mott The Hoople'};
-        dbh.artist().getById(1, function(result) {
-          test_util.check_item(result, expected, 'artist', ['id', 'name']);
+        db_orm.Artist.get(1, function(err, row) {
+          should.not.exist(err);
+          test_util.check_record(row, expected, ['id', 'name']);
           done();
         });
       });
@@ -771,8 +727,9 @@ debugger;//XXX
 
       it('should get the song', function(done) {
         var expected = {id: 1, name: 'Ziggy Stardust', artist_id: 5};
-        dbh.song().getById(1, function(result) {
-          test_util.check_item(result, expected, 'song', ['id', 'name', 'artist_id']);
+        db_orm.Song.get(1, function(err, row) {
+          should.not.exist(err);
+          test_util.check_record(row, expected, ['id', 'name', 'artist_id']);
           done();
         });
       });
@@ -792,8 +749,9 @@ debugger;//XXX
 
       it('should get the band_member', function(done) {
         var expected = {id: 1, band_id: 1, person_id: 1, band_admin: true};
-        dbh.band_member().getById(1, function(result) {
-          test_util.check_item(result, expected, 'band_member', ['id', 'band_id', 'person_id', 'band_admin']);
+        db_orm.BandMember.get(1, function(err, row) {
+          should.not.exist(err);
+          test_util.check_record(row, expected, ['id', 'band_id', 'person_id', 'band_admin']);
           done();
         });
       });
@@ -813,8 +771,9 @@ debugger;//XXX
 
       it('should get the band_song', function(done) {
         var expected = {id: 1, band_id: 1, song_id: 1, song_status: 2};
-        dbh.band_song().getById(1, function(result) {
-          test_util.check_item(result, expected, 'band_song', ['id', 'band_id', 'song_id', 'song_status']);
+        db_orm.BandSong.get(1, function(err, row) {
+          should.not.exist(err);
+          test_util.check_record(row, expected, ['id', 'band_id', 'song_id', 'song_status']);
           done();
         });
       });
@@ -834,8 +793,9 @@ debugger;//XXX
 
       it('should get the song_rating', function(done) {
         var expected = {id: 1, band_member_id: 1, band_song_id: 1, rating: 2};
-        dbh.song_rating().getById(1, function(result) {
-          test_util.check_item(result, expected, 'song_rating', ['id', 'band_member_id', 'band_song_id', 'rating']);
+        db_orm.SongRating.get(1, function(err, row) {
+          should.not.exist(err);
+          test_util.check_record(row, expected, ['id', 'band_member_id', 'band_song_id', 'rating']);
           done();
         });
       });
@@ -845,9 +805,9 @@ debugger;//XXX
   describe('#delete', function() {
     describe('#band_song', function() {
       it('should get the band_song', function(done) {
-        dbh.band_song().getById(5, function(result) {
-          should.exist(result);
-          result.should.have.property('band_song');
+        db_orm.BandSong.get(5, function(err, row) {
+          should.not.exist(err);
+          should.exist(row);
           done();
         });
       });
@@ -864,9 +824,12 @@ debugger;//XXX
       });
 
       it('should not get the band_song', function(done) {
-        dbh.band_song().getById(5, function(result) {
-          should.exist(result);
-          result.should.not.have.property('band_song');
+        db_orm.BandSong.get(5, function(err, row) {
+          should.exist(err);
+          err.should.have.property('message');
+          var msg = err.message.toUpperCase();
+          msg.should.eql('NOT FOUND');
+          should.not.exist(row);
           done();
         });
       });
@@ -874,9 +837,9 @@ debugger;//XXX
 
     describe('#band_member', function() {
       it('should get the band_member', function(done) {
-        dbh.band_member().getById(5, function(result) {
-          should.exist(result);
-          result.should.have.property('band_member');
+        db_orm.BandMember.get(5, function(err, row) {
+          should.not.exist(err);
+          should.exist(row);
           done();
         });
       });
@@ -893,9 +856,12 @@ debugger;//XXX
       });
 
       it('should not get the band_member', function(done) {
-        dbh.band_member().getById(5, function(result) {
-          should.exist(result);
-          result.should.not.have.property('band_member');
+        db_orm.BandMember.get(5, function(err, row) {
+          should.exist(err);
+          err.should.have.property('message');
+          var msg = err.message.toUpperCase();
+          msg.should.eql('NOT FOUND');
+          should.not.exist(row);
           done();
         });
       });
@@ -903,9 +869,9 @@ debugger;//XXX
 
     describe('#song', function() {
       it('should get the song', function(done) {
-        dbh.song().getById(7, function(result) {
-          should.exist(result);
-          result.should.have.property('song');
+        db_orm.Song.get(7, function(err, row) {
+          should.not.exist(err);
+          should.exist(row);
           done();
         });
       });
@@ -922,9 +888,12 @@ debugger;//XXX
       });
 
       it('should not get the song', function(done) {
-        dbh.song().getById(7, function(result) {
-          should.exist(result);
-          result.should.not.have.property('song');
+        db_orm.Song.get(7, function(err, row) {
+          should.exist(err);
+          err.should.have.property('message');
+          var msg = err.message.toUpperCase();
+          msg.should.eql('NOT FOUND');
+          should.not.exist(row);
           done();
         });
       });
@@ -932,33 +901,23 @@ debugger;//XXX
 
     describe('#band', function() {
       before(function(done) {
-        dbh.band_member().getAllWithArgs({ where: { band_id: 4}}, function(result) {
-          result.all_band_members.forEach(function(band_member) {
-            dbh.band_member().deleteById(band_member.id, function(dres) {
-              should.exist(dres);
-              dres.should.not.have.property('err');
-            });
-          });
+        db_orm.BandMember.find({band_id: 4}).remove(function(err) {
+          if (err) throw err;
           done();
         });
       });
 
       before(function(done) {
-        dbh.band_song().getAllWithArgs({ where: { band_id: 4}}, function(result) {
-          result.all_band_songs.forEach(function(band_song) {
-            dbh.band_song().deleteById(band_song.id, function(dres) {
-              should.exist(dres);
-              dres.should.not.have.property('err');
-            });
-          });
+        db_orm.BandSong.find({band_id: 4}).remove(function(err) {
+          if (err) throw err;
           done();
         });
       });
 
       it('should get the band', function(done) {
-        dbh.band().getById(4, function(result) {
-          should.exist(result);
-          result.should.have.property('band');
+        db_orm.Band.get(4, function(err, row) {
+          should.not.exist(err);
+          should.exist(row);
           done();
         });
       });
@@ -975,9 +934,12 @@ debugger;//XXX
       });
 
       it('should not get the band', function(done) {
-        dbh.band().getById(4, function(result) {
-          should.exist(result);
-          result.should.not.have.property('band');
+        db_orm.Band.get(4, function(err, row) {
+          should.exist(err);
+          err.should.have.property('message');
+          var msg = err.message.toUpperCase();
+          msg.should.eql('NOT FOUND');
+          should.not.exist(row);
           done();
         });
       });
@@ -985,21 +947,16 @@ debugger;//XXX
 
     describe('#person', function() {
       before(function(done) {
-        dbh.band_member().getAllWithArgs({ where: { person_id: 4}}, function(result) {
-          result.all_band_members.forEach(function(band_member) {
-            dbh.band_member().deleteById(band_member.id, function(dres) {
-              should.exist(dres);
-              dres.should.not.have.property('err');
-            });
-          });
+        db_orm.BandMember.find({person_id: 4}).remove(function(err) {
+          if (err) throw err;
           done();
         });
       });
 
       it('should get the person', function(done) {
-        dbh.person().getById(4, function(result) {
-          should.exist(result);
-          result.should.have.property('person');
+        db_orm.Person.get(4, function(err, row) {
+          should.not.exist(err);
+          should.exist(row);
           done();
         });
       });
@@ -1016,9 +973,12 @@ debugger;//XXX
       });
 
       it('should not get the person', function(done) {
-        dbh.person().getById(4, function(result) {
-          should.exist(result);
-          result.should.not.have.property('person');
+        db_orm.Person.get(4, function(err, row) {
+          should.exist(err);
+          err.should.have.property('message');
+          var msg = err.message.toUpperCase();
+          msg.should.eql('NOT FOUND');
+          should.not.exist(row);
           done();
         });
       });
@@ -1026,21 +986,16 @@ debugger;//XXX
 
     describe('#artist', function() {
       before(function(done) {
-        dbh.song().getAllWithArgs({ where: { artist_id: 3}}, function(result) {
-          result.all_songs.forEach(function(song) {
-            dbh.song().deleteById(song.id, function(dres) {
-              should.exist(dres);
-              dres.should.not.have.property('err');
-            });
-          });
+        db_orm.Song.find({artist_id: 3}).remove(function(err) {
+          if (err) throw err;
           done();
         });
       });
 
       it('should get the artist', function(done) {
-        dbh.artist().getById(3, function(result) {
-          should.exist(result);
-          result.should.have.property('artist');
+        db_orm.Artist.get(3, function(err, row) {
+          should.not.exist(err);
+          should.exist(row);
           done();
         });
       });
@@ -1057,9 +1012,12 @@ debugger;//XXX
       });
 
       it('should not get the artist', function(done) {
-        dbh.artist().getById(3, function(result) {
-          should.exist(result);
-          result.should.not.have.property('artist');
+        db_orm.Artist.get(3, function(err, row) {
+          should.exist(err);
+          err.should.have.property('message');
+          var msg = err.message.toUpperCase();
+          msg.should.eql('NOT FOUND');
+          should.not.exist(row);
           done();
         });
       });
@@ -1110,16 +1068,10 @@ debugger;//XXX
 });
 
 describe('request_routes', function() {
-  var dbh;
-  before(function(done) {
-    db.setDbPath('./bombay_test.db');
-    dbh = new db.Handle()
-    var sql = fs.readFileSync('./sql/schema.sql', 'utf8');
-    dbh.doSqlExec([sql], done);
-  });
+  before(function(done) { test_util.db.resetDb(done); });
 
   before(function(done) {
-    var sql_cmds = [
+    test_util.db.loadSql([
       'INSERT INTO band (id, name) VALUES (1, \'Wild At Heart\');',
       'INSERT INTO person (id, name, full_name) VALUES (3, \'bbunny\', \'Bugs Bunny\');',
       'INSERT INTO person (id, name, full_name) VALUES (2, \'efudd\', \'Elmer Fudd\');',
@@ -1127,11 +1079,7 @@ describe('request_routes', function() {
       'INSERT INTO person (id, name, full_name) VALUES (5, \'tbird\', \'Tweety Bird\');',
       'INSERT INTO person (id, name, full_name) VALUES (6, \'scat\', \'Sylvester Cat\');',
       'INSERT INTO band_member (id, band_id, person_id, band_admin) VALUES (1, 1, 3, 1);',
-    ];
-    var sql = sql_cmds.join('\n');
-    dbh.doSqlExec(sql, function(err) {
-      done();
-    });
+    ], done);
   });
 
   var req;
@@ -1161,12 +1109,10 @@ describe('request_routes', function() {
   });
 
   it('should not find a matching band_member', function(done) {
-    dbh.band_member().getAllWithArgs({
-      where: { band_id: 1, person_id: 2}
-    }, function(result) {
-      should.exist(result);
-      result.should.have.property('all_band_members');
-      result.all_band_members.should.eql([]);
+    db_orm.BandMember.count({band_id: 1, person_id: 2}, function(err, count) {
+      should.not.exist(err);
+      should.exist(count);
+      count.should.eql(0);
       done();
     });
   });
@@ -1204,12 +1150,10 @@ describe('request_routes', function() {
   });
 
   it('should not find a matching band_member', function(done) {
-    dbh.band_member().getAllWithArgs({
-      where: { band_id: 1, person_id: 2}
-    }, function(result) {
-      should.exist(result);
-      result.should.have.property('all_band_members');
-      result.all_band_members.should.eql([]);
+    db_orm.BandMember.count({band_id: 1, person_id: 2}, function(err, count) {
+      should.not.exist(err);
+      should.exist(count);
+      count.should.eql(0);
       done();
     });
   });
@@ -1257,12 +1201,10 @@ describe('request_routes', function() {
   });
 
   it('should not find a matching band_member', function(done) {
-    dbh.band_member().getAllWithArgs({
-      where: { band_id: 1, person_id: 2}
-    }, function(result) {
-      should.exist(result);
-      result.should.have.property('all_band_members');
-      result.all_band_members.should.eql([]);
+    db_orm.BandMember.count({band_id: 1, person_id: 2}, function(err, count) {
+      should.not.exist(err);
+      should.exist(count);
+      count.should.eql(0);
       done();
     });
   });
@@ -1288,12 +1230,10 @@ describe('request_routes', function() {
   });
 
   it('should not find a matching band_member', function(done) {
-    dbh.band_member().getAllWithArgs({
-      where: { band_id: 1, person_id: 2}
-    }, function(result) {
-      should.exist(result);
-      result.should.have.property('all_band_members');
-      result.all_band_members.should.eql([]);
+    db_orm.BandMember.count({band_id: 1, person_id: 2}, function(err, count) {
+      should.not.exist(err);
+      should.exist(count);
+      count.should.eql(0);
       done();
     });
   });
@@ -1324,24 +1264,18 @@ describe('request_routes', function() {
       person_id: 2,
       band_admin: false
     }];
-    dbh.band_member().getAllWithArgs({
-      where: { band_id: 1, person_id: 2}
-    }, function(result) {
-      test_util.check_list(
-        result, expected, 'all_band_members',
-        ['band_id', 'person_id', 'band_admin']
-      );
+    db_orm.BandMember.find({ band_id: 1, person_id: 2}, function(err, rows) {
+      should.not.exist(err);
+      test_util.check_rows(rows, expected, ['band_id', 'person_id', 'band_admin']);
       done();
     });
   });
 
   it('should not find a matching band_member', function(done) {
-    dbh.band_member().getAllWithArgs({
-      where: { band_id: 1, person_id: 4}
-    }, function(result) {
-      should.exist(result);
-      result.should.have.property('all_band_members');
-      result.all_band_members.should.eql([]);
+    db_orm.BandMember.count({band_id: 1, person_id: 4}, function(err, count) {
+      should.not.exist(err);
+      should.exist(count);
+      count.should.eql(0);
       done();
     });
   });
@@ -1378,12 +1312,10 @@ describe('request_routes', function() {
   });
 
   it('should not find a matching band_member', function(done) {
-    dbh.band_member().getAllWithArgs({
-      where: { band_id: 1, person_id: 4}
-    }, function(result) {
-      should.exist(result);
-      result.should.have.property('all_band_members');
-      result.all_band_members.should.eql([]);
+    db_orm.BandMember.count({band_id: 1, person_id: 4}, function(err, count) {
+      should.not.exist(err);
+      should.exist(count);
+      count.should.eql(0);
       done();
     });
   });
@@ -1409,12 +1341,10 @@ describe('request_routes', function() {
   });
 
   it('should not find a matching band_member', function(done) {
-    dbh.band_member().getAllWithArgs({
-      where: { band_id: 1, person_id: 4}
-    }, function(result) {
-      should.exist(result);
-      result.should.have.property('all_band_members');
-      result.all_band_members.should.eql([]);
+    db_orm.BandMember.count({band_id: 1, person_id: 4}, function(err, count) {
+      should.not.exist(err);
+      should.exist(count);
+      count.should.eql(0);
       done();
     });
   });
@@ -1445,13 +1375,9 @@ describe('request_routes', function() {
       person_id: 4,
       band_admin: false
     }];
-    dbh.band_member().getAllWithArgs({
-      where: { band_id: 1, person_id: 4}
-    }, function(result) {
-      test_util.check_list(
-        result, expected, 'all_band_members',
-        ['band_id', 'person_id', 'band_admin']
-      );
+    db_orm.BandMember.find({ band_id: 1, person_id: 4}, function(err, rows) {
+      should.not.exist(err);
+      test_util.check_rows(rows, expected, ['band_id', 'person_id', 'band_admin']);
       done();
     });
   });

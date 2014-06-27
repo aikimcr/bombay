@@ -4,71 +4,54 @@ var fs = require('fs');
 var util = require('util');
 
 var test_util = require('test/lib/util');
-process.env.db_name = 'bombay_test.db';
 
 var constants = require('lib/constants');
-var db = require('lib/db');
 var db_orm = require('lib/db_orm');
-var dbh;
 
 var request = require('lib/request');
 
 describe('manage_requests', function() {
   describe('make a request to join a band', function() {
+    before(function(done) { test_util.db.resetDb(done); });
+
     before(function(done) {
-      db.setDbPath('./bombay_test.db');
-      dbh = new db.Handle()
-      var sql = fs.readFileSync('./sql/schema.sql', 'utf8');
-      dbh.doSqlExec([sql], done);
-    });
-
-    it('should load all the records into the db', function(done) {
-      var sql = fs.readFileSync('./test/support/addBands.sql', 'utf8') + '\n' +
-        fs.readFileSync('./test/support/addPeople.sql', 'utf8') + '\n' +
-        'INSERT INTO band_member (band_id, person_id, band_admin) VALUES (1,2,1);';
-
-      dbh.doSqlExec(sql, function(err) {
-        should.not.exist(err);
-        done();
-      });
+      test_util.db.loadSql([
+        {file: './test/support/addBands.sql'},
+        {file: './test/support/addPeople.sql'},
+        'INSERT INTO band_member (band_id, person_id, band_admin) VALUES (1,2,1);'
+      ], done);
     });
 
     it('should not find a matching band_member', function(done) {
-      dbh.band_member().getAllWithArgs({
-        where: { band_id: 1, person_id: 3}
-      }, function(result) {
-        should.exist(result);
-        result.should.have.property('all_band_members');
-        result.all_band_members.should.eql([]);
+      db_orm.BandMember.find({ band_id: 1, person_id: 3}, function(err, rows) {
+        should.not.exist(err);
+        should.exist(rows);
+        rows.length.should.eql(0);
         done();
       });
     });
 
     var request_id;
     it('should create the request', function(done) {
-      request.joinBand({band_id: 1, person_id: 3}, function(result) {
-        should.exist(result);
-        result.should.not.have.property('err');
-        result.should.have.property('request');
-        result.request.should.have.property('id');
-        request_id = result.request.id;
+      request.joinBand({band_id: 1, person_id: 3}, function(err, request) {
+        should.not.exist(err);
+        should.exist(request);
+        request.should.have.property('id');
+        request_id = request.id;
         done();
       });
     });
 
     it('should not find a matching band_member', function(done) {
-      dbh.band_member().getAllWithArgs({
-        where: { band_id: 1, person_id: 3}
-      }, function(result) {
-        should.exist(result);
-        result.should.have.property('all_band_members');
-        result.all_band_members.should.eql([]);
+      db_orm.BandMember.find({ band_id: 1, person_id: 3}, function(err, rows) {
+        should.not.exist(err);
+        should.exist(rows);
+        rows.length.should.eql(0);
         done();
       });
     });
 
     var last_req;
-    var now = new Date();
     it('should get the request', function(done) {
       var expected = {
         id: request_id,
@@ -78,9 +61,9 @@ describe('manage_requests', function() {
         band_id: 1,
         person_id: 3,
       };
-      request.getById(request_id, function(result) {
-        test_util.check_request(result, expected, now);
-        last_req = result.request;
+      request.getById(request_id, function(err, result) {
+        test_util.check_request(err, result, expected);
+        last_req = result;
         done();
       });
     });
@@ -94,8 +77,8 @@ describe('manage_requests', function() {
         band_id: 1,
         person_id: 3,
       }];
-      request.getMyRequests(2, function(result) {
-        test_util.check_request_list(result.all_requests, expected, now);
+      request.getMyRequests(2, function(err, result) {
+        test_util.check_request_list(err, result, expected);
         done();
       });
     });
@@ -109,19 +92,17 @@ describe('manage_requests', function() {
         band_id: 1,
         person_id: 3,
       };
-      last_req.reject(function(result) {
-        test_util.check_request(result, expected, now);
+      last_req.reject(function(err, result) {
+        test_util.check_request(err, result, expected);
         done();
       });
     });
 
     it('should not find a matching band_member', function(done) {
-      dbh.band_member().getAllWithArgs({
-        where: { band_id: 1, person_id: 3}
-      }, function(result) {
-        should.exist(result);
-        result.should.have.property('all_band_members');
-        result.all_band_members.should.eql([]);
+      db_orm.BandMember.find({ band_id: 1, person_id: 3}, function(err, rows) {
+        should.not.exist(err);
+        should.exist(rows);
+        rows.length.should.eql(0);
         done();
       });
     });
@@ -135,19 +116,17 @@ describe('manage_requests', function() {
         band_id: 1,
         person_id: 3,
       };
-      last_req.reopen(function(result) {
-        test_util.check_request(result, expected, now);
+      last_req.reopen(function(err, result) {
+        test_util.check_request(err, result, expected);
         done();
       });
     });
 
     it('should not find a matching band_member', function(done) {
-      dbh.band_member().getAllWithArgs({
-        where: { band_id: 1, person_id: 3}
-      }, function(result) {
-        should.exist(result);
-        result.should.have.property('all_band_members');
-        result.all_band_members.should.eql([]);
+      db_orm.BandMember.find({ band_id: 1, person_id: 3}, function(err, rows) {
+        should.not.exist(err);
+        should.exist(rows);
+        rows.length.should.eql(0);
         done();
       });
     });
@@ -161,8 +140,8 @@ describe('manage_requests', function() {
         band_id: 1,
         person_id: 3,
       };
-      last_req.accept(function(result) {
-        test_util.check_request(result, expected, now);
+      last_req.accept(function(err, result) {
+        test_util.check_request(err, result, expected);
         done();
       });
     });
@@ -173,67 +152,50 @@ describe('manage_requests', function() {
         person_id: 3,
         band_admin: false
       }];
-      dbh.band_member().getAllWithArgs({
-        where: { band_id: 1, person_id: 3}
-      }, function(result) {
-        test_util.check_list(
-          result, expected, 'all_band_members',
-          ['band_id', 'person_id', 'band_admin']
-        );
+      db_orm.BandMember.find({ band_id: 1, person_id: 3}, function(err, rows) {
+        should.not.exist(err);
+        test_util.check_rows(rows, expected, ['band_id', 'person_id', 'band_admin']);
         done();
       });
     });
   });
 
   describe('make a request to add a member', function() {
+    before(function(done) { test_util.db.resetDb(done); });
+
     before(function(done) {
-      db.setDbPath('./bombay_test.db');
-      dbh = new db.Handle()
-      var sql = fs.readFileSync('./sql/schema.sql', 'utf8');
-      dbh.doSqlExec([sql], done);
-    });
-
-    it('should load all the records into the db', function(done) {
-      var sql = fs.readFileSync('./test/support/addBands.sql', 'utf8') + '\n' +
-        fs.readFileSync('./test/support/addPeople.sql', 'utf8') + '\n' +
-        'INSERT INTO band_member (band_id, person_id, band_admin) VALUES (1,2,1);';
-
-      dbh.doSqlExec(sql, function(err) {
-        should.not.exist(err);
-        done();
-      });
+      test_util.db.loadSql([
+        {file: './test/support/addBands.sql'},
+        {file: './test/support/addPeople.sql'},
+        'INSERT INTO band_member (band_id, person_id, band_admin) VALUES (1,2,1);'
+      ], done);
     });
 
     it('should not find a matching band_member', function(done) {
-      dbh.band_member().getAllWithArgs({
-        where: { band_id: 1, person_id: 3}
-      }, function(result) {
-        should.exist(result);
-        result.should.have.property('all_band_members');
-        result.all_band_members.should.eql([]);
+      db_orm.BandMember.find({ band_id: 1, person_id: 3}, function(err, rows) {
+        should.not.exist(err);
+        should.exist(rows);
+        rows.length.should.eql(0);
         done();
       });
     });
 
     var request_id;
     it('should create the request', function(done) {
-      request.addBandMember({band_id: 1, person_id: 3}, function(result) {
+      request.addBandMember({band_id: 1, person_id: 3}, function(err, result) {
+        should.not.exist(err);
         should.exist(result);
-        result.should.not.have.property('err');
-        result.should.have.property('request');
-        result.request.should.have.property('id');
-        request_id = result.request.id;
+        result.should.have.property('id');
+        request_id = result.id;
         done();
       });
     });
 
     it('should not find a matching band_member', function(done) {
-      dbh.band_member().getAllWithArgs({
-        where: { band_id: 1, person_id: 3}
-      }, function(result) {
-        should.exist(result);
-        result.should.have.property('all_band_members');
-        result.all_band_members.should.eql([]);
+      db_orm.BandMember.find({ band_id: 1, person_id: 3}, function(err, rows) {
+        should.not.exist(err);
+        should.exist(rows);
+        rows.length.should.eql(0);
         done();
       });
     });
@@ -249,9 +211,9 @@ describe('manage_requests', function() {
         band_id: 1,
         person_id: 3,
       };
-      request.getById(request_id, function(result) {
-        test_util.check_request(result, expected, now);
-        last_req = result.request;
+      request.getById(request_id, function(err, result) {
+        test_util.check_request(err, result, expected);
+        last_req = result;
         done();
       });
     });
@@ -265,8 +227,8 @@ describe('manage_requests', function() {
         band_id: 1,
         person_id: 3,
       }];
-      request.getMyRequests(2, function(result) {
-        test_util.check_request_list(result.all_requests, expected, now);
+      request.getMyRequests(2, function(err, result) {
+        test_util.check_request_list(err, result, expected);
         done();
       });
     });
@@ -280,19 +242,17 @@ describe('manage_requests', function() {
         band_id: 1,
         person_id: 3,
       };
-      last_req.reject(function(result) {
-        test_util.check_request(result, expected, now);
+      last_req.reject(function(err, result) {
+        test_util.check_request(err, result, expected);
         done();
       });
     });
 
     it('should not find a matching band_member', function(done) {
-      dbh.band_member().getAllWithArgs({
-        where: { band_id: 1, person_id: 3}
-      }, function(result) {
-        should.exist(result);
-        result.should.have.property('all_band_members');
-        result.all_band_members.should.eql([]);
+      db_orm.BandMember.find({ band_id: 1, person_id: 3}, function(err, rows) {
+        should.not.exist(err);
+        should.exist(rows);
+        rows.length.should.eql(0);
         done();
       });
     });
@@ -306,19 +266,17 @@ describe('manage_requests', function() {
         band_id: 1,
         person_id: 3,
       };
-      last_req.reopen(function(result) {
-        test_util.check_request(result, expected, now);
+      last_req.reopen(function(err, result) {
+        test_util.check_request(err, result, expected);
         done();
       });
     });
 
     it('should not find a matching band_member', function(done) {
-      dbh.band_member().getAllWithArgs({
-        where: { band_id: 1, person_id: 3}
-      }, function(result) {
-        should.exist(result);
-        result.should.have.property('all_band_members');
-        result.all_band_members.should.eql([]);
+      db_orm.BandMember.find({ band_id: 1, person_id: 3}, function(err, rows) {
+        should.not.exist(err);
+        should.exist(rows);
+        rows.length.should.eql(0);
         done();
       });
     });
@@ -332,8 +290,8 @@ describe('manage_requests', function() {
         band_id: 1,
         person_id: 3,
       };
-      last_req.accept(function(result) {
-        test_util.check_request(result, expected, now);
+      last_req.accept(function(err, result) {
+        test_util.check_request(err, result, expected);
         done();
       });
     });
@@ -344,69 +302,54 @@ describe('manage_requests', function() {
         person_id: 3,
         band_admin: false
       }];
-      dbh.band_member().getAllWithArgs({
-        where: { band_id: 1, person_id: 3}
-      }, function(result) {
-        test_util.check_list(
-          result, expected, 'all_band_members',
-          ['band_id', 'person_id', 'band_admin']
-        );
+      db_orm.BandMember.find({ band_id: 1, person_id: 3}, function(err, rows) {
+        should.not.exist(err);
+        test_util.check_rows(rows, expected, ['band_id', 'person_id', 'band_admin']);
         done();
       });
     });
   });
 
   describe('Get request lists', function() {
+    before(function(done) { test_util.db.resetDb(done); });
+
     before(function(done) {
-      db.setDbPath('./bombay_test.db');
-      dbh = new db.Handle()
-      var sql = fs.readFileSync('./sql/schema.sql', 'utf8');
-      dbh.doSqlExec([sql], done);
+      test_util.db.loadSql([
+        {file: './test/support/addBands.sql'},
+        {file: './test/support/addPeople.sql'},
+        'INSERT INTO band_member (band_id, person_id, band_admin) VALUES (1,2,1);',
+        'INSERT INTO band_member (band_id, person_id, band_admin) VALUES (2,3,1);'
+      ], done);
     });
 
-    it('should load all the records into the db', function(done) {
-      var sql = fs.readFileSync('./test/support/addBands.sql', 'utf8') + '\n' +
-        fs.readFileSync('./test/support/addPeople.sql', 'utf8') + '\n' +
-        'INSERT INTO band_member (band_id, person_id, band_admin) VALUES (1,2,1);' +
-        'INSERT INTO band_member (band_id, person_id, band_admin) VALUES (2,3,1);';
-
-      dbh.doSqlExec(sql, function(err) {
-        should.not.exist(err);
-        done();
-      });
-    });
-    
     var request_id = [];
     var now = new Date();
     it('should create a request to add Danny Drums to Wild At Heart', function(done) {
-      request.addBandMember({band_id: 1, person_id: 3}, function(result) {
+      request.addBandMember({band_id: 1, person_id: 3}, function(err, result) {
+        should.not.exist(err);
         should.exist(result);
-        result.should.not.have.property('err');
-        result.should.have.property('request');
-        result.request.should.have.property('id');
-        request_id.push(result.request.id);
+        result.should.have.property('id');
+        request_id.push(result.id);
         done();
       });
     });
 
     it('should create a request for Alan Poser to join Live! Dressed! Girls!', function(done) {
-      request.joinBand({band_id: 2, person_id: 2}, function(result) {
+      request.joinBand({band_id: 2, person_id: 2}, function(err, result) {
+        should.not.exist(err);
         should.exist(result);
-        result.should.not.have.property('err');
-        result.should.have.property('request');
-        result.request.should.have.property('id');
-        request_id.push(result.request.id);
+        result.should.have.property('id');
+        request_id.push(result.id);
         done();
       });
     });
 
     it('should create a request for Johnny Guitar to join Live! Dressed! Girls!', function(done) {
-      request.joinBand({band_id: 2, person_id: 4}, function(result) {
+      request.joinBand({band_id: 2, person_id: 4}, function(err, result) {
+        should.not.exist(err);
         should.exist(result);
-        result.should.not.have.property('err');
-        result.should.have.property('request');
-        result.request.should.have.property('id');
-        request_id.push(result.request.id);
+        result.should.have.property('id');
+        request_id.push(result.id);
         done();
       });
     });
@@ -427,8 +370,8 @@ describe('manage_requests', function() {
         band_id: 1,
         person_id: 3,
       }];
-      request.getMyRequests(2, function(result) {
-        test_util.check_request_list(result.all_requests, expected, now);
+      request.getMyRequests(2, function(err, result) {
+        test_util.check_request_list(err, result, expected);
         done();
       });
     });
@@ -456,8 +399,8 @@ describe('manage_requests', function() {
         band_id: 1,
         person_id: 3,
       }];
-      request.getMyRequests(3, function(result) {
-        test_util.check_request_list(result.all_requests, expected, now);
+      request.getMyRequests(3, function(err, result) {
+        test_util.check_request_list(err, result, expected);
         done();
       });
     });
@@ -471,8 +414,8 @@ describe('manage_requests', function() {
         band_id: 2,
         person_id: 4,
       }];
-      request.getMyRequests(4, function(result) {
-        test_util.check_request_list(result.all_requests, expected, now);
+      request.getMyRequests(4, function(err, result) {
+        test_util.check_request_list(err, result, expected);
         done();
       });
     });
@@ -500,8 +443,8 @@ describe('manage_requests', function() {
         band_id: 1,
         person_id: 3,
       }];
-      request.getMyRequests(1, function(result) {
-        test_util.check_request_list(result.all_requests, expected, now);
+      request.getMyRequests(1, function(err, result) {
+        test_util.check_request_list(err, result, expected);
         done();
       });
     });

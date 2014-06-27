@@ -3,7 +3,8 @@ var should = require('should');
 var fs = require('fs');
 var sqlite3 = require('sqlite3');
 
-process.env.db_name = 'bombay_test.db';
+var test_util = require('test/lib/util');
+
 var bombay_db = require('lib/db_orm');
 
 describe('db_orm', function() {
@@ -16,12 +17,7 @@ describe('db_orm', function() {
 
   describe('access', function() {
     describe('Band', function() {
-      before(function(done) {
-        var sql = fs.readFileSync('./sql/schema.sql', 'utf8');
-        var sqlite_handle = new sqlite3.Database('./bombay_test.db');
-        sqlite_handle.exec(sql, done);
-        sqlite_handle.close();
-      });
+      before(function(done) { test_util.db.resetDb(done); });
 
       var last_band_id = null;
       it('should create a band row', function(done) {
@@ -48,12 +44,7 @@ describe('db_orm', function() {
     });
 
     describe('Person', function() {
-      before(function(done) {
-        var sql = fs.readFileSync('./sql/schema.sql', 'utf8');
-        var sqlite_handle = new sqlite3.Database('./bombay_test.db');
-        sqlite_handle.exec(sql, done);
-        sqlite_handle.close();
-      });
+      before(function(done) { test_util.db.resetDb(done); });
 
       var last_person_id = null;
       it('should create a person row', function(done) {
@@ -94,12 +85,7 @@ describe('db_orm', function() {
     });
 
     describe('Artist', function() {
-      before(function(done) {
-        var sql = fs.readFileSync('./sql/schema.sql', 'utf8');
-        var sqlite_handle = new sqlite3.Database('./bombay_test.db');
-        sqlite_handle.exec(sql, done);
-        sqlite_handle.close();
-      });
+      before(function(done) { test_util.db.resetDb(done); });
 
       var last_artist_id = null;
       it('should create a artist row', function(done) {
@@ -126,12 +112,7 @@ describe('db_orm', function() {
     });
 
     describe('Song', function() {
-      before(function(done) {
-        var sql = fs.readFileSync('./sql/schema.sql', 'utf8');
-        var sqlite_handle = new sqlite3.Database('./bombay_test.db');
-        sqlite_handle.exec(sql, done);
-        sqlite_handle.close();
-      });
+      before(function(done) { test_util.db.resetDb(done); });
 
       var last_artist = null;
       before(function(done) {
@@ -204,12 +185,7 @@ describe('db_orm', function() {
     });
 
     describe('BandMember', function() {
-      before(function(done) {
-        var sql = fs.readFileSync('./sql/schema.sql', 'utf8');
-        var sqlite_handle = new sqlite3.Database('./bombay_test.db');
-        sqlite_handle.exec(sql, done);
-        sqlite_handle.close();
-      });
+      before(function(done) { test_util.db.resetDb(done); });
 
       var last_band = null;
       before(function(done) {
@@ -306,12 +282,7 @@ describe('db_orm', function() {
     });
 
     describe('BandSong', function() {
-      before(function(done) {
-        var sql = fs.readFileSync('./sql/schema.sql', 'utf8');
-        var sqlite_handle = new sqlite3.Database('./bombay_test.db');
-        sqlite_handle.exec(sql, done);
-        sqlite_handle.close();
-      });
+      before(function(done) { test_util.db.resetDb(done); });
 
       var last_band = null;
       before(function(done) {
@@ -419,12 +390,7 @@ describe('db_orm', function() {
   });
 
   describe('Ratings', function() {
-    before(function(done) {
-      var sql = fs.readFileSync('./sql/schema.sql', 'utf8');
-      var sqlite_handle = new sqlite3.Database('./bombay_test.db');
-      sqlite_handle.exec(sql, done);
-      sqlite_handle.close();
-    });
+    before(function(done) { test_util.db.resetDb(done); });
 
     var bands_by_name = {};
     var bands_by_id = {};
@@ -649,12 +615,7 @@ describe('db_orm', function() {
   });
 
   describe('Requests', function() {
-    before(function(done) {
-      var sql = fs.readFileSync('./sql/schema.sql', 'utf8');
-      var sqlite_handle = new sqlite3.Database('./bombay_test.db');
-      sqlite_handle.exec(sql, done);
-      sqlite_handle.close();
-    });
+    before(function(done) { test_util.db.resetDb(done); });
 
     var bands_by_name = {};
     var bands_by_id = {};
@@ -790,12 +751,7 @@ describe('db_orm', function() {
   });;
 
   describe('Raw_query', function() {
-    before(function(done) {
-      var sql = fs.readFileSync('./sql/schema.sql', 'utf8');
-      var sqlite_handle = new sqlite3.Database('./bombay_test.db');
-      sqlite_handle.exec(sql, done);
-      sqlite_handle.close();
-    });
+    before(function(done) { test_util.db.resetDb(done); });
 
     var persons_by_name = {};
     var persons_by_id = {};
