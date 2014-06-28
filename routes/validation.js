@@ -3,9 +3,9 @@
  */
 var node_util = require('util');
 
-var db = require('lib/db');
+var db_orm = require('lib/db_orm');
 
-var permission_error = {err: 'Permission Denied'};
+var permission_error = 'Permission Denied';
 
 exports.findParam = function(req, key) {
   var result = req.query[key];
@@ -21,60 +21,16 @@ function getUser(req) {
   return null;
 }
 
-function getSongRatingById(id, callback) {
-  if (id == null) {
-    callback(null);
-  } else {
-    var dbh = new db.Handle();
-    dbh.song_rating().getById(id, function(result) {
-      callback(result.song_rating);
-    });
-  }
-}
-
-function getBandMemberById(id, callback) {
-  if (id == null) {
-    callback(null);
-  } else {
-    var dbh = new db.Handle();
-    dbh.band_member().getById(id, function(result) {
-      if (result.err) {
-        console.log(node_util.inspect(result));
-        callback(null);
-      } else {
-        callback(result.band_member);
-      }
-    });
-  }
-}
-
-function getBandMember(person_id, band_id, callback) {
-  if (person_id == null) {
-    callback(null);
-  } else if (band_id == null) {
-    callback(null);
-  } else {
-    var dbh = new db.Handle();
-    dbh.band_member().getAllWithArgs({
-      fields: ['id', 'band_admin'],
-      where: {band_id: band_id, person_id: person_id}
-    }, function(result) {
-      if (result.err) {
-        console.log(node_util.inspect(result));
-        callback(null);
-      } else {
-        callback(result.all_band_members[0]);
-      }
-    });
-  }
-}
-
 function getRequestBandMember(req, callback) {
   if (req.path.match(/band_member/)) {
-    getBandMemberById(exports.findParam(req, 'id'), callback);
+    db_orm.BandMember.get(exports.findParam(req, 'id'), callback);
   } else if (req.path.match(/song_rating/)) {
-    getSongRatingById(exports.findParam(req, 'id'), function(song_rating) {
-      getBandMemberById(song_rating.band_member_id, callback);
+    db_orm.SongRating.get(exports.findParam(req, 'id'), function(err, song_rating) {
+      if (err) {
+        callback(err);
+      } else {
+        db_orm.BandMember.get(song_rating.band_member_id, callback);
+      }
     })
   } else {
     callback(null);
@@ -85,16 +41,18 @@ function getCurrentBandMember(req, user, callback) {
   var band_id = exports.findParam(req, 'band_id');
 
   if (band_id == null) {
-    var req_band_member = getRequestBandMember(req, function(req_band_member) {
-      if (req_band_member) {
-        getBandMember(user.id, req_band_member.band_id, callback);
+    var req_band_member = getRequestBandMember(req, function(err, req_band_member) {
+      if (err) {
+        callback(err);
+      } else if (req.band_member) {
+        db_orm.BandMember.one({person_id: user.id, band_id: req_band_member.band_id}, callback);
       } else {
-        callback(null);
+        callback(null, null);
       }
     });
 
   } else {
-    getBandMember(user.id, exports.findParam(req, 'band_id'), callback);
+    db_orm.BandMember.one({person_id: user.id, band_id: exports.findParam(req, 'band_id')}, callback);
   }
 };
 
@@ -121,7 +79,7 @@ exports.requireSysAdmin = function(req, res, next) {
     next();
   } else {
     console.log('User ' + user.id + ' is not system administrator');
-    res.json(permission_error);
+    res.json(403, permission_error);
   }
 };
 
@@ -130,12 +88,15 @@ exports.requireBandAdmin = function(req, res, next) {
   if (isSysAdmin(user)) {
     next();
   } else {
-    getCurrentBandMember(req, user, function(band_member) {
-      if (isBandAdmin(band_member)) {
+    getCurrentBandMember(req, user, function(err, band_member) {
+      if (err) {
+        console.log(err);
+        res.json(500, err);
+      } else if (isBandAdmin(band_member)) {
         next();
       } else {
         console.log('User ' + user.id + ' is not band administrator');
-        res.json(permission_error);
+        res.json(403, permission_error);
       }
     });
   }
@@ -145,25 +106,29 @@ exports.requireSelfOrAdmin = function(req, res, next) {
   var user = getUser(req);
   if (user == null) {
     console.log('User not found');
-    res.json(permission_error);
+    res.json(403, permission_error);
   } else if (isSysAdmin(user)) {
     next();
   } else if (req.path.match(/person/) && exports.findParam(req, 'id') === user.id) {
     next();
   } else {
-    getCurrentBandMember(req, user, function(current_member) {
-      if (isBandAdmin(current_member)) {
+    getCurrentBandMember(req, user, function(err, current_member) {
+      if (err) {
+        res.json(500, err);
+      } else if (isBandAdmin(current_member)) {
         next();
       } else {
-        getRequestBandMember(req, function(band_member) {
-          if (band_member == null) {
+        getRequestBandMember(req, function(err, band_member) {
+          if (err) {
+            res.json(403, err);
+          } else if (band_member == null) {
             console.log('User ' + user.id + ' is not a member of band');
-            res.json(permission_error);
+            res.json(403, permission_error);
           } else if (isBandAdmin(band_member) || band_member.person_id == user.id) {
             next();
           } else {
             console.log('User ' + user.id + ' is not administrator and does not match ' + band_member.person_id);
-            res.json(permission_error);
+            res.json(403, permission_error);
           }
         });
       }

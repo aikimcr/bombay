@@ -55,11 +55,16 @@ exports.check_result = function(result, data_key) {
   return result[data_key];
 };
 
-exports.check_error_result = function(result, data_key) {
+exports.check_error_result = function(err_code, result, expected_err_code, opt_expected_message) {
+  should.exist(err_code);
+  err_code.should.eql(expected_err_code);
   should.exist(result);
-  result.should.not.have.property(data_key);
-  result.should.have.property('err');
-  return result.err;
+
+  if (opt_expected_message) {
+    result.should.eql(opt_expected_message);
+  }
+
+  return result;
 };
 
 exports.check_request = function(err, result, expected) {

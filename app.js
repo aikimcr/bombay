@@ -25,31 +25,33 @@ passport.use(new LocalStrategy(
     password = decodeURIComponent(password);
     // console.log(username + ', ' + password);
 
-    db_orm.connect(function(db_model) {
-      db_model.Person.one({name: username}, function(err, person) {
-        if (err) {
-          console.log('Failed login for ' + username + util.inspect(err));
-          return done(null, false, { message: 'Login Incorrect.'});
-        } else {
-          var pem = util.get_pem_file('crypto/rsa_private.pem');
-          //console.log(pem);
-          var decrypt_password = password;
-          var decrypt_person = person.password;
+    db_orm.Person.one({name: username}, function(err, person) {
+      if (err) {
+        console.log('Failed login for ' + username + util.inspect(err));
+        return done(null, false, { message: 'Login Incorrect.'});
+      } else if (person) {
+        var pem = util.get_pem_file('crypto/rsa_private.pem');
+        //console.log(pem);
+        var decrypt_password = password;
+        var decrypt_person = person.password;
 
-          // console.log(decrypt_person + ', ' + decrypt_password);
-          try {
-            decrypt_password = base64_decode(util.decrypt(pem, password));
-            decrypt_person = util.decrypt(pem, person.password);
-          } catch(e) {
-            console.log(e);
-          };
-          // console.log(decrypt_person + ', ' + decrypt_password);
-          if (username == person.name && decrypt_password == decrypt_person) {
-            console.log(username + ' logged in');
-            return done(null, person);
-          }
+        // console.log(decrypt_person + ', ' + decrypt_password);
+        try {
+          decrypt_password = base64_decode(util.decrypt(pem, password));
+          decrypt_person = util.decrypt(pem, person.password);
+        } catch(e) {
+          console.log(e);
+        };
+        // console.log(decrypt_person + ', ' + decrypt_password);
+        if (username == person.name && decrypt_password == decrypt_person) {
+          console.log(username + ' logged in');
+          return done(null, person);
+        } else {
+          return done(null, false, { message: 'Login Incorrect'});
         }
-      });
+      } else {
+        return done(null, false, {message: 'Login Incorrect.'});
+      }
     });
   }
 ));

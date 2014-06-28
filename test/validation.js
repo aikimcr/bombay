@@ -6,15 +6,9 @@ var node_util = require('util');
 var test_util = require('test/lib/util');
 
 var validate = require('routes/validation');
-var db = require('lib/db');
-var dbh;
+var db_orm = require('lib/db_orm');
 
 describe('validation', function() {
-  before(function(done) {
-    dbh = new db.Handle();
-    done();
-  });
-
   var req;
   beforeEach(function(done) {
     req = {
@@ -97,10 +91,8 @@ describe('validation', function() {
   describe('requireSysAdmin', function() {
     it('should return an error', function(done) {
       req.session.passport.user = JSON.stringify({id: 1, system_admin: false});
-      res.json = function(result) {
-        should.exist(result);
-        result.should.have.property('err');
-        result.err.should.eql('Permission Denied');
+      res.json = function(err_code, result) {
+        test_util.check_error_result(err_code, result, 403, 'Permission Denied');
         done();
       };
       validate.requireSysAdmin(req, res, function() {
@@ -117,40 +109,20 @@ describe('validation', function() {
   });
 
   describe('requireBandAdmin', function(done) {
-    before(function(done) {
-      db.setDbPath('./bombay_test.db');
-      dbh = new db.Handle()
-      var sql = fs.readFileSync('./sql/schema.sql', 'utf8');
-      dbh.doSqlExec([sql], done);
-    });
+    before(function(done) { test_util.db.resetDb(done); });
 
     before(function(done) {
-      var sql = fs.readFileSync('./test/support/addBands.sql', 'utf8');
-      dbh.doSqlExec(sql, function(err) {
-        done();
-      });
-    });
-
-    before(function(done) {
-      var sql = fs.readFileSync('./test/support/addPeople.sql', 'utf8');
-      dbh.doSqlExec(sql, function(err) {
-        done();
-      });
-    });
-
-    before(function(done) {
-      var sql = fs.readFileSync('./test/support/addBandMembers.sql', 'utf8');
-      dbh.doSqlExec(sql, function(err) {
-        done();
-      });
+      test_util.db.loadSql([
+        {file: './test/support/addBands.sql'},
+        {file: './test/support/addPeople.sql'},
+        {file: './test/support/addBandMembers.sql'}
+      ], done);
     });
 
     it('should return an error', function(done) {
       req.session.passport.user = JSON.stringify({id: 1, system_admin: false});
-      res.json = function(result) {
-        should.exist(result);
-        result.should.have.property('err');
-        result.err.should.eql('Permission Denied');
+      res.json = function(err_code, result) {
+        test_util.check_error_result(err_code, result, 403, 'Permission Denied');
         done();
       };
       validate.requireBandAdmin(req, res, function() {
@@ -161,10 +133,8 @@ describe('validation', function() {
     it('should return an error', function(done) {
       req.session.passport.user = JSON.stringify({id: 1, system_admin: false});
       req.query.band_id = 1;
-      res.json = function(result) {
-        should.exist(result);
-        result.should.have.property('err');
-        result.err.should.eql('Permission Denied');
+      res.json = function(err_code, result) {
+        test_util.check_error_result(err_code, result, 403, 'Permission Denied');
         done();
       };
       validate.requireBandAdmin(req, res, function() {
@@ -175,10 +145,8 @@ describe('validation', function() {
     it('should return an error', function(done) {
       req.session.passport.user = JSON.stringify({id: 1, system_admin: false});
       req.params.band_id = 1;
-      res.json = function(result) {
-        should.exist(result);
-        result.should.have.property('err');
-        result.err.should.eql('Permission Denied');
+      res.json = function(err_code, result) {
+        test_util.check_error_result(err_code, result, 403, 'Permission Denied');
         done();
       };
       validate.requireBandAdmin(req, res, function() {
@@ -189,10 +157,8 @@ describe('validation', function() {
     it('should return an error', function(done) {
       req.session.passport.user = JSON.stringify({id: 1, system_admin: false});
       req.body.band_id = 1;
-      res.json = function(result) {
-        should.exist(result);
-        result.should.have.property('err');
-        result.err.should.eql('Permission Denied');
+      res.json = function(err_code, result) {
+        test_util.check_error_result(err_code, result, 403, 'Permission Denied');
         done();
       };
       validate.requireBandAdmin(req, res, function() {
@@ -226,68 +192,23 @@ describe('validation', function() {
   });
 
   describe('requireSelfOrAdmin', function(done) {
-    before(function(done) {
-      db.setDbPath('./bombay_test.db');
-      dbh = new db.Handle()
-      var sql = fs.readFileSync('./sql/schema.sql', 'utf8');
-      dbh.doSqlExec([sql], done);
-    });
+    before(function(done) { test_util.db.resetDb(done); });
 
     before(function(done) {
-      var sql = fs.readFileSync('./test/support/addBands.sql', 'utf8');
-      dbh.doSqlExec(sql, function(err) {
-        done();
-      });
-    });
-
-    before(function(done) {
-      var sql = fs.readFileSync('./test/support/addPeople.sql', 'utf8');
-      dbh.doSqlExec(sql, function(err) {
-        done();
-      });
-    });
-
-    before(function(done) {
-      var sql = fs.readFileSync('./test/support/addBandMembers.sql', 'utf8');
-      dbh.doSqlExec(sql, function(err) {
-        done();
-      });
-    });
-
-
-    before(function(done) {
-      var sql = fs.readFileSync('./test/support/addArtists.sql', 'utf8');
-      dbh.doSqlExec(sql, function(err) {
-        done();
-      });
-    });
-
-    before(function(done) {
-      var sql = fs.readFileSync('./test/support/addSongs.sql', 'utf8');
-      dbh.doSqlExec(sql, function(err) {
-        done();
-      });
-    });
-
-    before(function(done) {
-      var sql = fs.readFileSync('./test/support/addBandSongs.sql', 'utf8');
-      dbh.doSqlExec(sql, function(err) {
-        done();
-      });
-    });
-
-    before(function(done) {
-      var sql = 'INSERT INTO band_member (id, band_id, person_id, band_admin) VALUES (6, 2, 2, 0);'
-      dbh.doSqlExec(sql, function(err) {
-        done();
-      });
+      test_util.db.loadSql([
+        {file: './test/support/addBands.sql'},
+        {file: './test/support/addPeople.sql'},
+        {file: './test/support/addBandMembers.sql'},
+        {file: './test/support/addArtists.sql'},
+        {file: './test/support/addSongs.sql'},
+        {file: './test/support/addBandSongs.sql'},
+        'INSERT INTO band_member (id, band_id, person_id, band_admin) VALUES (100, 2, 2, 0);'
+      ], done);
     });
 
     it('should return an error - no user', function(done) {
-      res.json = function(result) {
-        should.exist(result);
-        result.should.have.property('err');
-        result.err.should.eql('Permission Denied');
+      res.json = function(err_code, result) {
+        test_util.check_error_result(err_code, result, 403, 'Permission Denied');
         done();
       };
       validate.requireSelfOrAdmin(req, res, function() {
@@ -298,10 +219,8 @@ describe('validation', function() {
     it('should return an error - user is not sysadmin with no id', function(done) {
       req.session.passport.user = JSON.stringify({id: 1, system_admin: false});
       req.path = '/person';
-      res.json = function(result) {
-        should.exist(result);
-        result.should.have.property('err');
-        result.err.should.eql('Permission Denied');
+      res.json = function(err_code, result) {
+        test_util.check_error_result(err_code, result, 403, 'Permission Denied');
         done();
       };
       validate.requireSelfOrAdmin(req, res, function() {
@@ -313,10 +232,8 @@ describe('validation', function() {
       req.session.passport.user = JSON.stringify({id: 1, system_admin: false});
       req.query.id = 2;
       req.path = '/person';
-      res.json = function(result) {
-        should.exist(result);
-        result.should.have.property('err');
-        result.err.should.eql('Permission Denied');
+      res.json = function(err_code, result) {
+        test_util.check_error_result(err_code, result, 403, 'Permission Denied');
         done();
       };
       validate.requireSelfOrAdmin(req, res, function() {
@@ -328,10 +245,8 @@ describe('validation', function() {
       req.session.passport.user = JSON.stringify({id: 1, system_admin: false});
       req.params.id = 2;
       req.path = '/person';
-      res.json = function(result) {
-        should.exist(result);
-        result.should.have.property('err');
-        result.err.should.eql('Permission Denied');
+      res.json = function(err_code, result) {
+        test_util.check_error_result(err_code, result, 403, 'Permission Denied');
         done();
       };
       validate.requireSelfOrAdmin(req, res, function() {
@@ -343,10 +258,8 @@ describe('validation', function() {
       req.session.passport.user = JSON.stringify({id: 1, system_admin: false});
       req.body.id = 2;
       req.path = '/person';
-      res.json = function(result) {
-        should.exist(result);
-        result.should.have.property('err');
-        result.err.should.eql('Permission Denied');
+      res.json = function(err_code, result) {
+        test_util.check_error_result(err_code, result, 403, 'Permission Denied');
         done();
       };
       validate.requireSelfOrAdmin(req, res, function() {
@@ -358,10 +271,8 @@ describe('validation', function() {
       req.session.passport.user = JSON.stringify({id: 2, system_admin: false});
       req.query.id = 1;
       req.path = '/band_member';
-      res.json = function(result) {
-        should.exist(result);
-        result.should.have.property('err');
-        result.err.should.eql('Permission Denied');
+      res.json = function(err_code, result) {
+        test_util.check_error_result(err_code, result, 403, 'Permission Denied');
         done();
       };
       validate.requireSelfOrAdmin(req, res, function() {
@@ -373,10 +284,8 @@ describe('validation', function() {
       req.session.passport.user = JSON.stringify({id: 2, system_admin: false});
       req.params.id = 1;
       req.path = '/band_member';
-      res.json = function(result) {
-        should.exist(result);
-        result.should.have.property('err');
-        result.err.should.eql('Permission Denied');
+      res.json = function(err_code, result) {
+        test_util.check_error_result(err_code, result, 403, 'Permission Denied');
         done();
       };
       validate.requireSelfOrAdmin(req, res, function() {
@@ -388,10 +297,8 @@ describe('validation', function() {
       req.session.passport.user = JSON.stringify({id: 2, system_admin: false});
       req.body.id = 1;
       req.path = '/band_member';
-      res.json = function(result) {
-        should.exist(result);
-        result.should.have.property('err');
-        result.err.should.eql('Permission Denied');
+      res.json = function(err_code, result) {
+        test_util.check_error_result(err_code, result, 403, 'Permission Denied');
         done();
       };
       validate.requireSelfOrAdmin(req, res, function() {
@@ -403,10 +310,8 @@ describe('validation', function() {
       req.session.passport.user = JSON.stringify({id: 2, system_admin: false});
       req.query.id = 1;
       req.path = '/song_rating';
-      res.json = function(result) {
-        should.exist(result);
-        result.should.have.property('err');
-        result.err.should.eql('Permission Denied');
+      res.json = function(err_code, result) {
+        test_util.check_error_result(err_code, result, 403, 'Permission Denied');
         done();
       };
       validate.requireSelfOrAdmin(req, res, function() {
@@ -418,10 +323,8 @@ describe('validation', function() {
       req.session.passport.user = JSON.stringify({id: 2, system_admin: false});
       req.params.id = 1;
       req.path = '/song_rating';
-      res.json = function(result) {
-        should.exist(result);
-        result.should.have.property('err');
-        result.err.should.eql('Permission Denied');
+      res.json = function(err_code, result) {
+        test_util.check_error_result(err_code, result, 403, 'Permission Denied');
         done();
       };
       validate.requireSelfOrAdmin(req, res, function() {
@@ -433,10 +336,8 @@ describe('validation', function() {
       req.session.passport.user = JSON.stringify({id: 2, system_admin: false});
       req.body.id = 1;
       req.path = '/song_rating';
-      res.json = function(result) {
-        should.exist(result);
-        result.should.have.property('err');
-        result.err.should.eql('Permission Denied');
+      res.json = function(err_code, result) {
+        test_util.check_error_result(err_code, result, 403, 'Permission Denied');
         done();
       };
       validate.requireSelfOrAdmin(req, res, function() {

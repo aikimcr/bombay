@@ -359,8 +359,8 @@ describe('routes', function() {
       it('should return an error', function(done) {
         req.body = {name: 'Cover Story'};
         var res = {
-          json: function(result) {
-            var error = test_util.check_error_result(result, 'band_id');
+          json: function(err_code, result) {
+            var error = test_util.check_error_result(err_code, result, 500);
             done();
           }
         };
@@ -396,8 +396,8 @@ describe('routes', function() {
           system_admin: false,
         };
         var res = {
-          json: function(result) {
-            var error = test_util.check_error_result(result, 'person_id');
+          json: function(err_code, result) {
+            var error = test_util.check_error_result(err_code, result, 500);
             done();
           }
         };
@@ -421,8 +421,8 @@ describe('routes', function() {
       it('should return an error', function(done) {
         req.body = {name: 'Mott the Hoople'};
         var res = {
-          json: function(result) {
-            var error = test_util.check_error_result(result, 'artist_id');
+          json: function(err_code, result) {
+            var error = test_util.check_error_result(err_code, result, 500);
             done();
           }
         };
@@ -446,8 +446,8 @@ describe('routes', function() {
       it('should return an error', function(done) {
         req.body = {name: 'La Grange', artist_id: 2};
         var res = {
-          json: function(result) {
-            var error = test_util.check_error_result(result, 'song_id');
+          json: function(err_code, result) {
+            var error = test_util.check_error_result(err_code, result, 500);
             done();
           }
         };
@@ -485,8 +485,8 @@ describe('routes', function() {
       it('should return an error', function(done) {
         req.body = {band_id: 3, person_id: 1};
         var res = {
-          json: function(result) {
-            var error = test_util.check_error_result(result, 'band_member_id');
+          json: function(err_code, result) {
+            var error = test_util.check_error_result(err_code, result, 500);
             done();
           }
         };
@@ -510,8 +510,8 @@ describe('routes', function() {
       it('should return an error', function(done) {
         req.body = {band_id: 3, song_id: 1, song_status: 4};
         var res = {
-          json: function(result) {
-            var error = test_util.check_error_result(result, 'band_song_id');
+          json: function(err_code, result) {
+            var error = test_util.check_error_result(err_code, result, 500);
             done();
           }
         };
@@ -535,8 +535,8 @@ describe('routes', function() {
       it('should return an error', function(done) {
         req.body = {band_member_id: 3, band_song_id: 1, rating: 4};
         var res = {
-          json: function(result) {
-            var error = test_util.check_error_result(result, 'song_rating_id');
+          json: function(err_code, result) {
+            var error = test_util.check_error_result(err_code, result, 500);
             done();
           }
         };
@@ -643,10 +643,11 @@ describe('routes', function() {
       it('should reject the new password because old password is wrong', function(done) {
         req.query = {id: 1, token: change_token};
         var res = {
-          json: function(result) {
+          json: function(err_code, result) {
+            should.exist(err_code);
+            err_code.should.eql(500);
             should.exist(result);
-            result.should.have.property('err');
-            result.err.should.eql('Old password did not match');
+            result.should.eql('Old password did not match');
             done();
           }
         };
@@ -1117,10 +1118,11 @@ describe('request_routes', function() {
   it('attempt to create a join request should fail', function(done) {
     req.body = {band_id: 1, person_id: 2, action: 'join_band'};
     var res = {
-      json: function(result) {
+      json: function(err_code, result) {
+        should.exist(err_code);
+        err_code.should.eql(500);
         should.exist(result);
-        result.should.have.property('err');
-        result.err.should.eql('Join requests can only be for logged in user');
+        result.should.eql('Join requests can only be for logged in user');
         done();
       }
     };
@@ -1279,10 +1281,11 @@ describe('request_routes', function() {
     req.body = {band_id: 1, person_id: 4, action: 'add_band_member'};
     req.session.passport.user = JSON.stringify({ id: 2, system_admin: false })
     var res = {
-      json: function(result) {
+      json: function(err_code, result) {
+        should.exist(err_code);
+        err_code.should.eql(500);
         should.exist(result);
-        result.should.have.property('err');
-        result.err.should.eql('Only band Admin may add members');
+        result.should.eql('Only band Admin may add members');
         done();
       }
     };
