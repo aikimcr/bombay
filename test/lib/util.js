@@ -4,9 +4,8 @@
 var should = require('should');
 var util = require('util');
 
-var db = require('lib/db');
 var fs = require('fs');
-exports.db = require('./db');
+exports.db = require('./db_test');
 
 exports.check_record = function(got_record, expected_record, fields) {
   should.exist(got_record, 'Got null record');
