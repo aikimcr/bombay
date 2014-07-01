@@ -2,7 +2,6 @@
 /*
  * GET home page.
  */
-var db = require('lib/db');
 var util = require('lib/util');
 
 var app_title = 'All Night Music Band Manager';
