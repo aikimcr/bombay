@@ -1430,7 +1430,7 @@ describe('request_routes', function() {
     }];
     var res = {
       json: function(result) {
-        test_util.check_request_list(null, result, expected, now);
+        test_util.check_request_list(null, result.all_requests, expected, now);
         done();
       }
     };

@@ -3,7 +3,7 @@
 // Node Standard includes
 var fs = require('fs');
 var path = require('path');
-var node_util = require('util');
+var util = require('util');
 
 // Third-party packages
 var SqlGenerator = require('sql-generator');
@@ -11,63 +11,59 @@ var flow = require('flow');
 var jade = require('jade');
 
 // Bombay packages
-var db = require('lib/db');
+var db_orm = require('lib/db_orm');
 var path_util = require('lib/path_util');
-var util = require('lib/util');
 var mail_util = require('lib/mail_util');
 
-var dbh = new db.Handle();
+function flatten(err, rows, callback) {
+  if (err) throw err;
+  var flat_rows = JSON.parse(JSON.stringify(rows)); 
+  callback(null, flat_rows);
+}
 
 function average_lo_to_hi(where, callback) {
-  var sqlgen = new SqlGenerator();
-  var order = {
-    order: [ 'average_rating', 'variance desc', 'song_name', 'artist_name'],
-    limit: 10
-  };
-  var stmt = sqlgen.select('song_rating_snapshot', '*', where, order);
-  dbh.doSqlQuery(stmt.sql, stmt.values, 'average_lo_to_hi', function(result) {
-    callback(result);
-  });
+  db_orm.SongRatingSnapshot.find(where)
+    .limit(10)
+    .order('average_rating')
+    .order('-variance')
+    .order('song_name')
+    .order('artist_name')
+    .run(function(err, rows) { flatten(err, rows, callback) });
 }
 
 function average_hi_to_lo(where, callback) {
-  var sqlgen = new SqlGenerator();
-  var order = {
-    order: [ 'average_rating desc', 'variance', 'song_name', 'artist_name'],
-    limit: 10
-  };
-  var stmt = sqlgen.select('song_rating_snapshot', '*', where, order);
-  dbh.doSqlQuery(stmt.sql, stmt.values, 'average_hi_to_lo', function(result) {
-    callback(result);
-  });
+  db_orm.SongRatingSnapshot.find(where)
+    .limit(10)
+    .order('-average_rating')
+    .order('variance')
+    .order('song_name')
+    .order('artist_name')
+    .run(function(err, rows) { flatten(err, rows, callback) });
 }
 
 function variance_lo_to_hi(where, callback) {
-  var sqlgen = new SqlGenerator();
-  var order = {
-    order: [ 'variance', 'average_rating desc', 'song_name', 'artist_name'],
-    limit: 10
-  };
-  var stmt = sqlgen.select('song_rating_snapshot', '*', where, order);
-  dbh.doSqlQuery(stmt.sql, stmt.values, 'variance_lo_to_hi', function(result) {
-    callback(result);
-  });
+  db_orm.SongRatingSnapshot.find(where)
+    .limit(10)
+    .order('variance')
+    .order('-average_rating')
+    .order('song_name')
+    .order('artist_name')
+    .run(function(err, rows) { flatten(err, rows, callback) });
 }
 
 function variance_hi_to_lo(where, callback) {
-  var sqlgen = new SqlGenerator();
-  var order = {
-    order: [ 'variance desc', 'average_rating', 'song_name', 'artist_name'],
-    limit: 10
-  };
-  var stmt = sqlgen.select('song_rating_snapshot', '*', where, order);
-  dbh.doSqlQuery(stmt.sql, stmt.values, 'variance_hi_to_lo', function(result) {
-    callback(result);
-  });
+  db_orm.SongRatingSnapshot.find(where)
+    .limit(10)
+    .order('-variance')
+    .order('average_rating')
+    .order('song_name')
+    .order('artist_name')
+    .run(function(err, rows) { flatten(err, rows, callback) });
 }
 
 function calc_agreement(tables, callback) {
   Object.keys(tables).forEach(function(key) {
+    if (!tables[key]) throw new Error('No table entry for ' + key);
     tables[key].forEach(function(row) {
       row.stddev = Math.sqrt(row.variance);
       row.agreement = Math.round(((2 - row.stddev) / 2) * 100);
@@ -79,43 +75,48 @@ function calc_agreement(tables, callback) {
 function calc_other_averages(where, callback) {
   var sqlgen = new SqlGenerator();
   var stmt = sqlgen.select('song_rating_snapshot', 'average_rating, variance', where);
-  dbh.doSqlQuery(stmt.sql, stmt.values, 'stats', function(result) {
-    var count = 0;
-    var rating_total = 0;
-    var agreement_total = 0;
+  
+  db_orm.SongRatingSnapshot.find(where).only(['average_rating', 'variance'])
+    .run(function(err, rows) {
+      if (err) {
+        callback(err);
+      } else {
+        var count = rows.length;
+        var rating_total = 0;
+        var agreement_total = 0;
 
-    result.stats.forEach(function(row) {
-      count++;
-      rating_total += row.average_rating;
-      var stddev = Math.sqrt(row.variance);
-      var agreement = ((2 - stddev) / 2) * 100;
-      agreement_total += agreement;
+        rows.forEach(function(row) {
+          rating_total += row.average_rating;
+          var stddev = Math.sqrt(row.variance);
+          var agreement = ((2 - stddev) / 2) * 100;
+          agreement_total += agreement;
+        });
+
+        var average_rating = Math.round((rating_total / count) * 100) / 100;
+        var average_agreement = Math.round(agreement_total / count);
+        callback(null, count, average_rating, average_agreement);
+      }
     });
-
-    var average_rating = Math.round((rating_total / count) * 100) / 100;
-    var average_agreement = Math.round(agreement_total / count);
-    callback(count, average_rating, average_agreement);
-  });
 }
 
 function calc_member_count(band_id, callback) {
-  var sqlgen = new SqlGenerator();
-  var stmt = sqlgen.select('band_member', 'count(*) as count', {band_id: band_id});
-  dbh.doSqlGet(stmt.sql, stmt.values, 'members', function(result) {
-    callback(result.members.count);
-  });
+  db_orm.BandMember.count({band_id: band_id}, callback);
 }
 
 function get_to_addresses(band_id, callback) {
-  var sql = 'select email from person where email is not null and id in (select person_id from band_member where band_id = ?)';
-  dbh.doSqlQuery(sql, [band_id], 'persons', function(result) {
-    var persons = result.persons.map(function(person) {
-      return person.email;
-    });
-    var valid_emails = persons.filter(function(email) {
-      return email.match(/[^@]+@[^@]+/);
-    });
-    callback(valid_emails.join(','));
+  db_orm.Person
+    .findByBands({band_id: band_id}).only('email')
+    .where('email IS NOT NULL').run(function(err, rows) {
+      if (err) {
+        callback(err);
+      } else {
+        var valid_emails = rows.map(function(person) {
+          return person.email;
+        }).filter(function(email) {
+          return email.match(/[^@]+@[^@]+/);
+        });
+        callback(null, valid_emails.join(','));
+      }
   });
 };
 
@@ -131,54 +132,59 @@ function generate_band_report(snapshot_id, band_id, style_info) {
     function() {
       average_lo_to_hi(where, this);
     },
-    function(result) {
-      tables.average_lo_to_hi = result.average_lo_to_hi;
+    function(err, rows) {
+      if (err) throw err;
+      tables.average_lo_to_hi = rows;
       average_hi_to_lo(where, this);
     },
-    function(result) {
-      tables.average_hi_to_lo = result.average_hi_to_lo;
+    function(err, rows) {
+      if (err) throw err;
+      tables.average_hi_to_lo = rows;
       variance_lo_to_hi(where, this);
     },
-    function(result) {
-      tables.variance_lo_to_hi = result.variance_lo_to_hi;
+    function(err, rows) {
+      if (err) throw err;
+      tables.variance_lo_to_hi = rows;
       variance_hi_to_lo(where, this);
     },
-    function(result) {
-      tables.variance_hi_to_lo = result.variance_hi_to_lo;
+    function(err, rows) {
+      if (err) throw err;
+      tables.variance_hi_to_lo = rows;
       calc_agreement(tables, this);
     },
     function() {
-      var sqlgen = new SqlGenerator();
-      var stmt = sqlgen.select('snapshot', 'timestamp', { id: snapshot_id });
-      dbh.doSqlGet(stmt.sql, stmt.values, 'snapshot_time', function(result) {
-        this(result.snapshot_time.timestamp);
+      db_orm.Snapshot.get(snapshot_id, function(err, row) {
+        if (err) throw err;
+        this(row.timestamp);
       }.bind(this));
     },
     function(snapshot_time) {
       this.snapshot_time = snapshot_time;
-      var sqlgen = new SqlGenerator();
-      var stmt = sqlgen.select('band', 'name', { id: band_id });
-      dbh.doSqlGet(stmt.sql, stmt.values, 'band_name', function(result) {
-        this(result.band_name.name);
+      db_orm.Band.get(band_id, function(err, row) {
+        if (err) throw err;
+        this(row.name);
       }.bind(this));
     },
     function(band_name) {
       this.band_name = band_name;
       calc_other_averages(where, this);
     },
-    function(song_count, average_rating, average_agreement) {
+    function(err, song_count, average_rating, average_agreement) {
+      if (err) throw err;
       this.song_count = song_count; 
       this.average_rating = average_rating;
       this.average_agreement = average_agreement;
       calc_member_count(band_id, this);
     },
-    function(member_count) {
+    function(err, member_count) {
+      if (err) throw err;
       this.member_count = member_count;
       get_to_addresses(band_id, this);
     },
-    function(to_addresses) {
+    function(err, to_addresses) {
+      if (err) throw err;
       this.to_addresses = to_addresses;
-      this.formatted_time = new Date(this.snapshot_time + ' UTC');
+      this.formatted_time = new Date(this.snapshot_time);
       render_report({
         style_info: style_info,
         formatted_time: this.formatted_time.toLocaleString(),
@@ -192,7 +198,8 @@ function generate_band_report(snapshot_id, band_id, style_info) {
       }, this);
     },
     function(err, report_text) {
-      var report_subject = node_util.format('%s Songs Report from %s', this.band_name, this.formatted_time.toLocaleString());
+      if (err) throw err;
+      var report_subject = util.format('%s Songs Report from %s', this.band_name, this.formatted_time.toLocaleString());
       var report_name = 'songs_report.html'
 
       var report_file = 'band_song_summary_' + this.snapshot_time + '.html';
@@ -201,11 +208,12 @@ function generate_band_report(snapshot_id, band_id, style_info) {
 
       fs.writeFile(report_full_path, report_text, {encoding: 'utf8'}, function(err) {
         if (err) throw err;
-        this(report_file, report_full_path, report_subject, report_name);
+        this(null, report_file, report_full_path, report_subject, report_name);
       }.bind(this));
     },
-    function(report_file, report_full_path, report_subject, report_name) {
-      console.log('"' + this.to_addresses + '"');
+    function(err, report_file, report_full_path, report_subject, report_name) {
+      if (err) throw err;
+//XXX      console.log('"' + this.to_addresses + '"');
 /*
  * XXX mailing is currently broken.  I think it's a problem with Postfix.  Which sucks.  Postfix, I mean.
       if (this.to_addresses.length > 0) {
@@ -218,9 +226,10 @@ function generate_band_report(snapshot_id, band_id, style_info) {
         }, report_full_path);
       }
 */
-      this(report_full_path);
+      this(null, report_full_path);
     },
-    function(report_full_path) {
+    function(err, report_full_path) {
+      if (err) throw err;
       var link_file = 'band_song_summary.html';
       var link_full_path = path.join(path_util.reports_path(band_id), link_file);
       try {
@@ -239,28 +248,28 @@ var report = flow.define(
   function() {
     var sql_file = path.join(path_util.sql_path(), 'songsbyrating.sql');
     var build_stats_sql = fs.readFileSync(sql_file, {encoding: 'utf8'});
-    dbh.doSqlExec(build_stats_sql, function(result) {
-      if (!result) { this(); }
+    db_orm.execSqlList(build_stats_sql, function(err) {
+      if (err) throw err;
+      this();
     }.bind(this));
   },
   function() {
-    var sqlgen = new SqlGenerator();
-    var stmt = sqlgen.select('snapshot', 'MAX(id) as snapshot_id');
-    dbh.doSqlGet(stmt.sql, stmt.values, 'snapshot_id', function(result) {
-      if (result.snapshot_id) {
-        this(result.snapshot_id.snapshot_id);
-      } else if (result.err) {
-        throw result.err;
+    db_orm.Snapshot.aggregate().max('id').get(function(err, snapshot_id) {
+      if (err) throw err;
+      if (snapshot_id) {
+        this(null, snapshot_id);
       } else {
-        throw new Error("failed to get snapshot id");
+        throw new Error('failed to get snapshot id');
       }
     }.bind(this));
   },
-  function(snapshot_id) {
+  function(err, snapshot_id) {
+    if (err) throw err;
     var style_sheet = path.join(path_util.css_path(), 'report.css');
     var style_info = fs.readFileSync(style_sheet, {encoding: 'utf8'});
-    dbh.band().getAll(function(result) {
-      result.all_bands.forEach(function(band) {
+    db_orm.Band.find(function(err, rows) {
+      if (err) throw err;
+      rows.forEach(function(band) {
         generate_band_report(snapshot_id, band.id, style_info);
       });
     }.bind(this));

@@ -12,7 +12,7 @@ var path_util = require('lib/path_util');
 exports.getReports = function(req, res) {
   var user = util.getUser(req);
 
-  db_orm.Person.find({person_id: user.id}, function(err, rows) {
+  db_orm.BandMember.find({person_id: user.id}, function(err, rows) {
     if (err) {
       res.json(500, err);
     } else {

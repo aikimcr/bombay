@@ -4,12 +4,9 @@
 var fs = require('fs');
 
 // Bombay modules
-var db = require('lib/db');
 var util = require('lib/util');
 var path_util = require('lib/path_util');
 
-var dbh = new db.Handle();
-var person_handle = dbh.person();
 var public_pem = util.get_public_pem();
 var private_pem = util.get_private_pem();
 

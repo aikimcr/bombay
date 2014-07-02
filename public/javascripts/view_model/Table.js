@@ -90,6 +90,9 @@ TableList.prototype.load = function() {
 };
 
 TableList.prototype.load_ = function(result) {
+  if (! result[this.model_key]) {
+    throw new Error('Table load got no result for ' + this.model_key + ' result = "' + result.toString() + '"');
+  }
   result[this.model_key].forEach(function(model) {
     this.list.push(this.build_object_(model));
   }.bind(this));
