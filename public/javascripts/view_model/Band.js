@@ -1,6 +1,6 @@
 // The Individual Band Objects
 function Band(id, name) {
-  Table.call(this, './band');
+  Table.call(this);
   this.id = ko.observable(id || -1);
   this.name = ko.observable(name || '');
 
@@ -26,24 +26,10 @@ function Band(id, name) {
 }
 util.inherits(Band, Table);
 
-Band.loadById = function(id, callback) {
-  var svc = service.getInstance();
-  svc.get('./band?id=' + id, function(result) {
-    callback(new Band(result.band.id, result.band.name));
-  });
-};
-
-Band.prototype.refresh = function(callback) {
-  var svc = service.getInstance();
-  svc.get('./band?id=' + this.id(), function(result) {
-    if (result.err) {
-      callback(result);
-    } else {
-      if (this.name() != result.band.name) this.name(result.band.name);
-      callback({});
-    }
-  }.bind(this));
-};
+Band.service_url = './band';
+Band.model_key = 'band';
+Band.columns = ['name'];
+Band.list_key = 'bands';
 
 Band.prototype.confirm_text = function() {
   return 'Delete band ' + this.name() + '?';
@@ -55,7 +41,7 @@ Band.prototype.reload_list = function() {
 
 // The Band List Object
 function BandList() {
-  TableList.call(this, './band', 'all_bands');
+  TableList.call(this, Band);
 }
 util.inherits(BandList, TableList);
 

@@ -1,5 +1,5 @@
 function Artist(id, name) {
-  Table.call(this, './artist');
+  Table.call(this);
   this.id = ko.observable(id || -1);
   this.name = ko.observable(name || '');
 
@@ -13,24 +13,10 @@ function Artist(id, name) {
 }
 util.inherits(Artist, Table);
 
-Artist.loadById = function(id, callback) {
-  var svc = service.getInstance();
-  svc.get('./artist?id=' + id, function(result) {
-    callback(new Artist(result.artist.id, result.artist.name));
-  });
-};
-
-Artist.prototype.refresh = function(callback) {
-  var svc = service.getInstance();
-  svc.get('./artist?id=' + this.id(), function(result) {
-    if (result.err) {
-      callback(result);
-    } else {
-      if (this.name() != result.artist.name) this.name(result.artist.name);
-      callback({});
-    }
-  }.bind(this));
-};
+Artist.service_url = './artist';
+Artist.model_key = 'artist';
+Artist.columns = ['name'];
+Artist.list_key = 'artists';
 
 Artist.prototype.confirm_text = function() {
   return 'Delete artist ' + this.name() + '?';
@@ -42,7 +28,7 @@ Artist.prototype.reload_list = function() {
 
 // The Artist List Object
 function ArtistList() {
-  TableList.call(this, './artist', 'all_artists');
+  TableList.call(this, Artist);
 }
 util.inherits(ArtistList, TableList);
 

@@ -1,5 +1,5 @@
 service = function() {
-  this.type_list = ['get', 'put', 'set', 'delete'];
+  this.type_list = ['get', 'put', 'post', 'delete'];
 
   this.type_list.forEach(function(type) {
     this[type] = function(url, callback, data) {
@@ -11,8 +11,9 @@ service = function() {
       } else {
         this[type].params.push([url, cb, data]);
       }
-      callback(this[type].result);
+      callback(this[type].result_code, this[type].result);
     };
+    this[type].result_code = 200;
     this[type].calls = 0;
     this[type].params = [];
   }, this);

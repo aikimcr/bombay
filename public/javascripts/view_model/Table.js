@@ -1,6 +1,9 @@
-function Table(service_url) {
-  this.service_url = service_url;
-}
+function Table() { }
+
+Table.prototype.list = function() {
+  var key = this.constructor.model_key + 's';
+  return manager[key];
+};
 
 Table.prototype.update = function(data, callback) {
   var svc = service.getInstance();
@@ -12,7 +15,7 @@ Table.prototype.update = function(data, callback) {
     data[fn] = value;
   });
   data['id'] = this.id();
-  svc.put(this.service_url, function(result) {
+  svc.put(this.constructor.service_url, function(result) {
     if (callback) callback(result);
   }.bind(this), data);
 };
@@ -21,25 +24,58 @@ Table.prototype.delete = function(callback, opt_event) {
   manager.confirm_dialog.show(this.confirm_text(), opt_event, function(delete_it) {
     if (delete_it) {
       var svc = service.getInstance();
-      svc.delete(this.service_url + '?id=' + this.id(), function(result) {
-        if (result.err) {
-          if (callback) callback(result);
-        } else {
-          if (callback) callback(result);
+      var url = this.constructor.service_url + '?id=' + this.id();
+      svc.delete(url, function(result_code, result) {
+        if (result_code == 200 || result_code == 304) {
+          var list_key = this.constructor.list_key;
+          var model_key = this.constructor.model_key;
+          manager[list_key].deleteById(result[model_key].id);
         }
-      });
+        if (callback) callback(result_code, result);
+      }.bind(this));
     } else {
-      if (callback) callback();
+      if (callback) callback(); //XXX This needs fleshing out.
     }
+  }.bind(this));
+};
+
+Table.prototype.updateModel_ = function(model_result) {
+  this.constructor.columns.forEach(function(column) {
+    if (this[column]() != model_result[column]) {
+      this[column](model_result[column]);
+    }
+  }.bind(this));
+};
+
+Table.prototype.update = function(data, callback) {
+  var svc = service.getInstance();
+  var url = this.constructor.service_url;
+  var model_key = this.constructor.model_key;
+  svc.put(this.constructor.service_url, function(result_code, result) {
+    if (result_code == 200 || result_code == 304) {
+      this.updateModel_(result[model_key]);
+    }
+    callback(result_code, result);
+  }.bind(this), data);
+};
+
+Table.prototype.refresh = function(callback) {
+  var svc = service.getInstance();
+  var url = this.constructor.service_url + '?id=' + this.id();
+  var model_key = this.constructor.model_key;
+  svc.get(url, function(result_code, result) {
+    if (result_code == 200 || result_code == 304) {
+      this.updateModel_(result[model_key]);
+    }
+    callback(result_code);
   }.bind(this));
 };
 
 Table.prototype.reload_relatives = function() { };
 
-function TableList(load_url, model_key) {
+function TableList(model_type) {
   this.list = ko.observableArray([]);
-  this.load_url = load_url;
-  this.model_key = model_key;
+  this.model_type = model_type;
   this.sort_type = ko.observable('__default');
   this.set_sort_compare_list();
   this.set_filter_list();
@@ -52,6 +88,18 @@ function TableList(load_url, model_key) {
     return filtered.sort(sort_compare);
   }.bind(this));
 }
+
+TableList.prototype.create = function(data, callback) {
+  var svc = service.getInstance();
+  svc.post(this.model_type.service_url, function(result_code, result) {
+    if (result_code == 200 || result_code == 304) {
+      var model_result = result[this.model_type.model_key];
+      var model = this.build_object_(model_result);
+      this.insert(model);
+    }
+    callback(result_code, result);
+  }.bind(this), data);
+};
 
 TableList.prototype.sort_types = function() {
   return this.sort_compare_labels.sort(function(a, b) {
@@ -83,18 +131,22 @@ TableList.prototype.set_filter_list = function() {
 };
 
 TableList.prototype.load = function() {
-  this.list([]);
+  this.clear();
   var svc = service.getInstance();
-  svc.get(this.load_url, this.load_.bind(this));
+  svc.get(this.model_type.service_url, this.load_.bind(this));
   return this;
 };
 
-TableList.prototype.load_ = function(result) {
-  if (! result[this.model_key]) {
-    throw new Error('Table load got no result for ' + this.model_key + ' result = "' + result.toString() + '"');
+TableList.prototype.load_ = function(result_code, result) {
+  if (result_code != 200 && result_code != 304) {
+    throw new Error('Table load got result_code ' + result_code);
   }
-  result[this.model_key].forEach(function(model) {
-    this.list.push(this.build_object_(model));
+  var model_key = 'all_' + this.model_type.model_key + 's';
+  if (! result[model_key]) {
+    throw new Error('Table load got no result for ' + model_key + ' result = "' + result.toString() + '"');
+  }
+  result[model_key].forEach(function(model) {
+    this.insert(this.build_object_(model));
   }.bind(this));
 };
 
@@ -108,4 +160,18 @@ TableList.prototype.getById = function(id) {
   return ko.utils.arrayFirst(this.list(), function(item) {
     return item.id() == id;
   }.bind(this));
+};
+
+TableList.prototype.deleteById = function(id) {
+  return this.list.remove(function(row) {
+    return row.id() == id;
+  });
+};
+
+TableList.prototype.clear = function() {
+  return this.list.removeAll();
+};
+
+TableList.prototype.insert = function(model) {
+  this.list.push(model);
 };

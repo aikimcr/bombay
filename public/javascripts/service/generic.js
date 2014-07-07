@@ -17,9 +17,10 @@ service.generic = function(url, callback) {
           window.location.replace(window.location.origin + '/login');
           window.location.reload();
         }
-        callback(response);
+        callback(this.status, response);
       } else {
         window.console.log("error on " + this.url);
+        callback(this.status, this.responseText);
       }
     }
   };
@@ -34,7 +35,7 @@ service.generic.prototype.get = function() {
   this.service_.send();
 };
 
-service.generic.prototype.set = function(data) {
+service.generic.prototype.post = function(data) {
   this.service_.open('POST', this.url);
   this.service_.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
   var buffer = [];

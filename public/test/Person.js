@@ -117,61 +117,7 @@ describe('Person Table', function() {
     });
   });
 
-  describe('loadById', function() {
-    var person;
-    var svc;
-
-    before(function(done) {
-      svc = service.getInstance();
-      svc.resetCalls();
-      done();
-    });
-
-    it('should call the person API', function(done) {
-      svc.get.result = { person: person_model.all_persons[1] };
-      Person.loadById(16, function(result) {
-        should.exist(result);
-        person = result;
-        done();
-      });
-    });
-
-    it('should have called the service', function(done) {
-      svc.get.calls.should.be.eql(1);
-      svc.get.params.should.eql([[
-        './person?id=16',
-        'function'
-      ]]);
-      done();
-    });
-
-    it('should get the person', function(done) {
-      should.exist(person);
-      person.should.be.an.instanceOf(Person);
-      done();
-    });
-
-    it('should be a valid person', function(done) {
-      person.should.have.property('id');
-      ko.isObservable(person.id).should.be.true;
-      person.id().should.eql(person_model.all_persons[1].id);
-      person.should.have.property('name');
-      ko.isObservable(person.name).should.be.true;
-      person.name().should.eql(person_model.all_persons[1].name);
-      person.should.have.property('full_name');
-      ko.isObservable(person.full_name).should.be.true;
-      person.full_name().should.eql(person_model.all_persons[1].full_name);
-      person.should.have.property('email');
-      ko.isObservable(person.email).should.be.true;
-      person.email().should.eql(person_model.all_persons[1].email);
-      person.should.have.property('system_admin');
-      ko.isObservable(person.system_admin).should.be.true;
-      person.system_admin().should.eql(person_model.all_persons[1].system_admin);
-      done();
-    });
-  });
-
-  describe('Refresh', function() {
+describe('Refresh', function() {
     var person;
     var expected_id = 16;
     var expected_name = 'Not a bird';
@@ -225,6 +171,95 @@ describe('Person Table', function() {
     });
   });
 
+  describe('Post', function() {
+    before(function(done) {
+      svc = service.getInstance();
+      svc.resetCalls();
+      done();
+    });
+
+    before(function(done) {
+      manager.persons.clear();
+      done();
+    });
+
+    it('should call the person API', function(done) {
+      svc.post.result = { person: { id: 4231, name: 'Thunder Monkeys' } };
+      manager.persons.create({name: 'Thunder Monkeys'}, function(result_code, result) {
+        should.exist(result_code);
+        result_code.should.eql(200);
+        should.exist(result);
+        result.should.not.have.property('err');
+        done();
+      });
+    });
+
+    it('should have called the service', function(done) {
+      svc.post.calls.should.be.eql(1);
+      svc.post.params.should.eql([[
+        './person',
+        'function',
+        {name: 'Thunder Monkeys'}
+      ]]);
+      done();
+    });
+
+    it('should have added the person into the list', function(done) {
+      var new_person = manager.persons.getById(4231);
+      check_object_values(new_person, { id: 4231, name: 'Thunder Monkeys' });
+      done();
+    });
+  });
+
+  describe('Put', function() {
+    before(function(done) {
+      svc = service.getInstance();
+      svc.resetCalls();
+      done();
+    });
+
+    before(function(done) {
+      manager.persons.clear();
+      var person = new Person(4231, 'Thunder Monkeys');
+      manager.persons.insert(person);
+      done();
+    });
+
+    var person;
+    it('should get the person', function(done) {
+      person = manager.persons.getById(4231);
+      check_object_values(person, { id: 4231, name: 'Thunder Monkeys' });
+      done();
+    });
+
+    it('should call the person API', function(done) {
+      svc.put.result = { person: { id: 4231, name: 'Lightning Monkeys' } };
+      person.update({name: 'Lightning Monkeys'}, function(result_code, result) {
+        should.exist(result_code);
+        result_code.should.eql(200);
+        should.exist(result);
+        result.should.not.have.property('err');
+        done();
+      });
+    });
+
+    it('should have called the service', function(done) {
+      svc.put.calls.should.be.eql(1);
+      svc.put.params.should.eql([[
+        './person',
+        'function',
+        {name: 'Lightning Monkeys'}
+      ]]);
+      done();
+    });
+
+    it('should have modified the name of the person in the list', function(done) {
+      var new_person = manager.persons.getById(4231);
+      check_object_values(new_person, { id: 4231, name: 'Lightning Monkeys' });
+      done();
+    });
+  });
+
   describe('Delete', function() {
     var person;
     var expected_id = 1;
@@ -238,19 +273,28 @@ describe('Person Table', function() {
     });
 
     it('should create a person object', function(done) {
-      person = new Person(expected_id, expected_name);
+      var person = new Person(expected_id, expected_name);
       should.exist(person);
+      manager.persons.insert(person);
+      done();
+    });
+
+    it('should get the person', function(done) {
+      person = manager.persons.getById(expected_id);
+      check_object_values(person, { id: expected_id, name: expected_name });
       done();
     });
 
     it('should call the person API', function(done) {
-      svc.delete.result = {person: 1};
+      svc.delete.result = {person: {id: expected_id}};
       svc.get.result = person_model;
-      person.delete(function (result) {
+      person.delete(function (result_code, result) {
+        should.exist(result_code);
+        result_code.should.eql(200);
         should.exist(result);
         result.should.have.property('person');
-        result.person.should.eql(1);
-        result.should.not.have.property('err');
+        result.person.should.have.property('id');
+        result.person.id.should.eql(expected_id);
         done();
       });
     });
@@ -261,6 +305,12 @@ describe('Person Table', function() {
         './person?id=1',
         'function'
       ]]);
+      done();
+    });
+
+    it('should have removed the person from the list', function(done) {
+      var person = manager.persons.getById(expected_id);
+      should.not.exist(person);
       done();
     });
   });

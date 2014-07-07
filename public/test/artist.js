@@ -57,51 +57,6 @@ describe('Artist Table', function() {
     });
   });
 
-  describe('loadById', function() {
-    var artist;
-    var svc;
-
-    before(function(done) {
-      svc = service.getInstance();
-      svc.resetCalls();
-      done();
-    });
-
-    it('should call the artist API', function(done) {
-      svc.get.result = { artist: artist_model.all_artists[1] };
-      Artist.loadById(16, function(result) {
-        should.exist(result);
-        artist = result;
-        done();
-      });
-    });
-
-    it('should have called the service', function(done) {
-      svc.get.calls.should.be.eql(1);
-      svc.get.params.should.eql([[
-        './artist?id=16',
-        'function'
-      ]]);
-      done();
-    });
-
-    it('should get the artist', function(done) {
-      should.exist(artist);
-      artist.should.be.an.instanceOf(Artist);
-      done();
-    });
-
-    it('should be a valid artist', function(done) {
-      artist.should.have.property('id');
-      ko.isObservable(artist.id).should.be.true;
-      artist.id().should.eql(artist_model.all_artists[1].id);
-      artist.should.have.property('name');
-      ko.isObservable(artist.name).should.be.true;
-      artist.name().should.eql(artist_model.all_artists[1].name);
-      done();
-    });
-  });
-
   describe('Refresh', function() {
     var artist;
     var expected_id = 13;
@@ -144,6 +99,95 @@ describe('Artist Table', function() {
     });
   });
 
+  describe('Post', function() {
+    before(function(done) {
+      svc = service.getInstance();
+      svc.resetCalls();
+      done();
+    });
+
+    before(function(done) {
+      manager.artists.clear();
+      done();
+    });
+
+    it('should call the artist API', function(done) {
+      svc.post.result = { artist: { id: 4231, name: 'Thunder Monkeys' } };
+      manager.artists.create({name: 'Thunder Monkeys'}, function(result_code, result) {
+        should.exist(result_code);
+        result_code.should.eql(200);
+        should.exist(result);
+        result.should.not.have.property('err');
+        done();
+      });
+    });
+
+    it('should have called the service', function(done) {
+      svc.post.calls.should.be.eql(1);
+      svc.post.params.should.eql([[
+        './artist',
+        'function',
+        {name: 'Thunder Monkeys'}
+      ]]);
+      done();
+    });
+
+    it('should have added the artist into the list', function(done) {
+      var new_artist = manager.artists.getById(4231);
+      check_object_values(new_artist, { id: 4231, name: 'Thunder Monkeys' });
+      done();
+    });
+  });
+
+  describe('Put', function() {
+    before(function(done) {
+      svc = service.getInstance();
+      svc.resetCalls();
+      done();
+    });
+
+    before(function(done) {
+      manager.artists.clear();
+      var artist = new Artist(4231, 'Thunder Monkeys');
+      manager.artists.insert(artist);
+      done();
+    });
+
+    var artist;
+    it('should get the artist', function(done) {
+      artist = manager.artists.getById(4231);
+      check_object_values(artist, { id: 4231, name: 'Thunder Monkeys' });
+      done();
+    });
+
+    it('should call the artist API', function(done) {
+      svc.put.result = { artist: { id: 4231, name: 'Lightning Monkeys' } };
+      artist.update({name: 'Lightning Monkeys'}, function(result_code, result) {
+        should.exist(result_code);
+        result_code.should.eql(200);
+        should.exist(result);
+        result.should.not.have.property('err');
+        done();
+      });
+    });
+
+    it('should have called the service', function(done) {
+      svc.put.calls.should.be.eql(1);
+      svc.put.params.should.eql([[
+        './artist',
+        'function',
+        {name: 'Lightning Monkeys'}
+      ]]);
+      done();
+    });
+
+    it('should have modified the name of the artist in the list', function(done) {
+      var new_artist = manager.artists.getById(4231);
+      check_object_values(new_artist, { id: 4231, name: 'Lightning Monkeys' });
+      done();
+    });
+  });
+
   describe('Delete', function() {
     var artist;
     var expected_id = 1;
@@ -157,19 +201,28 @@ describe('Artist Table', function() {
     });
 
     it('should create a artist object', function(done) {
-      artist = new Artist(expected_id, expected_name);
+      var artist = new Artist(expected_id, expected_name);
       should.exist(artist);
+      manager.artists.insert(artist);
+      done();
+    });
+
+    it('should get the artist', function(done) {
+      artist = manager.artists.getById(expected_id);
+      check_object_values(artist, { id: expected_id, name: expected_name });
       done();
     });
 
     it('should call the artist API', function(done) {
-      svc.delete.result = {artist: 1};
+      svc.delete.result = {artist: {id: expected_id}};
       svc.get.result = artist_model;
-      artist.delete(function (result) {
+      artist.delete(function (result_code, result) {
+        should.exist(result_code);
+        result_code.should.eql(200);
         should.exist(result);
         result.should.have.property('artist');
-        result.artist.should.eql(1);
-        result.should.not.have.property('err');
+        result.artist.should.have.property('id');
+        result.artist.id.should.eql(expected_id);
         done();
       });
     });
@@ -180,6 +233,12 @@ describe('Artist Table', function() {
         './artist?id=1',
         'function'
       ]]);
+      done();
+    });
+
+    it('should have removed the artist from the list', function(done) {
+      var artist = manager.artists.getById(expected_id);
+      should.not.exist(artist);
       done();
     });
   });

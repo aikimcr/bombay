@@ -44,20 +44,27 @@ function postModel(res, model_name, options, result_key) {
 
   db_orm[model_name].create([data], function(err, rows) {
     var result = {};
-    result[result_key] = rows ? rows[0].id : 0;
+    result[result_key] = rows ? rows[0] : {};
     handleJSONResponse(res, err, result);
   });
 }
 
 function putModel(res, model_name, options, result_key) {
-  db_orm[model_name].get(options.id, function(err, row) {
+  var model = db_orm[model_name];
+  model.get(options.id, function(err, row) {
     handleJSONResponse(res, err, function() {
       var data = JSON.parse(JSON.stringify(options));
       delete data['id'];
       row.save(data, function(err) {
-        var result = {};
-        result[result_key] = options.id;
-        handleJSONResponse(res, err, result);
+        if (err) {
+          handleJSONResponse(res, err, null);
+        } else {
+          model.get(options.id, function(err, new_row) {
+            var result = {};
+            result[result_key] = new_row;
+            handleJSONResponse(res, err, result);
+          });
+        }
       });
     });
   });
@@ -68,7 +75,7 @@ function deleteModel(res, model_name, row_id, result_key) {
     handleJSONResponse(res, err, function() {
       row.remove(function(err) {
         var result = {};
-        result[result_key] = row_id;
+        result[result_key] = {id: row_id};
         handleJSONResponse(res, err, result);
       });
     });
@@ -92,7 +99,7 @@ exports.getBandTable = function(req, res) {
 };
 
 exports.postBandTable = function(req, res) {
-  postModel(res, 'Band', req.body, 'band_id');
+  postModel(res, 'Band', req.body, 'band');
 };
 
 exports.putBandTable = function(req, res) {
@@ -110,7 +117,7 @@ exports.getPersonTable = function(req, res) {
 };
 
 exports.postPersonTable = function(req, res) {
-  postModel(res, 'Person', req.body, 'person_id');
+  postModel(res, 'Person', req.body, 'person');
 };
 
 exports.putPersonTable = function(req, res) {
@@ -143,8 +150,13 @@ exports.putPersonTable = function(req, res) {
           var data = JSON.parse(JSON.stringify(req.query));
           delete data['id'];
           row.save(data, function(err) {
-            var result = {person: req.query.id};
-            handleJSONResponse(res, err, result);
+            if (err) {
+              handleJSONResponse(res, err, null);
+            } else {
+              db_orm.Person.get(req.query.id, function(err, new_row) {
+                handleJSONResponse(res, err, {person: new_row});
+              });
+            }
           });
         } else {
           res.json(500, wrong_old);
@@ -167,7 +179,7 @@ exports.getArtistTable = function(req, res) {
 };
 
 exports.postArtistTable = function(req, res) {
-  postModel(res, 'Artist', req.body, 'artist_id');
+  postModel(res, 'Artist', req.body, 'artist');
 };
 
 exports.putArtistTable = function(req, res) {
@@ -185,7 +197,7 @@ exports.getSongTable = function(req, res) {
 };
 
 exports.postSongTable = function(req, res) {
-  postModel(res, 'Song', req.body, 'song_id');
+  postModel(res, 'Song', req.body, 'song');
 };
 
 exports.putSongTable = function(req, res) {
@@ -251,7 +263,7 @@ exports.getBandSongTable = function(req, res) {
 };
 
 exports.postBandSongTable = function(req, res) {
-  postModel(res, 'BandSong', req.body, 'band_song_id');
+  postModel(res, 'BandSong', req.body, 'band_song');
 };
 
 exports.putBandSongTable = function(req, res) {
@@ -269,7 +281,7 @@ exports.getSongRatingTable = function(req, res) {
 };
 
 exports.postSongRatingTable = function(req, res) {
-  postModel(res, 'SongRating', req.body, 'song_rating_id');
+  postModel(res, 'SongRating', req.body, 'song_rating');
 };
 
 exports.putSongRatingTable = function(req, res) {

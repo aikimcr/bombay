@@ -47,11 +47,37 @@ exports.check_rows = function(got_rows, expected_rows, fields) {
   }
 };
 
-exports.check_result = function(result, data_key) {
+exports.check_result = function(result, data_key, expected_row) {
+  var errors = [];
+
   should.exist(result);
   result.should.have.property(data_key);
-  result.should.not.have.property('err');
-  return result[data_key];
+
+  if (expected_row) {
+    var got_row = result[data_key];
+    try {
+      should.exist(got_row, 'Row not found');
+    } catch(e) {
+      errors.push(e.toString());
+    }
+
+    Object.keys(expected_row).forEach(function(key) {
+      try {
+        should.exist(got_row, 'Can\'t read ' + key + ' for empty row');
+        got_row.should.have.property(key);
+        got_row[key].should.equal(expected_row[key], 'For ' + key + ' expected ' + expected_row[key] + ' got ' + got_row[key]);
+      } catch(e) {
+        errors.push(e.toString());
+      }
+    });
+
+    if (errors.length > 0) {
+      throw new Error('\n\t' + errors.join('\n\t') + '\n');
+    }
+  }
+
+  should.exist(result[data_key].id);
+  return result[data_key].id;
 };
 
 exports.check_error_result = function(err_code, result, expected_err_code, opt_expected_message) {

@@ -349,7 +349,7 @@ describe('routes', function() {
         req.body = {name: 'Cover Story'};
         var res = {
           json: function(result) {
-            band_id = test_util.check_result(result, 'band_id');
+            band_id = test_util.check_result(result, 'band', req.body);
             done();
           }
         };
@@ -380,7 +380,7 @@ describe('routes', function() {
         };
         var res = {
           json: function(result) {
-            person_id = test_util.check_result(result, 'person_id');
+            person_id = test_util.check_result(result, 'person', req.body);
             done();
           }
         };
@@ -411,7 +411,7 @@ describe('routes', function() {
         req.body = {name: 'Mott the Hoople'};
         var res = {
           json: function(result) {
-            artist_id = test_util.check_result(result, 'artist_id');
+            artist_id = test_util.check_result(result, 'artist', req.body);
             done();
           }
         };
@@ -436,7 +436,7 @@ describe('routes', function() {
         req.body = {name: 'La Grange', artist_id: 2};
         var res = {
           json: function(result) {
-            song_id = test_util.check_result(result, 'song_id');
+            song_id = test_util.check_result(result, 'song', req.body);
             done();
           }
         };
@@ -500,7 +500,7 @@ describe('routes', function() {
         req.body = {band_id: 3, song_id: 1, key_signature: '', song_status: 3};
         var res = {
           json: function(result) {
-            band_song_id = test_util.check_result(result, 'band_song_id');
+            band_song_id = test_util.check_result(result, 'band_song', req.body);
             done();
           }
         };
@@ -525,7 +525,7 @@ describe('routes', function() {
         req.body = {band_member_id: 3, band_song_id: 1, rating: 3};
         var res = {
           json: function(result) {
-            song_rating_id = test_util.check_result(result, 'song_rating_id');
+            song_rating_id = test_util.check_result(result, 'song_rating', req.body);
             done();
           }
         };
@@ -551,7 +551,7 @@ describe('routes', function() {
         req.query = {id: 1, name: 'Groove On The Side'};
         var res = {
           json: function(result) {
-            band_id = test_util.check_result(result, 'band');
+            band_id = test_util.check_result(result, 'band', req.query);
             done();
           }
         };
@@ -573,7 +573,7 @@ describe('routes', function() {
         req.query = {id: 1, email: 'admin@musichero.foo'};
         var res = {
           json: function(result) {
-            person_id = test_util.check_result(result, 'person');
+            person_id = test_util.check_result(result, 'person', req.query);
             done();
           }
         };
@@ -624,6 +624,7 @@ describe('routes', function() {
         var res = {
           json: function(result) {
             person_id = test_util.check_result(result, 'person');
+            result.person.should.have.property('password');
             done();
           }
         };

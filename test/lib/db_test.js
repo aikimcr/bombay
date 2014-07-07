@@ -35,7 +35,6 @@ function flattenSql(sql) {
 }
 
 exports.loadSql = function(sql, done) {
-console.log(db_orm.getConnect());//XXX
   db_orm.execSqlList(flattenSql(sql), function(err) {
     if (err) throw err;
     done();

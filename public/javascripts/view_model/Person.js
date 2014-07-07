@@ -1,5 +1,5 @@
 function Person(id, name, full_name, email, system_admin) {
-  Table.call(this, './person');
+  Table.call(this);
   this.id = ko.observable(id || -1);
   this.name = ko.observable(name || '');
   this.full_name = ko.observable(full_name || '');
@@ -16,33 +16,10 @@ function Person(id, name, full_name, email, system_admin) {
 }
 util.inherits(Person, Table);
 
-Person.loadById = function(id, callback) {
-  var svc = service.getInstance();
-  svc.get('./person?id=' + id, function(result) {
-    callback(new Person(
-      result.person.id,
-      result.person.name,
-      result.person.full_name,
-      result.person.email,
-      result.person.system_admin
-    ));
-  });
-};
-
-Person.prototype.refresh = function(callback) {
-  var svc = service.getInstance();
-  svc.get('./person?id=' + this.id(), function(result) {
-    if (result.err) {
-      callback(result);
-    } else {
-      if (this.name() != result.person.name) this.name(result.person.name);
-      if (this.full_name() != result.person.full_name) this.full_name(result.person.full_name);
-      if (this.email() != result.person.email) this.email(result.person.email);
-      if (this.system_admin() != result.person.system_admin) this.system_admin(result.person.system_admin);
-      callback({});
-    }
-  }.bind(this));
-};
+Person.service_url = './person';
+Person.model_key = 'person';
+Person.columns = ['name', 'full_name', 'email', 'system_admin'];
+Person.list_key = 'persons';
 
 Person.prototype.confirm_text = function() {
   return 'Delete person ' + this.name() + '?';
@@ -54,7 +31,7 @@ Person.prototype.reload_list = function() {
 
 // The List Object
 function PersonList() {
-  TableList.call(this, './person', 'all_persons');
+  TableList.call(this, Person);
 }
 util.inherits(PersonList, TableList);
 

@@ -37,8 +37,8 @@ service.prototype.put = function(url, callback, data) {
   this.getRequest_(url, callback).put(data);
 };
 
-service.prototype.set = function(url, callback, data) {
-  this.getRequest_(url, callback).set(data);
+service.prototype.post = function(url, callback, data) {
+  this.getRequest_(url, callback).post(data);
 };
 
 service.prototype.delete = function(url, callback) {

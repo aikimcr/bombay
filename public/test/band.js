@@ -57,51 +57,6 @@ describe('Band Table', function() {
     });
   });
 
-  describe('loadById', function() {
-    var band;
-    var svc;
-
-    before(function(done) {
-      svc = service.getInstance();
-      svc.resetCalls();
-      done();
-    });
-
-    it('should call the band API', function(done) {
-      svc.get.result = { band: band_model.all_bands[1] };
-      Band.loadById(16, function(result) {
-        should.exist(result);
-        band = result;
-        done();
-      });
-    });
-
-    it('should have called the service', function(done) {
-      svc.get.calls.should.be.eql(1);
-      svc.get.params.should.eql([[
-        './band?id=16',
-        'function'
-      ]]);
-      done();
-    });
-
-    it('should get the band', function(done) {
-      should.exist(band);
-      band.should.be.an.instanceOf(Band);
-      done();
-    });
-
-    it('should be a valid band', function(done) {
-      band.should.have.property('id');
-      ko.isObservable(band.id).should.be.true;
-      band.id().should.eql(band_model.all_bands[1].id);
-      band.should.have.property('name');
-      ko.isObservable(band.name).should.be.true;
-      band.name().should.eql(band_model.all_bands[1].name);
-      done();
-    });
-  });
-
   describe('Refresh', function() {
     var band;
     var expected_id = 45;
@@ -122,9 +77,10 @@ describe('Band Table', function() {
 
     it('should call the band API', function(done) {
       svc.get.result = { band: band_model.all_bands[0] };
-      band.refresh(function(result) {
-        should.exist(result);
-        result.should.not.have.property('err');
+      band.refresh(function(result_code, result) {
+        should.exist(result_code);
+        result_code.should.eql(200);
+        should.not.exist(result);
         done();
       });
     });
@@ -144,6 +100,95 @@ describe('Band Table', function() {
     });
   });
 
+  describe('Post', function() {
+    before(function(done) {
+      svc = service.getInstance();
+      svc.resetCalls();
+      done();
+    });
+
+    before(function(done) {
+      manager.bands.clear();
+      done();
+    });
+
+    it('should call the band API', function(done) {
+      svc.post.result = { band: { id: 4231, name: 'Thunder Monkeys' } };
+      manager.bands.create({name: 'Thunder Monkeys'}, function(result_code, result) {
+        should.exist(result_code);
+        result_code.should.eql(200);
+        should.exist(result);
+        result.should.not.have.property('err');
+        done();
+      });
+    });
+
+    it('should have called the service', function(done) {
+      svc.post.calls.should.be.eql(1);
+      svc.post.params.should.eql([[
+        './band',
+        'function',
+        {name: 'Thunder Monkeys'}
+      ]]);
+      done();
+    });
+
+    it('should have added the band into the list', function(done) {
+      var new_band = manager.bands.getById(4231);
+      check_object_values(new_band, { id: 4231, name: 'Thunder Monkeys' });
+      done();
+    });
+  });
+
+  describe('Put', function() {
+    before(function(done) {
+      svc = service.getInstance();
+      svc.resetCalls();
+      done();
+    });
+
+    before(function(done) {
+      manager.bands.clear();
+      var band = new Band(4231, 'Thunder Monkeys');
+      manager.bands.insert(band);
+      done();
+    });
+
+    var band;
+    it('should get the band', function(done) {
+      band = manager.bands.getById(4231);
+      check_object_values(band, { id: 4231, name: 'Thunder Monkeys' });
+      done();
+    });
+
+    it('should call the band API', function(done) {
+      svc.put.result = { band: { id: 4231, name: 'Lightning Monkeys' } };
+      band.update({name: 'Lightning Monkeys'}, function(result_code, result) {
+        should.exist(result_code);
+        result_code.should.eql(200);
+        should.exist(result);
+        result.should.not.have.property('err');
+        done();
+      });
+    });
+
+    it('should have called the service', function(done) {
+      svc.put.calls.should.be.eql(1);
+      svc.put.params.should.eql([[
+        './band',
+        'function',
+        {name: 'Lightning Monkeys'}
+      ]]);
+      done();
+    });
+
+    it('should have modified the name of the band in the list', function(done) {
+      var new_band = manager.bands.getById(4231);
+      check_object_values(new_band, { id: 4231, name: 'Lightning Monkeys' });
+      done();
+    });
+  });
+
   describe('Delete', function() {
     var band;
     var expected_id = 1;
@@ -157,19 +202,28 @@ describe('Band Table', function() {
     });
 
     it('should create a band object', function(done) {
-      band = new Band(expected_id, expected_name);
+      var band = new Band(expected_id, expected_name);
       should.exist(band);
+      manager.bands.insert(band);
+      done();
+    });
+
+    it('should get the band', function(done) {
+      band = manager.bands.getById(expected_id);
+      check_object_values(band, { id: expected_id, name: expected_name });
       done();
     });
 
     it('should call the band API', function(done) {
-      svc.delete.result = {band: 1};
+      svc.delete.result = {band: {id: expected_id}};
       svc.get.result = band_model;
-      band.delete(function (result) {
+      band.delete(function (result_code, result) {
+        should.exist(result_code);
+        result_code.should.eql(200);
         should.exist(result);
         result.should.have.property('band');
-        result.band.should.eql(1);
-        result.should.not.have.property('err');
+        result.band.should.have.property('id');
+        result.band.id.should.eql(expected_id);
         done();
       });
     });
@@ -180,6 +234,12 @@ describe('Band Table', function() {
         './band?id=1',
         'function'
       ]]);
+      done();
+    });
+
+    it('should have removed the band from the list', function(done) {
+      var band = manager.bands.getById(expected_id);
+      should.not.exist(band);
       done();
     });
   });
