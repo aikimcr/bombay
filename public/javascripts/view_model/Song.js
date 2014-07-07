@@ -30,25 +30,10 @@ function Song(id, name, artist_id, key_signature) {
 }
 util.inherits(Song, Table);
 
-Song.loadById = function(id, callback) {
-  var svc = service.getInstance();
-  svc.get('./song?id=' + id, function(result) {
-    callback(new Song(result.song.id, result.song.name, result.song.artist_id));
-  });
-};
-
-Song.prototype.refresh = function(callback) {
-  var svc = service.getInstance();
-  svc.get('./song?id=' + this.id(), function(result) {
-    if (result.err) {
-      callback(result);
-    } else {
-      if (this.name() != result.song.name) this.name(result.song.name);
-      if (this.artist_id() != result.song.artist_id) this.artist_id(result.song.artist_id);
-      callback({});
-    }
-  }.bind(this));
-};
+Song.service_url = './song';
+Song.model_key = 'song';
+Song.columns = ['name', 'artist_id'];
+Song.list_key = 'songs';
 
 Song.prototype.confirm_text = function() {
   return 'Delete song ' + this.name() + ' by ' + this.artist().name() + '?';
@@ -60,7 +45,7 @@ Song.prototype.reload_list = function() {
 
 // The Song List Object
 function SongList() {
-  TableList.call(this, './song', 'all_songs');
+  TableList.call(this, Song);
 }
 util.inherits(SongList, TableList);
 

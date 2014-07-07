@@ -8,7 +8,7 @@ var song_model = {
   }]
 };
 
-describe('Song Table', function() {
+describe('Song Master Table', function() {
   describe('#Instantiate', function() {
     var song;
     var expected_id = 1;
@@ -73,54 +73,6 @@ describe('Song Table', function() {
     });
   });
 
-  describe('loadById', function() {
-    var song;
-    var svc;
-
-    before(function(done) {
-      svc = service.getInstance();
-      svc.resetCalls();
-      done();
-    });
-
-    it('should call the song API', function(done) {
-      svc.get.result = { song: song_model.all_songs[1] };
-      Song.loadById(16, function(result) {
-        should.exist(result);
-        song = result;
-        done();
-      });
-    });
-
-    it('should have called the service', function(done) {
-      svc.get.calls.should.be.eql(1);
-      svc.get.params.should.eql([[
-        './song?id=16',
-        'function'
-      ]]);
-      done();
-    });
-
-    it('should get the song', function(done) {
-      should.exist(song);
-      song.should.be.an.instanceOf(Song);
-      done();
-    });
-
-    it('should be a valid song', function(done) {
-      song.should.have.property('id');
-      ko.isObservable(song.id).should.be.true;
-      song.id().should.eql(song_model.all_songs[1].id);
-      song.should.have.property('name');
-      ko.isObservable(song.name).should.be.true;
-      song.name().should.eql(song_model.all_songs[1].name);
-      song.should.have.property('artist_id');
-      ko.isObservable(song.artist_id).should.be.true;
-      song.artist_id().should.eql(song_model.all_songs[1].artist_id);
-      done();
-    });
-  });
-
   describe('Refresh', function() {
     var song;
     var expected_id = 45;
@@ -165,6 +117,118 @@ describe('Song Table', function() {
     });
   });
 
+  describe('Post', function() {
+    before(function(done) {
+      svc = service.getInstance();
+      svc.resetCalls();
+      done();
+    });
+
+    before(function(done) {
+      manager.songs.clear();
+      done();
+    });
+
+    it('should call the song API', function(done) {
+      svc.post.result = { song: {
+        id: 4231,
+        name: 'Thunder Monkeys',
+        artist_id: 67
+      } };
+      manager.songs.create({
+        name: 'Thunder Monkeys',
+        artist_id: 67
+      }, function(result_code, result) {
+        should.exist(result_code);
+        result_code.should.eql(200);
+        should.exist(result);
+        result.should.not.have.property('err');
+        done();
+      });
+    });
+
+    it('should have called the service', function(done) {
+      svc.post.calls.should.be.eql(1);
+      svc.post.params.should.eql([[
+        './song',
+        'function',
+        {name: 'Thunder Monkeys', artist_id: 67}
+      ]]);
+      done();
+    });
+
+    it('should have added the song into the list', function(done) {
+      var new_song = manager.songs.getById(4231);
+      check_object_values(new_song, {
+        id: 4231,
+        name: 'Thunder Monkeys',
+        artist_id: 67
+      });
+      done();
+    });
+  });
+
+  describe('Put', function() {
+    before(function(done) {
+      svc = service.getInstance();
+      svc.resetCalls();
+      done();
+    });
+
+    before(function(done) {
+      manager.songs.clear();
+      var song = new Song(4231, 'Thunder Monkeys', 67);
+      manager.songs.insert(song);
+      done();
+    });
+
+    var song;
+    it('should get the song', function(done) {
+      song = manager.songs.getById(4231);
+      check_object_values(song, {
+        id: 4231,
+        name: 'Thunder Monkeys',
+        artist_id: 67
+      });
+      done();
+    });
+
+    it('should call the song API', function(done) {
+      svc.put.result = { song: {
+        id: 4231,
+        name: 'Lightning Monkeys',
+        artist_id: 67
+      } };
+      song.update({name: 'Lightning Monkeys'}, function(result_code, result) {
+        should.exist(result_code);
+        result_code.should.eql(200);
+        should.exist(result);
+        result.should.not.have.property('err');
+        done();
+      });
+    });
+
+    it('should have called the service', function(done) {
+      svc.put.calls.should.be.eql(1);
+      svc.put.params.should.eql([[
+        './song',
+        'function',
+        {name: 'Lightning Monkeys'}
+      ]]);
+      done();
+    });
+
+    it('should have modified the name of the song in the list', function(done) {
+      var new_song = manager.songs.getById(4231);
+      check_object_values(new_song, {
+        id: 4231,
+        name: 'Lightning Monkeys',
+        artist_id: 67
+      });
+      done();
+    });
+  });
+
   describe('Delete', function() {
     var song;
     var expected_id = 1;
@@ -179,19 +243,32 @@ describe('Song Table', function() {
     });
 
     it('should create a song object', function(done) {
-      song = new Song(expected_id, expected_name, expected_artist_id);
+      var song = new Song(expected_id, expected_name, expected_artist_id);
       should.exist(song);
+      manager.songs.insert(song);
+      done();
+    });
+
+    it('should get the song', function(done) {
+      song = manager.songs.getById(expected_id);
+      check_object_values(song, {
+        id: expected_id,
+        name: expected_name,
+        artist_id: expected_artist_id
+      });
       done();
     });
 
     it('should call the song API', function(done) {
-      svc.delete.result = {song: 1};
+      svc.delete.result = {song: { id: 1}};
       svc.get.result = song_model;
-      song.delete(function (result) {
+      song.delete(function (result_code, result) {
+        should.exist(result_code);
+        result_code.should.eql(200);
         should.exist(result);
         result.should.have.property('song');
-        result.song.should.eql(1);
-        result.should.not.have.property('err');
+        result.song.should.have.property('id');
+        result.song.id.should.eql(expected_id);
         done();
       });
     });
@@ -204,10 +281,16 @@ describe('Song Table', function() {
       ]]);
       done();
     });
+
+    it('should have removed the song from the list', function(done) {
+      var song = manager.songs.getById(expected_id);
+      should.not.exist(song);
+      done();
+    });
   });
 });
 
-describe('SongList', function() {
+describe('Song Master List', function() {
   var song_list;
   var svc;
 
