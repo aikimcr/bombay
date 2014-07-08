@@ -35,10 +35,6 @@ Band.prototype.confirm_text = function() {
   return 'Delete band ' + this.name() + '?';
 };
 
-Band.prototype.reload_list = function() {
-  manager.bands.load();
-};
-
 // The Band List Object
 function BandList() {
   TableList.call(this, Band);

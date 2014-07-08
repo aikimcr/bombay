@@ -118,7 +118,6 @@ describe('Band Table', function() {
         should.exist(result_code);
         result_code.should.eql(200);
         should.exist(result);
-        result.should.not.have.property('err');
         done();
       });
     });
@@ -294,7 +293,7 @@ describe('Band List', function() {
   });
 });
 
-describe('BandFilters', function() {
+describe('Band Table Filters', function() {
   var band_list = function() {
     return manager.bands.filtered_list().map(function(band) {
       return {id: band.id(), name: band.name()};

@@ -1,5 +1,5 @@
 function BandMember(id, band_id, person_id, band_admin) {
-  Table.call(this, './band_member');
+  Table.call(this);
   this.id = ko.observable(id || -1);
   this.band_id = ko.observable(band_id || -1);
   this.person_id = ko.observable(person_id || -1);
@@ -15,47 +15,18 @@ function BandMember(id, band_id, person_id, band_admin) {
 }
 util.inherits(BandMember, Table);
 
-BandMember.loadById = function(id, callback) {
-  var svc = service.getInstance();
-  svc.get('./band_member?id=' + id, function(result) {
-    callback(new BandMember(
-      result.band_member.id,
-      result.band_member.band_id,
-      result.band_member.person_id,
-      result.band_member.band_admin
-    ));
-  });
-};
-
-BandMember.prototype.refresh = function(callback) {
-  var svc = service.getInstance();
-  svc.get('./band_member?id=' + this.id(), function(result) {
-    if (result.err) {
-      callback(result);
-    } else {
-      if (this.band_id() != result.band_member.band_id) this.band_id(result.band_member.band_id);
-      if (this.person_id() != result.band_member.person_id) this.person_id(result.band_member.person_id);
-      if (this.band_admin() != result.band_member.band_admin) this.band_admin(result.band_member.band_admin);
-      callback({});
-    }
-  }.bind(this));
-};
+BandMember.service_url = './band_member';
+BandMember.model_key = 'band_member';
+BandMember.columns = ['band_id', 'person_id', 'band_admin'];
+BandMember.list_key = 'band_members';
 
 BandMember.prototype.confirm_text = function() {
   return 'Delete band member ' + this.person().name() + ' from ' + this.band().name() + '?';
 };
 
-BandMember.prototype.reload_list = function() {
-  manager.band_members.load();
-};
-
-BandMember.prototype.reload_relatives = function() {
-  manager.song_ratings.load();
-};
-
 // The BandMember List Object
 function BandMemberList() {
-  TableList.call(this, './band_member', 'all_band_members');
+  TableList.call(this, BandMember);
 }
 util.inherits(BandMemberList, TableList);
 

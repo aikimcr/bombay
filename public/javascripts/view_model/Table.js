@@ -71,8 +71,6 @@ Table.prototype.refresh = function(callback) {
   }.bind(this));
 };
 
-Table.prototype.reload_relatives = function() { };
-
 function TableList(model_type) {
   this.list = ko.observableArray([]);
   this.model_type = model_type;

@@ -1,5 +1,5 @@
 function BandSong(id, band_id, song_id, song_status, key_signature) {
-  Table.call(this, './band_song');
+  Table.call(this);
   this.id = ko.observable(id || -1);
   this.band_id = ko.observable(band_id || -1);
   this.song_id = ko.observable(song_id || -1);
@@ -69,47 +69,18 @@ function BandSong(id, band_id, song_id, song_status, key_signature) {
 }
 util.inherits(BandSong, Table);
 
-BandSong.loadById = function(id, callback) {
-  var svc = service.getInstance();
-  svc.get('./band_song?id=' + id, function(result) {
-    callback(new BandSong(
-      result.band_song.id,
-      result.band_song.band_id,
-      result.band_song.song_id,
-      result.band_song.song_status
-    ));
-  });
-};
-
-BandSong.prototype.refresh = function(callback) {
-  var svc = service.getInstance();
-  svc.get('./band_song?id=' + this.id(), function(result) {
-    if (result.err) {
-      callback(result);
-    } else {
-      if (this.band_id() != result.band_song.band_id) this.band_id(result.band_song.band_id);
-      if (this.song_id() != result.band_song.song_id) this.song_id(result.band_song.song_id);
-      if (this.song_status() != result.band_song.song_status) this.song_status(result.band_song.song_status);
-      callback({});
-    }
-  }.bind(this));
-};
+BandSong.service_url = './band_song';
+BandSong.model_key = 'band_song';
+BandSong.columns = ['band_id', 'song_id', 'song_status', 'key_signature'];
+BandSong.list_key = 'band_songs';
 
 BandSong.prototype.confirm_text = function() {
   return 'Remove song ' + this.song().name() + ' from ' + this.band().name() + '?';
 };
 
-BandSong.prototype.reload_list = function() {
-  manager.band_songs.load();
-};
-
-BandSong.prototype.reload_relatives = function() {
-  manager.song_ratings.load();
-};
-
 // The BandSong List Object
 function BandSongList() {
-  TableList.call(this, './band_song', 'all_band_songs');
+  TableList.call(this, BandSong);
   this.sort_type('name_asc');
 }
 util.inherits(BandSongList, TableList);

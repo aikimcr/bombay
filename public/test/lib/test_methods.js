@@ -183,8 +183,8 @@ function load_test_models() {
 };
 
 function load_test_model(view_model, test_data) {
-  view_model.list([]);
-  view_model.load_(test_data);
+  view_model.clear();
+  view_model.load_(200, test_data);
 };
 
 function check_object_values(got, expected) {

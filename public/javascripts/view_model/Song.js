@@ -39,10 +39,6 @@ Song.prototype.confirm_text = function() {
   return 'Delete song ' + this.name() + ' by ' + this.artist().name() + '?';
 };
 
-Song.prototype.reload_list = function() {
-  manager.songs.load();
-};
-
 // The Song List Object
 function SongList() {
   TableList.call(this, Song);

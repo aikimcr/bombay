@@ -342,7 +342,7 @@ describe('Song Master List', function() {
   });
 });
 
-describe('SongFilters', function() {
+describe('Song Master Table Filters', function() {
   var song_list = function() {
     return manager.songs.filtered_list().map(function(song) {
       return {

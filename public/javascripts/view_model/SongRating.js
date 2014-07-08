@@ -1,5 +1,5 @@
 function SongRating(id, band_member_id, band_song_id, rating) {
-  Table.call(this, './song_rating');
+  Table.call(this);
   this.id = ko.observable(id);
   this.band_member_id = ko.observable(band_member_id);
   this.band_song_id = ko.observable(band_song_id);
@@ -7,35 +7,14 @@ function SongRating(id, band_member_id, band_song_id, rating) {
 }
 util.inherits(SongRating, Table);
 
-SongRating.loadById = function(id, callback) {
-  var svc = service.getInstance();
-  svc.get('./song_rating?id=' + id, function(result) {
-    callback(new SongRating(
-      result.song_rating.id,
-      result.song_rating.band_member_id,
-      result.song_rating.band_song_id,
-      result.song_rating.rating
-    ));
-  });
-};
-
-SongRating.prototype.refresh = function(callback) {
-  var svc = service.getInstance();
-  svc.get('./song_rating?id=' + this.id(), function(result) {
-    if (result.err) {
-      callback(result);
-    } else {
-      if (this.band_member_id() != result.song_rating.band_member_id) this.band_member_id(result.song_rating.band_member_id);
-      if (this.band_song_id() != result.song_rating.band_song_id) this.band_song_id(result.song_rating.band_song_id);
-      if (this.rating() != result.song_rating.rating) this.rating(result.song_rating.rating);
-      callback({});
-    }
-  }.bind(this));
-};
+SongRating.service_url = './song_rating';
+SongRating.model_key = 'song_rating';
+SongRating.columns = ['band_member_id', 'band_song_id', 'rating'];
+SongRating.list_key = 'song_ratings';
 
 // The SongRating List Object
 function SongRatingList() {
-  TableList.call(this, './song_rating', 'all_song_ratings');
+  TableList.call(this, SongRating);
 }
 util.inherits(SongRatingList, TableList);
 

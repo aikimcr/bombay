@@ -110,47 +110,8 @@ function Request(id, request_type, timestamp, person_id, band_id, description, o
 }
 util.inherits(Request, Table);
 
-
-Request.loadById = function(id, callback) {
-  var svc = service.getInstance();
-  svc.get('./request?id=' + id, function(result) {
-    callback(new Request(
-      result.request.id,
-      result.request.type,
-      result.request.timestamp,
-      result.request.person_id,
-      result.request.band_id,
-      result.request.description
-    ));
-  });
-};
-
-Request.prototype.refresh = function(callback) {
-  var svc = service.getInstance();
-  svc.get('./request?id=' + id, function(result) {
-    if (result.err) {
-      callback(result);
-    } else {
-      if (this.type() != result.request.type) this.type(result.request.type);
-      if (this.timestamp() != result.request.timestamp) this.timestamp(result.request.timestamp);
-      if (this.person_id() != result.request.person_id) this.person_id(result.request.person_id);
-      if (this.band_id() != result.request.band_id) this.band_id(result.request.band_id);
-    }
-  });
-};
-
 Request.prototype.confirm_text = function() {
   return 'Delete request for ' + this.person().full_name() + ', ' + this.band().name() + '?';
-};
-
-Request.prototype.reload_list = function() {
-  manager.requests.load();
-};
-
-Request.prototype.reload_relatives = function() {
-  manager.band_members.load();
-  manager.band_songs.load();
-  manager.song_ratings.load();
 };
 
 Request.prototype.change_status = function(action, callback) {

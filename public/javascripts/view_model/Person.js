@@ -25,10 +25,6 @@ Person.prototype.confirm_text = function() {
   return 'Delete person ' + this.name() + '?';
 };
 
-Person.prototype.reload_list = function() {
-  manager.persons.load();
-};
-
 // The List Object
 function PersonList() {
   TableList.call(this, Person);

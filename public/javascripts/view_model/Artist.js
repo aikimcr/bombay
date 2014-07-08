@@ -22,10 +22,6 @@ Artist.prototype.confirm_text = function() {
   return 'Delete artist ' + this.name() + '?';
 };
 
-Artist.prototype.reload_list = function() {
-  manager.artists.load();
-};
-
 // The Artist List Object
 function ArtistList() {
   TableList.call(this, Artist);

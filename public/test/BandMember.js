@@ -94,99 +94,6 @@ describe('BandMember Table', function() {
     });
   });
 
-  describe('loadById', function() {
-    var band_member;
-    var svc;
-
-    before(function(done) {
-      svc = service.getInstance();
-      svc.resetCalls();
-      done();
-    });
-
-    it('should call the band_member API', function(done) {
-      svc.get.result = { band_member: band_member_model.all_band_members[1] };
-      BandMember.loadById(16, function(result) {
-        should.exist(result);
-        band_member = result;
-        done();
-      });
-    });
-
-    it('should have called the service', function(done) {
-      svc.get.calls.should.be.eql(1);
-      svc.get.params.should.eql([[
-        './band_member?id=16',
-        'function'
-      ]]);
-      done();
-    });
-
-    it('should get the band_member', function(done) {
-      should.exist(band_member);
-      band_member.should.be.an.instanceOf(BandMember);
-      done();
-    });
-
-    it('should be a valid band_member', function(done) {
-      band_member.should.have.property('id');
-      ko.isObservable(band_member.id).should.be.true;
-      band_member.id().should.eql(band_member_model.all_band_members[1].id);
-      band_member.should.have.property('band_id');
-      ko.isObservable(band_member.band_id).should.be.true;
-      band_member.band_id().should.eql(band_member_model.all_band_members[1].band_id);
-      band_member.should.have.property('person_id');
-      ko.isObservable(band_member.person_id).should.be.true;
-      band_member.person_id().should.eql(band_member_model.all_band_members[1].person_id);
-      band_member.should.have.property('band_admin');
-      ko.isObservable(band_member.band_admin).should.be.true;
-      band_member.band_admin().should.eql(band_member_model.all_band_members[1].band_admin);
-      done();
-    });
-  });
-
-  describe('Update', function() {
-    var band_member;
-    var expected_id = 1;
-    var expected_band_id = 1;
-    var expected_person_id = 1;
-    var expected_band_admin = 0;
-    var svc;
-
-    before(function(done) {
-      svc = service.getInstance();
-      svc.resetCalls();
-      done();
-    });
-
-    it('should create a band_member object', function(done) {
-      band_member = new BandMember(expected_id, expected_band_id, expected_person_id, expected_band_admin);
-      should.exist(band_member);
-      done();
-    });
-
-    it('should call the band_member API', function(done) {
-      svc.put.result = {band_member: 1};
-      band_member.update({band_admin: true}, function (result) {
-        should.exist(result);
-        result.should.have.property('band_member');
-        result.band_member.should.eql(1);
-        result.should.not.have.property('err');
-        done();
-      });
-    });
-
-    it('should have called the update service', function(done) {
-      svc.put.calls.should.be.eql(1);
-      svc.put.params.should.eql([[
-        './band_member',
-        'function',
-        {id: expected_band_id, band_admin: 1},
-      ]]);
-      done();
-    });
-  });
-
   describe('Refresh', function() {
     var band_member;
     var expected_id = 45;
@@ -214,9 +121,10 @@ describe('BandMember Table', function() {
 
     it('should call the band_member API', function(done) {
       svc.get.result = { band_member: band_member_model.all_band_members[0] };
-      band_member.refresh(function(result) {
-        should.exist(result);
-        result.should.not.have.property('err');
+      band_member.refresh(function(result_code, result) {
+        should.exist(result_code);
+        result_code.should.eql(200);
+        should.not.exist(result);
         done();
       });
     });
@@ -238,6 +146,128 @@ describe('BandMember Table', function() {
     });
   });
 
+/* XXX This is not how band members work
+  describe('Post', function() {
+    before(function(done) {
+      svc = service.getInstance();
+      svc.resetCalls();
+      done();
+    });
+
+    before(function(done) {
+      manager.bands.clear();
+      done();
+    });
+
+    it('should call the band_member API', function(done) {
+      svc.post.result = { band_member: {
+        id: 4231,
+        band_id: 67,
+        person_id: 367,
+        band_admin: false
+      } };
+      manager.band_members.create({
+        band_id: 67,
+        person_id: 367,
+        band_admin: false
+      }, function(result_code, result) {
+        should.exist(result_code);
+        result_code.should.eql(200);
+        should.exist(result);
+        done();
+      });
+    });
+
+    it('should have called the service', function(done) {
+      svc.post.calls.should.be.eql(1);
+      svc.post.params.should.eql([[
+        './band_member',
+        'function',
+        {
+          band_id: 67,
+          person_id: 367,
+          band_admin: false
+        }
+      ]]);
+      done();
+    });
+
+    it('should have added the band_member into the list', function(done) {
+      var new_band_member = manager.band_members.getById(4231);
+      check_object_values(new_band, {
+        id: 4231,
+        band_id: 67,
+        person_id: 367,
+        band_admin: false
+      });
+      done();
+    });
+  });
+*/
+
+  describe('Put', function() {
+    before(function(done) {
+      svc = service.getInstance();
+      svc.resetCalls();
+      done();
+    });
+
+    before(function(done) {
+      manager.band_members.clear();
+      var band_member = new BandMember(4231, 67, 367, false);
+      manager.band_members.insert(band_member);
+      done();
+    });
+
+    var band;
+    it('should get the band', function(done) {
+      band_member = manager.band_members.getById(4231);
+      check_object_values(band_member, {
+        id: 4231,
+        band_id: 67,
+        person_id: 367,
+        band_admin: false
+      });
+      done();
+    });
+
+    it('should call the band API', function(done) {
+      svc.put.result = { band_member: {
+        id: 4231,
+        band_id: 67,
+        person_id: 367,
+        band_admin: true
+      } };
+      band_member.update({band_admin: true}, function(result_code, result) {
+        should.exist(result_code);
+        result_code.should.eql(200);
+        should.exist(result);
+        done();
+      });
+    });
+
+    it('should have called the service', function(done) {
+      svc.put.calls.should.be.eql(1);
+      svc.put.params.should.eql([[
+        './band_member',
+        'function',
+        {band_admin: true}
+      ]]);
+      done();
+    });
+
+    it('should have modified the band_member in the list', function(done) {
+      var new_band_member = manager.band_members.getById(4231);
+      check_object_values(new_band_member, {
+        id: 4231,
+        band_id: 67,
+        person_id: 367,
+        band_admin: true
+      });
+      done();
+    });
+  });
+
   describe('Delete', function() {
     var band_member;
     var expected_id = 1;
@@ -253,18 +283,32 @@ describe('BandMember Table', function() {
     });
 
     it('should create a band_member object', function(done) {
-      band_member = new BandMember(expected_id, expected_band_id, expected_person_id, expected_band_admin);
+      var band_member = new BandMember(expected_id, expected_band_id, expected_person_id, expected_band_admin);
       should.exist(band_member);
+      manager.band_members.insert(band_member);
+      done();
+    });
+
+    it('should get the band_member', function(done) {
+      band_member = manager.band_members.getById(expected_id);
+      check_object_values(band_member, {
+        id: expected_id,
+        band_id: expected_band_id,
+        person_id: expected_person_id,
+        band_admin: expected_band_admin
+      });
       done();
     });
 
     it('should call the band_member API', function(done) {
-      svc.delete.result = {band_member: 1};
-      band_member.delete(function (result) {
+      svc.delete.result = {band_member: {id: 1}};
+      band_member.delete(function (result_code, result) {
+        should.exist(result_code);
+        result_code.should.eql(200);
         should.exist(result);
         result.should.have.property('band_member');
-        result.band_member.should.eql(1);
-        result.should.not.have.property('err');
+        result.band_member.should.have.property('id');
+        result.band_member.id.should.eql(expected_id);
         done();
       });
     });
@@ -277,10 +321,16 @@ describe('BandMember Table', function() {
       ]]);
       done();
     });
+
+    it('should have removed the band_member from the list', function(done) {
+      var band_member = manager.band_members.getById(expected_id);
+      should.not.exist(band_member);
+      done();
+    });
   });
 });
 
-describe('BandMemberList', function() {
+describe('BandMember List', function() {
   var band_member_list;
   var svc;
 
@@ -335,7 +385,7 @@ describe('BandMemberList', function() {
   });
 });
 
-describe('BandMemberFilters', function() {
+describe('BandMember Filters', function() {
   var band_member_list = function() {
     return manager.band_members.filtered_list().map(function(band_member) {
       return {

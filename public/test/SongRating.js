@@ -8,7 +8,7 @@ var song_rating_model = {
   }]
 };
 
-describe('SongRating', function() {
+describe('SongRating Table', function() {
   describe('#Instantiate', function() {
     var song_rating;
     var expected_id = 1;
@@ -94,57 +94,6 @@ describe('SongRating', function() {
     });
   });
 
-  describe('loadById', function() {
-    var song_rating;
-    var svc;
-
-    before(function(done) {
-      svc = service.getInstance();
-      svc.resetCalls();
-      done();
-    });
-
-    it('should call the song_rating API', function(done) {
-      svc.get.result = { song_rating: song_rating_model.all_song_ratings[1] };
-      SongRating.loadById(16, function(result) {
-        should.exist(result);
-        song_rating = result;
-        done();
-      });
-    });
-
-    it('should have called the service', function(done) {
-      svc.get.calls.should.be.eql(1);
-      svc.get.params.should.eql([[
-        './song_rating?id=16',
-        'function'
-      ]]);
-      done();
-    });
-
-    it('should get the song_rating', function(done) {
-      should.exist(song_rating);
-      song_rating.should.be.an.instanceOf(SongRating);
-      done();
-    });
-
-    it('should be a valid song_rating', function(done) {
-      song_rating.should.have.property('id');
-      ko.isObservable(song_rating.id).should.be.true;
-      song_rating.id().should.eql(song_rating_model.all_song_ratings[1].id);
-      song_rating.should.have.property('band_member_id');
-      ko.isObservable(song_rating.band_member_id).should.be.true;
-      song_rating.band_member_id().should.eql(song_rating_model.all_song_ratings[1].band_member_id);
-      song_rating.should.have.property('band_song_id');
-      ko.isObservable(song_rating.band_song_id).should.be.true;
-      song_rating.band_song_id().should.eql(song_rating_model.all_song_ratings[1].band_song_id);
-      song_rating.should.have.property('rating');
-      ko.isObservable(song_rating.rating).should.be.true;
-      song_rating.rating().should.eql(song_rating_model.all_song_ratings[1].rating);
-      done();
-    });
-  });
-
   describe('Refresh', function() {
     var song_rating;
     var expected_id = 45;
@@ -172,9 +121,10 @@ describe('SongRating', function() {
 
     it('should call the song_rating API', function(done) {
       svc.get.result = { song_rating: song_rating_model.all_song_ratings[0] };
-      song_rating.refresh(function(result) {
-        should.exist(result);
-        result.should.not.have.property('err');
+      song_rating.refresh(function(result_code, result) {
+        should.exist(result_code);
+        result_code.should.eql(200);
+        should.not.exist(result);
         done();
       });
     });
@@ -182,7 +132,7 @@ describe('SongRating', function() {
     it('should have called the service', function(done) {
       svc.get.calls.should.be.eql(1);
       svc.get.params.should.eql([[
-        './song_rating?id=45',
+        './song_rating?id=' + expected_id,
         'function'
       ]]);
       done();
@@ -195,9 +145,72 @@ describe('SongRating', function() {
       done();
     });
   });
+
+  describe('Put', function() {
+    before(function(done) {
+      svc = service.getInstance();
+      svc.resetCalls();
+      done();
+    });
+
+    before(function(done) {
+      manager.song_ratings.clear();
+      var song_rating = new SongRating(4231, 67, 367, 4);
+      manager.song_ratings.insert(song_rating);
+      done();
+    });
+
+    var song_rating;
+    it('should get the song_rating', function(done) {
+      song_rating = manager.song_ratings.getById(4231);
+      check_object_values(song_rating, {
+        id: 4231,
+        band_member_id: 67,
+        band_song_id: 367,
+        rating: 4
+      });
+      done();
+    });
+
+    it('should call the band API', function(done) {
+      svc.put.result = { song_rating: {
+        id: 4231,
+        band_member_id: 67,
+        band_song_id: 367,
+        rating: 2
+      } };
+      song_rating.update({rating: 2}, function(result_code, result) {
+        should.exist(result_code);
+        result_code.should.eql(200);
+        should.exist(result);
+        done();
+      });
+    });
+
+    it('should have called the service', function(done) {
+      svc.put.calls.should.be.eql(1);
+      svc.put.params.should.eql([[
+        './song_rating',
+        'function',
+        {rating: 2}
+      ]]);
+      done();
+    });
+
+    it('should have modified the song_rating in the list', function(done) {
+      var new_song_rating = manager.song_ratings.getById(4231);
+      check_object_values(new_song_rating, {
+        id: 4231,
+        band_member_id: 67,
+        band_song_id: 367,
+        rating: 2,
+      });
+      done();
+    });
+  });
 });
 
-describe('SongRatingList', function() {
+describe('SongRating List', function() {
   var song_rating_list;
   var svc;
 

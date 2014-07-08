@@ -94,57 +94,6 @@ describe('BandSong Table', function() {
     });
   });
 
-  describe('loadById', function() {
-    var band_song;
-    var svc;
-
-    before(function(done) {
-      svc = service.getInstance();
-      svc.resetCalls();
-      done();
-    });
-
-    it('should call the band_song API', function(done) {
-      svc.get.result = { band_song: band_song_model.all_band_songs[1] };
-      BandSong.loadById(16, function(result) {
-        should.exist(result);
-        band_song = result;
-        done();
-      });
-    });
-
-    it('should have called the service', function(done) {
-      svc.get.calls.should.be.eql(1);
-      svc.get.params.should.eql([[
-        './band_song?id=16',
-        'function'
-      ]]);
-      done();
-    });
-
-    it('should get the band_song', function(done) {
-      should.exist(band_song);
-      band_song.should.be.an.instanceOf(BandSong);
-      done();
-    });
-
-    it('should be a valid band_song', function(done) {
-      band_song.should.have.property('id');
-      ko.isObservable(band_song.id).should.be.true;
-      band_song.id().should.eql(band_song_model.all_band_songs[1].id);
-      band_song.should.have.property('band_id');
-      ko.isObservable(band_song.band_id).should.be.true;
-      band_song.band_id().should.eql(band_song_model.all_band_songs[1].band_id);
-      band_song.should.have.property('song_id');
-      ko.isObservable(band_song.song_id).should.be.true;
-      band_song.song_id().should.eql(band_song_model.all_band_songs[1].song_id);
-      band_song.should.have.property('song_status');
-      ko.isObservable(band_song.song_status).should.be.true;
-      band_song.song_status().should.eql(band_song_model.all_band_songs[1].song_status);
-      done();
-    });
-  });
-
   describe('Refresh', function() {
     var band_song;
     var expected_id = 45;
@@ -172,9 +121,10 @@ describe('BandSong Table', function() {
 
     it('should call the band_song API', function(done) {
       svc.get.result = { band_song: band_song_model.all_band_songs[0] };
-      band_song.refresh(function(result) {
-        should.exist(result);
-        result.should.not.have.property('err');
+      band_song.refresh(function(result_code, result) {
+        should.exist(result_code);
+        result_code.should.eql(200);
+        should.not.exist(result);
         done();
       });
     });
@@ -196,12 +146,140 @@ describe('BandSong Table', function() {
     });
   });
 
+  describe('Post', function() {
+    before(function(done) {
+      svc = service.getInstance();
+      svc.resetCalls();
+      done();
+    });
+
+    before(function(done) {
+      manager.bands.clear();
+      done();
+    });
+
+    it('should call the band_song API', function(done) {
+      svc.post.result = { band_song: {
+        id: 4231,
+        band_id: 67,
+        song_id: 367,
+        song_status: 4,
+        key_signature: 'Bb'
+      } };
+      manager.band_songs.create({
+        band_id: 67,
+        song_id: 367,
+        song_status: 4,
+        key_signature: 'Bb'
+      }, function(result_code, result) {
+        should.exist(result_code);
+        result_code.should.eql(200);
+        should.exist(result);
+        done();
+      });
+    });
+
+    it('should have called the service', function(done) {
+      svc.post.calls.should.be.eql(1);
+      svc.post.params.should.eql([[
+        './band_song',
+        'function',
+        {
+          band_id: 67,
+          song_id: 367,
+          song_status: 4,
+          key_signature: 'Bb'
+        }
+      ]]);
+      done();
+    });
+
+    it('should have added the band_song into the list', function(done) {
+      var new_band_song = manager.band_songs.getById(4231);
+      check_object_values(new_band_song, {
+        id: 4231,
+        band_id: 67,
+        song_id: 367,
+        song_status: 4,
+        key_signature: 'Bb'
+      });
+      done();
+    });
+  });
+
+  describe('Put', function() {
+    before(function(done) {
+      svc = service.getInstance();
+      svc.resetCalls();
+      done();
+    });
+
+    before(function(done) {
+      manager.band_songs.clear();
+      var band_song = new BandSong(4231, 67, 367, 4, 'Bb');
+      manager.band_songs.insert(band_song);
+      done();
+    });
+
+    var band_song;
+    it('should get the band_song', function(done) {
+      band_song = manager.band_songs.getById(4231);
+      check_object_values(band_song, {
+        id: 4231,
+        band_id: 67,
+        song_id: 367,
+        song_status: 4,
+        key_signature: 'Bb'
+      });
+      done();
+    });
+
+    it('should call the band API', function(done) {
+      svc.put.result = { band_song: {
+        id: 4231,
+        band_id: 67,
+        song_id: 367,
+        song_status: 4,
+        key_signature: 'G#'
+      } };
+      band_song.update({key_signature: 'G#'}, function(result_code, result) {
+        should.exist(result_code);
+        result_code.should.eql(200);
+        should.exist(result);
+        done();
+      });
+    });
+
+    it('should have called the service', function(done) {
+      svc.put.calls.should.be.eql(1);
+      svc.put.params.should.eql([[
+        './band_song',
+        'function',
+        {key_signature: 'G#'}
+      ]]);
+      done();
+    });
+
+    it('should have modified the band_song in the list', function(done) {
+      var new_band_song = manager.band_songs.getById(4231);
+      check_object_values(new_band_song, {
+        id: 4231,
+        band_id: 67,
+        song_id: 367,
+        song_status: 4,
+        key_signature: 'G#'
+      });
+      done();
+    });
+  });
+
   describe('Delete', function() {
     var band_song;
     var expected_id = 1;
     var expected_band_id = 1;
     var expected_song_id = 1;
     var expected_song_status = 1;
+    var expected_key_signature = 'Bb';
     var svc;
 
     before(function(done) {
@@ -211,19 +289,40 @@ describe('BandSong Table', function() {
     });
 
     it('should create a band_song object', function(done) {
-      song = new BandSong(expected_id, expected_band_id, expected_song_id, expected_song_status);
-      should.exist(song);
+      var band_song = new BandSong(
+        expected_id,
+        expected_band_id,
+        expected_song_id,
+        expected_song_status,
+        expected_key_signature
+      );
+      should.exist(band_song);
+      manager.band_songs.insert(band_song);
+      done();
+    });
+
+    it('should get the band_song', function(done) {
+      band_song = manager.band_songs.getById(expected_id);
+      check_object_values(band_song, {
+        id: expected_id,
+        band_id: expected_band_id,
+        song_id: expected_song_id,
+        song_status: expected_song_status,
+        key_signature: expected_key_signature
+      });
       done();
     });
 
     it('should call the song API', function(done) {
-      svc.delete.result = {band_song: 1};
+      svc.delete.result = {band_song: {id: expected_id}};
       svc.get.result = song_model;
-      song.delete(function (result) {
+      band_song.delete(function (result_code, result) {
+        should.exist(result_code);
+        result_code.should.eql(200);
         should.exist(result);
         result.should.have.property('band_song');
-        result.band_song.should.eql(1);
-        result.should.not.have.property('err');
+        result.band_song.should.have.property('id');
+        result.band_song.id.should.eql(expected_id);
         done();
       });
     });
@@ -231,9 +330,15 @@ describe('BandSong Table', function() {
     it('should have called the delete service', function(done) {
       svc.delete.calls.should.be.eql(1);
       svc.delete.params.should.eql([[
-        './band_song?id=1',
+        './band_song?id=' + expected_id,
         'function'
       ]]);
+      done();
+    });
+
+    it('should have removed the band_song from the list', function(done) {
+      var band_song = manager.band_songs.getById(expected_id);
+      should.not.exist(band_song);
       done();
     });
   });
