@@ -146,7 +146,6 @@ describe('BandMember Table', function() {
     });
   });
 
-/* XXX This is not how band members work
   describe('Post', function() {
     before(function(done) {
       svc = service.getInstance();
@@ -155,7 +154,7 @@ describe('BandMember Table', function() {
     });
 
     before(function(done) {
-      manager.bands.clear();
+      manager.band_members.clear();
       done();
     });
 
@@ -194,7 +193,7 @@ describe('BandMember Table', function() {
 
     it('should have added the band_member into the list', function(done) {
       var new_band_member = manager.band_members.getById(4231);
-      check_object_values(new_band, {
+      check_object_values(new_band_member, {
         id: 4231,
         band_id: 67,
         person_id: 367,
@@ -203,7 +202,6 @@ describe('BandMember Table', function() {
       done();
     });
   });
-*/
 
   describe('Put', function() {
     before(function(done) {
@@ -251,7 +249,7 @@ describe('BandMember Table', function() {
       svc.put.params.should.eql([[
         './band_member',
         'function',
-        {band_admin: true}
+        {id: 4231, band_admin: true}
       ]]);
       done();
     });

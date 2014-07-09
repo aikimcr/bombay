@@ -192,7 +192,7 @@ describe('SongRating Table', function() {
       svc.put.params.should.eql([[
         './song_rating',
         'function',
-        {rating: 2}
+        {id: 4231, rating: 2}
       ]]);
       done();
     });

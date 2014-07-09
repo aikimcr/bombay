@@ -176,7 +176,7 @@ describe('Artist Table', function() {
       svc.put.params.should.eql([[
         './artist',
         'function',
-        {name: 'Lightning Monkeys'}
+        {id: 4231, name: 'Lightning Monkeys'}
       ]]);
       done();
     });

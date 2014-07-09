@@ -176,7 +176,7 @@ describe('Band Table', function() {
       svc.put.params.should.eql([[
         './band',
         'function',
-        {name: 'Lightning Monkeys'}
+        {id: 4231, name: 'Lightning Monkeys'}
       ]]);
       done();
     });
@@ -244,7 +244,7 @@ describe('Band Table', function() {
   });
 });
 
-describe('Band List', function() {
+describe('Band Table List', function() {
   var band_list;
   var svc;
 

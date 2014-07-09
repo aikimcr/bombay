@@ -5,21 +5,6 @@ Table.prototype.list = function() {
   return manager[key];
 };
 
-Table.prototype.update = function(data, callback) {
-  var svc = service.getInstance();
-  Object.keys(data).forEach(function(fn) {
-    if (fn == 'id') return;
-    var value = data[fn];
-    if (value === false || value == 'false') value = 0;
-    if (value === true || value == 'true') value = 1;
-    data[fn] = value;
-  });
-  data['id'] = this.id();
-  svc.put(this.constructor.service_url, function(result) {
-    if (callback) callback(result);
-  }.bind(this), data);
-};
-
 Table.prototype.delete = function(callback, opt_event) {
   manager.confirm_dialog.show(this.confirm_text(), opt_event, function(delete_it) {
     if (delete_it) {
@@ -47,11 +32,29 @@ Table.prototype.updateModel_ = function(model_result) {
   }.bind(this));
 };
 
-Table.prototype.update = function(data, callback) {
-  var svc = service.getInstance();
+Table.prototype.update = function() {
+  var data = {};
+  var callback;
   var url = this.constructor.service_url;
+
+  for(var i=0; i < arguments.length; i++) {
+    if (typeof(arguments[i]) === 'object') {
+      data = arguments[i];
+    } else if (typeof(arguments[i]) === 'string') {
+      url = url + '/' + arguments[i];
+    } else if (typeof(arguments[i]) === 'function') {
+      callback = arguments[i];
+    } else {
+      throw new Error('Unrecognized argument ' + arguments[i] + '(' + typeof(arguments[i]) + ')');
+    }
+  }
+
+  data['id'] = this.id();
+  if (! callback ) throw new Error('No callback provided');
+
+  var svc = service.getInstance();
   var model_key = this.constructor.model_key;
-  svc.put(this.constructor.service_url, function(result_code, result) {
+  svc.put(url, function(result_code, result) {
     if (result_code == 200 || result_code == 304) {
       this.updateModel_(result[model_key]);
     }
@@ -87,9 +90,27 @@ function TableList(model_type) {
   }.bind(this));
 }
 
-TableList.prototype.create = function(data, callback) {
+TableList.prototype.create = function() {
+  var data, callback;
+  var url = this.model_type.service_url;
+
+  for(var i=0; i < arguments.length; i++) {
+    if (typeof(arguments[i]) === 'object') {
+      data = arguments[i];
+    } else if (typeof(arguments[i]) === 'string') {
+      url = url + '/' + arguments[i];
+    } else if (typeof(arguments[i]) === 'function') {
+      callback = arguments[i];
+    } else {
+      throw new Error('Unrecognized argument ' + arguments[i] + '(' + typeof(arguments[i]) + ')');
+    }
+  }
+
+  if (! data ) throw new Error('No data provided');
+  if (! callback ) throw new Error('No callback provided');
+
   var svc = service.getInstance();
-  svc.post(this.model_type.service_url, function(result_code, result) {
+  svc.post(url, function(result_code, result) {
     if (result_code == 200 || result_code == 304) {
       var model_result = result[this.model_type.model_key];
       var model = this.build_object_(model_result);

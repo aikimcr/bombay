@@ -213,7 +213,7 @@ describe('Song Master Table', function() {
       svc.put.params.should.eql([[
         './song',
         'function',
-        {name: 'Lightning Monkeys'}
+        {id: 4231, name: 'Lightning Monkeys'}
       ]]);
       done();
     });

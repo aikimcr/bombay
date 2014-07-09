@@ -149,7 +149,11 @@ function Manager(for_test) {
 
   if (!for_test) {
     var svc = service.getInstance();
-    svc.get('./session_info', function(result) {
+    svc.get('./session_info', function(result_code, result) {
+      if (result_code != 200 && result_code != 304) {
+        throw new Error('Unexpected result ' + result_code);
+      }
+      
       this.current_person(new Person(
         result.person.id,
         result.person.name,
@@ -273,7 +277,8 @@ function Manager(for_test) {
 
   this.current_reports = ko.computed(function() {
     if (this.current_band() && this.current_band().id() > 0) {
-      return this.reports.list()[this.current_band().id()]().sort(function(a, b) {
+      var band_reports = this.reports.list()[this.current_band().id()] || ko.observableArray();
+      return band_reports().sort(function(a, b) {
         if (! a.name().match(/_([0-9]+)\.html$/)) {
           if (a.name() == b.name()) return 0;
           return -1;
@@ -345,27 +350,20 @@ function Manager(for_test) {
   this.send_request_action = function(data, event) {
     request_action = event.target.parentElement.querySelector('select').value;
     if (request_action == 'delete') {
-      data.delete(function(result) {
-        if (result) {
-          if (result.err) {
-            this.request_msg(result.err);
-          } else {
-            data.reload_list();
-            data.reload_relatives();
-            this.request_msg('');
-          }
+      data.delete(function(result_code, result) {
+        if (result_code != 200 && result_code != 304) {
+          this.request_msg(result);
         } else {
-          data.reload_list();
-          data.reload_relatives();
+          // XXX Update lists.
+          this.request_msg('');
         }
       }.bind(this), event);
     } else {
       data.change_status(request_action, function(result) {
-        if (result.err) {
-          this.request_msg(result.err);
+        if (result_code != 200 && result_code != 304) {
+          this.request_msg(result);
         } else {
-          data.reload_list();
-          data.reload_relatives();
+          // XXX Update lists.
           this.request_msg('');
         }
       }.bind(this), event);

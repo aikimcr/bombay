@@ -248,7 +248,7 @@ describe('Refresh', function() {
       svc.put.params.should.eql([[
         './person',
         'function',
-        {name: 'Lightning Monkeys'}
+        {id: 4231, name: 'Lightning Monkeys'}
       ]]);
       done();
     });

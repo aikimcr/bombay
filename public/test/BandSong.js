@@ -255,7 +255,7 @@ describe('BandSong Table', function() {
       svc.put.params.should.eql([[
         './band_song',
         'function',
-        {key_signature: 'G#'}
+        {id: 4231, key_signature: 'G#'}
       ]]);
       done();
     });

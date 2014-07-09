@@ -52,22 +52,11 @@ Form.putChange = function(form, opt_object) {
   if (form.validate()) {
     var object = opt_object == null ? form.object() : opt_object();
     var changeset = form.changeset();
-    object.update(changeset, function(result) {
-      if (result) {
-        if (result.err) {
-          this.setError(result.err);
-        } else {
-          object.refresh(function(result) {
-            if (result.err) {
-              this.setError(result.err);
-            } else {
-              this.init(object);
-              this.message('Change accepted');
-            }
-          }.bind(this));
-        }
+    object.update(changeset, function(result_code, result) {
+      if (result_code != 200 && result_code != 304) {
+        this.setError(result);
       } else {
-        this.setError('Unknown error on update');
+        this.message('Change accepted');
       }
     }.bind(form));
   }
@@ -80,11 +69,10 @@ function AddBand() {
 util.inherits(AddBand, Form);
 
 AddBand.prototype.postChange_ = function(callback) {
-  var svc = service.getInstance();
-  svc.set('./band', function(result) {
-    callback(result);
+  manager.bands.create({name: this.name()}, function(result_code, result) {
+    callback(result_code, result);
     this.name(null);
-  }.bind(this), {name: this.name()});
+  }.bind(this))
 };
 
 function EditBand() {
@@ -95,11 +83,10 @@ function EditBand() {
 util.inherits(EditBand, Form);
 
 EditBand.prototype.postChange_ = function(callback) {
-  var svc = service.getInstance();
-  svc.set('./band', function(result) {
-    callback(result);
+  manager.bands.create({name: this.name()}, function(result_code, result) {
+    callback(result_code, result);
     this.name(null);
-  }.bind(this), {name: this.name()});
+  }.bind(this))
 };
 
 EditBand.prototype.show = function(band) {
@@ -129,20 +116,19 @@ function AddPerson() {
 util.inherits(AddPerson, Form);
 
 AddPerson.prototype.postChange_ = function(callback) {
-  var svc = service.getInstance();
   var params = {
     name: this.name(),
     full_name: this.full_name(),
     email: this.email(),
     system_admin: this.system_admin()
   };
-  svc.set('./person', function(result) {
-    callback(result);
+  manager.persons.create(params, function(result_code, result) {
+    callback(result_code, result);
     this.name(null);
     this.full_name(null);
     this.email(null);
     this.system_admin(false);
-  }.bind(this), params);
+  }.bind(this));
 };
 
 function EditProfile() {
@@ -234,11 +220,10 @@ function AddArtist() {
 util.inherits(AddArtist, Form);
 
 AddArtist.prototype.postChange_ = function(callback) {
-  var svc = service.getInstance();
-  svc.set('./artist', function(result) {
-    callback(result);
+  manager.artists.create({name: this.name()}, function(result_code, result) {
+    callback(result_code, result);
     this.name (null);
-  }.bind(this), {name: this.name()});
+  }.bind(this));
 };
 
 function EditArtist() {
@@ -260,7 +245,7 @@ EditArtist.prototype.show = function(artist) {
   this.init(artist);
   Form.prototype.show.call(this);
 };
-
+ 
 EditArtist.prototype.init = function(artist) {
   this.artist(artist);
   Form.prototype.init.call(this);
@@ -282,12 +267,14 @@ function AddSong() {
 util.inherits(AddSong, Form);
 
 AddSong.prototype.postChange_ = function(callback) {
-  var svc = service.getInstance();
-  svc.set('./song', function(result) {
-    callback(result);
-    this.name(null);
-    this.artist(null);
-  }.bind(this), {name: this.name(), artist_id: this.artist().id()});
+  manager.songs.create(
+    {name: this.name(), artist_id: this.artist().id()},
+    function(result_code, result) {
+      callback(result_code, result);
+      this.name(null);
+      this.artist(null);
+    }
+  );
 };
 
 function EditSong() {
@@ -303,11 +290,14 @@ EditSong.prototype.object = function() {
 };
 
 EditSong.prototype.postChange_ = function(callback) {
-  var svc = service.getInstance();
-  svc.set('./song', function(result) {
-    callback(result);
-    this.name(null);
-  }.bind(this), {name: this.name()});
+  manager.songs.create(
+    {name: this.name(), artist_id: this.artist().id()},
+    function(result_code, result) {
+      callback(result_code, result);
+      this.name(null);
+      this.artist(null);
+    }
+  );
 };
 
 EditSong.prototype.show = function(song) {

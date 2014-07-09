@@ -1,5 +1,5 @@
 function Request(id, request_type, timestamp, person_id, band_id, description, opt_status) {
-  Table.call(this, './request');
+  Table.call(this);
   this.id = ko.observable(id || -1);
   this.request_type = ko.observable(request_type);
   this.timestamp = ko.observable(timestamp);
@@ -110,26 +110,41 @@ function Request(id, request_type, timestamp, person_id, band_id, description, o
 }
 util.inherits(Request, Table);
 
+Request.service_url = './request';
+Request.model_key = 'request';
+Request.columns = ['request_type', 'timestamp', 'person_id', 'band_id', 'description', 'status'];
+Request.list_key = 'requests';
+
 Request.prototype.confirm_text = function() {
   return 'Delete request for ' + this.person().full_name() + ', ' + this.band().name() + '?';
 };
 
 Request.prototype.change_status = function(action, callback) {
-  var svc = service.getInstance();
-  svc.put(this.service_url, function(result) {
-    if (callback) callback(result);
-  }, {
-    action: action,
-    id: this.id()
-  });
+  this.update(action, callback);
 };
 
 // The Request List Object
 function RequestList() {
-  TableList.call(this, './request', 'all_requests');
+  TableList.call(this, Request);
   this.sort_type('time_asc');
 }
 util.inherits(RequestList, TableList);
+
+RequestList.prototype.joinBand = function(band_id, callback) {
+  if (manager.current_person().id() == -1) {
+    callback(404, 'Current login is invalid');
+  } else {
+    this.create({band_id: band_id, person_id: manager.current_person().id()}, 'join_band', callback);
+  }
+};
+
+RequestList.prototype.addBandMember = function(person_id, callback) {
+  if (manager.current_person().id() == -1) {
+    callback(404, 'Current login is invalid');
+  } else {
+    this.create({band_id: manager.current_band().id(), person_id: person_id}, 'add_band_member', callback);
+  }
+};
 
 RequestList.prototype.set_sort_compare_list = function() {
   this.sort_type('time_asc');
