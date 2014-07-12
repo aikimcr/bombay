@@ -273,7 +273,7 @@ AddSong.prototype.postChange_ = function(callback) {
       callback(result_code, result);
       this.name(null);
       this.artist(null);
-    }
+    }.bind(this)
   );
 };
 
@@ -326,14 +326,13 @@ function JoinBand() {
 util.inherits(JoinBand, Form);
 
 JoinBand.prototype.postChange_ = function(callback) {
-  var svc = service.getInstance();
-  var params = {
-    band_id: this.band().id(),
-  };
-  svc.set('./band_member', function(result) {
-    callback(result);
-    this.band(null);
-  }.bind(this), params);
+  manager.requests.create(
+    {band_id: this.band().id(), person_id: manager.current_person().id()},
+    function(result_code, result) {
+      callback(result_code, result);
+      this.band(null);
+    }.bind(this)
+  );
 };
 
 function AddBandMember() {
@@ -343,33 +342,34 @@ function AddBandMember() {
 util.inherits(AddBandMember, Form);
 
 AddBandMember.prototype.postChange_ = function(callback) {
-  var svc = service.getInstance();
-  var params = {
-    band_id: manager.current_band().id(),
-    person_id: this.person().id(),
-  };
-  svc.set('./band_member', function(result) {
-    callback(result);
-    this.person(null);
-  }.bind(this), params);
+  manager.requests.create(
+    {band_id: manager.current_band().id(), person_id: this.person().id()},
+    function(result_code, result) {
+      callback(result_code, result);
+      this.person(null);
+    }.bind(this)
+  );
 };
 
 function AddBandSong() {
   Form.call(this, [manager.song_ratings]);
   this.song = ko.observable(null);
+  this.key_signature = ko.observable(null);
 }
 util.inherits(AddBandSong, Form);
 
 AddBandSong.prototype.postChange_ = function(callback) {
-  var svc = service.getInstance();
-  var params = {
-    band_id: manager.current_band().id(),
-    song_id: this.song().id(),
-    song_status: -1,
-    key_signature: this.song().key_signature()
-  };
-  svc.set('./band_song', function(result) {
-    callback(result);
-    this.song(null);
-  }.bind(this), params);
+  manager.band_songs.create(
+    {
+      band_id: manager.current_band().id(),
+      song_id: this.song().id(),
+      song_status: -1,
+      key_signature: this.key_signature()
+    },
+    function(result_code, result) {
+      callback(result_code, result);
+      this.song(null);
+      this.key_signature(null);
+    }.bind(this)
+  );
 };

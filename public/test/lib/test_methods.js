@@ -199,3 +199,14 @@ function check_object_values(got, expected) {
     got_value.should.eql(expected[key]);
   });
 }
+
+function check_result_values(got, expected) {
+  should.exist(got);
+
+  var got_keys = Object.keys(got);
+  var expected_keys = Object.keys(expected);
+
+  expected_keys.forEach(function(key) {
+    got.should.have.property(key, expected[key]);
+  });
+}

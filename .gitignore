@@ -11,6 +11,8 @@ public/javascripts/lib
 public/test/lib/chai.js
 public/test/lib/mocha.css
 public/test/lib/mocha.js
+public/test/lib/sinon.js
+public/test/lib/sinon-chai.js
 reports
 
 *~

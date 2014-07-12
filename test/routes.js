@@ -57,7 +57,7 @@ describe('routes', function() {
 	  id: 1, name: 'Wild At Heart'
         }];
         var res = {
-          json: function(result) {
+          json: function(result_code, result) {
             test_util.check_list(result, expected, 'all_bands', ['id', 'name']);
 	    done();
           }
@@ -69,7 +69,7 @@ describe('routes', function() {
         var expected = {id: 1, name: 'Wild At Heart' };
         req.query.id = 1;
         var res = {
-          json: function(result) {
+          json: function(result_code, result) {
             test_util.check_item(result, expected, 'band', ['id', 'name']);
 	    done();
           }
@@ -117,7 +117,7 @@ describe('routes', function() {
 	  system_admin: true
         }];
         var res = {
-          json: function(result) {
+          json: function(result_code, result) {
             test_util.check_list(result, expected, 'all_persons', ['id', 'name', 'full_name', 'password', 'email', 'system_admin']);
 	    done();
           }
@@ -136,7 +136,7 @@ describe('routes', function() {
         };
         req.query.id = 1;
         var res = {
-          json: function(result) {
+          json: function(result_code, result) {
             test_util.check_item(result, expected, 'person', ['id', 'name', 'full_name', 'password', 'email', 'system_admin']);
 	    done();
           }
@@ -159,7 +159,7 @@ describe('routes', function() {
 	  id: 2, name: 'ZZ Top'      
         }];
         var res = {
-          json: function(result) {
+          json: function(result_code, result) {
             test_util.check_list(result, expected, 'all_artists', ['id', 'name']);
 	    done();
           }
@@ -171,7 +171,7 @@ describe('routes', function() {
         var expected = {id: 1, name: 'AC/DC' };
         req.query.id = 1;
         var res = {
-          json: function(result) {
+          json: function(result_code, result) {
             test_util.check_item(result, expected, 'artist', ['id', 'name']);
 	    done();
           }
@@ -198,7 +198,7 @@ describe('routes', function() {
 	  id: 3, name: 'You Shook Me All Night Long', artist_id: 1      
         }];
         var res = {
-          json: function(result) {
+          json: function(result_code, result) {
             test_util.check_list(result, expected, 'all_songs', ['id', 'name', 'artist_id']);
 	    done();
           }
@@ -210,7 +210,7 @@ describe('routes', function() {
         var expected = {id: 1, name: 'Space Oddity', artist_id: 5 };
         req.query.id = 1;
         var res = {
-          json: function(result) {
+          json: function(result_code, result) {
             test_util.check_item(result, expected, 'song', ['id', 'name', 'artist_id']);
 	    done();
           }
@@ -235,7 +235,7 @@ describe('routes', function() {
 	  id: 4, band_id: 4, person_id: 2, band_admin: true
         }];
         var res = {
-          json: function(result) {
+          json: function(result_code, result) {
             test_util.check_list(result, expected, 'all_band_members', ['id', 'band_id', 'person_id', 'band_admin']);
 	    done();
           }
@@ -247,7 +247,7 @@ describe('routes', function() {
         var expected = {id: 1, band_id: 1, person_id: 1, band_admin: false };
         req.query.id = 1;
         var res = {
-          json: function(result) {
+          json: function(result_code, result) {
             test_util.check_item(result, expected, 'band_member', ['id', 'band_id', 'person_id', 'band_admin']);
 	    done();
           }
@@ -270,7 +270,7 @@ describe('routes', function() {
 	  id: 5, band_id: 1, song_id: 5, song_status: -1
         }];
         var res = {
-          json: function(result) {
+          json: function(result_code, result) {
             test_util.check_list(result, expected, 'all_band_songs', ['id', 'band_id', 'song_id', 'song_status']);
 	    done();
           }
@@ -282,7 +282,7 @@ describe('routes', function() {
         var expected = {id: 1, band_id: 1, song_id: 1, song_status: 4 };
         req.query.id = 1;
         var res = {
-          json: function(result) {
+          json: function(result_code, result) {
             test_util.check_item(result, expected, 'band_song', ['id', 'band_id', 'song_id', 'song_status']);
 	    done();
           }
@@ -315,7 +315,7 @@ describe('routes', function() {
           id: 10, band_member_id: 2, band_song_id: 5, rating: 5
         }];
         var res = {
-          json: function(result) {
+          json: function(result_code, result) {
             test_util.check_list(result, expected, 'all_song_ratings', ['id', 'band_member_id', 'band_song_id', 'rating']);
 	    done();
           }
@@ -327,7 +327,7 @@ describe('routes', function() {
         var expected = {id: 1, band_member_id: 1, band_song_id: 1, rating: 1 };
         req.query.id = 1;
         var res = {
-          json: function(result) {
+          json: function(result_code, result) {
             test_util.check_item(result, expected, 'song_rating', ['id', 'band_member_id', 'band_song_id', 'rating']);
 	    done();
           }
@@ -348,7 +348,7 @@ describe('routes', function() {
       it('should create a band', function(done) {
         req.body = {name: 'Cover Story'};
         var res = {
-          json: function(result) {
+          json: function(result_code, result) {
             band_id = test_util.check_result(result, 'band', req.body);
             done();
           }
@@ -359,8 +359,8 @@ describe('routes', function() {
       it('should return an error', function(done) {
         req.body = {name: 'Cover Story'};
         var res = {
-          json: function(err_code, result) {
-            var error = test_util.check_error_result(err_code, result, 500);
+          json: function(result_code, result) {
+            var error = test_util.check_error_result(result_code, result, 500);
             done();
           }
         };
@@ -379,7 +379,7 @@ describe('routes', function() {
           system_admin: false,
         };
         var res = {
-          json: function(result) {
+          json: function(result_code, result) {
             person_id = test_util.check_result(result, 'person', req.body);
             done();
           }
@@ -396,8 +396,8 @@ describe('routes', function() {
           system_admin: false,
         };
         var res = {
-          json: function(err_code, result) {
-            var error = test_util.check_error_result(err_code, result, 500);
+          json: function(result_code, result) {
+            var error = test_util.check_error_result(result_code, result, 500);
             done();
           }
         };
@@ -410,7 +410,7 @@ describe('routes', function() {
       it('should create a artist', function(done) {
         req.body = {name: 'Mott the Hoople'};
         var res = {
-          json: function(result) {
+          json: function(result_code, result) {
             artist_id = test_util.check_result(result, 'artist', req.body);
             done();
           }
@@ -421,8 +421,8 @@ describe('routes', function() {
       it('should return an error', function(done) {
         req.body = {name: 'Mott the Hoople'};
         var res = {
-          json: function(err_code, result) {
-            var error = test_util.check_error_result(err_code, result, 500);
+          json: function(result_code, result) {
+            var error = test_util.check_error_result(result_code, result, 500);
             done();
           }
         };
@@ -435,7 +435,7 @@ describe('routes', function() {
       it('should create a song', function(done) {
         req.body = {name: 'La Grange', artist_id: 2};
         var res = {
-          json: function(result) {
+          json: function(result_code, result) {
             song_id = test_util.check_result(result, 'song', req.body);
             done();
           }
@@ -446,8 +446,8 @@ describe('routes', function() {
       it('should return an error', function(done) {
         req.body = {name: 'La Grange', artist_id: 2};
         var res = {
-          json: function(err_code, result) {
-            var error = test_util.check_error_result(err_code, result, 500);
+          json: function(result_code, result) {
+            var error = test_util.check_error_result(result_code, result, 500);
             done();
           }
         };
@@ -457,25 +457,11 @@ describe('routes', function() {
 
     describe('#band_member', function() {
       var band_member_id;
-      it('should create an add_band_member request', function(done) {
-        req.session.passport.user = JSON.stringify({ id: 5, system_admin: false });
-        req.body = {band_id: 3, person_id: 1};
+      it('should create a band_member', function(done) {
+        req.body = {band_id: 3, person_id: 1, band_admin: false};
         var res = {
-          json: function(result) {
-            should.exist(result);
-            result.should.have.property('request_type');
-            result.request_type.should.eql(constants.request_type.add_band_member);
-            result.should.have.property('band_id');
-            result.band_id.should.eql(3);
-            result.should.have.property('person_id');
-            result.person_id.should.eql(1);
-            result.should.have.property('description');
-            result.description.should.eql('Sally Says Go is inviting System Admin User to join');
-            result.should.have.property('status');
-            result.status.should.eql(constants.request_status.pending);
-            result.should.have.property('id');
-            result.id.should.eql(1);
-            result.should.have.property('timestamp');
+          json: function(result_code, result) {
+            band_member_id = test_util.check_result(result, 'band_member', req.body);
             done();
           }
         };
@@ -485,8 +471,8 @@ describe('routes', function() {
       it('should return an error', function(done) {
         req.body = {band_id: 3, person_id: 1};
         var res = {
-          json: function(err_code, result) {
-            var error = test_util.check_error_result(err_code, result, 500);
+          json: function(result_code, result) {
+            var error = test_util.check_error_result(result_code, result, 500);
             done();
           }
         };
@@ -499,7 +485,7 @@ describe('routes', function() {
       it('should create a band_song', function(done) {
         req.body = {band_id: 3, song_id: 1, key_signature: '', song_status: 3};
         var res = {
-          json: function(result) {
+          json: function(result_code, result) {
             band_song_id = test_util.check_result(result, 'band_song', req.body);
             done();
           }
@@ -510,8 +496,8 @@ describe('routes', function() {
       it('should return an error', function(done) {
         req.body = {band_id: 3, song_id: 1, song_status: 4};
         var res = {
-          json: function(err_code, result) {
-            var error = test_util.check_error_result(err_code, result, 500);
+          json: function(result_code, result) {
+            var error = test_util.check_error_result(result_code, result, 500);
             done();
           }
         };
@@ -524,7 +510,7 @@ describe('routes', function() {
       it('should create a song_rating', function(done) {
         req.body = {band_member_id: 3, band_song_id: 1, rating: 3};
         var res = {
-          json: function(result) {
+          json: function(result_code, result) {
             song_rating_id = test_util.check_result(result, 'song_rating', req.body);
             done();
           }
@@ -535,8 +521,8 @@ describe('routes', function() {
       it('should return an error', function(done) {
         req.body = {band_member_id: 3, band_song_id: 1, rating: 4};
         var res = {
-          json: function(err_code, result) {
-            var error = test_util.check_error_result(err_code, result, 500);
+          json: function(result_code, result) {
+            var error = test_util.check_error_result(result_code, result, 500);
             done();
           }
         };
@@ -550,7 +536,7 @@ describe('routes', function() {
       it('should update the band name', function(done) {
         req.query = {id: 1, name: 'Groove On The Side'};
         var res = {
-          json: function(result) {
+          json: function(result_code, result) {
             band_id = test_util.check_result(result, 'band', req.query);
             done();
           }
@@ -572,7 +558,7 @@ describe('routes', function() {
       it('should update the person name', function(done) {
         req.query = {id: 1, email: 'admin@musichero.foo'};
         var res = {
-          json: function(result) {
+          json: function(result_code, result) {
             person_id = test_util.check_result(result, 'person', req.query);
             done();
           }
@@ -622,7 +608,7 @@ describe('routes', function() {
       it('should update the password', function(done) {
         req.query = {id: 1, token: change_token};
         var res = {
-          json: function(result) {
+          json: function(result_code, result) {
             person_id = test_util.check_result(result, 'person');
             result.person.should.have.property('password');
             done();
@@ -644,9 +630,9 @@ describe('routes', function() {
       it('should reject the new password because old password is wrong', function(done) {
         req.query = {id: 1, token: change_token};
         var res = {
-          json: function(err_code, result) {
-            should.exist(err_code);
-            err_code.should.eql(500);
+          json: function(result_code, result) {
+            should.exist(result_code);
+            result_code.should.eql(500);
             should.exist(result);
             result.should.eql('Old password did not match');
             done();
@@ -671,7 +657,7 @@ describe('routes', function() {
         var new_change_token = encodeURIComponent(util.encrypt(pem, ct));
         req.query = {id: 1, token: new_change_token};
         var res = {
-          json: function(result) {
+          json: function(result_code, result) {
             person_id = test_util.check_result(result, 'person');
             done();
           }
@@ -694,7 +680,7 @@ describe('routes', function() {
       it('should update the artist name', function(done) {
         req.query = {id: 1, name: 'Mott The Hoople'};
         var res = {
-          json: function(result) {
+          json: function(result_code, result) {
             artist_id = test_util.check_result(result, 'artist');
             done();
           }
@@ -716,7 +702,7 @@ describe('routes', function() {
       it('should update the song name', function(done) {
         req.query = {id: 1, name: 'Ziggy Stardust'};
         var res = {
-          json: function(result) {
+          json: function(result_code, result) {
             song_id = test_util.check_result(result, 'song');
             done();
           }
@@ -738,7 +724,7 @@ describe('routes', function() {
       it('should update the band_member name', function(done) {
         req.query = {id: 1, band_admin: true};
         var res = {
-          json: function(result) {
+          json: function(result_code, result) {
             band_member_id = test_util.check_result(result, 'band_member');
             done();
           }
@@ -760,7 +746,7 @@ describe('routes', function() {
       it('should update the band_song name', function(done) {
         req.query = {id: 1, song_status: 2};
         var res = {
-          json: function(result) {
+          json: function(result_code, result) {
             band_song_id = test_util.check_result(result, 'band_song');
             done();
           }
@@ -782,7 +768,7 @@ describe('routes', function() {
       it('should update the song_rating name', function(done) {
         req.query = {id: 1, rating: 2};
         var res = {
-          json: function(result) {
+          json: function(result_code, result) {
             song_rating_id = test_util.check_result(result, 'song_rating');
             done();
           }
@@ -814,7 +800,7 @@ describe('routes', function() {
       it('should delete the band_song', function(done) {
         req.query = {id: 5};
         var res = {
-          json: function(result) {
+          json: function(result_code, result) {
             band_song_id = test_util.check_result(result, 'band_song');
             done();
           }
@@ -846,7 +832,7 @@ describe('routes', function() {
       it('should delete the band_member', function(done) {
         req.query = {id: 5};
         var res = {
-          json: function(result) {
+          json: function(result_code, result) {
             band_member_id = test_util.check_result(result, 'band_member');
             done();
           }
@@ -878,7 +864,7 @@ describe('routes', function() {
       it('should delete the song', function(done) {
         req.query = {id: 7};
         var res = {
-          json: function(result) {
+          json: function(result_code, result) {
             song_id = test_util.check_result(result, 'song');
             done();
           }
@@ -924,7 +910,7 @@ describe('routes', function() {
       it('should delete the band', function(done) {
         req.query = {id: 4};
         var res = {
-          json: function(result) {
+          json: function(result_code, result) {
             band_id = test_util.check_result(result, 'band');
             done();
           }
@@ -963,7 +949,7 @@ describe('routes', function() {
       it('should delete the person', function(done) {
         req.query = {id: 4};
         var res = {
-          json: function(result) {
+          json: function(result_code, result) {
             person_id = test_util.check_result(result, 'person');
             done();
           }
@@ -1002,7 +988,7 @@ describe('routes', function() {
       it('should delete the artist', function(done) {
         req.query = {id: 3};
         var res = {
-          json: function(result) {
+          json: function(result_code, result) {
             artist_id = test_util.check_result(result, 'artist');
             done();
           }
@@ -1039,7 +1025,7 @@ describe('routes', function() {
     it('should get the public key', function(done) {
       req.query = {action: 'pubkey'};
       var res = {
-        json: function(result) {
+        json: function(result_code, result) {
           should.exist(result);
           result.should.have.property('public_key');
           result.public_key.should.eql(parsed_pem);
@@ -1054,7 +1040,7 @@ describe('routes', function() {
       encrypted = util.encrypt(pub_pem, 'Plover');
       req.query = {action: 'check', clear: 'Plover', encrypted: encrypted};
       var res = {
-        json: function(result) {
+        json: function(result_code, result) {
           should.exist(result);
           result.should.have.property('match');
           result.match.should.eql(true);
@@ -1100,7 +1086,7 @@ describe('request_routes', function() {
   var res;
   beforeEach(function(done) {
     res = {
-      json: function(result) {
+      json: function(result_code, result) {
         done('No JSON function set');
       }
     };
@@ -1117,11 +1103,12 @@ describe('request_routes', function() {
   });
 
   it('attempt to create a join request should fail', function(done) {
-    req.body = {band_id: 1, person_id: 2, action: 'join_band'};
+    req.params = {action: 'join_band'};
+    req.body = {band_id: 1, person_id: 2};
     var res = {
-      json: function(err_code, result) {
-        should.exist(err_code);
-        err_code.should.eql(500);
+      json: function(result_code, result) {
+        should.exist(result_code);
+        result_code.should.eql(500);
         should.exist(result);
         result.should.eql('Join requests can only be for logged in user');
         done();
@@ -1133,10 +1120,11 @@ describe('request_routes', function() {
   var all_request_ids = [];
   var request_id;
   it('should create a join request', function(done) {
-    req.body = {band_id: 1, person_id: 2, action: 'join_band'};
+    req.params = {action: 'join_band'};
+    req.body = {band_id: 1, person_id: 2};
     req.session.passport.user = JSON.stringify({ id: 2, system_admin: false })
     var res = {
-      json: function(result) {
+      json: function(result_code, result) {
         should.exist(result);
         result.should.have.property('id');
         request_id = result.id;
@@ -1169,7 +1157,7 @@ describe('request_routes', function() {
     };
     req.query = {id: request_id};
     var res = {
-      json: function(result) {
+      json: function(result_code, result) {
         test_util.check_request(null, result, expected, now);
         last_req = result;
         done();
@@ -1187,10 +1175,11 @@ describe('request_routes', function() {
       band_id: 1,
       person_id: 2,
     };
-    req.query = {id: request_id, action: 'reject'};
+    req.params = {action: 'reject'};
+    req.query = {id: request_id};
     req.session.passport.user = JSON.stringify({ id: 3, system_admin: false })
     var res = {
-      json: function(result) {
+      json: function(result_code, result) {
         test_util.check_request(null, result, expected, now);
         done();
       }
@@ -1216,10 +1205,11 @@ describe('request_routes', function() {
       band_id: 1,
       person_id: 2,
     };
-    req.query = {id: request_id, action: 'reopen'};
+    req.params = {action: 'reopen'}
+    req.query = {id: request_id};
     req.session.passport.user = JSON.stringify({ id: 2, system_admin: false })
     var res = {
-      json: function(result) {
+      json: function(result_code, result) {
         test_util.check_request(null, result, expected, now);
         done();
       }
@@ -1245,10 +1235,11 @@ describe('request_routes', function() {
       band_id: 1,
       person_id: 2,
     };
-    req.query = {id: request_id, action: 'accept'};
+    req.params = {action: 'accept'};
+    req.query = {id: request_id};
     req.session.passport.user = JSON.stringify({ id: 3, system_admin: false })
     var res = {
-      json: function(result) {
+      json: function(result_code, result) {
         test_util.check_request(null, result, expected, now);
         done();
       }
@@ -1279,12 +1270,13 @@ describe('request_routes', function() {
   });
 
   it('should fail attempting to create an add member request', function(done) {
-    req.body = {band_id: 1, person_id: 4, action: 'add_band_member'};
+    req.params = {action: 'add_band_member'};
+    req.body = {band_id: 1, person_id: 4};
     req.session.passport.user = JSON.stringify({ id: 2, system_admin: false })
     var res = {
-      json: function(err_code, result) {
-        should.exist(err_code);
-        err_code.should.eql(500);
+      json: function(result_code, result) {
+        should.exist(result_code);
+        result_code.should.eql(500);
         should.exist(result);
         result.should.eql('Only band Admin may add members');
         done();
@@ -1294,10 +1286,11 @@ describe('request_routes', function() {
   });
 
   it('should create an add member request', function(done) {
-    req.body = {band_id: 1, person_id: 4, action: 'add_band_member'};
+    req.params = {action: 'add_band_member'};
+    req.body = {band_id: 1, person_id: 4};
     req.session.passport.user = JSON.stringify({ id: 3, system_admin: false })
     var res = {
-      json: function(result) {
+      json: function(result_code, result) {
         should.exist(result);
         result.should.have.property('id');
         request_id = result.id;
@@ -1328,7 +1321,7 @@ describe('request_routes', function() {
     };
     req.query = {id: request_id};
     var res = {
-      json: function(result) {
+      json: function(result_code, result) {
         test_util.check_request(null, result, expected, now);
         last_req = result;
         done();
@@ -1355,10 +1348,11 @@ describe('request_routes', function() {
       band_id: 1,
       person_id: 4,
     };
-    req.query = {id: request_id, action: 'accept'};
+    req.params = {action: 'accept'};
+    req.query = {id: request_id};
     req.session.passport.user = JSON.stringify({ id: 4, system_admin: false })
     var res = {
-      json: function(result) {
+      json: function(result_code, result) {
         test_util.check_request(null, result, expected, now);
         done();
       }
@@ -1430,7 +1424,7 @@ describe('request_routes', function() {
       person_id: 5,
     }];
     var res = {
-      json: function(result) {
+      json: function(result_code, result) {
         test_util.check_request_list(null, result.all_requests, expected, now);
         done();
       }

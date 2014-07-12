@@ -15,8 +15,15 @@ CRYPTO_DIR = ./crypto
 PRIVATE_KEY = $(CRYPTO_DIR)/rsa_private.pem
 PUBLIC_KEY = $(CRYPTO_DIR)/rsa_public.pem
 
+CHAI_URL = http\://chaijs.com/chai.js
 CHAI_JS = $(TEST_CLIENT_LIB)/chai.js
 CHAI_SRC = $(NODE_MODULES)/chai/chai.js
+
+SINON_URL = http\://sinonjs.org/releases/sinon-1.10.2.js
+SINON_JS = $(TEST_CLIENT_LIB)/sinon.js
+
+SINON_CHAI_URL = https\://raw.githubusercontent.com/domenic/sinon-chai/master/lib/sinon-chai.js
+SINON_CHAI_JS = $(TEST_CLIENT_LIB)/sinon-chai.js
 
 MOCHA = $(NODE_MODULES)/mocha
 MOCHA_JS = $(TEST_CLIENT_LIB)/mocha.js
@@ -26,7 +33,7 @@ MOCHA_CSS_SRC = $(NODE_MODULES)/mocha/mocha.js
 
 SHOULD_JS = $(NODE_MODULES)/should
 
-TEST_FILES = $(MOCHA_JS) $(MOCHA_CSS) $(CHAI_JS) $(SHOULD_JS)
+TEST_FILES = $(MOCHA_JS) $(MOCHA_CSS) $(CHAI_JS) $(SINON_JS) $(SINON_CHAI_JS) $(SHOULD_JS)
 
 SCHEMA = ./sql/schema.sql
 DATABASE = ./bombay.db
@@ -72,11 +79,21 @@ $(DATABASE): $(SCHEMA)
 	touch $(DATABASE)
 	sqlite3 $(DATABASE) '.read sql/schema.sql'
 
-$(CHAI_SRC): $(NODE_MODULES)
-	npm install chai
+$(CHAI_JS): $(TEST_CLIENT_LIB)
+	curl -o $(CHAI_JS) $(CHAI_URL)
 
-$(CHAI_JS): $(TEST_CLIENT_LIB) $(CHAI_SRC)
-	cp $(CHAI_SRC) $(CHAI_JS)
+# $(CHAI_SRC): $(NODE_MODULES)
+# 	npm install chai
+# 
+# $(CHAI_JS): $(TEST_CLIENT_LIB) $(CHAI_SRC)
+# 	cp $(CHAI_SRC) $(CHAI_JS)
+
+
+$(SINON_JS): $(TEST_CLIENT_LIB)
+	curl -o $(SINON_JS) $(SINON_URL)
+
+$(SINON_CHAI_JS): $(TEST_CLIENT_LIB)
+	curl -o $(SINON_CHAI_JS) $(SINON_CHAI_URL)
 
 $(MOCHA_JS_SRC): $(MOCHA)
 

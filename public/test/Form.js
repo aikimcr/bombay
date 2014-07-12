@@ -50,12 +50,13 @@ describe('Form', function() {
   });
 
   describe('#AddBand', function() {
-    var svc;
     var form;
+    var create_stub;
 
     before(function(done) {
-      svc = service.getInstance();
-      svc.resetCalls();
+      create_stub = sinon.stub(manager.bands, 'create', function(options, callback) {
+        callback(null, {id: 23, name: 'Cover Story'});
+      });
       done();
     });
 
@@ -71,23 +72,25 @@ describe('Form', function() {
     });
 
     it('should post to the band API', function(done) {
-      svc.set.result = {band_id: 23};
       form.name('Cover Story');
-      form.postChange_(function(result) {
+      form.postChange_(function(err, result) {
+        should.not.exist(err);
         should.exist(result);
-        result.should.have.property('band_id', 23);
-        result.should.not.have.property('err');
+        check_result_values(result, {
+          id: 23,
+          name: 'Cover Story'
+        });
         done();
       });
     });
 
-    it('should have done the call', function(done) {
-      svc.set.calls.should.eql(1);
-      svc.set.params.should.eql([[
-        './band',
-        'function',
-        {name: 'Cover Story'},
-      ]]);
+    it('should have done the call exactly once', function(done) {
+      create_stub.should.have.been.calledOnce;
+      done();
+    });
+
+    it('should have called the create with correct params', function(done) {
+      create_stub.should.have.been.calledWith({name: 'Cover Story'});
       done();
     });
 
@@ -98,12 +101,19 @@ describe('Form', function() {
   });
 
   describe('#AddPerson', function() {
-    var svc;
+    var create_stub;
     var form;
 
     before(function(done) {
-      svc = service.getInstance();
-      svc.resetCalls();
+      create_stub = sinon.stub(manager.persons, 'create', function(options, callback) {
+        callback(null, {
+          id: 23,
+          name: 'bbongos',
+          full_name: 'Billy Bongos',
+          email: 'bbongos@musichero.foo',
+          system_admin: true
+        });
+      });
       done();
     });
 
@@ -134,31 +144,36 @@ describe('Form', function() {
     });
 
     it('should post to the person API', function(done) {
-      svc.set.result = {person_id: 23};
       form.name('bbongos');
       form.full_name('Billy Bongos');
       form.email('bbongos@musichero.foo');
       form.system_admin(true);
-      form.postChange_(function(result) {
+      form.postChange_(function(err, result) {
+        should.not.exist(err);
         should.exist(result);
-        result.should.have.property('person_id', 23);
-        result.should.not.have.property('err');
-        done();
-      });
-    });
-
-    it('should have done the call', function(done) {
-      svc.set.calls.should.eql(1);
-      svc.set.params.should.eql([[
-        './person',
-        'function',
-        {
+        check_result_values(result, {
+          id: 23,
           name: 'bbongos',
           full_name: 'Billy Bongos',
           email: 'bbongos@musichero.foo',
           system_admin: true
-        },
-      ]]);
+        });
+        done();
+      });
+    });
+
+    it('should have done the call exactly once', function(done) {
+      create_stub.should.have.been.calledOnce;
+      done();
+    });
+
+    it('should have called the create with correct params', function(done) {
+      create_stub.should.have.been.calledWith({
+        name: 'bbongos',
+        full_name: 'Billy Bongos',
+        email: 'bbongos@musichero.foo',
+        system_admin: true
+      });
       done();
     });
 
@@ -172,12 +187,13 @@ describe('Form', function() {
   });
 
   describe('#AddArtist', function() {
-    var svc;
+    var create_stub;
     var form;
 
     before(function(done) {
-      svc = service.getInstance();
-      svc.resetCalls();
+      create_stub = sinon.stub(manager.artists, 'create', function(options, callback) {
+        callback(null, {id: 23, name: 'Mott the Hoople'});
+      });
       done();
     });
 
@@ -193,23 +209,25 @@ describe('Form', function() {
     });
 
     it('should post to the artist API', function(done) {
-      svc.set.result = {artist_id: 23};
       form.name('Mott the Hoople');
-      form.postChange_(function(result) {
+      form.postChange_(function(err, result) {
+        should.not.exist(err);
         should.exist(result);
-        result.should.have.property('artist_id', 23);
-        result.should.not.have.property('err');
+        check_result_values(result, {
+          id: 23,
+          name: 'Mott the Hoople'
+        });
         done();
       });
     });
 
-    it('should have done the call', function(done) {
-      svc.set.calls.should.eql(1);
-      svc.set.params.should.eql([[
-        './artist',
-        'function',
-        {name: 'Mott the Hoople'},
-      ]]);
+    it('should have done the call exactly once', function(done) {
+      create_stub.should.have.been.calledOnce;
+      done();
+    });
+
+    it('should have called the create with correct params', function(done) {
+      create_stub.should.have.been.calledWith({name: 'Mott the Hoople'});
       done();
     });
 
@@ -220,12 +238,22 @@ describe('Form', function() {
   });
 
   describe('#AddSong', function() {
-    var svc;
+    var create_stub;
     var form;
+    var artist;
 
     before(function(done) {
-      svc = service.getInstance();
-      svc.resetCalls();
+      manager.songs.clear();
+      manager.artists.clear();
+      artist = new Artist(5, 'David Bowie');
+      manager.artists.insert(artist);
+      done();
+    });
+
+    before(function(done) {
+      create_stub = sinon.stub(manager.songs, 'create', function(options, callback) {
+        callback(null, {id: 23, name: 'Ziggy Stardust', artist_id: 5});
+      });
       done();
     });
 
@@ -246,24 +274,23 @@ describe('Form', function() {
     });
 
     it('should post to the song API', function(done) {
-      svc.set.result = {song_id: 23};
       form.name('Ziggy Stardust');
-      form.artist(new Artist(5, 'David Bowie'));
-      form.postChange_(function(result) {
+      form.artist(artist);
+      form.postChange_(function(err, result) {
+        should.not.exist(err);
         should.exist(result);
-        result.should.have.property('song_id', 23);
-        result.should.not.have.property('err');
+        check_result_values(result, {id: 23, name: 'Ziggy Stardust', artist_id: 5});
         done();
       });
     });
 
-    it('should have done the call', function(done) {
-      svc.set.calls.should.eql(1);
-      svc.set.params.should.eql([[
-        './song',
-        'function',
-        {name: 'Ziggy Stardust', artist_id: 5},
-      ]]);
+    it('should have done the call exactly once', function(done) {
+      create_stub.should.have.been.calledOnce;
+      done();
+    });
+
+    it('should have called the create with correct params', function(done) {
+      create_stub.should.have.been.calledWith({name: 'Ziggy Stardust', artist_id: 5});
       done();
     });
 
@@ -275,12 +302,35 @@ describe('Form', function() {
   });
 
   describe('#JoinBand', function() {
-    var svc;
+    var create_stub;
     var form;
+    var band;
+    var person;
 
     before(function(done) {
-      svc = service.getInstance();
-      svc.resetCalls();
+      manager.bands.clear();
+      manager.persons.clear();
+      manager.requests.clear();
+      band = new Band(23, 'Cover Story');
+      manager.bands.insert(band);
+      person = new Person(23, 'bbongos', 'Billy Bongos', 'bbongos@musichero.foo', true);
+      manager.persons.insert(person);
+      manager.current_person(person);
+      done();
+    });
+
+    before(function(done) {
+      create_stub = sinon.stub(manager.requests, 'create', function(options, callback) {
+        callback(null, {
+          id: 23,
+          band_id: band.id(),
+          person_id: person.id(),
+          description: 'Bongos Rule',
+          request_type: constants.request_type.join_band,
+          status: constants.request_status.accepted,
+          timestamp: '2014-04-01 15:32:05'
+        });
+      });
       done();
     });
 
@@ -296,23 +346,33 @@ describe('Form', function() {
     });
 
     it('should post to the band_member API', function(done) {
-      svc.set.result = {band_member_id: 23};
-      form.band(new Band(1, 'All Night Music'));
-      form.postChange_(function(result) {
+      form.band(band);
+      form.postChange_(function(err, result) {
+        should.not.exist(err);
         should.exist(result);
-        result.should.have.property('band_member_id', 23);
-        result.should.not.have.property('err');
+        check_result_values(result, {
+          id: 23,
+          band_id: band.id(),
+          person_id: person.id(),
+          description: 'Bongos Rule',
+          request_type: constants.request_type.join_band,
+          status: constants.request_status.accepted,
+          timestamp: '2014-04-01 15:32:05'
+        });
         done();
       });
     });
 
-    it('should have done the call', function(done) {
-      svc.set.calls.should.eql(1);
-      svc.set.params.should.eql([[
-        './band_member',
-        'function',
-        {band_id: 1},
-      ]]);
+    it('should have done the call exactly once', function(done) {
+      create_stub.should.have.been.calledOnce;
+      done();
+    });
+
+    it('should have called the create with correct params', function(done) {
+      create_stub.should.have.been.calledWith({
+        band_id: band.id(),
+        person_id: person.id(),
+      });
       done();
     });
 
@@ -323,12 +383,36 @@ describe('Form', function() {
   });
 
   describe('#AddBandMember', function() {
-    var svc;
+    var create_stub;
     var form;
+    var band;
+    var person;
 
     before(function(done) {
-      svc = service.getInstance();
-      svc.resetCalls();
+      manager.bands.clear();
+      manager.persons.clear();
+      manager.requests.clear();
+      band = new Band(23, 'Cover Story');
+      manager.bands.insert(band);
+      manager.current_band(band);
+      person = new Person(23, 'bbongos', 'Billy Bongos', 'bbongos@musichero.foo', true);
+      manager.persons.insert(person);
+      done();
+    });
+
+    before(function(done) {
+      manager.requests.create.restore();
+      create_stub = sinon.stub(manager.requests, 'create', function(options, callback) {
+        callback(null, {
+          id: 23,
+          band_id: band.id(),
+          person_id: person.id(),
+          description: 'Bongos Rule',
+          request_type: constants.request_type.join_band,
+          status: constants.request_status.accepted,
+          timestamp: '2014-04-01 15:32:05'
+        });
+      });
       done();
     });
 
@@ -344,23 +428,33 @@ describe('Form', function() {
     });
 
     it('should post to the song API', function(done) {
-      svc.set.result = {band_member_id: 23};
-      form.person(new Person(2, 'bbongos', 'Billy Bongos', false));
-      form.postChange_(function(result) {
+      form.person(person);
+      form.postChange_(function(err, result) {
+        should.not.exist(err);
         should.exist(result);
-        result.should.have.property('band_member_id', 23);
-        result.should.not.have.property('err');
+        check_result_values(result, {
+          id: 23,
+          band_id: band.id(),
+          person_id: person.id(),
+          description: 'Bongos Rule',
+          request_type: constants.request_type.join_band,
+          status: constants.request_status.accepted,
+          timestamp: '2014-04-01 15:32:05'
+        });
         done();
       });
     });
 
-    it('should have done the call', function(done) {
-      svc.set.calls.should.eql(1);
-      svc.set.params.should.eql([[
-        './band_member',
-        'function',
-        {band_id: 1, person_id: 2},
-      ]]);
+    it('should have done the call exactly once', function(done) {
+      create_stub.should.have.been.calledOnce;
+      done();
+    });
+
+    it('should have called the create with correct params', function(done) {
+      create_stub.should.have.been.calledWith({
+        band_id: band.id(),
+        person_id: person.id(),
+      });
       done();
     });
 
@@ -371,12 +465,37 @@ describe('Form', function() {
   });
 
   describe('#AddBandSong', function() {
-    var svc;
+    var create_stub;
     var form;
+    var band;
+    var artist;
+    var song;
 
     before(function(done) {
-      svc = service.getInstance();
-      svc.resetCalls();
+      manager.bands.clear();
+      manager.artists.clear();
+      manager.songs.clear();
+      manager.band_songs.clear();
+      band = new Band(23, 'Cover Story');
+      manager.bands.insert(band);
+      manager.current_band(band);
+      artist = new Artist(5, 'David Bowie');
+      manager.artists.insert(artist);
+      song = new Song(23, 'Ziggy Stardust', artist.id());
+      manager.songs.insert(song);
+      done();
+    });
+
+    before(function(done) {
+      create_stub = sinon.stub(manager.band_songs, 'create', function(options, callback) {
+        callback(null, {
+          id: 23,
+          band_id: band.id(),
+          song_id: song.id(),
+          song_status: -1,
+          key_signature: 'C'
+        });
+      });
       done();
     });
 
@@ -391,30 +510,46 @@ describe('Form', function() {
       done();
     });
 
+    it('should have an observable key signature', function(done) {
+      ko.isObservable(form.key_signature).should.be.true;
+      done();
+    });
+
     it('should post to the song API', function(done) {
-      svc.set.result = {band_song_id: 23};
-      form.song(new Song(2, 1, 2));
-      form.postChange_(function(result) {
+      form.song(song);
+      form.key_signature('C');
+      form.postChange_(function(err, result) {
+        should.not.exist(err);
         should.exist(result);
-        result.should.have.property('band_song_id', 23);
-        result.should.not.have.property('err');
+        check_result_values(result, {
+          id: 23,
+          band_id: band.id(),
+          song_id: song.id(),
+          song_status: -1,
+          key_signature: 'C'
+        });
         done();
       });
     });
 
-    it('should have done the call', function(done) {
-      svc.set.calls.should.eql(1);
-console.log(svc.set.params);
-      svc.set.params.should.eql([[
-        './band_song',
-        'function',
-        {band_id: 1, song_id: 2, song_status: -1, key_signature: ''},
-      ]]);
+    it('should have done the call exactly once', function(done) {
+      create_stub.should.have.been.calledOnce;
+      done();
+    });
+
+    it('should have called the create with correct params', function(done) {
+      create_stub.should.have.been.calledWith({
+        band_id: band.id(),
+        song_id: song.id(),
+        song_status: -1,
+        key_signature: 'C'
+      });
       done();
     });
 
     it('should have reset the form values', function(done) {
       should.not.exist(form.song());
+      should.not.exist(form.key_signature());
       done();
     });
   });

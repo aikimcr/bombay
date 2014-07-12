@@ -14,7 +14,7 @@ function handleJSONResponse(res, err, result) {
   } else if (typeof result == 'function') {
     result();
   } else {
-    res.json(result);
+    res.json(200, result);
   }
 }
 
@@ -215,37 +215,7 @@ exports.getBandMemberTable = function(req, res) {
 };
 
 exports.postBandMemberTable = function(req, res) {
-  var user = util.getUser(req);
-  var person_id = req.body.person_id;
-
-  if (person_id) {
-    util.getBandMember(user.id, req.body.band_id, function(err, band_member) {
-      if (err) {
-        res.json(500, err);
-      } else if (user.system_admin || (band_member && band_member.band_admin)) {
-        request.addBandMember({
-          band_id: req.body.band_id,
-          person_id: req.body.person_id,
-          band_admin: false
-        }, function(err, result) {
-          if (err) {
-            res.json(err);
-          } else {
-            res.json(result);
-          }
-        });
-      } else {
-        res.json(500, 'Only band Admin may add members');
-      }
-    });
-  } else {
-    request.joinBand({
-      band_id: req.body.band_id,
-      person_id: user.id
-    }, function(result) {
-      res.json(result);
-    });
-  }
+  postModel(res, 'BandMember', req.body, 'band_member');
 };
 
 exports.putBandMemberTable = function(req, res) {
@@ -316,8 +286,7 @@ function request_require_self(action, result) {
 }; 
 
 exports.createRequest = function(req, res) {
-  var action = req.body.action;
-  delete req.body.action;
+  var action = req.params.action;
 
   var  user = util.getUser(req);
 
@@ -326,9 +295,9 @@ exports.createRequest = function(req, res) {
       if (user.id == req.body.person_id) {
         request.joinBand(req.body, function(err, result) {
           if (err) {
-            res.json(err);
+            res.json(err, result);
           } else {
-            res.json(result);
+            res.json(200, result);
           }
         });
       } else {
@@ -343,7 +312,7 @@ exports.createRequest = function(req, res) {
             if (err) {
               res.json(500, err);
             } else {
-              res.json(result);
+              res.json(200, result);
             }
           });
         } else {
@@ -367,7 +336,7 @@ exports.getRequest = function(req, res) {
       if (err) {
         res.json(err);
       } else {
-        res.json(result);
+        res.json(200, result);
       }
     });
   } else {
@@ -377,7 +346,7 @@ exports.getRequest = function(req, res) {
         if (err) {
           res.json(err);
         } else {
-          res.json({all_requests: result});
+          res.json(200, {all_requests: result});
         }
       });
     } else {
@@ -387,8 +356,8 @@ exports.getRequest = function(req, res) {
 };
 
 exports.updateRequest = function(req, res) {
-  var request_id = req.params.id;
-  if (!request_id) request_id = req.query.id;
+  var action = req.params.action;
+  var request_id = req.query.id;
 
   var user = util.getUser(req);
   var is_allowed = function(action, result, user, band_member) {
@@ -403,46 +372,39 @@ exports.updateRequest = function(req, res) {
     }
   };
 
-  if (user) {
-    request.getById(request_id, function(err, result) {
-      if (err) {
-        res.json(500, err);
-      } else {
-        util.getBandMember(user.id, result.band_id, function(err, band_member) {
-          if (err) {
-            res.json(500, err);
-          } else {
-            var action = req.params.action;
-            if (!action) action = req.query.action;
-
-            function stdHandler (err, result) {
-              if (err) {
-                res.json(500, err);
-              } else {
-                res.json(200, result);
-              }
-            }
-
-            if (is_allowed(action, result, user, band_member)) {
-              if (action == 'reject') {
-                result.reject(stdHandler);
-              } else if (action == 'reopen') {
-                result.reopen(stdHandler);
-              } else if (action == 'accept') {
-                result.accept(stdHandler);
-              } else {
-                res.json(500, 'unrecognized action: ' + action);
-              }
+  request.getById(request_id, function(err, result) {
+    if (err) {
+      res.json(500, err);
+    } else {
+      util.getBandMember(user.id, result.band_id, function(err, band_member) {
+        if (err) {
+          res.json(500, err);
+        } else {
+          function stdHandler (err, result) {
+            if (err) {
+              res.json(500, err);
             } else {
-              res.json(500, 'Permission denied');
+              res.json(200, result);
             }
           }
-        });
-      }
-    });
-  } else {
-    res.json(403, 'Not logged in');
-  }
+
+          if (is_allowed(action, result, user, band_member)) {
+            if (action == 'reject') {
+              result.reject(stdHandler);
+            } else if (action == 'reopen') {
+              result.reopen(stdHandler);
+            } else if (action == 'accept') {
+              result.accept(stdHandler);
+            } else {
+              res.json(500, 'unrecognized action: ' + action);
+            }
+          } else {
+            res.json(500, 'Permission denied');
+          }
+        }
+      });
+    }
+  });
 };
 
 exports.deleteRequest = function(req, res) {
