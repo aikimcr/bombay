@@ -2,6 +2,7 @@ function Form(opt_other_models) {
   this.isVisible = ko.observable(false);
   this.other_models = opt_other_models ? opt_other_models : [];
   this.message = ko.observable('');
+  this.object = ko.observable();
 }
 
 Form.prototype.show = function() {
@@ -34,31 +35,29 @@ Form.prototype.setError = function(err) {
   }
 };
 
-Form.postChange = function(form, model) {
-  form.postChange_(function (result) {
-    if (result.err) {
-      this.setError(result.err);
+Form.prototype.postChange = function(form_element, opt_callback) {
+  this.postChange_(function (err, result) {
+    if (err) {
+      this.setError(result);
     } else {
       this.message('Record Added');
-      model.load();
-      this.other_models.forEach(function(omodel) {
-        omodel.load();
-      }.bind(this));
     }
-  }.bind(form));
+    if (opt_callback) opt_callback(err, result);
+  }.bind(this));
 };
 
-Form.putChange = function(form, opt_object) {
-  if (form.validate()) {
-    var object = opt_object == null ? form.object() : opt_object();
-    var changeset = form.changeset();
-    object.update(changeset, function(result_code, result) {
-      if (result_code != 200 && result_code != 304) {
+Form.prototype.putChange = function(form_element, opt_callback) {
+  if (this.validate()) {
+    var changeset = this.changeset();
+    this.object().update(changeset, function(err, result) {
+      if (err) {
         this.setError(result);
       } else {
-        this.message('Change accepted');
+        this.message('Change Accepted');
+        this.resetValues();
       }
-    }.bind(form));
+      if (opt_callback) opt_callback(err, result);
+    }.bind(this));
   }
 };
 
@@ -78,15 +77,11 @@ AddBand.prototype.postChange_ = function(callback) {
 function EditBand() {
   Form.call(this);
   this.name = ko.observable(null);
-  this.band = ko.observable(null);
 }
 util.inherits(EditBand, Form);
 
 EditBand.prototype.postChange_ = function(callback) {
-  manager.bands.create({name: this.name()}, function(result_code, result) {
-    callback(result_code, result);
-    this.name(null);
-  }.bind(this))
+  throw new Error('Attempt to post from edit form');
 };
 
 EditBand.prototype.show = function(band) {
@@ -95,15 +90,19 @@ EditBand.prototype.show = function(band) {
 };
 
 EditBand.prototype.init = function(band) {
-  this.band(band);
+  this.object(band);
   Form.prototype.init.call(this);
-  this.name(this.band().name());
+  this.name(this.object().name());
 };
 
 EditBand.prototype.changeset = function(callback) {
   return {
     name: this.name(),
   };
+};
+
+EditBand.prototype.resetValues = function() {
+  this.name(null);
 };
 
 function AddPerson() {
@@ -120,6 +119,7 @@ AddPerson.prototype.postChange_ = function(callback) {
     name: this.name(),
     full_name: this.full_name(),
     email: this.email(),
+    password: 'password',
     system_admin: this.system_admin()
   };
   manager.persons.create(params, function(result_code, result) {
@@ -144,11 +144,12 @@ EditProfile.prototype.show = function() {
   Form.prototype.show.call(this);
 };
 
-EditProfile.prototype.init = function() {
+EditProfile.prototype.init = function(person) {
+  this.object(person);
   Form.prototype.init.call(this);
-  this.name(manager.current_person().name());
-  this.full_name(manager.current_person().full_name());
-  this.email(manager.current_person().email());
+  this.name(this.object().name());
+  this.full_name(this.object().full_name());
+  this.email(this.object().email());
 };
 
 EditProfile.prototype.changeset = function(callback) {
@@ -157,6 +158,12 @@ EditProfile.prototype.changeset = function(callback) {
     full_name: this.full_name(),
     email: this.email(),
   };
+};
+
+EditProfile.prototype.resetValues = function() {
+  this.name(null);
+  this.full_name(null);
+  this.email(null);
 };
 
 function ChangePassword() {
@@ -229,16 +236,11 @@ AddArtist.prototype.postChange_ = function(callback) {
 function EditArtist() {
   Form.call(this);
   this.name = ko.observable(null);
-  this.artist = ko.observable(null);
 }
 util.inherits(EditArtist, Form);
 
 EditArtist.prototype.postChange_ = function(callback) {
-  var svc = service.getInstance();
-  svc.set('./artist', function(result) {
-    callback(result);
-    this.name(null);
-  }.bind(this), {name: this.name()});
+  throw new Error('Attempt to post from edit form');
 };
 
 EditArtist.prototype.show = function(artist) {
@@ -247,15 +249,19 @@ EditArtist.prototype.show = function(artist) {
 };
  
 EditArtist.prototype.init = function(artist) {
-  this.artist(artist);
+  this.object(artist);
   Form.prototype.init.call(this);
-  this.name(this.artist().name());
+  this.name(this.object().name());
 };
 
 EditArtist.prototype.changeset = function(callback) {
   return {
     name: this.name(),
   };
+};
+
+EditArtist.prototype.resetValues = function() {
+  this.name(null);
 };
 
 function AddSong() {
@@ -326,8 +332,8 @@ function JoinBand() {
 util.inherits(JoinBand, Form);
 
 JoinBand.prototype.postChange_ = function(callback) {
-  manager.requests.create(
-    {band_id: this.band().id(), person_id: manager.current_person().id()},
+  manager.requests.joinBand(
+    this.band().id(),
     function(result_code, result) {
       callback(result_code, result);
       this.band(null);
@@ -342,8 +348,8 @@ function AddBandMember() {
 util.inherits(AddBandMember, Form);
 
 AddBandMember.prototype.postChange_ = function(callback) {
-  manager.requests.create(
-    {band_id: manager.current_band().id(), person_id: this.person().id()},
+  manager.requests.addBandMember(
+    this.person().id(),
     function(result_code, result) {
       callback(result_code, result);
       this.person(null);

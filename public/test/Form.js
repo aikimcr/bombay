@@ -73,7 +73,7 @@ describe('Form', function() {
 
     it('should post to the band API', function(done) {
       form.name('Cover Story');
-      form.postChange_(function(err, result) {
+      form.postChange(null, function(err, result) {
         should.not.exist(err);
         should.exist(result);
         check_result_values(result, {
@@ -98,7 +98,12 @@ describe('Form', function() {
       should.not.exist(form.name());
       done();
     });
-  });
+  
+    it('should have set the message', function(done) {
+      form.message().should.eql('Record Added');
+      done();
+    });
+});
 
   describe('#AddPerson', function() {
     var create_stub;
@@ -111,6 +116,7 @@ describe('Form', function() {
           name: 'bbongos',
           full_name: 'Billy Bongos',
           email: 'bbongos@musichero.foo',
+          password: 'password',
           system_admin: true
         });
       });
@@ -148,7 +154,7 @@ describe('Form', function() {
       form.full_name('Billy Bongos');
       form.email('bbongos@musichero.foo');
       form.system_admin(true);
-      form.postChange_(function(err, result) {
+      form.postChange(null, function(err, result) {
         should.not.exist(err);
         should.exist(result);
         check_result_values(result, {
@@ -156,6 +162,7 @@ describe('Form', function() {
           name: 'bbongos',
           full_name: 'Billy Bongos',
           email: 'bbongos@musichero.foo',
+          password: 'password',
           system_admin: true
         });
         done();
@@ -172,6 +179,7 @@ describe('Form', function() {
         name: 'bbongos',
         full_name: 'Billy Bongos',
         email: 'bbongos@musichero.foo',
+        password: 'password',
         system_admin: true
       });
       done();
@@ -184,7 +192,12 @@ describe('Form', function() {
       form.system_admin().should.be.false;
       done();
     });
-  });
+  
+    it('should have set the message', function(done) {
+      form.message().should.eql('Record Added');
+      done();
+    });
+});
 
   describe('#AddArtist', function() {
     var create_stub;
@@ -210,7 +223,7 @@ describe('Form', function() {
 
     it('should post to the artist API', function(done) {
       form.name('Mott the Hoople');
-      form.postChange_(function(err, result) {
+      form.postChange(null, function(err, result) {
         should.not.exist(err);
         should.exist(result);
         check_result_values(result, {
@@ -235,7 +248,12 @@ describe('Form', function() {
       should.not.exist(form.name());
       done();
     });
-  });
+  
+    it('should have set the message', function(done) {
+      form.message().should.eql('Record Added');
+      done();
+    });
+});
 
   describe('#AddSong', function() {
     var create_stub;
@@ -276,7 +294,7 @@ describe('Form', function() {
     it('should post to the song API', function(done) {
       form.name('Ziggy Stardust');
       form.artist(artist);
-      form.postChange_(function(err, result) {
+      form.postChange(null, function(err, result) {
         should.not.exist(err);
         should.exist(result);
         check_result_values(result, {id: 23, name: 'Ziggy Stardust', artist_id: 5});
@@ -299,7 +317,12 @@ describe('Form', function() {
       should.not.exist(form.artist());
       done();
     });
-  });
+  
+    it('should have set the message', function(done) {
+      form.message().should.eql('Record Added');
+      done();
+    });
+});
 
   describe('#JoinBand', function() {
     var create_stub;
@@ -320,7 +343,7 @@ describe('Form', function() {
     });
 
     before(function(done) {
-      create_stub = sinon.stub(manager.requests, 'create', function(options, callback) {
+      create_stub = sinon.stub(manager.requests, 'joinBand', function(options, callback) {
         callback(null, {
           id: 23,
           band_id: band.id(),
@@ -347,7 +370,7 @@ describe('Form', function() {
 
     it('should post to the band_member API', function(done) {
       form.band(band);
-      form.postChange_(function(err, result) {
+      form.postChange(null, function(err, result) {
         should.not.exist(err);
         should.exist(result);
         check_result_values(result, {
@@ -368,11 +391,8 @@ describe('Form', function() {
       done();
     });
 
-    it('should have called the create with correct params', function(done) {
-      create_stub.should.have.been.calledWith({
-        band_id: band.id(),
-        person_id: person.id(),
-      });
+    it('should have called join_band with correct params', function(done) {
+      create_stub.should.have.been.calledWith(band.id());
       done();
     });
 
@@ -380,7 +400,12 @@ describe('Form', function() {
       should.not.exist(form.band());
       done();
     });
-  });
+  
+    it('should have set the message', function(done) {
+      form.message().should.eql('Record Added');
+      done();
+    });
+});
 
   describe('#AddBandMember', function() {
     var create_stub;
@@ -401,8 +426,7 @@ describe('Form', function() {
     });
 
     before(function(done) {
-      manager.requests.create.restore();
-      create_stub = sinon.stub(manager.requests, 'create', function(options, callback) {
+      create_stub = sinon.stub(manager.requests, 'addBandMember', function(options, callback) {
         callback(null, {
           id: 23,
           band_id: band.id(),
@@ -429,7 +453,7 @@ describe('Form', function() {
 
     it('should post to the song API', function(done) {
       form.person(person);
-      form.postChange_(function(err, result) {
+      form.postChange(null, function(err, result) {
         should.not.exist(err);
         should.exist(result);
         check_result_values(result, {
@@ -451,15 +475,17 @@ describe('Form', function() {
     });
 
     it('should have called the create with correct params', function(done) {
-      create_stub.should.have.been.calledWith({
-        band_id: band.id(),
-        person_id: person.id(),
-      });
+      create_stub.should.have.been.calledWith(person.id());
       done();
     });
 
     it('should have reset the form values', function(done) {
       should.not.exist(form.person());
+      done();
+    });
+
+    it('should have set the message', function(done) {
+      form.message().should.eql('Record Added');
       done();
     });
   });
@@ -518,7 +544,7 @@ describe('Form', function() {
     it('should post to the song API', function(done) {
       form.song(song);
       form.key_signature('C');
-      form.postChange_(function(err, result) {
+      form.postChange(null, function(err, result) {
         should.not.exist(err);
         should.exist(result);
         check_result_values(result, {
@@ -550,6 +576,285 @@ describe('Form', function() {
     it('should have reset the form values', function(done) {
       should.not.exist(form.song());
       should.not.exist(form.key_signature());
+      done();
+    });
+  
+    it('should have set the message', function(done) {
+      form.message().should.eql('Record Added');
+      done();
+    });
+  });
+
+  describe('#EditBand', function() {
+    var update_stub;
+    var form;
+    var band;
+
+    before(function(done) {
+      band = new Band(23, 'Cover Story');
+      done();
+    });
+
+    before(function(done) {
+      update_stub = sinon.stub(Band.prototype, 'update', function(options, callback) {
+        callback(null, {
+          id: 23,
+          name: 'Cover Girls'
+        });
+      });
+      done();
+    });
+
+    it('should create the form', function(done) {
+      form = new EditBand();
+      should.exist(form);
+      done();
+    });
+
+    it('should have an observable name', function(done) {
+      ko.isObservable(form.name).should.be.true;
+      done();
+    });
+
+    it('should have an empty, observable object', function(done) {
+      ko.isObservable(form.object).should.be.true;
+      should.not.exist(form.object());
+      done();
+    });
+
+    it('should call init', function(done) {
+      form.init(band);
+      done();
+    });
+
+    it('should now contain the band as the object', function(done) {
+      should.exist(form.object());
+      form.object().should.eql(band);
+      done();
+    });
+
+    it('should call the model update', function(done) {
+      form.name('Cover Girls');
+      form.putChange(null, function(err, result) {
+        should.not.exist(err);
+        should.exist(result);
+        check_result_values(result, {
+          id: 23,
+          name: 'Cover Girls'
+        });
+        done();
+      });
+    });
+
+    it('should have done the call exactly once', function(done) {
+      update_stub.should.have.been.calledOnce;
+      done();
+    });
+
+    it('should have called the create with correct params', function(done) {
+      update_stub.should.have.been.calledWith({
+        name: 'Cover Girls'
+      });
+      done();
+    });
+
+    it('should have reset the form values', function(done) {
+      should.not.exist(form.name());
+      done();
+    });
+  
+    it('should have set the message', function(done) {
+      form.message().should.eql('Change Accepted');
+      done();
+    });
+  });
+
+  describe('#EditArtist', function() {
+    var update_stub;
+    var form;
+    var artist;
+
+    before(function(done) {
+      artist = new Artist(23, 'David Slade');
+      done();
+    });
+
+    before(function(done) {
+      update_stub = sinon.stub(Artist.prototype, 'update', function(options, callback) {
+        callback(null, {
+          id: 23,
+          name: 'David Bowie'
+        });
+      });
+      done();
+    });
+
+    it('should create the form', function(done) {
+      form = new EditArtist();
+      should.exist(form);
+      done();
+    });
+
+    it('should have an observable name', function(done) {
+      ko.isObservable(form.name).should.be.true;
+      done();
+    });
+
+    it('should have an empty, observable object', function(done) {
+      ko.isObservable(form.object).should.be.true;
+      should.not.exist(form.object());
+      done();
+    });
+
+    it('should call init', function(done) {
+      form.init(artist);
+      done();
+    });
+
+    it('should now contain the artist as the object', function(done) {
+      should.exist(form.object());
+      form.object().should.eql(artist);
+      done();
+    });
+
+    it('should call the model update', function(done) {
+      form.name('David Bowie');
+      form.putChange(null, function(err, result) {
+        should.not.exist(err);
+        should.exist(result);
+        check_result_values(result, {
+          id: 23,
+          name: 'David Bowie'
+        });
+        done();
+      });
+    });
+
+    it('should have done the call exactly once', function(done) {
+      update_stub.should.have.been.calledOnce;
+      done();
+    });
+
+    it('should have called the create with correct params', function(done) {
+      update_stub.should.have.been.calledWith({
+        name: 'David Bowie'
+      });
+      done();
+    });
+
+    it('should have reset the form values', function(done) {
+      should.not.exist(form.name());
+      done();
+    });
+  
+    it('should have set the message', function(done) {
+      form.message().should.eql('Change Accepted');
+      done();
+    });
+  });
+
+  describe('#EditPerson', function() {
+    var update_stub;
+    var form;
+    var person;
+
+    before(function(done) {
+      person = new Person(23, 'bbongos', 'Billy Bongos', 'bongs@musicloser.foo', true);
+      done();
+    });
+
+    before(function(done) {
+      update_stub = sinon.stub(Person.prototype, 'update', function(options, callback) {
+        callback(null, {
+          id: 23,
+          name: 'bbongos',
+          full_name: 'Billy Bongos',
+          email: 'bbongos@musichero.foo',
+          password: 'password',
+          system_admin: true
+        });
+      });
+      done();
+    });
+
+    it('should create the form', function(done) {
+      form = new EditProfile();
+      should.exist(form);
+      done();
+    });
+
+    it('should have an observable name', function(done) {
+      ko.isObservable(form.name).should.be.true;
+      done();
+    });
+
+    it('should have an observable full_name', function(done) {
+      ko.isObservable(form.full_name).should.be.true;
+      done();
+    });
+
+    it('should have an observable email', function(done) {
+      ko.isObservable(form.email).should.be.true;
+      done();
+    });
+
+    it('should have an empty, observable object', function(done) {
+      ko.isObservable(form.object).should.be.true;
+      should.not.exist(form.object());
+      done();
+    });
+
+    it('should call init', function(done) {
+      form.init(person);
+      done();
+    });
+
+    it('should now contain the person as the object', function(done) {
+      should.exist(form.object());
+      form.object().should.eql(person);
+      done();
+    });
+
+    it('should call the model update', function(done) {
+      form.email('bbongos@musichero.foo');
+      form.putChange(null, function(err, result) {
+        should.not.exist(err);
+        should.exist(result);
+        check_result_values(result, {
+          id: 23,
+          name: 'bbongos',
+          full_name: 'Billy Bongos',
+          email: 'bbongos@musichero.foo',
+          password: 'password',
+          system_admin: true
+        });
+        done();
+      });
+    });
+
+    it('should have done the call exactly once', function(done) {
+      update_stub.should.have.been.calledOnce;
+      done();
+    });
+
+    it('should have called the create with correct params', function(done) {
+      update_stub.should.have.been.calledWith({
+        name: 'bbongos',
+        full_name: 'Billy Bongos',
+        email: 'bbongos@musichero.foo',
+      });
+      done();
+    });
+
+    it('should have reset the form values', function(done) {
+      should.not.exist(form.name());
+      should.not.exist(form.full_name());
+      should.not.exist(form.email());
+      done();
+    });
+  
+    it('should have set the message', function(done) {
+      form.message().should.eql('Change Accepted');
       done();
     });
   });
