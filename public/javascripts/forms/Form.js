@@ -58,6 +58,8 @@ Form.prototype.putChange = function(form_element, opt_callback) {
       }
       if (opt_callback) opt_callback(err, result);
     }.bind(this));
+  } else {
+    if (opt_callback) opt_callback(this.message(), result);
   }
 };
 
@@ -179,25 +181,26 @@ ChangePassword.prototype.show = function() {
   Form.prototype.show.call(this);
 };
 
-ChangePassword.prototype.init = function() {
+ChangePassword.prototype.init = function(person) {
+  this.object(person);
   Form.prototype.init.call(this);
-  this.old_password('');
-  this.new_password('');
-  this.confirm_new_password('');
+  this.old_password(null);
+  this.new_password(null);
+  this.confirm_new_password(null);
 };
 
 ChangePassword.prototype.validate = function() {
-  if (this.old_password() == '') {
+  if (this.old_password() == null) {
     this.setError('Please provide your old password');
     return false;
   }
 
-  if (this.new_password() == '') {
+  if (this.new_password() == null) {
     this.setError('Please provide a new password');
     return false;
   }
 
-  if (this.confirm_new_password() == '') {
+  if (this.confirm_new_password() == null) {
     this.setError('Please confirm your new password');
     return false;
   }
@@ -218,6 +221,12 @@ ChangePassword.prototype.changeset = function(callback) {
   ]);
   var encrypted_ct = encodeURIComponent(util.encrypt(pk, ct));
   return { token: encrypted_ct };
+};
+
+ChangePassword.prototype.resetValues = function() {
+  this.old_password(null);
+  this.new_password(null);
+  this.confirm_new_password(null);
 };
 
 function AddArtist() {
@@ -287,7 +296,6 @@ function EditSong() {
   Form.call(this);
   this.name = ko.observable(null);
   this.artist = ko.observable(null);
-  this.song = ko.observable(null);
 }
 util.inherits(EditSong, Form);
 
@@ -312,10 +320,10 @@ EditSong.prototype.show = function(song) {
 };
 
 EditSong.prototype.init = function(song) {
-  this.song(song);
+  this.object(song);
   Form.prototype.init.call(this);
-  this.name(this.song().name());
-  this.artist(manager.artists.getById(this.song().artist_id()));
+  this.name(this.object().name());
+  this.artist(manager.artists.getById(this.object().artist_id()));
 };
 
 EditSong.prototype.changeset = function(callback) {
@@ -323,6 +331,11 @@ EditSong.prototype.changeset = function(callback) {
     name: this.name(),
     artist_id: this.artist().id()
   };
+};
+
+EditSong.prototype.resetValues = function() {
+  this.name(null);
+  this.artist(null);
 };
 
 function JoinBand() {

@@ -1126,8 +1126,9 @@ describe('request_routes', function() {
     var res = {
       json: function(result_code, result) {
         should.exist(result);
-        result.should.have.property('id');
-        request_id = result.id;
+        result.should.have.property('request');
+        result.request.should.have.property('id');
+        request_id = result.request.id;
         all_request_ids.push(request_id);
         done();
       }
@@ -1292,8 +1293,9 @@ describe('request_routes', function() {
     var res = {
       json: function(result_code, result) {
         should.exist(result);
-        result.should.have.property('id');
-        request_id = result.id;
+        result.should.have.property('request')
+        result.request.should.have.property('id');
+        request_id = result.request.id;
         all_request_ids.push(request_id);
         done();
       }

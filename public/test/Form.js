@@ -753,7 +753,7 @@ describe('Form', function() {
     });
   });
 
-  describe('#EditPerson', function() {
+  describe('#EditProfile', function() {
     var update_stub;
     var form;
     var person;
@@ -850,6 +850,215 @@ describe('Form', function() {
       should.not.exist(form.name());
       should.not.exist(form.full_name());
       should.not.exist(form.email());
+      done();
+    });
+  
+    it('should have set the message', function(done) {
+      form.message().should.eql('Change Accepted');
+      done();
+    });
+  });
+
+  describe('#ChangePassword', function() {
+    var update_stub;
+    var form;
+    var person;
+
+    before(function(done) {
+      person = new Person(23, 'bbongos', 'Billy Bongos', 'bongs@musicloser.foo', true);
+      done();
+    });
+
+    before(function(done) {
+      if (Person.prototype.update.restore) Person.prototype.update.restore();
+      update_stub = sinon.stub(Person.prototype, 'update', function(options, callback) {
+        callback(null, {
+          id: 23,
+          name: 'bbongos',
+          full_name: 'Billy Bongos',
+          email: 'bbongos@musichero.foo',
+          password: 'correct.horse',
+          system_admin: true
+        });
+      });
+      done();
+    });
+
+    it('should create the form', function(done) {
+      form = new ChangePassword();
+      should.exist(form);
+      done();
+    });
+
+    it('should have an observable old_password', function(done) {
+      ko.isObservable(form.old_password).should.be.true;
+      done();
+    });
+
+    it('should have an observable new_password', function(done) {
+      ko.isObservable(form.new_password).should.be.true;
+      done();
+    });
+
+    it('should have an observable confirm_new_password', function(done) {
+      ko.isObservable(form.confirm_new_password).should.be.true;
+      done();
+    });
+
+    it('should have an empty, observable object', function(done) {
+      ko.isObservable(form.object).should.be.true;
+      should.not.exist(form.object());
+      done();
+    });
+
+    it('should call init', function(done) {
+      form.init(person);
+      done();
+    });
+
+    it('should now contain the person as the object', function(done) {
+      should.exist(form.object());
+      form.object().should.eql(person);
+      done();
+    });
+
+    it('should call the model update', function(done) {
+      form.old_password('password');
+      form.new_password('correct.horse');
+      form.confirm_new_password('correct.horse');
+      form.putChange(null, function(err, result) {
+        should.not.exist(err);
+        should.exist(result);
+        check_result_values(result, {
+          id: 23,
+          name: 'bbongos',
+          full_name: 'Billy Bongos',
+          email: 'bbongos@musichero.foo',
+          password: 'correct.horse',
+          system_admin: true
+        });
+        done();
+      });
+    });
+
+    it('should have done the call exactly once', function(done) {
+      update_stub.should.have.been.calledOnce;
+      done();
+    });
+
+/* XXX Yeah, don't actually know how to do this test.
+    it('should have called the create with correct params', function(done) {
+      var pk = document.querySelector('input[name="pubkey"]').value;
+      var ct = JSON.stringify(['password','correct.horse']);
+      var token = encodeURIComponent(util.encrypt(pk, ))
+      update_stub.should.have.been.calledWith({
+        token: "idgPNlVl5v8%2BZtYGYSYHbPMhHwtQ4GBLgZ72BanltMFShA6YB%2BKJndfg3gt31A8kDwxoNgHneoSLvqOZCE0EOg%3D%3D"
+      });
+      done();
+    });
+*/
+
+    it('should have reset the form values', function(done) {
+      should.not.exist(form.old_password());
+      should.not.exist(form.new_password());
+      should.not.exist(form.confirm_new_password());
+      done();
+    });
+  
+    it('should have set the message', function(done) {
+      form.message().should.eql('Change Accepted');
+      done();
+    });
+  });
+
+  describe ('#EditSong', function() {
+    var update_stub;
+    var form;
+    var song;
+    var artist;
+
+    before(function(done) {
+      manager.artists.clear();
+      artist = new Artist(23, 'David Slade');
+      manager.artists.insert(artist);
+      song = new Song(23, 'Ziggy Coaldust', artist.id());
+      done();
+    });
+
+    before(function(done) {
+      update_stub = sinon.stub(Song.prototype, 'update', function(options, callback) {
+        callback(null, {
+          id: 23,
+          name: 'Ziggy Stardust',
+          artist_id: 23
+        });
+      });
+      done();
+    });
+
+    it('should create the form', function(done) {
+      form = new EditSong();
+      should.exist(form);
+      done();
+    });
+
+    it('should have an observable name', function(done) {
+      ko.isObservable(form.name).should.be.true;
+      done();
+    });
+
+    it('should have an observable artist', function(done) {
+      ko.isObservable(form.artist).should.be.true;
+      done();
+    });
+
+    it('should have an empty, observable object', function(done) {
+      ko.isObservable(form.object).should.be.true;
+      should.not.exist(form.object());
+      done();
+    });
+
+    it('should call init', function(done) {
+      form.init(song);
+      done();
+    });
+
+    it('should now contain the song as the object', function(done) {
+      should.exist(form.object());
+      form.object().should.eql(song);
+      done();
+    });
+
+    it('should call the model update', function(done) {
+      form.name('Ziggy Stardust');
+      form.putChange(null, function(err, result) {
+        should.not.exist(err);
+        should.exist(result);
+        check_result_values(result, {
+          id: 23,
+          name: 'Ziggy Stardust',
+          artist_id: 23
+        });
+        done();
+      });
+    });
+
+    it('should have done the call exactly once', function(done) {
+      update_stub.should.have.been.calledOnce;
+      done();
+    });
+
+    it('should have called the create with correct params', function(done) {
+      update_stub.should.have.been.calledWith({
+        name: 'Ziggy Stardust',
+        artist_id: 23
+      });
+      done();
+    });
+
+    it('should have reset the form values', function(done) {
+      should.not.exist(form.name());
+      should.not.exist(form.artist());
       done();
     });
   
