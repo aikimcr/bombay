@@ -55,7 +55,7 @@ describe('Form', function() {
 
     before(function(done) {
       create_stub = sinon.stub(manager.bands, 'create', function(options, callback) {
-        callback(null, {id: 23, name: 'Cover Story'});
+        callback(200, {id: 23, name: 'Cover Story'});
       });
       done();
     });
@@ -73,8 +73,9 @@ describe('Form', function() {
 
     it('should post to the band API', function(done) {
       form.name('Cover Story');
-      form.postChange(null, function(err, result) {
-        should.not.exist(err);
+      form.postChange(null, function(result_code, result) {
+        should.exist(result_code);
+        result_code.should.eql(200);
         should.exist(result);
         check_result_values(result, {
           id: 23,
@@ -111,13 +112,12 @@ describe('Form', function() {
 
     before(function(done) {
       create_stub = sinon.stub(manager.persons, 'create', function(options, callback) {
-        callback(null, {
+        callback(200, {
           id: 23,
           name: 'bbongos',
           full_name: 'Billy Bongos',
           email: 'bbongos@musichero.foo',
-          password: 'password',
-          system_admin: true
+          system_admin: false
         });
       });
       done();
@@ -144,8 +144,8 @@ describe('Form', function() {
       done();
     });
 
-    it('should have an observable system_admin', function(done) {
-      ko.isObservable(form.system_admin).should.be.true;
+    it('should not have a system_admin object', function(done) {
+      should.not.exist(form.system_admin);
       done();
     });
 
@@ -153,17 +153,16 @@ describe('Form', function() {
       form.name('bbongos');
       form.full_name('Billy Bongos');
       form.email('bbongos@musichero.foo');
-      form.system_admin(true);
-      form.postChange(null, function(err, result) {
-        should.not.exist(err);
+      form.postChange(null, function(result_code, result) {
+        should.exist(result_code);
+        result_code.should.eql(200);
         should.exist(result);
         check_result_values(result, {
           id: 23,
           name: 'bbongos',
           full_name: 'Billy Bongos',
           email: 'bbongos@musichero.foo',
-          password: 'password',
-          system_admin: true
+          system_admin: false
         });
         done();
       });
@@ -178,9 +177,7 @@ describe('Form', function() {
       create_stub.should.have.been.calledWith({
         name: 'bbongos',
         full_name: 'Billy Bongos',
-        email: 'bbongos@musichero.foo',
-        password: 'password',
-        system_admin: true
+        email: 'bbongos@musichero.foo'
       });
       done();
     });
@@ -189,7 +186,6 @@ describe('Form', function() {
       should.not.exist(form.name());
       should.not.exist(form.full_name());
       should.not.exist(form.email());
-      form.system_admin().should.be.false;
       done();
     });
   
@@ -205,7 +201,7 @@ describe('Form', function() {
 
     before(function(done) {
       create_stub = sinon.stub(manager.artists, 'create', function(options, callback) {
-        callback(null, {id: 23, name: 'Mott the Hoople'});
+        callback(200, {id: 23, name: 'Mott the Hoople'});
       });
       done();
     });
@@ -223,8 +219,9 @@ describe('Form', function() {
 
     it('should post to the artist API', function(done) {
       form.name('Mott the Hoople');
-      form.postChange(null, function(err, result) {
-        should.not.exist(err);
+      form.postChange(null, function(result_code, result) {
+        should.exist(result_code);
+        result_code.should.eql(200);
         should.exist(result);
         check_result_values(result, {
           id: 23,
@@ -270,7 +267,7 @@ describe('Form', function() {
 
     before(function(done) {
       create_stub = sinon.stub(manager.songs, 'create', function(options, callback) {
-        callback(null, {id: 23, name: 'Ziggy Stardust', artist_id: 5});
+        callback(200, {id: 23, name: 'Ziggy Stardust', artist_id: 5, key_signature: 'Ab'});
       });
       done();
     });
@@ -294,10 +291,12 @@ describe('Form', function() {
     it('should post to the song API', function(done) {
       form.name('Ziggy Stardust');
       form.artist(artist);
-      form.postChange(null, function(err, result) {
-        should.not.exist(err);
+      form.key_signature('Ab');
+      form.postChange(null, function(result_code, result) {
+        should.exist(result_code);
+        result_code.should.eql(200);
         should.exist(result);
-        check_result_values(result, {id: 23, name: 'Ziggy Stardust', artist_id: 5});
+        check_result_values(result, {id: 23, name: 'Ziggy Stardust', artist_id: 5, key_signature: 'Ab'});
         done();
       });
     });
@@ -308,13 +307,14 @@ describe('Form', function() {
     });
 
     it('should have called the create with correct params', function(done) {
-      create_stub.should.have.been.calledWith({name: 'Ziggy Stardust', artist_id: 5});
+      create_stub.should.have.been.calledWith({name: 'Ziggy Stardust', artist_id: 5, key_signature: 'Ab'});
       done();
     });
 
     it('should have reset the form values', function(done) {
       should.not.exist(form.name());
       should.not.exist(form.artist());
+      should.not.exist(form.key_signature());
       done();
     });
   
@@ -344,7 +344,7 @@ describe('Form', function() {
 
     before(function(done) {
       create_stub = sinon.stub(manager.requests, 'joinBand', function(options, callback) {
-        callback(null, {
+        callback(200, {
           id: 23,
           band_id: band.id(),
           person_id: person.id(),
@@ -370,8 +370,9 @@ describe('Form', function() {
 
     it('should post to the band_member API', function(done) {
       form.band(band);
-      form.postChange(null, function(err, result) {
-        should.not.exist(err);
+      form.postChange(null, function(result_code, result) {
+        should.exist(result_code);
+        result_code.should.eql(200);
         should.exist(result);
         check_result_values(result, {
           id: 23,
@@ -427,7 +428,7 @@ describe('Form', function() {
 
     before(function(done) {
       create_stub = sinon.stub(manager.requests, 'addBandMember', function(options, callback) {
-        callback(null, {
+        callback(200, {
           id: 23,
           band_id: band.id(),
           person_id: person.id(),
@@ -453,8 +454,9 @@ describe('Form', function() {
 
     it('should post to the song API', function(done) {
       form.person(person);
-      form.postChange(null, function(err, result) {
-        should.not.exist(err);
+      form.postChange(null, function(result_code, result) {
+        should.exist(result_code);
+        result_code.should.eql(200);
         should.exist(result);
         check_result_values(result, {
           id: 23,
@@ -514,7 +516,7 @@ describe('Form', function() {
 
     before(function(done) {
       create_stub = sinon.stub(manager.band_songs, 'create', function(options, callback) {
-        callback(null, {
+        callback(200, {
           id: 23,
           band_id: band.id(),
           song_id: song.id(),
@@ -544,8 +546,9 @@ describe('Form', function() {
     it('should post to the song API', function(done) {
       form.song(song);
       form.key_signature('C');
-      form.postChange(null, function(err, result) {
-        should.not.exist(err);
+      form.postChange(null, function(result_code, result) {
+        should.exist(result_code);
+        result_code.should.eql(200);
         should.exist(result);
         check_result_values(result, {
           id: 23,
@@ -597,7 +600,7 @@ describe('Form', function() {
 
     before(function(done) {
       update_stub = sinon.stub(Band.prototype, 'update', function(options, callback) {
-        callback(null, {
+        callback(200, {
           id: 23,
           name: 'Cover Girls'
         });
@@ -635,8 +638,9 @@ describe('Form', function() {
 
     it('should call the model update', function(done) {
       form.name('Cover Girls');
-      form.putChange(null, function(err, result) {
-        should.not.exist(err);
+      form.putChange(null, function(result_code, result) {
+        should.exist(result_code);
+        result_code.should.eql(200);
         should.exist(result);
         check_result_values(result, {
           id: 23,
@@ -681,7 +685,7 @@ describe('Form', function() {
 
     before(function(done) {
       update_stub = sinon.stub(Artist.prototype, 'update', function(options, callback) {
-        callback(null, {
+        callback(200, {
           id: 23,
           name: 'David Bowie'
         });
@@ -719,8 +723,9 @@ describe('Form', function() {
 
     it('should call the model update', function(done) {
       form.name('David Bowie');
-      form.putChange(null, function(err, result) {
-        should.not.exist(err);
+      form.putChange(null, function(result_code, result) {
+        should.exist(result_code);
+        result_code.should.eql(200);
         should.exist(result);
         check_result_values(result, {
           id: 23,
@@ -765,7 +770,7 @@ describe('Form', function() {
 
     before(function(done) {
       update_stub = sinon.stub(Person.prototype, 'update', function(options, callback) {
-        callback(null, {
+        callback(200, {
           id: 23,
           name: 'bbongos',
           full_name: 'Billy Bongos',
@@ -817,8 +822,9 @@ describe('Form', function() {
 
     it('should call the model update', function(done) {
       form.email('bbongos@musichero.foo');
-      form.putChange(null, function(err, result) {
-        should.not.exist(err);
+      form.putChange(null, function(result_code, result) {
+        should.exist(result_code);
+        result_code.should.eql(200);
         should.exist(result);
         check_result_values(result, {
           id: 23,
@@ -872,7 +878,7 @@ describe('Form', function() {
     before(function(done) {
       if (Person.prototype.update.restore) Person.prototype.update.restore();
       update_stub = sinon.stub(Person.prototype, 'update', function(options, callback) {
-        callback(null, {
+        callback(200, {
           id: 23,
           name: 'bbongos',
           full_name: 'Billy Bongos',
@@ -926,8 +932,9 @@ describe('Form', function() {
       form.old_password('password');
       form.new_password('correct.horse');
       form.confirm_new_password('correct.horse');
-      form.putChange(null, function(err, result) {
-        should.not.exist(err);
+      form.putChange(null, function(result_code, result) {
+        should.exist(result_code);
+        result_code.should.eql(200);
         should.exist(result);
         check_result_values(result, {
           id: 23,
@@ -987,7 +994,7 @@ describe('Form', function() {
 
     before(function(done) {
       update_stub = sinon.stub(Song.prototype, 'update', function(options, callback) {
-        callback(null, {
+        callback(200, {
           id: 23,
           name: 'Ziggy Stardust',
           artist_id: 23
@@ -1031,8 +1038,9 @@ describe('Form', function() {
 
     it('should call the model update', function(done) {
       form.name('Ziggy Stardust');
-      form.putChange(null, function(err, result) {
-        should.not.exist(err);
+      form.putChange(null, function(result_code, result) {
+        should.exist(result_code);
+        result_code.should.eql(200);
         should.exist(result);
         check_result_values(result, {
           id: 23,

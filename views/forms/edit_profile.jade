@@ -12,7 +12,7 @@ div#edit_profile_form(data-bind="visible: forms.edit_profile.isVisible")
 
       div.dialog_body
         div.title(data-bind="text: forms.edit_profile.message")
-        form(data-bind="submit: function() { Form.putChange(forms.edit_profile, current_person); }")
+        form(data-bind="submit: putFormChange", form_key="edit_profile")
           input(data-bind="value: forms.edit_profile.name", type="text", placeholder="New Login Name")
           input(data-bind="value: forms.edit_profile.full_name", type="text", placeholder="Full Name")
           input(data-bind="value: forms.edit_profile.email", type="email", placeholder="E-Mail")

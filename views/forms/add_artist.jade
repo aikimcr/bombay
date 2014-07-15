@@ -8,6 +8,6 @@ div#add_artist_form(data-bind="visible: forms.add_artist.isVisible")
 
       div.dialog_body
         div.title(data-bind="text: forms.add_artist.message")
-        form(data-bind="submit: forms.add_artist.postChange")
+        form(data-bind="submit: postFormChange", form_key="add_artist")
           input(data-bind="value: forms.add_artist.name", type="text", placeholder="New Artist Name")
           input(type="submit", value="Add")

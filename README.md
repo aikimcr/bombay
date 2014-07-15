@@ -9,10 +9,7 @@ setlist, membership and calendar management for multiple bands within a single d
 But, really, it's mostly about me learning more Javascript and Node.js stuff.
 
 ToDo:
-- Key signature on band songs.
-- Original key signature on songs.
 - Ability to attach links to video/audio on songs.
-  involved.
 
 - The setlist management UI is non-existant.
 - The calendar handler is non-existant.
@@ -22,3 +19,4 @@ ToDo:
   - Use drag and drop.
   - Allow CSV upload.
   - "Bulk" adds.
+

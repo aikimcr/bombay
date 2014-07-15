@@ -10,6 +10,7 @@ var base64_decode = require('base64').decode;
 
 function handleJSONResponse(res, err, result) {
   if(err) {
+    console.log(err);
     res.json(500, err);
   } else if (typeof result == 'function') {
     result();
@@ -117,6 +118,8 @@ exports.getPersonTable = function(req, res) {
 };
 
 exports.postPersonTable = function(req, res) {
+  req.body.password = req.body.password || 'password';
+  req.body.system_admin = req.body.system_admin || false;
   postModel(res, 'Person', req.body, 'person');
 };
 

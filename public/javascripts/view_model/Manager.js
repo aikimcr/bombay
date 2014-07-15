@@ -314,10 +314,34 @@ function Manager(for_test) {
 
   this.confirm_dialog = new confirm_dialog();
 
+  this.postFormChange = function(form_element) {
+    var form_key = form_element.attributes.getNamedItem('form_key');
+    if (! form_key) throw new Error('No form key for ' + form_element.toString());
+    var form = this.forms[form_key.value];
+    return form.postChange(form_element);
+  };
+
+  this.putFormChange = function(form_element) {
+    var form_key = form_element.attributes.getNamedItem('form_key');
+    if (! form_key) throw new Error('No form key for ' + form_element.toString());
+    var form = this.forms[form_key.value];
+    var form_result = form.putChange(form_element);
+    form.hide();
+    return form_result;
+  };
+
   this.edit_table_object = function(data, event) {
     window.console.log(event);
     window.console.log(data);
     this.show(data);
+  };
+
+  this.delete_table_object = function(data, event) {
+    data.delete(function(result_code, result) {
+      if (result_code != 200 && result_code != 304) {
+        throw new Error(result); //XXX  Display a message?
+      }
+    }, event);
   };
 
   this.update_table_object = function(data, event) {
@@ -335,15 +359,6 @@ function Manager(for_test) {
         });
       }
     });
-  };
-
-  this.delete_table_object = function(data, event) {
-    data.delete(function(result) {
-      if (result && !result.err) {
-        data.reload_list();
-        data.reload_relatives();
-      }
-    }, event);
   };
 
   this.request_msg = ko.observable('');

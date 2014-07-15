@@ -12,6 +12,6 @@ div#add_band_song_form(data-bind="visible: forms.add_band_song.isVisible")
 
       div.dialog_body
         div.title(data-bind="text: forms.add_band_song.message")
-        form(data-bind="submit: forms.add_band_song.postChange")
+        form(data-bind="submit: postFormChange", form_key="add_band_song")
           select(data-bind="options: $root.non_band_songs, value: forms.add_band_song.song, optionsText: 'description'")
           input(type="submit", value="Add")

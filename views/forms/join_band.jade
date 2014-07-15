@@ -12,6 +12,6 @@ div#join_band_form(data-bind="visible: forms.join_band.isVisible")
 
       div.dialog_body
         div.title(data-bind="text: forms.join_band.message")
-        form(data-bind="submit: function() { Form.postChange(forms.join_band, band_members)}")
+        form(data-bind="submit: postFormChange", form_key="join_band")
           select(data-bind="options: $root.other_bands, value: forms.join_band.band, optionsText: 'name'")
           input(type="submit", value="Join")

@@ -32,7 +32,7 @@ util.inherits(Song, Table);
 
 Song.service_url = './song';
 Song.model_key = 'song';
-Song.columns = ['name', 'artist_id'];
+Song.columns = ['name', 'artist_id', 'key_signature'];
 Song.list_key = 'songs';
 
 Song.prototype.confirm_text = function() {

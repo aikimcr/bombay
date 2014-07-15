@@ -36,27 +36,27 @@ Form.prototype.setError = function(err) {
 };
 
 Form.prototype.postChange = function(form_element, opt_callback) {
-  this.postChange_(function (err, result) {
-    if (err) {
+  this.postChange_(function (result_code, result) {
+    if (result_code && result_code != 200 && result_code != 304) {
       this.setError(result);
     } else {
       this.message('Record Added');
     }
-    if (opt_callback) opt_callback(err, result);
+    if (opt_callback) opt_callback(result_code, result);
   }.bind(this));
 };
 
 Form.prototype.putChange = function(form_element, opt_callback) {
   if (this.validate()) {
     var changeset = this.changeset();
-    this.object().update(changeset, function(err, result) {
-      if (err) {
+    this.object().update(changeset, function(result_code, result) {
+      if (result_code && result_code != 200 && result_code != 304) {
         this.setError(result);
       } else {
         this.message('Change Accepted');
         this.resetValues();
       }
-      if (opt_callback) opt_callback(err, result);
+      if (opt_callback) opt_callback(result_code, result);
     }.bind(this));
   } else {
     if (opt_callback) opt_callback(this.message(), result);
@@ -112,7 +112,6 @@ function AddPerson() {
   this.name = ko.observable(null);
   this.full_name = ko.observable(null);
   this.email = ko.observable(null);
-  this.system_admin = ko.observable(false);
 }
 util.inherits(AddPerson, Form);
 
@@ -120,16 +119,13 @@ AddPerson.prototype.postChange_ = function(callback) {
   var params = {
     name: this.name(),
     full_name: this.full_name(),
-    email: this.email(),
-    password: 'password',
-    system_admin: this.system_admin()
+    email: this.email()
   };
   manager.persons.create(params, function(result_code, result) {
     callback(result_code, result);
     this.name(null);
     this.full_name(null);
     this.email(null);
-    this.system_admin(false);
   }.bind(this));
 };
 
@@ -283,11 +279,15 @@ util.inherits(AddSong, Form);
 
 AddSong.prototype.postChange_ = function(callback) {
   manager.songs.create(
-    {name: this.name(), artist_id: this.artist().id()},
-    function(result_code, result) {
+    {
+      name: this.name(),
+      artist_id: this.artist().id(),
+      key_signature: this.key_signature()
+    }, function(result_code, result) {
       callback(result_code, result);
       this.name(null);
       this.artist(null);
+      this.key_signature(null);
     }.bind(this)
   );
 };
