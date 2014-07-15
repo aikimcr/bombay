@@ -20,3 +20,9 @@ ToDo:
   - Allow CSV upload.
   - "Bulk" adds.
 
+
+Bugs:
+- Password change
+- Edit profile
+- Refreshing song_ratings.
+- Accepting requests (band_member).
