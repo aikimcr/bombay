@@ -369,16 +369,24 @@ function Manager(for_test) {
         if (result_code != 200 && result_code != 304) {
           this.request_msg(result);
         } else {
-          // XXX Update lists.
+          this.band_members.load();
+          this.song_ratings.load();
           this.request_msg('');
         }
       }.bind(this), event);
-    } else {
-      data.change_status(request_action, function(result) {
+    } else if (request_action != '') {
+      data.change_status(request_action, function(result_code, result) {
         if (result_code != 200 && result_code != 304) {
           this.request_msg(result);
         } else {
-          // XXX Update lists.
+          if (result.band_member) {
+            this.band_members.insertNew(result.band_member);
+          }
+
+          if (result.song_ratings) {
+            this.song_ratings.insertList(result.song_ratings);
+          }
+
           this.request_msg('');
         }
       }.bind(this), event);

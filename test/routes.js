@@ -487,6 +487,15 @@ describe('routes', function() {
         var res = {
           json: function(result_code, result) {
             band_song_id = test_util.check_result(result, 'band_song', req.body);
+            should.exist(result.song_ratings);
+            result.song_ratings.length.should.eql(3);
+            test_util.check_rows(result.song_ratings, [{
+              rating: 3, id: 11, band_member_id: 7, band_song_id: band_song_id
+            }, {
+              rating: 3, id: 12, band_member_id: 3, band_song_id: band_song_id
+            }, {
+              rating: 3, id: 13, band_member_id: 6, band_song_id: band_song_id
+            }], ['rating']);
             done();
           }
         };
@@ -1064,6 +1073,11 @@ describe('request_routes', function() {
       'INSERT INTO person (id, name, full_name) VALUES (5, \'tbird\', \'Tweety Bird\');',
       'INSERT INTO person (id, name, full_name) VALUES (6, \'scat\', \'Sylvester Cat\');',
       'INSERT INTO band_member (id, band_id, person_id, band_admin) VALUES (1, 1, 3, 1);',
+      'INSERT INTO artist (id, name) VALUES (1, \'Led Zeppelin\');',
+      'INSERT INTO song (id, name, artist_id) VALUES (1, \'Rock-n-Roll\', 1);',
+      'INSERT INTO song (id, name, artist_id) VALUES (2, \'Bron-Y-Aur\', 1);',
+      'INSERT INTO band_song (id, band_id, song_id) VALUES (1, 1, 1);',
+      'INSERT INTO band_song (id, band_id, song_id) VALUES (2, 1, 2);'
     ], done);
   });
 
@@ -1159,7 +1173,9 @@ describe('request_routes', function() {
     req.query = {id: request_id};
     var res = {
       json: function(result_code, result) {
-        test_util.check_request(null, result, expected, now);
+        should.exist(result);
+        result.should.have.property('request');
+        test_util.check_request(null, result.request, expected, now);
         last_req = result;
         done();
       }
@@ -1181,7 +1197,9 @@ describe('request_routes', function() {
     req.session.passport.user = JSON.stringify({ id: 3, system_admin: false })
     var res = {
       json: function(result_code, result) {
-        test_util.check_request(null, result, expected, now);
+        should.exist(result);
+        result.should.have.property('request');
+        test_util.check_request(null, result.request, expected, now);
         done();
       }
     };
@@ -1211,7 +1229,9 @@ describe('request_routes', function() {
     req.session.passport.user = JSON.stringify({ id: 2, system_admin: false })
     var res = {
       json: function(result_code, result) {
-        test_util.check_request(null, result, expected, now);
+        should.exist(result);
+        result.should.have.property('request');
+        test_util.check_request(null, result.request, expected, now);
         done();
       }
     };
@@ -1241,7 +1261,22 @@ describe('request_routes', function() {
     req.session.passport.user = JSON.stringify({ id: 3, system_admin: false })
     var res = {
       json: function(result_code, result) {
-        test_util.check_request(null, result, expected, now);
+        should.exist(result_code);
+        result_code.should.eql(200);
+        should.exist(result);
+        result.should.have.property('request');
+        test_util.check_request(null, result.request, expected, now);
+        result.should.have.property('band_member');
+        result.band_member.band_id.should.eql(1);
+        result.band_member.person_id.should.eql(2);
+        result.band_member.band_admin.should.eql(false);
+        result.should.have.property('song_ratings');
+        result.song_ratings.length.should.eql(2);
+        test_util.check_rows(result.song_ratings, [{
+          rating: 3, id: 3, band_member_id: 2, band_song_id: 1
+        }, {
+          rating: 3, id: 3, band_member_id: 2, band_song_id: 2
+        }], ['rating']);
         done();
       }
     };
@@ -1324,8 +1359,10 @@ describe('request_routes', function() {
     req.query = {id: request_id};
     var res = {
       json: function(result_code, result) {
-        test_util.check_request(null, result, expected, now);
-        last_req = result;
+        should.exist(result);
+        result.should.have.property('request');
+        test_util.check_request(null, result.request, expected, now);
+        last_req = result.request;
         done();
       }
     };
@@ -1355,7 +1392,22 @@ describe('request_routes', function() {
     req.session.passport.user = JSON.stringify({ id: 4, system_admin: false })
     var res = {
       json: function(result_code, result) {
-        test_util.check_request(null, result, expected, now);
+        should.exist(result_code);
+        result_code.should.eql(200);
+        should.exist(result);
+        result.should.have.property('request');
+        test_util.check_request(null, result.request, expected, now);
+        result.should.have.property('band_member');
+        result.band_member.band_id.should.eql(1);
+        result.band_member.person_id.should.eql(4);
+        result.band_member.band_admin.should.eql(false);
+        result.should.have.property('song_ratings');
+        result.song_ratings.length.should.eql(2);
+        test_util.check_rows(result.song_ratings, [{
+          rating: 3, id: 5, band_member_id: 3, band_song_id: 1
+        }, {
+          rating: 3, id: 5, band_member_id: 3, band_song_id: 2
+        }], ['rating']);
         done();
       }
     };
@@ -1377,7 +1429,6 @@ describe('request_routes', function() {
 
   it('should create a request to add Tweety Bird to Wild At Heart', function(done) {
     request.addBandMember({band_id: 1, person_id: 5}, function(err, result) {
-      should.not.exist(err);
       should.exist(result);
       result.should.have.property('id');
       all_request_ids.push(result.id);
@@ -1387,7 +1438,6 @@ describe('request_routes', function() {
 
   it('should create a request for Sylvester Cat to join Wild At Heart', function(done) {
     request.joinBand({band_id: 1, person_id: 6}, function(err, result) {
-      should.not.exist(err);
       should.exist(result);
       result.should.have.property('id');
       all_request_ids.push(result.id);

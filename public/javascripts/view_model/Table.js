@@ -194,3 +194,13 @@ TableList.prototype.clear = function() {
 TableList.prototype.insert = function(model) {
   this.list.push(model);
 };
+
+TableList.prototype.insertNew = function(model) {
+  this.insert(this.build_object_(model));
+};
+
+TableList.prototype.insertList = function(model_list) {
+  model_list.forEach(function(model) {
+    this.insertNew(model);
+  }.bind(this));
+};

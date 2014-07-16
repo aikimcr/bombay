@@ -10,7 +10,7 @@ var base64_decode = require('base64').decode;
 
 function handleJSONResponse(res, err, result) {
   if(err) {
-    console.log(err);
+    //console.log(err);
     res.json(500, err);
   } else if (typeof result == 'function') {
     result();
@@ -35,14 +35,18 @@ function getModel(res, model_name, row_id, sort, result_key) {
   }
 }
 
-function postModel(res, model_name, options, result_key) {
+function getPostData(model_name, options) {
   var data = {};
   db_orm.columns[model_name].forEach(function (column) {
     if (column != 'id' && column in options) {
       data[column] = options[column];
     }
   });
+  return data;
+}
 
+function postModel(res, model_name, options, result_key) {
+  var data = getPostData(model_name, options);
   db_orm[model_name].create([data], function(err, rows) {
     var result = {};
     result[result_key] = rows ? rows[0] : {};
@@ -236,7 +240,23 @@ exports.getBandSongTable = function(req, res) {
 };
 
 exports.postBandSongTable = function(req, res) {
-  postModel(res, 'BandSong', req.body, 'band_song');
+  var data = getPostData('BandSong', req.body);
+  db_orm.BandSong.create([data], function(err, rows) {
+    if (err) {
+      res.json(500, err);
+    } else {
+      var result = {};
+      result.band_song = rows ? rows[0] : {};
+      db_orm.SongRating.find({band_song_id: result.band_song.id}, function(err, ratings) {
+        if (err) {
+          res.json(500, err);
+        } else {
+          result.song_ratings = ratings;
+          handleJSONResponse(res, err, result);
+        }
+      });
+    }
+  });
 };
 
 exports.putBandSongTable = function(req, res) {
@@ -339,7 +359,7 @@ exports.getRequest = function(req, res) {
       if (err) {
         res.json(err);
       } else {
-        res.json(200, result);
+        res.json(200, {request: result});
       }
     });
   } else {
@@ -387,7 +407,7 @@ exports.updateRequest = function(req, res) {
             if (err) {
               res.json(500, err);
             } else {
-              res.json(200, result);
+              res.json(200, {request: result});
             }
           }
 
@@ -397,7 +417,29 @@ exports.updateRequest = function(req, res) {
             } else if (action == 'reopen') {
               result.reopen(stdHandler);
             } else if (action == 'accept') {
-              result.accept(stdHandler);
+              result.accept(function(err, request) {
+                if (err) {
+                  res.json(500, request);
+                } else {
+                  util.getBandMember(request.person_id, request.band_id, function(err, new_member) {
+                    if (err) {
+                      res.json(500, new_member);
+                    } else {
+                      db_orm.SongRating.find({band_member_id: new_member.id}, function(err, ratings) {
+                        if (err) {
+                          res.json(500, ratings);
+                        } else {
+                          res.json(200, {
+                            request: request,
+                            band_member: new_member,
+                            song_ratings: ratings
+                          });
+                        }
+                      });
+                    }
+                  });
+                }
+              });
             } else {
               res.json(500, 'unrecognized action: ' + action);
             }
