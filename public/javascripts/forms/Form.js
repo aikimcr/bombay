@@ -143,7 +143,7 @@ EditProfile.prototype.show = function() {
 };
 
 EditProfile.prototype.init = function(person) {
-  this.object(person);
+  this.object(person || manager.current_person());
   Form.prototype.init.call(this);
   this.name(this.object().name());
   this.full_name(this.object().full_name());
@@ -178,7 +178,7 @@ ChangePassword.prototype.show = function() {
 };
 
 ChangePassword.prototype.init = function(person) {
-  this.object(person);
+  this.object(person || manager.current_person());
   Form.prototype.init.call(this);
   this.old_password(null);
   this.new_password(null);

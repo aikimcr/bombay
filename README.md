@@ -23,6 +23,3 @@ ToDo:
 
 Bugs:
 - Password change
-- Edit profile
-- Refreshing song_ratings.
-- Accepting requests (band_member).
