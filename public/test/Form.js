@@ -953,17 +953,20 @@ describe('Form', function() {
       done();
     });
 
-/* XXX Yeah, don't actually know how to do this test.
     it('should have called the create with correct params', function(done) {
-      var pk = document.querySelector('input[name="pubkey"]').value;
-      var ct = JSON.stringify(['password','correct.horse']);
-      var token = encodeURIComponent(util.encrypt(pk, ))
-      update_stub.should.have.been.calledWith({
-        token: "idgPNlVl5v8%2BZtYGYSYHbPMhHwtQ4GBLgZ72BanltMFShA6YB%2BKJndfg3gt31A8kDwxoNgHneoSLvqOZCE0EOg%3D%3D"
-      });
+      should.exist(update_stub.args);
+      update_stub.args.length.should.eql(1);
+      update_stub.args[0].length.should.eql(2);
+      update_stub.args[0][0].should.have.property('token');
+      var token = update_stub.args[0][0].token;
+      var decoded_token = decodeURIComponent(token);
+      should.exist(decoded_token);
+      var decrypted_token = util.decrypt(priv_key, decoded_token);
+      should.exist(decrypted_token);
+      var token_array = JSON.parse(decrypted_token);
+      token_array.should.eql(['password','correct.horse']);
       done();
     });
-*/
 
     it('should have reset the form values', function(done) {
       should.not.exist(form.old_password());

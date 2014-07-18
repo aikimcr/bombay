@@ -104,12 +104,15 @@ exports.requireBandAdmin = function(req, res, next) {
 
 exports.requireSelfOrAdmin = function(req, res, next) {
   var user = getUser(req);
+console.log(req.path);
+console.log(exports.findParam(req, 'id'));
+console.log(user);
   if (user == null) {
     console.log('User not found');
     res.json(403, permission_error);
   } else if (isSysAdmin(user)) {
     next();
-  } else if (req.path.match(/person/) && exports.findParam(req, 'id') === user.id) {
+  } else if (req.path.match(/person/) && exports.findParam(req, 'id') == user.id) {
     next();
   } else {
     getCurrentBandMember(req, user, function(err, current_member) {

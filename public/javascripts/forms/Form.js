@@ -215,7 +215,7 @@ ChangePassword.prototype.changeset = function(callback) {
     this.old_password(),
     this.new_password()
   ]);
-  var encrypted_ct = encodeURIComponent(util.encrypt(pk, ct));
+  var encrypted_ct = util.encrypt(pk, ct);
   return { token: encrypted_ct };
 };
 
