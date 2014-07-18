@@ -10,7 +10,6 @@ But, really, it's mostly about me learning more Javascript and Node.js stuff.
 
 ToDo:
 - Ability to attach links to video/audio on songs.
-
 - The setlist management UI is non-existant.
 - The calendar handler is non-existant.
 - Authentication through Google.
@@ -19,7 +18,3 @@ ToDo:
   - Use drag and drop.
   - Allow CSV upload.
   - "Bulk" adds.
-
-
-Bugs:
-- Password change
