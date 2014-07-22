@@ -17,7 +17,7 @@ div.app_context(id="band_songs", data-bind="visible: $root.current_tab().value =
             tr
               td
                 div.sort
-                  select(data-bind="options: band_songs.sort_compare_labels, value: band_songs.sort_type, optionsText: 'label', optionsValue: 'value'")
+                  div(data-bind="searchableSelect: band_songs.sort_type, optionsList: band_songs.sort_compare_labels, optionsText: 'label', optionsValue: 'value'")
 
               td
                 div.filter
@@ -26,7 +26,7 @@ div.app_context(id="band_songs", data-bind="visible: $root.current_tab().value =
 
                 div.filter
                   label(for="band_songs_artist_id_filter") Artist
-                  select(name="band_songs_artist_id_filter", data-bind="options: manager.artists.list, value: band_songs.filter_values.artist_id, optionsText: 'name', optionsValue: 'id', optionsCaption: '-All Artists-'")
+                  div(name="band_songs_artist_id_filter", data-bind="searchableSelect: band_songs.filter_values.artist_id, optionsList: manager.artists.list, optionsText: 'name', optionsValue: 'id', optionsCaption: '-All Artists-'")
               
       div.list
         table

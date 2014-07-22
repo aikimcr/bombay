@@ -89,6 +89,9 @@ body {
   border-width: 1px;
   margin: 5px 0 5px 0;
 }
+.display .filters tbody {
+  vertical-align: top;
+}
 .display .filters .sort {
   border-style: solid;
   border-width: 1px;
@@ -100,6 +103,10 @@ body {
   border-width: 1px;
   display: inline-block;
   padding: 1px;
+  vertical-align: top;
+}
+.display .filters .filter label {
+  vertical-align: top;
 }
 .display .list {
   overflow: auto;
