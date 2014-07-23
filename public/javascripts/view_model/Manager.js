@@ -31,11 +31,15 @@ ko.bindingHandlers.searchableSelect = {
       var filtered_options = options_list;
 
       if (search_object.select_filter_value()) {
+        var match_text = search_object
+          .select_filter_value()
+          .toLowerCase()
+          .replace(/(\W)/g, '\\$1');
+
         filtered_options = ko.utils.arrayFilter(options_list, function(item) {
           var item_accessor = item[optionsText];
           var item_text = typeof item_accessor == 'function' ? item_accessor() : item_accessor;
           item_text = item_text.toLowerCase();
-          var match_text = search_object.select_filter_value().toLowerCase();
           return item_text.match(match_text);
         });
       }
@@ -54,15 +58,21 @@ ko.bindingHandlers.searchableSelect = {
 
       if (search_object.selector.value) {
         observable(search_object.selector.value);
+      } else if (search_object.selector.options.length > 0) {
+        observable(search_object.selector.options[0].value);
       } else {
         observable(null);
       }
     };
 
     search_object.filter.addEventListener('keyup', function(event) {
-      if (search_object.select_list().length > 0 && search_object.selector.selectedIndex == 0 &&
+      var default_index = 0;
+      if (allBindings.has('optionsCaption')) default_index = 1;
+
+      if (search_object.select_list().length > default_index &&
+          search_object.selector.selectedIndex <= default_index &&
           search_object.select_filter_value()) {
-        search_object.selector.selectedIndex = 1;
+        search_object.selector.selectedIndex = default_index;
       }
 
       setSelector();
@@ -132,7 +142,12 @@ ko.bindingHandlers.searchableSelect = {
     var observable = valueAccessor();
     var key = element.attributes.getNamedItem('select_key').value;
     var search_object = bindingContext.$data.searchable_select[key];
-    search_object.selector.value = observable() || '';
+
+    if (observable() == null) {
+      search_object.selector.value = '';
+    } else {
+      search_object.selector.value = observable();
+    }
   },
 };
 
