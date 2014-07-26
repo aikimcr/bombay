@@ -134,16 +134,6 @@ Sapphire.searchableSelect = {
           data.select_filter_value()) {
         data.working_value(data.selector.options[1].value);
       }
-/*
-      var default_index = 0;
-      if (allBindings.has('optionsCaption')) default_index = 1;
-
-      if (data.select_list().length > default_index &&
-          data.selector.selectedIndex <= default_index &&
-          data.select_filter_value()) {
-        data.working_value(data.selector.options[default_index].value);
-      }
-*/
     };
 
     search_object.blur_filter_ = function(data, event) {
