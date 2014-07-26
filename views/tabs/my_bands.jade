@@ -17,7 +17,7 @@ div.app_context(id="my_bands", data-bind="visible: $root.current_tab().value == 
             tr
               td
                 div.sort
-                  select(data-bind="options: $root.membership_sorts, value: band_members.sort_type, optionsText: 'label', optionsValue: 'value'")
+                  div(data-bind="searchableSelect: band_members.sort_type, optionsList: $root.membership_sorts, optionsText: 'label', optionsValue: 'value'")
 
               td
                 div.filter
