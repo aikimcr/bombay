@@ -296,6 +296,7 @@ function EditSong() {
   Form.call(this);
   this.name = ko.observable(null);
   this.artist = ko.observable(null);
+  this.key_signature = ko.observable(null);
 }
 util.inherits(EditSong, Form);
 
@@ -308,8 +309,6 @@ EditSong.prototype.postChange_ = function(callback) {
     {name: this.name(), artist_id: this.artist().id()},
     function(result_code, result) {
       callback(result_code, result);
-      this.name(null);
-      this.artist(null);
     }
   );
 };
@@ -324,18 +323,21 @@ EditSong.prototype.init = function(song) {
   Form.prototype.init.call(this);
   this.name(this.object().name());
   this.artist(manager.artists.getById(this.object().artist_id()));
+  this.key_signature(this.object().key_signature());
 };
 
 EditSong.prototype.changeset = function(callback) {
   return {
     name: this.name(),
-    artist_id: this.artist().id()
+    artist_id: this.artist().id(),
+    key_signature: this.key_signature()
   };
 };
 
 EditSong.prototype.resetValues = function() {
   this.name(null);
   this.artist(null);
+  this.key_signature(null);
 };
 
 function JoinBand() {

@@ -26,7 +26,7 @@ div.app_context(id="songs", data-bind="visible: $root.current_tab().value == 6")
 
                 div.filter
                   label(for="songs_artist_id_filter") Artist
-                  select(name="songs_artist_id_filter", data-bind="options: manager.artists.list, value: songs.filter_values.artist_id, optionsText: 'name', optionsValue: 'id', optionsCaption: '-All Artists-'")
+                  div(name="songs_artist_id_filter", data-bind="searchableSelect: songs.filter_values.artist_id, optionsList: manager.artists.list, optionsText: 'name', optionsValue: 'id', optionsCaption: '-All Artists-'")
               
       div.list
         table

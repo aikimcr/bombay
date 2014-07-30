@@ -19,17 +19,21 @@ function handleJSONResponse(res, err, result) {
   }
 }
 
-function getModel(res, model_name, row_id, sort, result_key) {
+function getModel(res, model_name, row_id, sort, result_key, opt_row_transform) {
+  var row_transform = opt_row_transform || function(row) { return row; };
+  var flatten = function(row) { return JSON.parse(JSON.stringify(row)); };
   if (row_id) {
     db_orm[model_name].get(row_id, function(err, row) {
       var result = {};
-      result[result_key] = row;
+      result[result_key] = row_transform(flatten(row));
       handleJSONResponse(res, err, result);
     });
   } else {
     db_orm[model_name].find(sort, function(err, rows) {
       var result = {};
-      result['all_' + result_key + 's'] = rows;
+      result['all_' + result_key + 's'] = rows.map(function(row) {
+        return row_transform(flatten(row));
+      });
       handleJSONResponse(res, err, result);
     });
   }
@@ -118,11 +122,16 @@ exports.deleteBandTable = function(req, res) {
 exports.getPersonTable = function(req, res) {
   var person_id = req.params.id;
   if (!person_id) person_id = req.query.id;
-  getModel(res, 'Person', person_id, 'full_name', 'person');
+  getModel(res, 'Person', person_id, 'full_name', 'person', function(row) {
+    delete row.password;
+    return row;
+  });
 };
 
 exports.postPersonTable = function(req, res) {
-  req.body.password = req.body.password || 'password';
+  var password = req.body.password || 'password';
+  var pem = util.get_pem_file('crypto/rsa_public.pem');
+  req.body.password = util.encrypt(pem, password);
   req.body.system_admin = req.body.system_admin || false;
   postModel(res, 'Person', req.body, 'person');
 };

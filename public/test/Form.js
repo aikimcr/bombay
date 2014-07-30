@@ -991,7 +991,7 @@ describe('Form', function() {
       manager.artists.clear();
       artist = new Artist(23, 'David Slade');
       manager.artists.insert(artist);
-      song = new Song(23, 'Ziggy Coaldust', artist.id());
+      song = new Song(23, 'Ziggy Coaldust', artist.id(), 'C#');
       done();
     });
 
@@ -1000,7 +1000,8 @@ describe('Form', function() {
         callback(200, {
           id: 23,
           name: 'Ziggy Stardust',
-          artist_id: 23
+          artist_id: 23,
+          key_signature: 'C#'
         });
       });
       done();
@@ -1022,6 +1023,11 @@ describe('Form', function() {
       done();
     });
 
+    it('should have an observable key_signature', function(done) {
+      ko.isObservable(form.key_signature).should.be.true;
+      done();
+    });
+
     it('should have an empty, observable object', function(done) {
       ko.isObservable(form.object).should.be.true;
       should.not.exist(form.object());
@@ -1039,6 +1045,21 @@ describe('Form', function() {
       done();
     });
 
+    it('should have the name', function(done) {
+      form.name().should.eql(song.name());
+      done();
+    });
+
+    it('should have the artist', function(done) {
+      form.artist().should.eql(song.artist());
+      done();
+    });
+
+    it('should have the key_signature', function(done) {
+      form.key_signature().should.eql(song.key_signature());
+      done();
+    });
+
     it('should call the model update', function(done) {
       form.name('Ziggy Stardust');
       form.putChange(null, function(result_code, result) {
@@ -1048,7 +1069,8 @@ describe('Form', function() {
         check_result_values(result, {
           id: 23,
           name: 'Ziggy Stardust',
-          artist_id: 23
+          artist_id: 23,
+          key_signature: 'C#'
         });
         done();
       });
@@ -1062,7 +1084,8 @@ describe('Form', function() {
     it('should have called the create with correct params', function(done) {
       update_stub.should.have.been.calledWith({
         name: 'Ziggy Stardust',
-        artist_id: 23
+        artist_id: 23,
+        key_signature: 'C#'
       });
       done();
     });
@@ -1070,6 +1093,7 @@ describe('Form', function() {
     it('should have reset the form values', function(done) {
       should.not.exist(form.name());
       should.not.exist(form.artist());
+      should.not.exist(form.key_signature());
       done();
     });
   

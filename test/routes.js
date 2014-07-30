@@ -1,5 +1,6 @@
 var should = require('should');
 var fs = require('fs');
+var base64_encode = require('base64').encode;
 
 var test_util = require('test/lib/util');
 
@@ -84,41 +85,39 @@ describe('routes', function() {
 	  id: 2,
 	  name: 'aposer',
 	  full_name: 'Alan Poser',
-	  password: 'fakeit',
 	  email: 'aposer@wannabe.net',
 	  system_admin: false
         }, {
 	  id: 3,
 	  name: 'ddrums',
 	  full_name: 'Danny Drums',
-	  password: 'backbeat',
 	  email: 'ddrums@musichero.foo',
 	  system_admin: false
         }, {
 	  id: 4,
 	  name: 'jguitar',
 	  full_name: 'Johnny Guitar',
-	  password: 'tonefreak',
 	  email: 'jguitar@musichero.foo',
 	  system_admin: false
         }, {
           id: 5,
           name: 'kkeys',
           full_name: 'Kevin Keys',
-          password: 'concerto',
           email: 'kkeys@musichero.foo',
           system_admin: false
         }, {
 	  id: 1,
 	  name: 'admin',
 	  full_name: 'System Admin User',
-	  password: 'admin',
 	  email: 'admin@allnightmusic.com',
 	  system_admin: true
         }];
         var res = {
           json: function(result_code, result) {
-            test_util.check_list(result, expected, 'all_persons', ['id', 'name', 'full_name', 'password', 'email', 'system_admin']);
+            test_util.check_list(result, expected, 'all_persons', ['id', 'name', 'full_name', 'email', 'system_admin']);
+            result.all_persons.forEach(function(person) {
+              person.should.not.have.property('password');
+            });
 	    done();
           }
         };
@@ -130,14 +129,14 @@ describe('routes', function() {
 	  id: 1,
 	  name: 'admin',
 	  full_name: 'System Admin User',
-	  password: 'admin',
 	  email: 'admin@allnightmusic.com',
 	  system_admin: true
         };
         req.query.id = 1;
         var res = {
           json: function(result_code, result) {
-            test_util.check_item(result, expected, 'person', ['id', 'name', 'full_name', 'password', 'email', 'system_admin']);
+            test_util.check_item(result, expected, 'person', ['id', 'name', 'full_name', 'email', 'system_admin']);
+            result.person.should.not.have.property('password');
 	    done();
           }
         };
@@ -380,11 +379,23 @@ describe('routes', function() {
         };
         var res = {
           json: function(result_code, result) {
+            delete req.body.password;
             person_id = test_util.check_result(result, 'person', req.body);
             done();
           }
         };
         routes.postPersonTable(req, res);
+      });
+
+      it('should encrypt the password', function(done) {
+        db_orm.Person.get(person_id, function(err, row) {
+          should.not.exist(err);
+          row.password.should.not.eql('clave');
+          var pem = util.get_pem_file('crypto/rsa_private.pem');
+          var password = util.decrypt(pem, row.password);
+          password.should.eql('clave');
+          done();
+        });
       });
 
       it('should return an error', function(done) {
@@ -598,7 +609,7 @@ describe('routes', function() {
 
       before(function(done) {
         var pem = util.get_pem_file('crypto/rsa_public.pem');
-        var ct = JSON.stringify([old_password, new_password]);
+        var ct = base64_encode(JSON.stringify([old_password, new_password]));
         change_token = encodeURIComponent(util.encrypt(pem, ct));
         done();
       });
@@ -618,6 +629,8 @@ describe('routes', function() {
         req.query = {id: 1, token: change_token};
         var res = {
           json: function(result_code, result) {
+            should.exist(result_code);
+            result_code.should.eql(200);
             person_id = test_util.check_result(result, 'person');
             result.person.should.have.property('password');
             done();
@@ -662,7 +675,7 @@ describe('routes', function() {
 
       it('should update the password again', function(done) {
         var pem = util.get_pem_file('crypto/rsa_public.pem');
-        var ct = JSON.stringify([new_password, old_password]);
+        var ct = base64_encode(JSON.stringify([new_password, old_password]));
         var new_change_token = encodeURIComponent(util.encrypt(pem, ct));
         req.query = {id: 1, token: new_change_token};
         var res = {

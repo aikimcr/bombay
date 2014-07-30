@@ -21,9 +21,9 @@ Sapphire.getNewContext = function(element, contextName, bindingContext) {
     bindingContext.$data[contextName] = {};
   }
 
-  var last_key = Math.max(Object.keys(bindingContext.$data[contextName]).map(function(k) {
-    return parseInt(k, 16);
-  }));
+  var last_key = Object.keys(bindingContext.$data[contextName]).reduce(function(pk, k) {
+    return Math.max(pk, parseInt(k, 16));
+  }, 0);
 
   if (last_key == 0) last_key = parseInt('F0000000', 16);
   last_key++;

@@ -13,5 +13,5 @@ div#add_band_member_form(data-bind="visible: forms.add_band_member.isVisible")
       div.dialog_body
         div.title(data-bind="text: forms.add_band_member.message")
         form(data-bind="submit: postFormChange", form_key="add_band_member")
-          select(data-bind="options: $root.non_band_members, value: forms.add_band_member.person, optionsText: 'full_name'")
+          div(data-bind="searchableSelect: forms.add_band_member.person, optionsList: $root.non_band_members, optionsText: 'full_name'")
           input(type="submit", value="Add")
