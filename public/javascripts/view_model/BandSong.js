@@ -1,5 +1,5 @@
 function BandSong(id, band_id, song_id, song_status, key_signature) {
-  Table.call(this);
+  this.super.call(this);
   this.id = ko.observable(id || -1);
   this.band_id = ko.observable(band_id || -1);
   this.song_id = ko.observable(song_id || -1);
@@ -80,7 +80,7 @@ BandSong.prototype.confirm_text = function() {
 
 // The BandSong List Object
 function BandSongList() {
-  TableList.call(this, BandSong);
+  this.super.call(this, BandSong);
   this.sort_type('name_asc');
 }
 util.inherits(BandSongList, TableList);

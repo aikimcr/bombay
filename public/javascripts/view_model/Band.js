@@ -1,6 +1,6 @@
 // The Individual Band Objects
 function Band(id, name) {
-  Table.call(this);
+  this.super.call(this);
   this.id = ko.observable(id || -1);
   this.name = ko.observable(name || '');
 
@@ -37,7 +37,7 @@ Band.prototype.confirm_text = function() {
 
 // The Band List Object
 function BandList() {
-  TableList.call(this, Band);
+  this.super.call(this, Band);
 }
 util.inherits(BandList, TableList);
 

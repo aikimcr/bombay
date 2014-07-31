@@ -1,5 +1,5 @@
 function Artist(id, name) {
-  Table.call(this);
+  this.super.call(this);
   this.id = ko.observable(id || -1);
   this.name = ko.observable(name || '');
 
@@ -24,7 +24,7 @@ Artist.prototype.confirm_text = function() {
 
 // The Artist List Object
 function ArtistList() {
-  TableList.call(this, Artist);
+  this.super.call(this, Artist);
 }
 util.inherits(ArtistList, TableList);
 

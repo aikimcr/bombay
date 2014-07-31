@@ -1,5 +1,5 @@
 function SongRating(id, band_member_id, band_song_id, rating) {
-  Table.call(this);
+  this.super.call(this);
   this.id = ko.observable(id);
   this.band_member_id = ko.observable(band_member_id);
   this.band_song_id = ko.observable(band_song_id);
@@ -14,7 +14,7 @@ SongRating.list_key = 'song_ratings';
 
 // The SongRating List Object
 function SongRatingList() {
-  TableList.call(this, SongRating);
+  this.super.call(this, SongRating);
 }
 util.inherits(SongRatingList, TableList);
 

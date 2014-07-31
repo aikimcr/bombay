@@ -1,5 +1,5 @@
 function BandMember(id, band_id, person_id, band_admin) {
-  Table.call(this);
+  this.super.call(this);
   this.id = ko.observable(id || -1);
   this.band_id = ko.observable(band_id || -1);
   this.person_id = ko.observable(person_id || -1);
@@ -26,7 +26,7 @@ BandMember.prototype.confirm_text = function() {
 
 // The BandMember List Object
 function BandMemberList() {
-  TableList.call(this, BandMember);
+  this.super.call(this, BandMember);
 }
 util.inherits(BandMemberList, TableList);
 

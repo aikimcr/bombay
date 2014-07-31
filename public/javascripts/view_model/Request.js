@@ -1,5 +1,5 @@
 function Request(id, request_type, timestamp, person_id, band_id, description, opt_status) {
-  Table.call(this);
+  this.super.call(this);
   this.id = ko.observable(id || -1);
   this.request_type = ko.observable(request_type);
   this.timestamp = ko.observable(timestamp);
@@ -125,7 +125,7 @@ Request.prototype.change_status = function(action, callback) {
 
 // The Request List Object
 function RequestList() {
-  TableList.call(this, Request);
+  this.super.call(this, Request);
   this.sort_type('time_asc');
 }
 util.inherits(RequestList, TableList);

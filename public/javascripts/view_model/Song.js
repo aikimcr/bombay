@@ -1,5 +1,5 @@
 function Song(id, name, artist_id, key_signature) {
-  Table.call(this, './song');
+  this.super.call(this, './song');
   this.id = ko.observable(id || -1);
   this.name = ko.observable(name || '');
   this.artist_id = ko.observable(artist_id || -1);
@@ -41,7 +41,7 @@ Song.prototype.confirm_text = function() {
 
 // The Song List Object
 function SongList() {
-  TableList.call(this, Song);
+  this.super.call(this, Song);
 }
 util.inherits(SongList, TableList);
 

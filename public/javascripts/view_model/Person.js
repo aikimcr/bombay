@@ -1,5 +1,5 @@
 function Person(id, name, full_name, email, system_admin) {
-  Table.call(this);
+  this.super.call(this);
   this.id = ko.observable(id || -1);
   this.name = ko.observable(name || '');
   this.full_name = ko.observable(full_name || '');
@@ -27,7 +27,7 @@ Person.prototype.confirm_text = function() {
 
 // The List Object
 function PersonList() {
-  TableList.call(this, Person);
+  this.super.call(this, Person);
 }
 util.inherits(PersonList, TableList);
 
