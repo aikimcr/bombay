@@ -1,4 +1,4 @@
-BEGIN TRANSACTION;
+#change Add request table
 
 DROP TABLE IF EXISTS request;
 CREATE TABLE request (
@@ -10,8 +10,3 @@ CREATE TABLE request (
   band_id INTEGER,
   person_id INTEGER
 );
-
-INSERT INTO schema_change (name, timestamp)
-       VALUES ('Add request table', datetime('now'));
-
-COMMIT;
