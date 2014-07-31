@@ -44,7 +44,7 @@ change_files.filter(function(x) { return ! x.match('~$'); }).sort().forEach(func
       var sql = [
         ('BEGIN TRANSACTION;'),
         change_spec[2],
-        util.format('INSERT INTO schema_change (name) VALUES (%s)', change_name),
+        util.format('INSERT INTO schema_change (name) VALUES (\'%s\');', change_name),
         'COMMIT;',
       ];
       

@@ -71,6 +71,8 @@ CREATE TABLE band_song (
   band_id INTEGER NOT NULL,
   song_id INTEGER NOT NULL,
   song_status INTEGER NOT NULL DEFAULT 0,
+  primary_vocal INTEGER REFERENCES person(id),
+  secondary_vocal INTEGER REFERENCES person(id),
   FOREIGN KEY (band_id) REFERENCES band(id),
   FOREIGN KEY (song_id) REFERENCES song(id),
   UNIQUE (band_id, song_id)
@@ -194,6 +196,9 @@ INSERT INTO schema_change (name, timestamp)
 
 INSERT INTO schema_change (name, timestamp)
        VALUES ('Add request table', datetime('now'));
+
+INSERT INTO schema_change (name, timestamp)
+       VALUES ('Add vocalist columns to band_song', datetime('now'));
 
 ALTER TABLE song ADD COLUMN key_signature VARCHAR;
 
