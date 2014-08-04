@@ -62,6 +62,7 @@ CREATE TABLE song (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name VARCHAR NOT NULL,
   artist_id INTEGER NOT NULL,
+  key_signature VARCHAR,
   FOREIGN KEY (artist_id) REFERENCES artist(id),
   UNIQUE (name, artist_id)
 );
@@ -71,10 +72,13 @@ CREATE TABLE band_song (
   band_id INTEGER NOT NULL,
   song_id INTEGER NOT NULL,
   song_status INTEGER NOT NULL DEFAULT 0,
-  primary_vocal INTEGER REFERENCES person(id),
-  secondary_vocal INTEGER REFERENCES person(id),
+  key_signature VARCHAR,
+  primary_vocal_id INTEGER,
+  secondary_vocal_id INTEGER,
   FOREIGN KEY (band_id) REFERENCES band(id),
   FOREIGN KEY (song_id) REFERENCES song(id),
+  FOREIGN KEY (primary_vocal_id) REFERENCES band_member(id),
+  FOREIGN KEY (secondary_vocal_id) REFERENCES band_member(id),
   UNIQUE (band_id, song_id)
 );
 
@@ -99,6 +103,8 @@ END;
 CREATE TRIGGER del_band_member BEFORE DELETE ON band_member FOR EACH ROW
 BEGIN
   DELETE FROM song_rating WHERE song_rating.band_member_id = OLD.id;
+  UPDATE band_song SET primary_vocal_id = null where primary_vocal_id = OLD.id;
+  UPDATE band_song SET secondary_vocal_id = null where primary_vocal_id = OLD.id;
 END;
 
 CREATE TRIGGER new_band_song AFTER INSERT ON band_song FOR EACH ROW
@@ -199,10 +205,6 @@ INSERT INTO schema_change (name, timestamp)
 
 INSERT INTO schema_change (name, timestamp)
        VALUES ('Add vocalist columns to band_song', datetime('now'));
-
-ALTER TABLE song ADD COLUMN key_signature VARCHAR;
-
-ALTER TABLE band_song ADD COLUMN key_signature VARCHAR;
 
 INSERT INTO schema_change (name, timestamp)
        VALUES ('Add Key Signature column to song and band_song tables', datetime('now'));

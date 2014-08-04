@@ -11,13 +11,18 @@ exports.check_record = function(got_record, expected_record, fields) {
   should.exist(got_record, 'Got null record');
   fields.forEach(function(f) {
     got_record.should.have.property(f);
-    should.exist(got_record[f], f + ' is undefined');
-    got_record[f].should.eql(expected_record[f], util.format(
-      '%s not equal\nGot %s\nExpected %s\n',
-      f,
-      util.inspect(JSON.parse(JSON.stringify(got_record))),
-      util.inspect(expected_record)
-    ));
+
+    if (expected_record[f] == null) {
+      should.not.exist(got_record[f]);
+    } else {
+      should.exist(got_record[f], f + ' is undefined');
+      got_record[f].should.eql(expected_record[f], util.format(
+        '%s not equal\nGot %s\nExpected %s\n',
+        f,
+        util.inspect(JSON.parse(JSON.stringify(got_record))),
+        util.inspect(expected_record)
+      ));
+    }
   });
 };
 
@@ -65,9 +70,15 @@ exports.check_result = function(result, data_key, expected_row) {
       try {
         should.exist(got_row, 'Can\'t read ' + key + ' for empty row');
         got_row.should.have.property(key);
-        got_row[key].should.equal(expected_row[key], 'For ' + key + ' expected ' + expected_row[key] + ' got ' + got_row[key]);
+
+        if (expected_row[key] == null) {
+          should.not.exist(got_row[key], 'Unexpected value \'' + got_row[key] + '\' for \'' + key + '\'');
+        } else {
+          should.exist(got_row[key], key + ' value is undefined');
+          got_row[key].should.equal(expected_row[key], 'For ' + key + ' expected ' + expected_row[key] + ' got ' + got_row[key]);
+        }
       } catch(e) {
-        errors.push(e.toString());
+        errors.push(e.toString() + ' [' + key + ']');
       }
     });
 

@@ -35,6 +35,8 @@ div.app_context(id="band_songs", data-bind="visible: $root.current_tab().value =
               th Name
               th Artist Name
               th Status
+              th Primary Vocal
+              th Secondary Vocal
               th Key
               th Member Rating
               th Average Rating
@@ -53,6 +55,12 @@ div.app_context(id="band_songs", data-bind="visible: $root.current_tab().value =
                  option(value=2) Run Through
                  option(value=3) Ready
                  option(value=4) Standard
+
+              td
+                select(name="primary_vocal_id", data-bind="value: primary_vocal_id, enable: $root.current_band_member().band_admin, options: $root.current_members, optionsText: 'full_name', optionsValue: 'id', optionsCaption: '-- No Set --', event: { change: $root.update_table_object }")
+
+              td
+                select(name="primary_vocal_id", data-bind="value: secondary_vocal_id, enable: $root.current_band_member().band_admin, options: $root.current_members, optionsText: 'full_name', optionsValue: 'id', optionsCaption: '-- No Set --', event: { change: $root.update_table_object }")
 
               td
                 select(name="key_signature", data-bind="value: key_signature, enable: $root.current_band_member().band_admin, options: manager.key_signature_map, optionsText: 'value_text', optionsValue: 'value', event: { change: $root.update_table_object }")

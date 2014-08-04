@@ -1,10 +1,12 @@
-function BandSong(id, band_id, song_id, song_status, key_signature) {
+function BandSong(id, band_id, song_id, song_status, key_signature, primary_vocal_id, secondary_vocal_id) {
   this.super.call(this);
   this.id = ko.observable(id || -1);
   this.band_id = ko.observable(band_id || -1);
   this.song_id = ko.observable(song_id || -1);
   this.song_status = ko.observable(song_status);
   this.key_signature = ko.observable(key_signature || '');
+  this.primary_vocal_id = ko.observable(primary_vocal_id || -1);
+  this.secondary_vocal_id = ko.observable(secondary_vocal_id || -1);
 
   // Joins
   this.band = ko.computed(function() {
@@ -13,6 +15,32 @@ function BandSong(id, band_id, song_id, song_status, key_signature) {
 
   this.song = ko.computed(function() {
     return manager.songs.getById(this.song_id()) || new Song();
+  }.bind(this)).extend({throttle: 250});
+
+  this.primary_vocal = ko.computed(function() {
+    return manager.band_members.getById(this.primary_vocal_id()) || new BandMember();
+  }.bind(this)).extend({throttle: 250});
+
+  this.secondary_vocal = ko.computed(function() {
+    return manager.band_members.getById(this.secondary_vocal_id()) || new BandMember();
+  }.bind(this)).extend({throttle: 250});
+
+  this.primary_vocal_full_name = ko.computed(function() {
+    var member = manager.band_members.getById(this.primary_vocal_id());
+    if (member) {
+      return member.person().full_name();
+    } else {
+      return '';
+    }
+  }.bind(this)).extend({throttle: 250});
+
+  this.secondary_vocal_full_name = ko.computed(function() {
+    var member = manager.band_members.getById(this.secondary_vocal_id());
+    if (member) {
+      return member.person().full_name();
+    } else {
+      return '';
+    }
   }.bind(this)).extend({throttle: 250});
 
   this.song_ratings = ko.computed(function() {
@@ -71,7 +99,7 @@ util.inherits(BandSong, Table);
 
 BandSong.service_url = './band_song';
 BandSong.model_key = 'band_song';
-BandSong.columns = ['band_id', 'song_id', 'song_status', 'key_signature'];
+BandSong.columns = ['band_id', 'song_id', 'song_status', 'key_signature', 'primary_vocal_id', 'secondary_vocal_id'];
 BandSong.list_key = 'band_songs';
 
 BandSong.prototype.confirm_text = function() {
@@ -178,7 +206,9 @@ BandSongList.prototype.build_object_ = function(model) {
     model.band_id,
     model.song_id,
     model.song_status,
-    model.key_signature
+    model.key_signature,
+    model.primary_vocal_id,
+    model.secondary_vocal_id
   );
 };
 

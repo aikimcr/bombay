@@ -258,19 +258,51 @@ describe('routes', function() {
     describe('#band_song', function()  {
       it('should return all the band_songs, sorted by band_id and song_id', function(done) {
         var expected = [{
-	  id: 1, band_id: 1, song_id: 1, song_status: 4
+	  id: 1,
+          band_id: 1,
+          song_id: 1,
+          song_status: 4,
+          primary_vocal_id: 1,
+          secondary_vocal_id: null
         }, {
-	  id: 2, band_id: 1, song_id: 2, song_status: 2
+	  id: 2,
+          band_id: 1,
+          song_id: 2,
+          song_status: 2,
+          primary_vocal_id: null,
+          secondary_vocal_id: null
         }, {
-	  id: 3, band_id: 1, song_id: 3, song_status: 3
+	  id: 3,
+          band_id: 1,
+          song_id: 3,
+          song_status: 3,
+          primary_vocal_id: 1,
+          secondary_vocal_id: 2
         }, {
-	  id: 4, band_id: 1, song_id: 4, song_status: 1
+	  id: 4,
+          band_id: 1,
+          song_id: 4,
+          song_status: 1,
+          primary_vocal_id: 1,
+          secondary_vocal_id: null
         }, {
-	  id: 5, band_id: 1, song_id: 5, song_status: -1
+	  id: 5,
+          band_id: 1,
+          song_id: 5,
+          song_status: -1,
+          primary_vocal_id: 1,
+          secondary_vocal_id: null
         }];
         var res = {
           json: function(result_code, result) {
-            test_util.check_list(result, expected, 'all_band_songs', ['id', 'band_id', 'song_id', 'song_status']);
+            test_util.check_list(result, expected, 'all_band_songs', [
+              'id',
+              'band_id',
+              'song_id',
+              'song_status',
+              'primary_vocal_id',
+              'secondary_vocal_id'
+            ]);
 	    done();
           }
         };
@@ -278,11 +310,25 @@ describe('routes', function() {
       });
 
       it('should return band_song with id 1', function(done) {
-        var expected = {id: 1, band_id: 1, song_id: 1, song_status: 4 };
+        var expected = {
+          id: 1,
+          band_id: 1,
+          song_id: 1,
+          song_status: 4,
+          primary_vocal_id: 1,
+          secondary_vocal_id: null
+        };
         req.query.id = 1;
         var res = {
           json: function(result_code, result) {
-            test_util.check_item(result, expected, 'band_song', ['id', 'band_id', 'song_id', 'song_status']);
+            test_util.check_item(result, expected, 'band_song', [
+              'id',
+              'band_id',
+              'song_id',
+              'song_status',
+              'primary_vocal_id',
+              'secondary_vocal_id'
+            ]);
 	    done();
           }
         };
@@ -494,18 +540,34 @@ describe('routes', function() {
     describe('#band_song', function() {
       var band_song_id;
       it('should create a band_song', function(done) {
-        req.body = {band_id: 3, song_id: 1, key_signature: '', song_status: 3};
+        req.body = {
+          band_id: 3,
+          song_id: 1,
+          key_signature: '',
+          song_status: 3,
+          primary_vocal_id: 3,
+          secondary_vocal_id: 4
+        };
         var res = {
           json: function(result_code, result) {
             band_song_id = test_util.check_result(result, 'band_song', req.body);
             should.exist(result.song_ratings);
             result.song_ratings.length.should.eql(3);
             test_util.check_rows(result.song_ratings, [{
-              rating: 3, id: 11, band_member_id: 7, band_song_id: band_song_id
+              rating: 3,
+              id: 11,
+              band_member_id: 7,
+              band_song_id: band_song_id
             }, {
-              rating: 3, id: 12, band_member_id: 3, band_song_id: band_song_id
+              rating: 3,
+              id: 12,
+              band_member_id: 3,
+              band_song_id: band_song_id
             }, {
-              rating: 3, id: 13, band_member_id: 6, band_song_id: band_song_id
+              rating: 3,
+              id: 13,
+              band_member_id: 6,
+              band_song_id: band_song_id
             }], ['rating']);
             done();
           }
@@ -514,7 +576,14 @@ describe('routes', function() {
       });
 
       it('should return an error', function(done) {
-        req.body = {band_id: 3, song_id: 1, song_status: 4};
+        req.body = {
+          band_id: 3,
+          song_id: 1,
+          key_signature: '',
+          song_status: 4,
+          primary_vocal_id: 3,
+          secondary_vocal_id: 4
+        };
         var res = {
           json: function(result_code, result) {
             var error = test_util.check_error_result(result_code, result, 500);
@@ -777,10 +846,24 @@ describe('routes', function() {
       });
 
       it('should get the band_song', function(done) {
-        var expected = {id: 1, band_id: 1, song_id: 1, song_status: 2};
+        var expected = {
+          id: 1,
+          band_id: 1,
+          song_id: 1,
+          song_status: 2,
+          primary_vocal_id: 1,
+          secondary_vocal_id: null
+        };
         db_orm.BandSong.get(1, function(err, row) {
           should.not.exist(err);
-          test_util.check_record(row, expected, ['id', 'band_id', 'song_id', 'song_status']);
+          test_util.check_record(row, expected, [
+            'id',
+            'band_id',
+            'song_id',
+            'song_status',
+            'primary_vocal_id',
+            'secondary_vocal_id'
+          ]);
           done();
         });
       });

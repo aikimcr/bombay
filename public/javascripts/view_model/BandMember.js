@@ -12,6 +12,10 @@ function BandMember(id, band_id, person_id, band_admin) {
   this.person = ko.computed(function() {
     return manager.persons.getById(this.person_id()) || new Person();
   }.bind(this)).extend({throttle: 250});
+
+  this.full_name = ko.computed(function() {
+    return this.person().full_name();
+  }.bind(this)).extend({throttle: 250});
 }
 util.inherits(BandMember, Table);
 

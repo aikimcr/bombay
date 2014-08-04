@@ -49,7 +49,7 @@ change_files.filter(function(x) { return ! x.match('~$'); }).sort().forEach(func
       ];
       
       dbh.exec(sql.join(' '), function(err) {
-        console.log(sql);
+//        console.log(sql);
         console.log(err);
         if (err) throw err;
       });
