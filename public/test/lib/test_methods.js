@@ -60,7 +60,7 @@ function fireClick(target) {
   target.dispatchEvent(new CustomEvent('click', {bubbles: true}));
 };
 
-function load_test_models() {
+function load_test_models(done) {
   load_test_model(manager.bands, {
     all_bands: [{
       id: 1, name: 'Wild At Heart'
@@ -107,21 +107,21 @@ function load_test_models() {
 
   load_test_model(manager.songs, {
     all_songs: [{
-      id: 1, name: 'Changes', artist_id: 1
+      id: 1, name: 'Changes', artist_id: 1, key_signature: 'C'
     }, {
-      id: 2, name: 'Help', artist_id: 2
+      id: 2, name: 'Help', artist_id: 2, key_signature: 'C'
     }, {
-      id: 3, name: 'You Shook Me All Night Long', artist_id: 3
+      id: 3, name: 'You Shook Me All Night Long', artist_id: 3, key_signature: 'C'
     }, {
-      id: 4, name: 'You Shook Me', artist_id: 4
+      id: 4, name: 'You Shook Me', artist_id: 4, key_signature: 'C'
     }, {
-      id: 5, name: 'Changes', artist_id: 5
+      id: 5, name: 'Changes', artist_id: 5, key_signature: 'C'
     }, {
-      id: 6, name: 'California Girls', artist_id: 6
+      id: 6, name: 'California Girls', artist_id: 6, key_signature: 'C'
     }, {
-      id: 7, name: 'Material Girl', artist_id: 7
+      id: 7, name: 'Material Girl', artist_id: 7, key_signature: 'C'
     }, {
-      id: 8, name: 'Lazy', artist_id: 8
+      id: 8, name: 'Lazy', artist_id: 8, key_signature: 'C'
     }]
   });
 
@@ -149,21 +149,69 @@ function load_test_models() {
 
   load_test_model(manager.band_songs, {
     all_band_songs: [{
-      id: 1, band_id: 1, song_id: 1, song_status: 0
+      id: 1,
+      band_id: 1,
+      song_id: 1,
+      song_status: 0,
+      key_signature: 'C',
+      primary_vocal_id: null,
+      secondary_vocal_id: null
     }, {
-      id: 2, band_id: 1, song_id: 2, song_status: 1
+      id: 2,
+      band_id: 1,
+      song_id: 2, 
+      song_status: 1,
+      key_signature: 'C',
+      primary_vocal_id: null,
+      secondary_vocal_id: null
     }, {
-      id: 3, band_id: 1, song_id: 3, song_status: -1
+      id: 3,
+      band_id: 1,
+      song_id: 3, 
+      song_status: -1,
+      key_signature: 'C',
+      primary_vocal_id: null,
+      secondary_vocal_id: null
     }, {
-      id: 4, band_id: 1, song_id: 4, song_status: 3
+      id: 4,
+      band_id: 1,
+      song_id: 4, 
+      song_status: 3,
+      key_signature: 'C',
+      primary_vocal_id: null,
+      secondary_vocal_id: null
     }, {
-      id: 5, band_id: 2, song_id: 5, song_status: 4
+      id: 5,
+      band_id: 2,
+      song_id: 5, 
+      song_status: 4,
+      key_signature: 'C',
+      primary_vocal_id: null,
+      secondary_vocal_id: null
     }, {
-      id: 6, band_id: 2, song_id: 6, song_status: 0
+      id: 6,
+      band_id: 2,
+      song_id: 6, 
+      song_status: 0,
+      key_signature: 'C',
+      primary_vocal_id: null,
+      secondary_vocal_id: null
     }, {
-      id: 7, band_id: 2, song_id: 7, song_status: 2
+      id: 7,
+      band_id: 2,
+      song_id: 7, 
+      song_status: 2,
+      key_signature: 'C',
+      primary_vocal_id: null,
+      secondary_vocal_id: null
     }, {
-      id: 8, band_id: 2, song_id: 8, song_status: -1
+      id: 8,
+      band_id: 2,
+      song_id: 8, 
+      song_status: -1,
+      key_signature: 'C',
+      primary_vocal_id: null,
+      secondary_vocal_id: null
     }]
   });
 
@@ -174,12 +222,25 @@ function load_test_models() {
       rating_model.push({
         id: next_id++,
         band_member_id: band_member.id(),
-        band_song_id: band_song.id()
+        band_song_id: band_song.id(),
+        rating: 3
       });
     });
   });
 
   load_test_model(manager.song_ratings, {all_song_ratings: rating_model});
+
+  if (done) {
+    var i = setInterval(function() {  // Give the model time to recalculate
+      var rating = manager.band_songs.list()[0].average_rating();
+      if (isNaN(parseInt(rating, 10))) {
+        window.console.log('waiting...');
+      } else {
+        clearInterval(i);
+        done();
+      }
+    }, 250);
+  }
 };
 
 function load_test_model(view_model, test_data) {

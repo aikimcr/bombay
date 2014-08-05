@@ -176,10 +176,14 @@ BandSongList.prototype.set_sort_compare_list = function() {
 };
 
 BandSongList.prototype.set_filter_list = function() {
+  var last_status_idx = manager.song_status_map.length - 1;
   this.filter_values = {
     'song_name': ko.observable(''),
     'artist_id': ko.observable(null),
-    'average_rating': ko.observable(null)
+    'minimum_status': ko.observable(manager.song_status_map[1].value),
+    'maximum_status': ko.observable(manager.song_status_map[last_status_idx].value),
+    'minimum_average_rating': ko.observable(1),
+    'maximum_average_rating': ko.observable(5)
   };
 
   this.filter_list = {
@@ -191,13 +195,28 @@ BandSongList.prototype.set_filter_list = function() {
       if (this.filter_values.artist_id() == null) return true;
       return item.song().artist_id() == this.filter_values.artist_id();
     }.bind(this),
-    'average_rating': function(item) {
-      if (this.filter_values.average_rating() == null) return true;
-      return item.average_rating() == this.filter_values.average_rating();
+    'minimum_status': function(item) {
+      if (this.filter_values.minimum_status() == null) return true;
+      return item.song_status() >= this.filter_values.minimum_status();
+    }.bind(this),
+    'maximum_status': function(item) {
+      if (this.filter_values.maximum_status() == null) return true;
+      return item.song_status() <= this.filter_values.maximum_status();
+    }.bind(this),
+    'minimum_average_rating': function(item) {
+      if (this.filter_values.minimum_average_rating() == null) return true;
+      return item.average_rating() >= this.filter_values.minimum_average_rating();
+    }.bind(this),
+    'maximum_average_rating': function(item) {
+      if (this.filter_values.maximum_average_rating() == null) return true;
+      return item.average_rating() <= this.filter_values.maximum_average_rating();
     }.bind(this)
   };
 
-  this.filter_order = ['song_name', 'artist_id', 'average_rating'];
+  this.filter_order = [
+    'song_name', 'artist_id', 'minimum_status', 'maximum_status',
+    'minimum_average_rating', 'maximum_average_rating'
+  ];
 };
 
 BandSongList.prototype.build_object_ = function(model) {

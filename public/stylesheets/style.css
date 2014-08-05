@@ -108,6 +108,16 @@ body {
 .display .filters .filter label {
   vertical-align: top;
 }
+.display .filters .filter .filter_title {
+  text-align: center;
+}
+.display .filters .filter .filter_label {
+  display: inline-block;
+  min-width: 35px;
+}
+.display .filters .filter > div > .filter_label + div {
+  display: inline-block;
+}
 .display .list {
   overflow: auto;
   width: 1080px;

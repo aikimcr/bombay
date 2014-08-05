@@ -351,13 +351,33 @@ describe('BandSongList', function() {
   before(function(done) {
     band_song_model = {
       all_band_songs: [{
-        id: 45, band_id: 1, song_id: 2, song_status: -1
+        id: 45,
+        band_id: 1,
+        song_id: 2,
+        song_status: -1,
+        primary_vocal_id: null,
+        secondary_vocal_id: null
       }, {
-        id: 16, band_id: 1, song_id: 10, song_status: 0
+        id: 16,
+        band_id: 1,
+        song_id: 10,
+        song_status: 0,
+        primary_vocal_id: null,
+        secondary_vocal_id: null
       }, {
-        id: 63, band_id: 1, song_id: 5, song_status: 4
+        id: 63,
+        band_id: 1,
+        song_id: 5,
+        song_status: 4,
+        primary_vocal_id: null,
+        secondary_vocal_id: null
       }, {
-        id: 72, band_id: 2, song_id: 2, song_status: -2
+        id: 72,
+        band_id: 2,
+        song_id: 2,
+        song_status: -2,
+        primary_vocal_id: null,
+        secondary_vocal_id: null
       }]
     };
     done();
@@ -433,8 +453,7 @@ describe('BandSongFilters', function() {
   };
 
   before(function(done) {
-    load_test_models();
-    done();
+    load_test_models(done);
   });
 
   it('should have a list of sort types', function(done) {

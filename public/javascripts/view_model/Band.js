@@ -6,11 +6,11 @@ function Band(id, name) {
 
   this.band_members = ko.computed(function() {
     return manager.band_members.filterByKey('band_id', this.id());
-  }.bind(this)).extend({throttle: 250});
+  }.bind(this)).extend({throttle: 50});
 
   this.band_member_count = ko.computed(function() {
     return this.band_members().length;
-  }.bind(this)).extend({throttle: 250});
+  }.bind(this)).extend({throttle: 50});
 
   this.band_songs = ko.computed(function() {
     return manager.band_songs.filterByKey('band_id', this.id());
@@ -22,7 +22,7 @@ function Band(id, name) {
 
   this.isPopulated = ko.computed(function() {
     return this.band_member_count() || this.band_song_count();
-  }.bind(this)).extend({throttle: 250});
+  }.bind(this)).extend({throttle: 50});
 }
 util.inherits(Band, Table);
 

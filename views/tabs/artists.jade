@@ -16,14 +16,24 @@ div.app_context(id="artists", data-bind="visible: $root.current_tab().value == 5
           tbody
             tr
               td
-                div.sort
-                  div(data-bind="searchableSelect: artists.sort_type, optionsList: artists.sort_compare_labels, optionsText: 'label', optionsValue: 'value'")
+                div.sort(data-bind="with: artists")
+                  select(data-bind="value: sort_type, options: sort_compare_labels, optionsText: 'label', optionsValue: 'value'")
 
               td
-                div.filter
-                  label(for="artists_name_filter") Name
-                  input(name="artists_name_filter", type="text", data-bind="value: artists.filter_values.name, valueUpdate: 'afterkeydown'")
-              
+                div.filter(data-bind="with: artists.filter_values")
+                  div.filter_label Name
+                  input(type="text", data-bind="value: name, valueUpdate: 'afterkeydown'")
+
+                div.filter(data-bind="with: artists.filter_values")
+                  div.filter_title Song Count
+                  div
+                    div.filter_label Min
+                    input(type="number", inputmode="numeric", data-bind="value: minimum_song_count, valueUpdate: 'afterkeydown'")
+
+                  div
+                    div.filter_label Max
+                    input(type="number", inputmode="numeric", data-bind="value: maximum_song_count, valueUpdate: 'afterkeydown'")
+
       div.list
         table
           thead

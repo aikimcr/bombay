@@ -7,15 +7,15 @@ function BandMember(id, band_id, person_id, band_admin) {
 
   this.band = ko.computed(function() {
     return manager.bands.getById(this.band_id()) || new Band();
-  }.bind(this)).extend({throttle: 250});
+  }.bind(this)).extend({throttle: 50});
 
   this.person = ko.computed(function() {
     return manager.persons.getById(this.person_id()) || new Person();
-  }.bind(this)).extend({throttle: 250});
+  }.bind(this)).extend({throttle: 50});
 
   this.full_name = ko.computed(function() {
     return this.person().full_name();
-  }.bind(this)).extend({throttle: 250});
+  }.bind(this)).extend({throttle: 50});
 }
 util.inherits(BandMember, Table);
 

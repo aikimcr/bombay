@@ -3,7 +3,7 @@ var manager;
 ko.bindingHandlers.searchableSelect = Sapphire.searchableSelect;
 
 ko.bindingHandlers.clickRating = {
-    init: function(element, valueAccessor) {
+    init: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
       var getTargetValue = function(event) {
         return parseInt(event.target.getAttribute('value'));
       };
@@ -39,7 +39,7 @@ ko.bindingHandlers.clickRating = {
         observable(index);
       });
     },
-    update: function(element, valueAccessor) {
+    update: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
       var observable = valueAccessor();
       var index = observable();
       var clickers = element.children;
@@ -166,10 +166,12 @@ function Manager(for_test) {
     }.bind(this));
 
     this.bands.load();
+    this.band_members.load();
+
+    
     this.persons.load();
     this.artists.load();
     this.songs.load();
-    this.band_members.load();
     this.band_songs.load();
     this.song_ratings.load();
     this.requests.load();
@@ -188,7 +190,7 @@ function Manager(for_test) {
     } else {
       return new BandMember();
     }
-  }.bind(this)).extend({ throttle: 250 });
+  }.bind(this)).extend({ throttle: 50 });
 
   this.membership_sorts = ko.computed(function() {
     return ko.utils.arrayFilter(this.band_members.sort_compare_labels, function(sort_compare) {
@@ -200,14 +202,14 @@ function Manager(for_test) {
     return ko.utils.arrayFilter(this.band_members.filtered_list(), function(band_member) {
       return band_member.person_id() == this.current_person().id();
     }.bind(this));
-  }.bind(this)).extend({ throttle: 250 });
+  }.bind(this)).extend({ throttle: 50 });
 
   this.current_bands = ko.computed(function() {
     return ko.utils.arrayMap(
       this.current_person().memberships(), 
       function(band_member) { return band_member.band() }
     );
-  }.bind(this)).extend({ throttle: 250 });
+  }.bind(this)).extend({ throttle: 50 });
 
   this.other_bands = ko.computed(function() {
     return ko.utils.arrayFilter(this.bands.list(), function(band) {
@@ -217,7 +219,7 @@ function Manager(for_test) {
       }.bind(this));
       return !member;
     }.bind(this));
-  }.bind(this)).extend({ throttle: 250 });
+  }.bind(this)).extend({ throttle: 50 });
 
   this.band_member_sorts = ko.computed(function() {
     return ko.utils.arrayFilter(this.band_members.sort_compare_labels, function(sort_compare) {
@@ -233,7 +235,7 @@ function Manager(for_test) {
     } else {
       return [];
     }
-  }.bind(this)).extend({ throttle: 250 });
+  }.bind(this)).extend({ throttle: 150 });
 
   this.non_band_members = ko.computed(function() {
     if (this.current_band()) {
@@ -247,7 +249,7 @@ function Manager(for_test) {
     } else {
       return this.persons.list();
     }
-  }.bind(this)).extend({ throttle: 250 });
+  }.bind(this)).extend({ throttle: 150 });
 
   this.current_band_songs = ko.computed(function() {
     if (this.current_band()) {
