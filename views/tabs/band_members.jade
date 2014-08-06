@@ -16,18 +16,22 @@ div.app_context(id="band_members", data-bind="visible: $root.current_tab().value
           tbody
             tr
               td
-                div.sort
-                  div(data-bind="searchableSelect: band_members.sort_type, optionsList: $root.band_members.sort_compare_labels, optionsText: 'label', optionsValue: 'value'")
+                div.sort(data-bind="with: band_members")
+                  select(data-bind="value: sort_type, options: sort_compare_labels, optionsText: 'label', optionsValue: 'value'")
 
               td
-                div.filter
-                  label(for="band_members_person_name_filter") Person Name
-                  input(name="band_members_person_name_filter", type="text", data-bind="value: band_members.filter_values.person_name, valueUpdate: 'afterkeydown'")
+                div.filter(data-bind="with: band_members.filter_values")
+                  div.filter_label Person Name
+                  input(type="text", data-bind="value: person_name, valueUpdate: 'afterkeydown'")
 
-                div.filter
-                  label(for="band_members_person_email_filter") Person Email
-                  input(name="band_members_person_email_filter", type="text", data-bind="value: band_members.filter_values.person_email, valueUpdate: 'afterkeydown'")
-              
+                div.filter(data-bind="with: band_members.filter_values")
+                  div.filter_label Person Email
+                  input(type="text", data-bind="value: person_email, valueUpdate: 'afterkeydown'")
+ 
+                div.filter(data-bind="with: band_members.filter_values")
+                  div.filter_label Only Band Admins
+                  input(type="checkbox", data-bind="checked: band_admin")
+
       div.list
         table
           thead

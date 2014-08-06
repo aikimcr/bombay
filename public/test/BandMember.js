@@ -410,19 +410,13 @@ describe('BandMember Filters', function() {
     }, {
       value: 'band_name_desc', label: 'Band Name (Z-A)'
     }, {
-      value: 'person_full_email_asc', label: 'Member Email (A-Z)'
+      value: 'person_email_asc', label: 'Member Email (A-Z)'
     }, {
-      value: 'person_full_email_desc', label: 'Member Email (Z-A)'
+      value: 'person_email_desc', label: 'Member Email (Z-A)'
     }, {
       value: 'person_full_name_asc', label: 'Member Full Name (A-Z)'
     }, {
       value: 'person_full_name_desc', label: 'Member Full Name (Z-A)'
-/*
-    }, {
-      value: 'person_name_asc', label: 'Member Login Name (A-Z)'
-    }, {
-      value: 'person_name_desc', label: 'Member Login Name (Z-A)'
-*/
     }]);
     done();
   });
