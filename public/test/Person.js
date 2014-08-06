@@ -543,7 +543,7 @@ describe('PersonFilters', function() {
     done();
   });
 
-  it('should not return Administrator', function(done) {
+  it('should not return everyone', function(done) {
     manager.persons.sort_type('name_desc');
     manager.persons.filter_values.system_admin(false);
     person_list().should.eql([{
@@ -552,6 +552,8 @@ describe('PersonFilters', function() {
       id: 2, name: 'dduck', full_name: 'Daffy Duck', email: 'dduck@foo.com', system_admin: false
     }, {
       id: 3, name: 'bbunny', full_name: 'Bugs Bunny', email: 'bbunny@foo.com', system_admin: false
+    }, {
+      id: 1, name: 'admin', full_name: 'Administrator', email: 'admin@foo.com', system_admin: true
     }]);
     manager.persons.filter_values.system_admin(null);
     done();

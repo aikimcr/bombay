@@ -65,17 +65,44 @@ BandList.prototype.set_sort_compare_list = function() {
 
 BandList.prototype.set_filter_list = function() {
   this.filter_values = {
-    'name': ko.observable('')
+    'name': ko.observable(''),
+    'minimum_member_count': ko.observable(null),
+    'maximum_member_count': ko.observable(null),
+    'minimum_song_count': ko.observable(null),
+    'maximum_song_count': ko.observable(null)
   };
 
   this.filter_list = {
     'name': function(item) {
       if (this.filter_values['name']() == '') return true;
       return item.name().toLowerCase().match(this.filter_values['name']().toLowerCase());
+    }.bind(this),
+    'minimum_member_count': function(item) {
+      var count = parseInt(this.filter_values.minimum_member_count(), 10);
+      if (isNaN(count)) return true;
+      return item.band_member_count() >= count;
+    }.bind(this),
+    'maximum_member_count': function(item) {
+      var count = parseInt(this.filter_values.maximum_member_count(), 10);
+      if (isNaN(count)) return true;
+      return item.band_member_count() <= count;
+    }.bind(this),
+    'minimum_song_count': function(item) {
+      var count = parseInt(this.filter_values.minimum_song_count(), 10);
+      if (isNaN(count)) return true;
+      return item.band_song_count() >= count;
+    }.bind(this),
+    'maximum_song_count': function(item) {
+      var count = parseInt(this.filter_values.maximum_song_count(), 10);
+      if (isNaN(count)) return true;
+      return item.band_song_count() <= count;
     }.bind(this)
   };
 
-  this.filter_order = ['name'];
+  this.filter_order = [
+    'name', 'minimum_member_count', 'maximum_member_count',
+    'minimum_song_count', 'maximum_song_count'
+  ];
 };
 
 BandList.prototype.build_object_ = function(model) {

@@ -92,7 +92,9 @@ SongList.prototype.set_sort_compare_list = function() {
 SongList.prototype.set_filter_list = function() {
   this.filter_values = {
     name: ko.observable(''),
-    artist_id: ko.observable(null)
+    artist_id: ko.observable(null),
+    minimum_band_count: ko.observable(null),
+    maximum_band_count: ko.observable(null)
   };
 
   this.filter_list = {
@@ -103,10 +105,20 @@ SongList.prototype.set_filter_list = function() {
     'artist_id': function(item) {
       if (this.filter_values.artist_id() == null) return true;
       return item.artist_id() == this.filter_values.artist_id();
+    }.bind(this),
+    'minimum_band_count': function(item) {
+      var count = parseInt(this.filter_values.minimum_band_count(), 10);
+      if (isNaN(count)) return true;
+      return item.band_count() >= count;
+    }.bind(this),
+    'maximum_band_count': function(item) {
+      var count = parseInt(this.filter_values.maximum_band_count(), 10);
+      if (isNaN(count)) return true;
+      return item.band_count() <= count;
     }.bind(this)
   };
 
-  this.filter_order = ['name', 'artist_id'];
+  this.filter_order = ['name', 'artist_id', 'minimum_band_count', 'maximum_band_count'];
 };
 
 SongList.prototype.build_object_ = function(model) {

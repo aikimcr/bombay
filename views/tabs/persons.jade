@@ -16,22 +16,36 @@ div.app_context(id="persons", data-bind="if: $root.current_person().system_admin
           tbody
             tr
               td
-                div.sort
-                  div(data-bind="searchableSelect: persons.sort_type, optionsList: persons.sort_compare_labels, optionsText: 'label', optionsValue: 'value'")
+                div.sort(data-bind="with: persons")
+                  select(data-bind="value: sort_type, options: sort_compare_labels, optionsText: 'label', optionsValue: 'value'")
 
               td
-                div.filter
-                  label(for="persons_name_filter") Name
-                  input(name="persons_name_filter", type="text", data-bind="value: persons.filter_values.name, valueUpdate: 'afterkeydown'")
+                div.filter(data-bind="with: persons.filter_values")
+                  div.filter_label Name
+                  input(type="text", data-bind="value: name, valueUpdate: 'afterkeydown'")
               
-                div.filter
-                  label(for="persons_full_name_filter") Full Name
-                  input(name="persons_full_name_filter", type="text", data-bind="value: persons.filter_values.full_name, valueUpdate: 'afterkeydown'")
+                div.filter(data-bind="with: persons.filter_values")
+                  div.filter_label Full Name
+                  input(type="text", data-bind="value: full_name, valueUpdate: 'afterkeydown'")
               
-                div.filter
-                  label(for="persons_email_filter") Email
-                  input(name="persons_email_filter", type="text", data-bind="value: persons.filter_values.email, valueUpdate: 'afterkeydown'")
+                div.filter(data-bind="with: persons.filter_values")
+                  div.filter_label Email
+                  input(type="text", data-bind="value: email, valueUpdate: 'afterkeydown'")
               
+                div.filter(data-bind="with: persons.filter_values")
+                  div.filter_label Only System Admins
+                  input(type="checkbox", data-bind="checked: system_admin")
+
+                div.filter(data-bind="with: persons.filter_values")
+                  div.filter_title Band Count
+                  div
+                    div.filter_label Min
+                    input(type="number", inputmode="numeric", data-bind="value: minimum_band_count, valueUpdate: 'afterkeydown'")
+
+                  div
+                    div.filter_label Max
+                    input(type="number", inputmode="numeric", data-bind="value: maximum_band_count, valueUpdate: 'afterkeydown'")
+
       div.list
         table
           thead

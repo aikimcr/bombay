@@ -16,14 +16,34 @@ div.app_context(id="bands", data-bind="if: $root.current_person().system_admin, 
           tbody
             tr
               td
-                div.sort
-                  div(data-bind="searchableSelect: bands.sort_type, optionsList: bands.sort_compare_labels, optionsText: 'label', optionsValue: 'value'")
+                div.sort(data-bind="with: bands")
+                  select(data-bind="value: sort_type, options: sort_compare_labels, optionsText: 'label', optionsValue: 'value'")
 
               td
-                div.filter
-                  label(for="bands_name_filter") Name
-                  input(name="bands_name_filter", type="text", data-bind="value: bands.filter_values.name, valueUpdate: 'afterkeydown'")
+                div.filter(data-bind="with: bands.filter_values")
+                  div.filter_label Name
+                  input(type="text", data-bind="value: name, valueUpdate: 'afterkeydown'")
               
+                div.filter(data-bind="with: bands.filter_values")
+                  div.filter_title Member Count
+                  div
+                    div.filter_label Min
+                    input(type="number", inputmode="numeric", data-bind="value: minimum_member_count, valueUpdate: 'afterkeydown'")
+
+                  div
+                    div.filter_label Max
+                    input(type="number", inputmode="numeric", data-bind="value: maximum_member_count, valueUpdate: 'afterkeydown'")
+
+                div.filter(data-bind="with: bands.filter_values")
+                  div.filter_title Song Count
+                  div
+                    div.filter_label Min
+                    input(type="number", inputmode="numeric", data-bind="value: minimum_song_count, valueUpdate: 'afterkeydown'")
+
+                  div
+                    div.filter_label Max
+                    input(type="number", inputmode="numeric", data-bind="value: maximum_song_count, valueUpdate: 'afterkeydown'")
+
       div.list
         table
           thead

@@ -86,7 +86,9 @@ PersonList.prototype.set_filter_list = function() {
     'name': ko.observable(''),
     'full_name': ko.observable(''),
     'email': ko.observable(''),
-    'system_admin': ko.observable(null)
+    'system_admin': ko.observable(null),
+    'minimum_band_count': ko.observable(null),
+    'maximum_band_count': ko.observable(null)
   };
 
   this.filter_list = {
@@ -103,12 +105,25 @@ PersonList.prototype.set_filter_list = function() {
       return item.email().toLowerCase().match(this.filter_values.email().toLowerCase());
     }.bind(this),
     'system_admin': function(item) {
-      if (this.filter_values.system_admin() == null) return true;
+      if (!this.filter_values.system_admin()) return true;
       return !!item.system_admin() === !!this.filter_values.system_admin();
+    }.bind(this),
+    'minimum_band_count': function(item) {
+      var count = parseInt(this.filter_values.minimum_band_count(), 10);
+      if (isNaN(count)) return true;
+      return item.membership_count() >= count;
+    }.bind(this),
+    'maximum_band_count': function(item) {
+      var count = parseInt(this.filter_values.maximum_band_count(), 10);
+      if (isNaN(count)) return true;
+      return item.membership_count() <= count;
     }.bind(this)
   };
 
-  this.filter_order = ['name', 'full_name', 'email', 'system_admin'];
+  this.filter_order = [
+    'name', 'full_name', 'email', 'system_admin',
+    'minimum_band_count', 'maximum_band_count'
+  ];
 };
 
 PersonList.prototype.build_object_ = function(model) {

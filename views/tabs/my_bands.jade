@@ -16,13 +16,13 @@ div.app_context(id="my_bands", data-bind="visible: $root.current_tab().value == 
           tbody
             tr
               td
-                div.sort
-                  div(data-bind="searchableSelect: band_members.sort_type, optionsList: $root.membership_sorts, optionsText: 'label', optionsValue: 'value'")
+                div.sort(data-bind="with: band_members")
+                  select(data-bind="value: sort_type, options: $root.membership_sorts, optionsText: 'label', optionsValue: 'value'")
 
               td
-                div.filter
-                  label(for="band_members_band_name_filter") Name
-                  input(name="band_members_band_name_filter", type="text", data-bind="value: band_members.filter_values.band_name, valueUpdate: 'afterkeydown'")
+                div.filter(data-bind="with: band_members.filter_values")
+                  div.filter_label Name
+                  input(type="text", data-bind="value: band_name, valueUpdate: 'afterkeydown'")
               
       div.list
         table

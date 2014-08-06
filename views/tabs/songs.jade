@@ -16,18 +16,28 @@ div.app_context(id="songs", data-bind="visible: $root.current_tab().value == 6")
           tbody
             tr
               td
-                div.sort
-                  div(data-bind="searchableSelect: songs.sort_type, optionsList: songs.sort_compare_labels, optionsText: 'label', optionsValue: 'value'")
+                div.sort(data-bind="with: songs")
+                  select(data-bind="value: sort_type, options: sort_compare_labels, optionsText: 'label', optionsValue: 'value'")
 
               td
-                div.filter
-                  label(for="songs_name_filter") Song Name
-                  input(name="songs_name_filter", type="text", data-bind="value: songs.filter_values.name, valueUpdate: 'afterkeydown'")
+                div.filter(data-bind="with: songs.filter_values")
+                  div.filter_label Song Name
+                  input(type="text", data-bind="value: name, valueUpdate: 'afterkeydown'")
 
-                div.filter
-                  label(for="songs_artist_id_filter") Artist
-                  div(name="songs_artist_id_filter", data-bind="searchableSelect: songs.filter_values.artist_id, optionsList: manager.artists.list, optionsText: 'name', optionsValue: 'id', optionsCaption: '-All Artists-'")
+                div.filter(data-bind="with: songs.filter_values")
+                  div.filter_label Artist
+                  div(data-bind="searchableSelect: artist_id, optionsList: $root.artists.list, optionsText: 'name', optionsValue: 'id', optionsCaption: '-All Artists-'")
               
+                div.filter(data-bind="with: songs.filter_values")
+                  div.filter_title Band Count
+                  div
+                    div.filter_label Min
+                    input(type="number", inputmode="numeric", data-bind="value: minimum_band_count, valueUpdate: 'afterkeydown'")
+
+                  div
+                    div.filter_label Max
+                    input(type="number", inputmode="numeric", data-bind="value: maximum_band_count, valueUpdate: 'afterkeydown'")
+
       div.list
         table
           thead
