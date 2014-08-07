@@ -21,6 +21,7 @@ var dbh = new sqlite3.Database('./bombay.db', function(err) {
 dbh.exec('PRAGMA foreigh_keys = ON;');
 
 change_files.filter(function(x) { return ! x.match('~$'); }).sort().forEach(function(file) {
+  if (file.match(/^\./)) return;
   console.log(util.format('Schema change %s', file));
   var change_text = fs.readFileSync(path.join(schema_dir, file), {encoding: 'utf8'});
   var change_spec = change_text.match(/#change\s*(.*)\n((\n.*)*)/);

@@ -33,3 +33,14 @@ build
 .grunt
 
 node_modules
+
+.svn
+*db_bkup*
+sql/artist.sql
+sql/band.sql
+sql/db_create.pl
+sql/joins.sql
+sql/person.sql
+sql/song.sql
+svn-commit.tmp
+
