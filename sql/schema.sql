@@ -62,7 +62,7 @@ CREATE TABLE song (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name VARCHAR NOT NULL,
   artist_id INTEGER NOT NULL,
-  key_signature VARCHAR,
+  key_signature VARCHAR DEFAULT '',
   FOREIGN KEY (artist_id) REFERENCES artist(id),
   UNIQUE (name, artist_id)
 );
@@ -72,7 +72,7 @@ CREATE TABLE band_song (
   band_id INTEGER NOT NULL,
   song_id INTEGER NOT NULL,
   song_status INTEGER NOT NULL DEFAULT 0,
-  key_signature VARCHAR,
+  key_signature VARCHAR DEFAULT '',
   primary_vocal_id INTEGER,
   secondary_vocal_id INTEGER,
   FOREIGN KEY (band_id) REFERENCES band(id),

@@ -354,13 +354,15 @@ function Manager(for_test) {
     var value = target.type == 'checkbox' ? target.checked : target.value;
     var changeset = {};
     changeset[name] = value;
-    data.update(changeset, function(result) {
-      if (result && !result.err) {
-        data.refresh(function(result) {
-          if (result.err) {
-            window.console.log(result.err);
+    data.update(changeset, function(result_code, result) {
+      if (result_code == 200 || result_code == 304) {
+        data.refresh(function(result_code) {
+          if (result_code != 200 && result_code != 304) {
+            window.console.log(result_code);
           }
         });
+      } else {
+        window.console.log(result_code);
       }
     });
   };

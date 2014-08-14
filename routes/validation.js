@@ -21,7 +21,7 @@ function getUser(req) {
   return null;
 }
 
-function getRequestBandMember(req, callback) {
+function getRequestBandMember(req, user, callback) {
   if (req.path.match(/band_member/)) {
     db_orm.BandMember.get(exports.findParam(req, 'id'), callback);
   } else if (req.path.match(/song_rating/)) {
@@ -32,6 +32,14 @@ function getRequestBandMember(req, callback) {
         db_orm.BandMember.get(song_rating.band_member_id, callback);
       }
     })
+  } else if (req.path.match(/band_song/)) {
+    db_orm.BandSong.get(exports.findParam(req, 'id'), function(err, band_song) {
+      if (err) {
+        callback(err);
+      } else {
+        db_orm.BandMember.one({person_id: user.id, band_id: band_song.band_id}, callback);
+      }
+    });
   } else {
     callback(null);
   }
@@ -41,10 +49,10 @@ function getCurrentBandMember(req, user, callback) {
   var band_id = exports.findParam(req, 'band_id');
 
   if (band_id == null) {
-    var req_band_member = getRequestBandMember(req, function(err, req_band_member) {
+    getRequestBandMember(req, user, function(err, req_band_member) {
       if (err) {
         callback(err);
-      } else if (req.band_member) {
+      } else if (req_band_member) {
         db_orm.BandMember.one({person_id: user.id, band_id: req_band_member.band_id}, callback);
       } else {
         callback(null, null);
@@ -121,7 +129,7 @@ console.log(user);
       } else if (isBandAdmin(current_member)) {
         next();
       } else {
-        getRequestBandMember(req, function(err, band_member) {
+        getRequestBandMember(req, user, function(err, band_member) {
           if (err) {
             res.json(403, err);
           } else if (band_member == null) {

@@ -23,7 +23,7 @@ var validation = require('routes/validation');
 passport.use(new LocalStrategy(
   function(username, password, done) {
     password = decodeURIComponent(password);
-    // console.log(username + ', ' + password);
+    //console.log('check_credentials:' + username + ', ' + password);
 
     db_orm.Person.one({name: username}, function(err, person) {
       if (err) {
@@ -57,11 +57,11 @@ passport.use(new LocalStrategy(
 ));
 
 passport.serializeUser(function(user, done) {
-  //console.log(node_util.inspect(user));
+  //console.log('serialize:' + node_util.inspect(user));
   done(null, JSON.stringify({id: user.id, system_admin: !!user.system_admin}));
 });
 passport.deserializeUser(function(user, done) {
-  //console.log(user);
+  //console.log('deserialize:' + node_util.inspect(user));
   done(null, JSON.parse(user));
 });
 
@@ -79,7 +79,7 @@ app.use(express.cookieParser('Plover-Indy-Girlfriend-Dragon'));
 app.use(express.session({
   secret: 'Plover-Indy-Girlfriend-Dragon',
   cookie: {
-    maxAge: 3600000
+    maxAge: 30 * 24 * 60 * 60 * 1000 // Set the cookie to thirty days.
   }
 }));
 app.use(passport.initialize());
