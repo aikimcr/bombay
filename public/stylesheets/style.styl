@@ -1,5 +1,5 @@
 container-width = 1200px
-container-height = 700px
+container-height = 800px
 display-width = container-width - 100px
 
 text-color = white
@@ -109,6 +109,7 @@ body
 .control
   width: display-width
   display: block
+  height: 35px
 
 .display
   font-size: 120%
@@ -119,6 +120,7 @@ body
     border-style: solid
     border-width: 1px
     margin: 5px 0 5px 0
+    height: 115px
 
     tbody
       vertical-align: top
@@ -131,6 +133,16 @@ body
       vertical-align: top
       min-height: 25px
 
+    .filter-list
+      display: block
+      overflow-x: scroll
+      overflow-y: hidden
+      max-width: display-width - 250px
+      height: 75px
+      white-space: nowrap
+      border-style: solid
+      padding: 5px 10px 0 10px
+
     .filter
       border-style: solid
       border-width: 1px
@@ -138,6 +150,7 @@ body
       padding: 1px
       vertical-align: top
       min-height: 25px
+      margin-right: 5px
 
       label
         vertical-align: top
@@ -155,13 +168,32 @@ body
   .list
     overflow: auto
     width: display-width - 20px;
-    height: 550px
-  
+    height: container-height - 250px
+    padding: 15px
+
     table
       border-style: solid
       border-color: main-border-color
       border-width: 1px;
+      border-radius: 10px
+      padding: 5px
   
+      table
+        min-width: display-width - 50px
+
+        tr
+          td:nth-child(even)
+            width: 200px
+
+          td:nth-child(odd)
+            width: 100px
+
+          td:last-child
+            width: 30px
+
+    tr
+      padding-bottom: 5px
+
     tr:nth-child(even)
       background-color: stripe-color-even
   

@@ -456,6 +456,12 @@ describe('BandSongFilters', function() {
     load_test_models(done);
   });
 
+  before(function(done) {
+    manager.current_band(manager.bands.list()[0]);
+    manager.current_person(manager.persons.list()[0]);
+    done();
+  });
+
   it('should have a list of sort types', function(done) {
     manager.band_songs.sort_types().should.eql([{
       value: 'artist_name_asc', label: 'Artist Name (A-Z)'

@@ -87,6 +87,7 @@ CREATE TABLE song_rating (
   band_member_id INTEGER NOT NULL,
   band_song_id INTEGER NOT NULL,
   rating INTEGER NOT NULL DEFAULT 3,
+  is_new INTEGER DEFAULT 1,
   FOREIGN KEY (band_member_id) REFERENCES band_member(id) ON DELETE CASCADE,
   FOREIGN KEY (band_song_id) REFERENCES band_song(id) ON DELETE CASCADE,
   UNIQUE (band_member_id, band_song_id)
@@ -208,3 +209,9 @@ INSERT INTO schema_change (name, timestamp)
 
 INSERT INTO schema_change (name, timestamp)
        VALUES ('Add Key Signature column to song and band_song tables', datetime('now'));
+
+INSERT INTO schema_change (name, timestamp)
+       VALUES ('Add Default to Key Signature columns', datetime('now'));
+
+INSERT INTO schema_change (name, timestamp)
+       VALUES ('Add New Flag to song_rating', datetime('now'));

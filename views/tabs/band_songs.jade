@@ -20,64 +20,82 @@ div.app_context(id="band_songs", data-bind="visible: $root.current_tab().value =
                   select(data-bind="value: sort_type, options: sort_compare_labels, optionsText: 'label', optionsValue: 'value'")
 
               td
-                div.filter(data-bind="with: band_songs.filter_values")
-                  div.filter_label Song Name
-                  input(type="text", data-bind="value: song_name, valueUpdate: 'afterkeydown'")
-
-                div.filter(data-bind="with: band_songs.filter_values")
-                  div.filter_label Artist
-                  div(data-bind="searchableSelect: artist_id, optionsList: manager.artists.list, optionsText: 'name', optionsValue: 'id', optionsCaption: '-All Artists-'")
-              
-                div.filter(data-bind="with: band_songs.filter_values")
-                  div.filter_title Status
-                  div
-                    div.filter_label Min
-                    select(data-bind="value: minimum_status, options: $root.song_status_map, optionsText: 'value_text', optionsValue: 'value'");
-
-                  div
-                    div.filter_label Max
-                    select(data-bind="value: maximum_status, options: $root.song_status_map, optionsText: 'value_text', optionsValue: 'value'");
-
-                div.filter(data-bind="with: band_songs.filter_values")
-                  div.filter_title Average Rating
-                  div
-                    div.filter_label Min
-                    div(data-bind="clickRating: minimum_average_rating")
-
-                  div
-                    div.filter_label Max
-                    div(data-bind="clickRating: maximum_average_rating")
+                div.filter-list
+                  div.filter(data-bind="with: band_songs.filter_values")
+                    div.filter_label Song Name
+                    input(type="text", data-bind="value: song_name, valueUpdate: 'afterkeydown'")
+  
+                  div.filter(data-bind="with: band_songs.filter_values")
+                    div.filter_label Artist
+                    div(data-bind="searchableSelect: artist_id, optionsList: manager.artists.list, optionsText: 'name', optionsValue: 'id', optionsCaption: '-All Artists-'")
+                
+                  div.filter(data-bind="with: band_songs.filter_values")
+                    div.filter_title Status
+                    div
+                      div.filter_label Min
+                      select(data-bind="value: minimum_status, options: $root.song_status_map, optionsText: 'value_text', optionsValue: 'value'");
+  
+                    div
+                      div.filter_label Max
+                      select(data-bind="value: maximum_status, options: $root.song_status_map, optionsText: 'value_text', optionsValue: 'value'");
+  
+                  div.filter(data-bind="with: band_songs.filter_values")
+                    div.filter_title Average Rating
+                    div
+                      div.filter_label Min
+                      div(data-bind="clickRating: minimum_average_rating")
+  
+                    div
+                      div.filter_label Max
+                      div(data-bind="clickRating: maximum_average_rating")
+  
+                  div.filter(data-bind="with: band_songs.filter_values")
+                    div.filter_title New/Old Song
+                      select(data-bind="value: is_new")
+                        option(value='') --All Songs--
+                        option(value='1') New Songs
+                        option(value='0') Old Songs
 
       div.list
         table
-          thead
-            tr
-              th Name
-              th Artist Name
-              th Status
-              th Primary Vocal
-              th Secondary Vocal
-              th Key
-              th Member Rating
-              th Average Rating
-              th
-
           tbody(data-bind="foreach: current_band_songs")
             tr
-              td(data-bind="text: song().name")
-              td(data-bind="text: song().artist().name")
               td
-                select(name="song_status", data-bind="value: song_status, options: $root.song_status_map, enable: $root.current_band_member().band_admin, optionsText: 'value_text', optionsValue: 'value', event: { change: $root.update_table_object }")
+                div
+                  table
+                    tr
+                      td Name
+                      td(data-bind="text: song().name")
+                      td Artist
+                      td(data-bind="text: song().artist().name")
+                      td
+                        div(data-bind="if: $root.current_band_member().band_admin")
+                          button.edit_button(data-bind="click: $root.delete_table_object") -
 
-              td
-                select(name="primary_vocal_id", data-bind="value: primary_vocal_id, enable: $root.current_band_member().band_admin, options: $root.current_members, optionsText: 'full_name', optionsValue: 'id', optionsCaption: '-- No Set --', event: { change: $root.update_table_object }")
+                    tr
+                      td Status
+                      td
+                        select(name="song_status", data-bind="value: song_status, options: $root.song_status_map, enable: $root.current_band_member().band_admin, optionsText: 'value_text', optionsValue: 'value', event: { change: $root.update_table_object }")
 
-              td
-                select(name="secondary_vocal_id", data-bind="value: secondary_vocal_id, enable: $root.current_band_member().band_admin, options: $root.current_members, optionsText: 'full_name', optionsValue: 'id', optionsCaption: '-- No Set --', event: { change: $root.update_table_object }")
+                      td Key
+                      td
+                        select(name="key_signature", data-bind="value: key_signature, enable: $root.current_band_member().band_admin, options: manager.key_signature_map, optionsText: 'value_text', optionsValue: 'value', event: { change: $root.update_table_object }")
+                      td
 
-              td
-                select(name="key_signature", data-bind="value: key_signature, enable: $root.current_band_member().band_admin, options: manager.key_signature_map, optionsText: 'value_text', optionsValue: 'value', event: { change: $root.update_table_object }")
-              td(data-bind="clickRating: member_rating")
-              td(data-bind="showRating: average_rating")
-              td(data-bind="if: $root.current_band_member().band_admin")
-                button.edit_button(data-bind="click: $root.delete_table_object") -
+                    tr
+                      td Member Rating
+                      td(data-bind="clickRating: member_rating")
+                      td Average Rating
+                      td(data-bind="showRating: average_rating")
+                      td
+                        div(data-bind="if: my_rating().is_new") NEW
+
+                    tr
+                      td Primary Vocals
+                      td
+                        select(name="primary_vocal_id", data-bind="value: primary_vocal_id, enable: $root.current_band_member().band_admin, options: $root.current_members, optionsText: 'full_name', optionsValue: 'id', optionsCaption: '-- Not Set --', event: { change: $root.update_table_object }")
+
+                      td Secondary Vocals
+                      td
+                        select(name="secondary_vocal_id", data-bind="value: secondary_vocal_id, enable: $root.current_band_member().band_admin, options: $root.current_members, optionsText: 'full_name', optionsValue: 'id', optionsCaption: '-- Not Set --', event: { change: $root.update_table_object }")
+                      td

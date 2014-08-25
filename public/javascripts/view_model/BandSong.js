@@ -48,6 +48,32 @@ function BandSong(id, band_id, song_id, song_status, key_signature, primary_voca
   }.bind(this)).extend({throttle: 250});
 
   // Calculations
+  this.my_rating = ko.computed(function() {
+    var dummy = function() {
+      return new SongRating(
+        -1,
+        manager.current_band_member().id(),
+        this.id(),
+        3,
+        true
+      );
+    }.bind(this);
+
+    var ratings = this.song_ratings();
+    if (ratings.length == 0) {
+      return dummy();
+    } else {
+      var member_rating = ko.utils.arrayFirst(ratings, function(rating) {
+        return rating.band_member_id() == manager.current_band_member().id();
+      }.bind(this));
+      if (member_rating) {
+        return member_rating;
+      } else {
+        return dummy();
+      }
+    }
+  }.bind(this)).extend({throttle: 250});
+
   this.member_rating = ko.computed({
     read: function() {
       var ratings = this.song_ratings();
@@ -183,7 +209,8 @@ BandSongList.prototype.set_filter_list = function() {
     'minimum_status': ko.observable(manager.song_status_map[1].value),
     'maximum_status': ko.observable(manager.song_status_map[last_status_idx].value),
     'minimum_average_rating': ko.observable(1),
-    'maximum_average_rating': ko.observable(5)
+    'maximum_average_rating': ko.observable(5),
+    'is_new': ko.observable('')
   };
 
   this.filter_list = {
@@ -210,12 +237,16 @@ BandSongList.prototype.set_filter_list = function() {
     'maximum_average_rating': function(item) {
       if (this.filter_values.maximum_average_rating() == null) return true;
       return item.average_rating() <= this.filter_values.maximum_average_rating();
+    }.bind(this),
+    'is_new': function(item) {
+      if (this.filter_values.is_new() == '') return true;
+      return !!item.my_rating().is_new() == !!parseInt(this.filter_values.is_new(), 10);
     }.bind(this)
   };
 
   this.filter_order = [
     'song_name', 'artist_id', 'minimum_status', 'maximum_status',
-    'minimum_average_rating', 'maximum_average_rating'
+    'minimum_average_rating', 'maximum_average_rating', 'is_new'
   ];
 };
 

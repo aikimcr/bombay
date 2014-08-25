@@ -339,25 +339,25 @@ describe('routes', function() {
     describe('#song_rating', function()  {
       it('should return all the song_ratings, sorted by band_member_id and band_song_id', function(done) {
         var expected = [{
-          id: 1, band_member_id: 1, band_song_id: 1, rating: 1
+          id: 1, band_member_id: 1, band_song_id: 1, rating: 1, is_new: true
         }, {
-          id: 2, band_member_id: 1, band_song_id: 2, rating: 2
+          id: 2, band_member_id: 1, band_song_id: 2, rating: 2, is_new: true
         }, {
-          id: 3, band_member_id: 1, band_song_id: 3, rating: 3
+          id: 3, band_member_id: 1, band_song_id: 3, rating: 3, is_new: true
         }, {
-          id: 4, band_member_id: 1, band_song_id: 4, rating: 4
+          id: 4, band_member_id: 1, band_song_id: 4, rating: 4, is_new: true
         }, {
-          id: 5, band_member_id: 1, band_song_id: 5, rating: 5
+          id: 5, band_member_id: 1, band_song_id: 5, rating: 5, is_new: true
         }, {
-          id: 6, band_member_id: 2, band_song_id: 1, rating: 1
+          id: 6, band_member_id: 2, band_song_id: 1, rating: 1, is_new: true
         }, {
-          id: 7, band_member_id: 2, band_song_id: 2, rating: 3
+          id: 7, band_member_id: 2, band_song_id: 2, rating: 3, is_new: true
         }, {
-          id: 8, band_member_id: 2, band_song_id: 3, rating: 3
+          id: 8, band_member_id: 2, band_song_id: 3, rating: 3, is_new: true
         }, {
-          id: 9, band_member_id: 2, band_song_id: 4, rating: 3
+          id: 9, band_member_id: 2, band_song_id: 4, rating: 3, is_new: true
         }, {
-          id: 10, band_member_id: 2, band_song_id: 5, rating: 5
+          id: 10, band_member_id: 2, band_song_id: 5, rating: 5, is_new: true
         }];
         var res = {
           json: function(result_code, result) {
@@ -557,17 +557,20 @@ describe('routes', function() {
               rating: 3,
               id: 11,
               band_member_id: 7,
-              band_song_id: band_song_id
+              band_song_id: band_song_id,
+              is_new: true
             }, {
               rating: 3,
               id: 12,
               band_member_id: 3,
-              band_song_id: band_song_id
+              band_song_id: band_song_id,
+              is_new: true
             }, {
               rating: 3,
               id: 13,
               band_member_id: 6,
-              band_song_id: band_song_id
+              band_song_id: band_song_id,
+              is_new: true
             }], ['rating']);
             done();
           }
@@ -597,7 +600,7 @@ describe('routes', function() {
     describe('#song_rating', function() {
       var song_rating_id;
       it('should create a song_rating', function(done) {
-        req.body = {band_member_id: 3, band_song_id: 1, rating: 3};
+        req.body = {band_member_id: 3, band_song_id: 1, rating: 3, is_new: true};
         var res = {
           json: function(result_code, result) {
             song_rating_id = test_util.check_result(result, 'song_rating', req.body);
@@ -608,7 +611,7 @@ describe('routes', function() {
       });
 
       it('should return an error', function(done) {
-        req.body = {band_member_id: 3, band_song_id: 1, rating: 4};
+        req.body = {band_member_id: 3, band_song_id: 1, rating: 4, is_new: true};
         var res = {
           json: function(result_code, result) {
             var error = test_util.check_error_result(result_code, result, 500);
@@ -882,10 +885,10 @@ describe('routes', function() {
       });
 
       it('should get the song_rating', function(done) {
-        var expected = {id: 1, band_member_id: 1, band_song_id: 1, rating: 2};
+        var expected = {id: 1, band_member_id: 1, band_song_id: 1, rating: 2, is_new: false};
         db_orm.SongRating.get(1, function(err, row) {
           should.not.exist(err);
-          test_util.check_record(row, expected, ['id', 'band_member_id', 'band_song_id', 'rating']);
+          test_util.check_record(row, expected, ['id', 'band_member_id', 'band_song_id', 'rating', 'is_new']);
           done();
         });
       });

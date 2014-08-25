@@ -223,7 +223,8 @@ function load_test_models(done) {
         id: next_id++,
         band_member_id: band_member.id(),
         band_song_id: band_song.id(),
-        rating: 3
+        rating: 3,
+        is_new: true
       });
     });
   });

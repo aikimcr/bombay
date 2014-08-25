@@ -287,6 +287,7 @@ exports.postSongRatingTable = function(req, res) {
 };
 
 exports.putSongRatingTable = function(req, res) {
+  req.query.is_new = false;
   putModel(res, 'SongRating', req.query, 'song_rating');
 };
 

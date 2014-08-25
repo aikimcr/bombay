@@ -37,13 +37,13 @@ body {
   border: 1px solid #3f8c83;
   border-radius: 0 0 10px 10px;
   width: 1198px;
-  height: 698px;
+  height: 798px;
 }
 .app_context {
   color: #000;
   background-color: #b8dfda;
   width: 1190px;
-  height: 690px;
+  height: 790px;
 }
 .app_context_header {
   color: panel-text_color;
@@ -78,6 +78,7 @@ body {
 .control {
   width: 1100px;
   display: block;
+  height: 35px;
 }
 .display {
   font-size: 120%;
@@ -88,6 +89,7 @@ body {
   border-style: solid;
   border-width: 1px;
   margin: 5px 0 5px 0;
+  height: 115px;
 }
 .display .filters tbody {
   vertical-align: top;
@@ -100,6 +102,16 @@ body {
   vertical-align: top;
   min-height: 25px;
 }
+.display .filters .filter-list {
+  display: block;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  max-width: 850px;
+  height: 75px;
+  white-space: nowrap;
+  border-style: solid;
+  padding: 5px 10px 0 10px;
+}
 .display .filters .filter {
   border-style: solid;
   border-width: 1px;
@@ -107,6 +119,7 @@ body {
   padding: 1px;
   vertical-align: top;
   min-height: 25px;
+  margin-right: 5px;
 }
 .display .filters .filter label {
   vertical-align: top;
@@ -125,11 +138,29 @@ body {
   overflow: auto;
   width: 1080px;
   height: 550px;
+  padding: 15px;
 }
 .display .list table {
   border-style: solid;
   border-color: #3f8c83;
   border-width: 1px;
+  border-radius: 10px;
+  padding: 5px;
+}
+.display .list table table {
+  min-width: 1050px;
+}
+.display .list table table tr td:nth-child(even) {
+  width: 200px;
+}
+.display .list table table tr td:nth-child(odd) {
+  width: 100px;
+}
+.display .list table table tr td:last-child {
+  width: 30px;
+}
+.display .list tr {
+  padding-bottom: 5px;
 }
 .display .list tr:nth-child(even) {
   background-color: #fefeea;
@@ -188,7 +219,7 @@ body {
 }
 .dialog_background {
   width: 1200px;
-  height: 700px;
+  height: 800px;
   top: 0;
   left: 0;
   position: absolute;
