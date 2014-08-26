@@ -73,12 +73,8 @@ function isBandAdmin(band_member) {
 }
 
 exports.requireLogin = function(req, res, next) {
-  var user = getUser(req);
-  if (user != null) {
-    next();
-  } else {
-    res.redirect('/login');
-  }
+  if (req.isAuthenticated()) { return next(); }
+  res.redirect('http://login');
 };
 
 exports.requireSysAdmin = function(req, res, next) {
@@ -112,9 +108,6 @@ exports.requireBandAdmin = function(req, res, next) {
 
 exports.requireSelfOrAdmin = function(req, res, next) {
   var user = getUser(req);
-console.log(req.path);
-console.log(exports.findParam(req, 'id'));
-console.log(user);
   if (user == null) {
     console.log('User not found');
     res.json(403, permission_error);

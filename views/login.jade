@@ -1,24 +1,29 @@
 extends layout
 
 block content
-  div.error_msg #{errors}
-  form(action="./login", method="post")
-    input(type="hidden", name="pubkey", value="#{pubkey}")
-    table
-      tr
-        td
-          | Name:
-
-        td
-          input(type="text", name="username")
-
-      tr
-        td
-          | Pass:
-
-        td
-          input(type="password", name="password")
-
-      tr
-        td
-          input(type="submit", value="Login")
+  div.login_title Welcome to the All Night Music Band Manager
+  div.login_page
+    div.login_container
+      div.error_msg #{errors}
+      div.title Please Login
+      hr
+  
+      form(action="./login", method="post")
+        input(type="hidden", name="pubkey", value="#{pubkey}")
+        table
+          tr
+            td
+              | Name:
+    
+            td
+              input(type="text", name="username")
+    
+          tr
+            td
+              | Password:
+    
+            td
+              input(type="password", name="password")
+    
+        hr
+        input.submit(type="submit", value="LOGIN")

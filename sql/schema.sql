@@ -121,6 +121,16 @@ BEGIN
   DELETE FROM song_rating WHERE song_rating.band_song_id = OLD.id;
 END;
 
+DROP TABLE IF EXISTS session;
+CREATE TABLE session (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  session_token VARCHAR,
+  session_start VARCHAR NOT NULL,
+  person_id INTEGER NOT NULL,
+  UNIQUE (session_token),
+  FOREIGN KEY (person_id) REFERENCES person(id) ON DELETE CASCADE
+);
+
 CREATE TABLE snapshot (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   timestamp VARCHAR DEFAULT CURRENT_TIMESTAMP

@@ -70,9 +70,10 @@ describe('validation', function() {
 
   describe('requireLogin', function() {
     it('should redirect to login', function(done) {
+      req.isAuthenticated = function() { return false; };
       res.redirect = function(url) {
         should.exist(url);
-        url.should.eql('/login');
+        url.should.eql('http://login');
         done();
       };
       validate.requireLogin(req, res, function() {
@@ -81,6 +82,7 @@ describe('validation', function() {
     });
 
     it('should call next', function(done) {
+      req.isAuthenticated = function() { return true; };
       req.session.passport.user = JSON.stringify({id: 1, system_admin: true});
       validate.requireLogin(req, res, function() {
         done();

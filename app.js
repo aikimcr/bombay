@@ -3,21 +3,23 @@
  * Module dependencies.
  */
 
-var express = require('express');
-var http = require('http');
-var path = require('path');
-var db_orm = require('lib/db_orm');
-var util = require('lib/util');
-var index = require('routes/index');
-var route_db = require('routes/db');
-var encryption = require('routes/encryption');
-var reports = require('routes/reports');
-var login = require('routes/login');
 var base64_decode = require('base64').decode;
+var express = require('express');
+var flash = require('connect-flash');
+var http = require('http');
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
-var flash = require('connect-flash');
-var node_util = require('util');
+var RememberMeStrategy = require('passport-remember-me').Strategy;
+var path = require('path');
+var util = require('util');
+
+var bombay_util = require('lib/util');
+var db_orm = require('lib/db_orm');
+var encryption = require('routes/encryption');
+var index = require('routes/index');
+var login = require('routes/login');
+var reports = require('routes/reports');
+var route_db = require('routes/db');
 var validation = require('routes/validation');
 
 passport.use(new LocalStrategy(
@@ -27,20 +29,21 @@ passport.use(new LocalStrategy(
 
     db_orm.Person.one({name: username}, function(err, person) {
       if (err) {
-        console.log('Failed login for ' + username + util.inspect(err));
+        console.log('Failed login for ' + username + bombay_util.inspect(err));
         return done(null, false, { message: 'Login Incorrect.'});
       } else if (person) {
-        var pem = util.get_pem_file('crypto/rsa_private.pem');
+        var pem = bombay_util.get_pem_file('crypto/rsa_private.pem');
         //console.log(pem);
         var decrypt_password = password;
         var decrypt_person = person.password;
 
         // console.log(decrypt_person + ', ' + decrypt_password);
         try {
-          decrypt_password = base64_decode(util.decrypt(pem, password));
-          decrypt_person = util.decrypt(pem, person.password);
+          decrypt_password = base64_decode(bombay_util.decrypt(pem, password));
+          decrypt_person = bombay_util.decrypt(pem, person.password);
         } catch(e) {
           console.log(e);
+          return done(null, false, { message: 'Unable to decrypt passwords' });
         };
         // console.log(decrypt_person + ', ' + decrypt_password);
         if (username == person.name && decrypt_password == decrypt_person) {
@@ -56,12 +59,67 @@ passport.use(new LocalStrategy(
   }
 ));
 
+passport.use('remember-me', new RememberMeStrategy(
+  function(token, done) {
+    db_orm.Session.one({session_token: token}, function(err, session) {
+      if (err) {
+        return done(null, false, { message: 'No Session found' });
+      } else if (session == null) {
+        return done(null, false, { message: 'No Session found' });
+      } else {
+        session.save({session_token: null}, function(err) {
+          if (err) {
+            console.log(err);
+            return done(null, false, { message: 'Unable to update session' });
+          } else {
+            session.getPerson(function(err, person) {
+              if (err) {
+                console.log(err);
+                return done(null, false, { message: 'Unable to get person' });
+              } else {
+                return done(null, person);
+              }
+            });
+          }
+        });
+      }
+    });
+  },
+  function(user, done) {
+    db_orm.Session.one({person_id: user.id}, function(err, session) {
+      if (err) {
+        console.log(err);
+        return done(null, false, { message: 'Unable to initiate session' });
+      } else if (session == null) {
+        db_orm.Session.create([{person_id: user.id}], function(err, rows) {
+          if (err) {
+            console.log(err);
+            return done(null, false, { message: 'Unable to initiate session' });
+          } else {
+            return done(null, rows[0].session_token);
+          }
+        });
+      } else {
+        var new_token = session.generateToken();
+        session.save({session_token: new_token}, function(err) {
+          if (err) {
+            console.log(err);
+            return done(null, false, { message: 'Unable to refresh session' });
+          } else {
+            return done(null, new_token);
+          }
+        });
+      }
+    });
+  }
+));
+
 passport.serializeUser(function(user, done) {
-  //console.log('serialize:' + node_util.inspect(user));
+  //console.log('serialize:' + util.inspect(user));
   done(null, JSON.stringify({id: user.id, system_admin: !!user.system_admin}));
 });
 passport.deserializeUser(function(user, done) {
-  //console.log('deserialize:' + node_util.inspect(user));
+  //console.log('deserialize:' + util.inspect(user));
   done(null, JSON.parse(user));
 });
 
@@ -82,9 +140,10 @@ app.use(express.session({
     maxAge: 30 * 24 * 60 * 60 * 1000 // Set the cookie to thirty days.
   }
 }));
+app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(flash());
+app.use(passport.authenticate('remember-me'));
 app.use(app.router);
 app.use(require('stylus').middleware(__dirname + '/public'));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -214,9 +273,28 @@ app.delete('/request', validation.requireLogin, route_db.deleteRequest);
 
 // Authentication handlers
 app.get('/login', login.login);
-app.post('/login', passport.authenticate('local', { successRedirect: '/',
-                                                    failureRedirect: '/login',
-                                                    failureFlash: true })
+app.post('/login',
+         passport.authenticate('local', { failureRedirect: '/login',
+                                          failureFlash: true }),
+         function(req, res, next) {
+           var user = bombay_util.getUser(req);
+           db_orm.Session.create([{person_id: user.id}], function(err, rows) {
+             if (err) {
+               console.log(err);
+               return res.send(500, err);
+             } else {
+               res.cookie(
+                 'remember_me',
+                 rows[0].session_token,
+                 { path: '/', httpOnly: true, maxAge: 120000 }
+               );
+               return next();
+             }
+           });
+         },
+         function(req, res) {
+           res.redirect('/');
+         }
 );
 
 // Reports handlers
@@ -227,6 +305,18 @@ app.get('/reports/:band_id/:report', validation.requireLogin, reports.sendReport
 app.get('/encryption', encryption.encryption);
 app.get('/logout', function(req, res) {
   //console.log(req.session);
+  var user = bombay_util.getUser(req);
+  db_orm.Session.one({person_id: user.id}, function(err, session) {
+    session.remove(function(err) {
+      if (err) {
+        console.log(util.format(
+          'Unable to remove session\n%s\n%s',
+          util.inspect(JSON.parse(JSON.stringify(session))),
+          util.inspect(err)
+        ));
+      }
+    });
+  });
   req.logout();
   res.redirect('/login');
 });
