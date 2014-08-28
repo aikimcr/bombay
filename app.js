@@ -22,6 +22,9 @@ var reports = require('routes/reports');
 var route_db = require('routes/db');
 var validation = require('routes/validation');
 
+//var session_expires = 24 * 3600 * 1000;
+var session_expires = 20 * 60 * 1000;
+
 passport.use(new LocalStrategy(
   function(username, password, done) {
     password = decodeURIComponent(password);
@@ -59,23 +62,77 @@ passport.use(new LocalStrategy(
   }
 ));
 
+function checkSessionExpiration(session, cb) {
+  if (!cb) cb = function() {};
+  var default_expiration = 30 * 60 * 1000;// Thirty minutes.
+  var session_duration = Date.now().valueOf() - session.session_start.valueOf();
+  session.getPerson(function(err, person) {
+    if (err) {
+      if (session_duration > default_expiration) {
+        console.log(util.format(
+          'Removing expired (possibly invalid) session %s for user %d',
+          session.session_token,
+          session.person_id
+        ));
+        session.remove(function(err) { if (err) { console.log(err); }});
+        return cb(true);
+      }
+    } else if (person) {
+      var session_expires = person.session_expires * 60 * 1000;//In minutes
+      if (session_duration > session_expires) {
+        console.log(util.format(
+          'Removing expired session %s for user %s',
+          session.session_token,
+          session.person.name
+        ));
+        session.remove(function(err) { if (err) { console.log(err); }});
+        return cb(true);
+      }
+      return cb(false, person);
+    } else {
+      console.log(util.format(
+        'Removing invalid session %s for user %d',
+        session.session_token,
+        session.person_id
+      ));
+      session.remove(function(err) { if (err) { console.log(err); }});
+      return cb(true);
+    }
+  });
+}
+
 passport.use('remember-me', new RememberMeStrategy(
   function(token, done) {
+    // Clear out old sessions
+    process.nextTick(function() {
+      db_orm.Session.find(function(err, session_list) {
+        if (err) {
+          console.log('Error getting session list:\n' + util.inspect(err));
+        } else {
+          session_list.forEach(function(session) {
+            checkSessionExpiration(session);
+          });
+        }
+      });
+    });
+
+    // Validate the session token
     db_orm.Session.one({session_token: token}, function(err, session) {
       if (err) {
+        console.log('No session found\n' + util.inspect(err));
         return done(null, false, { message: 'No Session found' });
       } else if (session == null) {
+        console.log('No session found');
         return done(null, false, { message: 'No Session found' });
       } else {
-        session.save({session_token: null}, function(err) {
-          if (err) {
-            console.log(err);
-            return done(null, false, { message: 'Unable to update session' });
+        checkSessionExpiration(session, function(expired, person) {
+          if (expired) {
+            return done(null, false, { message: 'Session Expired' });
           } else {
-            session.getPerson(function(err, person) {
+            session.save({session_token: null}, function(err) {
               if (err) {
-                console.log(err);
-                return done(null, false, { message: 'Unable to get person' });
+                console.log('Unable to update session\n' + util.inspect(err));
+                return done(null, false, { message: 'Unable to update session' });
               } else {
                 return done(null, person);
               }
@@ -86,14 +143,14 @@ passport.use('remember-me', new RememberMeStrategy(
     });
   },
   function(user, done) {
-    db_orm.Session.one({person_id: user.id}, function(err, session) {
+    db_orm.Session.one({person_id: user.id, session_token: null}, function(err, session) {
       if (err) {
-        console.log(err);
+        console.log('Unable to initiate session\n' + util.inspect(err));
         return done(null, false, { message: 'Unable to initiate session' });
       } else if (session == null) {
         db_orm.Session.create([{person_id: user.id}], function(err, rows) {
           if (err) {
-            console.log(err);
+            console.log('Unable to initiate session\n' + util.inspect(err));
             return done(null, false, { message: 'Unable to initiate session' });
           } else {
             return done(null, rows[0].session_token);
@@ -103,7 +160,7 @@ passport.use('remember-me', new RememberMeStrategy(
         var new_token = session.generateToken();
         session.save({session_token: new_token}, function(err) {
           if (err) {
-            console.log(err);
+            console.log('Unable to refresh session\n' + util.inspect(err));
             return done(null, false, { message: 'Unable to refresh session' });
           } else {
             return done(null, new_token);
@@ -136,14 +193,12 @@ app.use(express.methodOverride());
 app.use(express.cookieParser('Plover-Indy-Girlfriend-Dragon'));
 app.use(express.session({
   secret: 'Plover-Indy-Girlfriend-Dragon',
-  cookie: {
-    maxAge: 30 * 24 * 60 * 60 * 1000 // Set the cookie to thirty days.
-  }
+  cookie: { maxAge: 10 * 1000 }, // Refresh the session every ten seconds
 }));
 app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(passport.authenticate('remember-me'));
+app.use(passport.authenticate('remember-me', {failureFlash: true}));
 app.use(app.router);
 app.use(require('stylus').middleware(__dirname + '/public'));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -286,7 +341,7 @@ app.post('/login',
                res.cookie(
                  'remember_me',
                  rows[0].session_token,
-                 { path: '/', httpOnly: true, maxAge: 120000 }
+                 { path: '/', httpOnly: true, maxAge: 60 * 60 * 1000 }//Keep the session token one hour
                );
                return next();
              }
@@ -307,15 +362,19 @@ app.get('/logout', function(req, res) {
   //console.log(req.session);
   var user = bombay_util.getUser(req);
   db_orm.Session.one({person_id: user.id}, function(err, session) {
-    session.remove(function(err) {
-      if (err) {
-        console.log(util.format(
-          'Unable to remove session\n%s\n%s',
-          util.inspect(JSON.parse(JSON.stringify(session))),
-          util.inspect(err)
-        ));
-      }
-    });
+    if (err) {
+      console.log(err);
+    } else {
+      session.remove(function(err) {
+        if (err) {
+          console.log(util.format(
+            'Unable to remove session\n%s\n%s',
+            util.inspect(JSON.parse(JSON.stringify(session))),
+            util.inspect(err)
+          ));
+        }
+      });
+    }
   });
   req.logout();
   res.redirect('/login');

@@ -35,6 +35,11 @@ body {
   font-size: 300%;
   font-weight: bold;
 }
+.login_page .login_container .error_msg {
+  font-size: 50%;
+  color: #f00;
+  background-color: #fff;
+}
 .navigation {
   background-color: #b8dfda;
   color: #000;

@@ -133,6 +133,7 @@ exports.postPersonTable = function(req, res) {
   var pem = util.get_pem_file('crypto/rsa_public.pem');
   req.body.password = util.encrypt(pem, password);
   req.body.system_admin = req.body.system_admin || false;
+  req.body.session_expires = req.body.session_expires || 30;
   postModel(res, 'Person', req.body, 'person');
 };
 

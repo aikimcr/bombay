@@ -74,7 +74,7 @@ function isBandAdmin(band_member) {
 
 exports.requireLogin = function(req, res, next) {
   if (req.isAuthenticated()) { return next(); }
-  res.redirect('http://login');
+  res.redirect('/login');
 };
 
 exports.requireSysAdmin = function(req, res, next) {

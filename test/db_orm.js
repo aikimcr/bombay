@@ -53,7 +53,8 @@ describe('db_orm', function() {
           full_name: 'Herkimer Jones',
           password: 'shorebird',
           email: 'hjones@musichero.non',
-          system_admin: true
+          system_admin: true,
+          session_expires: 30
         }], function(err, persons) {
           should.not.exist(err);
           should.exist(persons);
@@ -63,6 +64,7 @@ describe('db_orm', function() {
           persons[0].password.should.eql('shorebird');
           persons[0].email.should.eql('hjones@musichero.non');
           persons[0].system_admin.should.eql(true);
+          persons[0].session_expires.should.eql(30);
           should.exist(persons[0].id);
           last_person_id = persons[0].id;
           done();
@@ -79,6 +81,7 @@ describe('db_orm', function() {
           person.password.should.eql('shorebird');
           person.email.should.eql('hjones@musichero.non');
           person.system_admin.should.eql(true);
+          person.session_expires.should.eql(30);
           done();
         });
       });
@@ -202,7 +205,8 @@ describe('db_orm', function() {
           full_name: 'Herkimer Jones',
           password: 'shorebird',
           email: 'hjones@musichero.non',
-          system_admin: true
+          system_admin: true,
+          session_expires: 30
         }], function(err, persons) {
           last_person = persons[0];
           done();
@@ -417,19 +421,22 @@ describe('db_orm', function() {
         full_name: 'Herkimer Jones',
         password: 'shorebird',
         email: 'hjones@musichero.non',
-        system_admin: true
+        system_admin: true,
+        session_expires: 30
       }, {
         name: 'bbunny',
         full_name: 'Bugs Bunny',
         password: 'harebrain',
         email: 'bbunny@looney.tunes',
-        system_admin: false
+        system_admin: false,
+        session_expires: 30
       }, {
         name: 'jguitar',
         full_name: 'Johnny Guitar',
         password: 'shredd',
         email: 'jguitar@musichero.non',
-        system_admin: false
+        system_admin: false,
+        session_expires: 30
       }], function(err, persons) {
         if (err) throw err;
         persons.forEach(function(person) {
@@ -642,25 +649,29 @@ describe('db_orm', function() {
         full_name: 'Herkimer Jones',
         password: 'shorebird',
         email: 'hjones@musichero.non',
-        system_admin: true
+        system_admin: true,
+        session_expires: 30
       }, {
         name: 'bbunny',
         full_name: 'Bugs Bunny',
         password: 'harebrain',
         email: 'bbunny@looney.tunes',
-        system_admin: false
+        system_admin: false,
+        session_expires: 30
       }, {
         name: 'jguitar',
         full_name: 'Johnny Guitar',
         password: 'shredd',
         email: 'jguitar@musichero.non',
-        system_admin: false
+        system_admin: false,
+        session_expires: 30
       }, {
         name: 'ddrums',
         full_name: 'Danny Drums',
         password: 'pounder',
         email: 'ddrums@musichero.non',
-        system_admin: false
+        system_admin: false,
+        session_expires: 30
       }], function(err, persons) {
         if (err) throw err;
         persons.forEach(function(person) {
@@ -761,19 +772,22 @@ describe('db_orm', function() {
         full_name: 'Herkimer Jones',
         password: 'shorebird',
         email: 'hjones@musichero.non',
-        system_admin: true
+        system_admin: true,
+        session_expires: 30
       }, {
         name: 'bbunny',
         full_name: 'Bugs Bunny',
         password: 'harebrain',
         email: 'bbunny@looney.tunes',
-        system_admin: false
+        system_admin: false,
+        session_expires: 30
       }, {
         name: 'jguitar',
         full_name: 'Johnny Guitar',
         password: 'shredd',
         email: 'jguitar@musichero.non',
-        system_admin: false
+        system_admin: false,
+        session_expires: 30
       }], function(err, persons) {
         if (err) throw err;
         persons.forEach(function(person) {

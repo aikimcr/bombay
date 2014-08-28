@@ -39,6 +39,7 @@ CREATE TABLE person (
   password VARCHAR NOT NULL DEFAULT 'password',
   email VARCHAR,
   system_admin INTEGER NOT NULL DEFAULT 0,
+  session_expires INTEGER NOT NULL DEFAULT 30,
   UNIQUE (name)
 );
 
