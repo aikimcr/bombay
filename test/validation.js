@@ -73,7 +73,7 @@ describe('validation', function() {
       req.isAuthenticated = function() { return false; };
       res.redirect = function(url) {
         should.exist(url);
-        url.should.eql('http://login');
+        url.should.eql('/login');
         done();
       };
       validate.requireLogin(req, res, function() {

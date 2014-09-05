@@ -115,6 +115,13 @@ TableList.prototype.create = function() {
       var model_result = result[this.model_type.model_key];
       var model = this.build_object_(model_result);
       this.insert(model);
+
+      if ('song_ratings' in result) {
+        result.song_ratings.forEach(function(rating) {
+          var model = manager.song_ratings.build_object_(rating);
+          manager.song_ratings.insert(model);
+        });
+      }
     }
     callback(result_code, result);
   }.bind(this), data);
