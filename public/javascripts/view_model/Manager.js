@@ -259,7 +259,7 @@ function Manager(for_test) {
     } else {
       return [];
     }
-  }.bind(this)).extend({ throttle: 250 });
+  }.bind(this)).extend({ throttle: 50 });
 
   this.non_band_songs = ko.computed(function() {
     if (this.current_band()) {
@@ -273,11 +273,11 @@ function Manager(for_test) {
     } else {
       return this.songs.list();
     }
-  }.bind(this)).extend({ throttle: 250 });
+  }.bind(this)).extend({ throttle: 50 });
 
   this.current_requests = ko.computed(function() {
     return this.requests.filtered_list();
-  }.bind(this)).extend({ throttle: 250 });
+  }.bind(this)).extend({ throttle: 50 });
 
   this.current_reports = ko.computed(function() {
     if (this.current_band() && this.current_band().id() > 0) {
@@ -298,7 +298,7 @@ function Manager(for_test) {
     } else {
       return [];
     }
-  }.bind(this)).extend({ throttle: 250 });
+  }.bind(this)).extend({ throttle: 50 });
 
   this.forms = {};
   if (!for_test) {

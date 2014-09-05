@@ -7,26 +7,26 @@ function Song(id, name, artist_id, key_signature) {
 
   this.artist = ko.computed(function() {
     return manager.artists.getById(this.artist_id()) || new Artist();
-  }.bind(this)).extend({throttle: 250});
+  }.bind(this)).extend({throttle: 50});
 
   this.band_songs = ko.computed(function() {
     return manager.band_songs.filterByKey('song_id', this.id());
-  }.bind(this)).extend({throttle: 250});
+  }.bind(this)).extend({throttle: 50});
 
   this.description = ko.computed(function () {
     if (!this.name() || !this.artist()) { return ''; }
     return this.name() + ' by ' + this.artist().name();
-  }.bind(this)).extend({throttle: 250});
+  }.bind(this)).extend({throttle: 50});
 
   this.bands = ko.computed(function () {
     return ko.utils.arrayMap(this.band_songs(), function(band_song) {
       return band_song.band();
     }.bind(this));
-  }.bind(this)).extend({throttle: 250});
+  }.bind(this)).extend({throttle: 50});
 
   this.band_count = ko.computed(function () {
     return this.bands().length;
-  }.bind(this)).extend({throttle: 250});
+  }.bind(this)).extend({throttle: 50});
 }
 util.inherits(Song, Table);
 

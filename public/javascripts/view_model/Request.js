@@ -10,7 +10,7 @@ function Request(id, request_type, timestamp, person_id, band_id, description, o
 
   this.person = ko.computed(function() {
     return manager.persons.getById(this.person_id());
-  }.bind(this)).extend({throttle: 250});
+  }.bind(this)).extend({throttle: 50});
 
   this.person_name = ko.computed(function() {
     var person = this.person();
@@ -20,11 +20,11 @@ function Request(id, request_type, timestamp, person_id, band_id, description, o
     } else {
       return "<Deleted>";
     }
-  }.bind(this)).extend({throttle: 250});
+  }.bind(this)).extend({throttle: 50});
 
   this.band = ko.computed(function() {
     return manager.bands.getById(this.band_id());
-  }.bind(this)).extend({throttle: 250});
+  }.bind(this)).extend({throttle: 50});
 
   this.band_name = ko.computed(function() {
     var band = this.band();
@@ -34,19 +34,19 @@ function Request(id, request_type, timestamp, person_id, band_id, description, o
     } else {
       return "<Deleted>";
     }
-  }.bind(this)).extend({throttle: 250});
+  }.bind(this)).extend({throttle: 50});
 
   this.pretty_request_type = ko.computed(function() {
     return constants.pretty_request_type[this.request_type()];
-  }.bind(this)).extend({throttle: 250});
+  }.bind(this)).extend({throttle: 50});
 
   this.pretty_status = ko.computed(function() {
     return constants.pretty_request_status[this.status()];
-  }.bind(this)).extend({throttle: 250});
+  }.bind(this)).extend({throttle: 50});
 
   this.isSelf = ko.computed(function() {
     return manager.current_person().id() == this.person_id();
-  }.bind(this)).extend({throttle: 250});
+  }.bind(this)).extend({throttle: 50});
 
   this.isAdmin = ko.computed(function() {
     var members = ko.utils.arrayFilter(manager.band_members.list(), function(member) {
@@ -55,7 +55,7 @@ function Request(id, request_type, timestamp, person_id, band_id, description, o
              member.band_admin();
     }.bind(this));
     return members.length > 0;
-  }.bind(this)).extend({throttle: 250});
+  }.bind(this)).extend({throttle: 50});
 
   this.actions_list = ko.computed(function() {
     var possible_actions = [{
@@ -106,7 +106,7 @@ function Request(id, request_type, timestamp, person_id, band_id, description, o
       }
       return false;
     }.bind(this));
-  }.bind(this)).extend({throttle: 250});
+  }.bind(this)).extend({throttle: 50});
 }
 util.inherits(Request, Table);
 

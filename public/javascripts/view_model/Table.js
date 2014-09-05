@@ -171,9 +171,11 @@ TableList.prototype.load_ = function(result_code, result) {
   if (! result[model_key]) {
     throw new Error('Table load got no result for ' + model_key + ' result = "' + result.toString() + '"');
   }
+  var list_model = [];
   result[model_key].forEach(function(model) {
-    this.insert(this.build_object_(model));
+    list_model.push(this.build_object_(model));
   }.bind(this));
+  this.list(list_model);
 };
 
 TableList.prototype.filterByKey = function(key, value) {

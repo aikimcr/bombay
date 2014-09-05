@@ -5,11 +5,11 @@ function Artist(id, name) {
 
   this.songs = ko.computed(function() {
     return manager.songs.filterByKey('artist_id', this.id());
-  }.bind(this)).extend({throttle: 250});
+  }.bind(this)).extend({throttle: 50});
 
   this.song_count = ko.computed(function() {
     return this.songs().length;
-  }.bind(this)).extend({throttle: 250});
+  }.bind(this)).extend({throttle: 50});
 }
 util.inherits(Artist, Table);
 
