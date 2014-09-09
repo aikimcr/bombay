@@ -4,6 +4,10 @@ DROP TABLE IF EXISTS setlist;
 
 DROP TABLE IF EXISTS song_rating;
 
+DROP TABLE IF EXISTS rehearsal_learning;
+DROP TABLE IF EXISTS rehearsal_run_through;
+DROP TABLE IF EXISTS rehearsal_plan;
+
 DROP TRIGGER IF EXISTS new_band_song;
 DROP TRIGGER IF EXISTS del_band_song;
 DROP TABLE IF EXISTS band_song;
@@ -93,6 +97,37 @@ CREATE TABLE song_rating (
   FOREIGN KEY (band_song_id) REFERENCES band_song(id) ON DELETE CASCADE,
   UNIQUE (band_member_id, band_song_id)
 );
+
+CREATE TABLE rehearsal_plan (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  rehearsal_date VARCHAR NOT NULL
+);
+
+CREATE TABLE rehearsal_run_through (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  rehearsal_plan_id INTEGER NOT NULL,
+  sequence INTEGER NOT NULL,
+  band_song_id INTEGER NOT NULL,
+  UNIQUE(rehearsal_plan_id, sequence),
+  FOREIGN KEY (rehearsal_plan_id) REFERENCES rehearsal_plan(id) ON DELETE CASCADE,
+  FOREIGN KEY (band_song_id) REFERENCES band_song(id) ON DELETE CASCADE
+);
+
+CREATE TABLE rehearsal_learning (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  rehearsal_plan_id INTEGER NOT NULL,
+  sequence INTEGER NOT NULL,
+  band_song_id INTEGER NOT NULL,
+  UNIQUE(rehearsal_plan_id, sequence),
+  FOREIGN KEY (rehearsal_plan_id) REFERENCES rehearsal_plan(id) ON DELETE CASCADE,
+  FOREIGN KEY (band_song_id) REFERENCES band_song(id) ON DELETE CASCADE
+);
+
+CREATE TRIGGER del_rehearsal_plan BEFORE DELETE ON rehearsal_plan FOR EACH ROW
+BEGIN
+  DELETE FROM rehearsal_run_through WHERE rehearsal_run_through.band_song_id = OLD.id;
+  DELETE FROM rehearsal_learning WHERE rehearsal_learning.band_song_id = OLD.id;
+END;
 
 CREATE TRIGGER new_band_member AFTER INSERT ON band_member FOR EACH ROW
 BEGIN
@@ -226,3 +261,6 @@ INSERT INTO schema_change (name, timestamp)
 
 INSERT INTO schema_change (name, timestamp)
        VALUES ('Add New Flag to song_rating', datetime('now'));
+
+INSERT INTO schema_change (name, timestamp)
+       VALUES ('Add Rehearsal Plan', datetime('now'));
