@@ -20,6 +20,7 @@ var index = require('routes/index');
 var login = require('routes/login');
 var reports = require('routes/reports');
 var route_db = require('routes/db');
+var rehearsal_plan = require('routes/rehearsal_plan');
 var validation = require('routes/validation');
 
 //var session_expires = 24 * 3600 * 1000;
@@ -325,6 +326,10 @@ app.get('/request', validation.requireLogin, route_db.getRequest);
 app.post('/request/:action', validation.requireLogin, route_db.createRequest);
 app.put('/request/:action', validation.requireLogin, route_db.updateRequest);
 app.delete('/request', validation.requireLogin, route_db.deleteRequest);
+
+app.get('/plan_lists', validation.requireLogin, rehearsal_plan.getPlanLists);
+app.get('/plan', validation.requireLogin, rehearsal_plan.getPlan);
+app.post('/plan', validation.requireLogin, rehearsal_plan.postPlan);
 
 // Authentication handlers
 app.get('/login', login.login);
