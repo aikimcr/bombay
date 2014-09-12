@@ -314,6 +314,7 @@ function Manager(for_test) {
     this.forms.add_song = new AddSong();
     this.forms.edit_song = new EditSong();
     this.forms.add_band_song = new AddBandSong();
+    this.forms.create_rehearsal_plan = new CreateRehearsalPlan();
   }
 
   this.confirm_dialog = new confirm_dialog();

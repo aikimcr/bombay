@@ -394,3 +394,83 @@ AddBandSong.prototype.postChange_ = function(callback) {
     }.bind(this)
   );
 };
+
+function CreateRehearsalPlan() {
+  Form.call(this, [manager.song_ratings]);
+  this.rehearsal_date = ko.observable(new Date().toDateString());
+  this.run_through_unselected = ko.observableArray();
+  this.run_through_preselected = ko.observableArray();
+  this.run_through_selected = ko.observableArray();
+  this.run_through_deselected = ko.observableArray();
+  this.learning_unselected = ko.observableArray();
+  this.learning_selected = ko.observableArray();
+}
+util.inherits(CreateRehearsalPlan, Form);
+
+CreateRehearsalPlan.prototype.show = function() {
+  this.init();
+  Form.prototype.show.call(this);
+};
+
+CreateRehearsalPlan.prototype.init = function() {
+  var svc = service.getInstance();
+
+  var query_date = new Date(this.rehearsal_date()).toISOString().substr(0, 10);
+  svc.get(
+    '/plan_lists?band_id=' + manager.current_band().id() + '&rehearsal_date=' + query_date,
+    function(result_code, result) {
+      if (result_code != 200 && result_code != 304) {
+        throw new Error('Get Plan Lists got result_code ' + result_code);
+      }
+
+      this.run_through_unselected(result.run_through_songs.map(function(song) {
+        return {
+          band_song_id: ko.observable(song.band_song_id),
+          description: ko.computed(function() {
+            var display_date = song.last_rehearsal_date ?
+              new Date(song.last_rehearsal_date).toDateString() :
+              'Never';
+
+            var display_status = manager.song_status_map.filter(function(map_row) {
+              return map_row.value == song.song_status;
+            })[0].value_text;
+
+            return song.song_name + ': ' + display_status + '(' + display_date + ')';
+          }.bind(this))
+        };
+      }));
+      this.learning_unselected(result.learning_songs);
+    }.bind(this)
+  );
+  Form.prototype.init.call(this);
+};
+
+CreateRehearsalPlan.prototype.moveList_ = function(source, destination, control) {
+  var i;
+  while(i = control.shift()) {
+    var rows = source.remove(function(item) {
+      return item.band_song_id() == i;
+    });
+
+    var row;
+    while(row = rows.shift()) {
+      destination.push(row);
+    }
+  }
+};
+
+CreateRehearsalPlan.prototype.moveToSelected = function() {
+  this.moveList_(
+    this.run_through_unselected,
+    this.run_through_selected,
+    this.run_through_preselected
+  );
+};
+
+CreateRehearsalPlan.prototype.moveToUnselected = function() {
+  this.moveList_(
+    this.run_through_selected,
+    this.run_through_unselected,
+    this.run_through_deselected
+  );
+};

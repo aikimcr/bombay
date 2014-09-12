@@ -1,0 +1,29 @@
+div#create_rehearsal_plan_form(data-bind="visible: forms.create_rehearsal_plan.isVisible")
+  div.dialog_background
+    div.dialog
+      div.title_bar
+        div.title Create Rehearsal Plan
+        div.close_button
+          button.close_button(data-bind="click: forms.create_rehearsal_plan.hide.bind(forms.create_rehearsal_plan)") X
+
+      div.dialog_body
+        div.title(data-bind="text: forms.create_rehearsal_plan.message")
+        form(data-bind="submit: postFormChange", form_key="create_rehearsal_plan")
+          div.list(data-bind="with: $root.forms.create_rehearsal_plan")
+            div
+              input(type="text", data-bind="value: rehearsal_date")
+
+            div
+              div
+                select(data-bind="selectedOptions: run_through_preselected, options: run_through_unselected, optionsText: 'description', optionsValue: 'band_song_id'" size="10" multiple="true")
+
+              div
+                button(data-bind="click: moveToSelected") >>>
+                button(data-bind="click: moveToUnselected") <<<
+
+              div
+                select(data-bind="selectedOptions: run_through_deselected, options: run_through_selected, optionsText: 'description', optionsValue: 'band_song_id'" size="10" multiple="true")
+
+
+
+          input(type="submit", value="Create")

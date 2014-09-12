@@ -3,6 +3,7 @@ div.app_context(id="dashboard", data-bind="visible: $root.current_tab().value ==
   div.app_context_item
     div.display
       div.control
+        button.edit_button(id="create_rehearsal_plan", data-bind="click: forms.create_rehearsal_plan.show.bind(forms.create_rehearsal_plan)") Create Rehearsal Plan
 
       div.filters(style="display: none")
         table
