@@ -4,8 +4,8 @@ JS_DIR = ./public/javascripts
 JS_LIB = $(JS_DIR)/lib
 TEST_CLIENT_LIB = ./public/test/lib
 
-KNOCKOUT_URL = http\://knockoutjs.com/downloads/knockout-3.0.0.js
-KNOCKOUT_JS = $(JS_LIB)/knockout-3.0.0.js
+KNOCKOUT_URL = http\://knockoutjs.com/downloads/knockout-3.2.0.js
+KNOCKOUT_JS = $(JS_LIB)/knockout-3.2.0.js
 
 PIDDER_URL = http\://sourceforge.net/projects/pidcrypt/files/pidcrypt/pidCrypt.crypto.library.005/pidCrypt.crypto.library.005.zip/download
 PIDDER_ZIP = $(JS_LIB)/pidCrypt.crypto.library.005.zip
@@ -48,6 +48,8 @@ test: $(NODE_MODULES) $(MOCHA) $(SHOULD_JS)
 test_setup: $(TEST_FILES)
 
 database: $(DATABASE)
+
+knockout: $(KNOCKOUT_JS)
 
 $(KNOCKOUT_JS): $(JS_LIB)
 	curl -o $(KNOCKOUT_JS) $(KNOCKOUT_URL)

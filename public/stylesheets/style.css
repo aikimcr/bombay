@@ -262,7 +262,7 @@ body {
   position: absolute;
 }
 .dialog {
-  width: 600px;
+  width: 750px;
   background-color: #b8dfda;
   color: #000;
   border-style: solid;
@@ -272,11 +272,11 @@ body {
   padding: 5px;
   position: absolute;
   top: 100px;
-  left: 300px;
+  left: 225px;
 }
 .dialog .title_bar {
   display: block;
-  width: 586px;
+  width: 736px;
   height: 30px;
   background-color: #1f4641;
   color: #dceeec;
@@ -288,7 +288,7 @@ body {
 }
 .dialog .title_bar .title {
   display: inline-block;
-  width: 548px;
+  width: 698px;
   height: 30px;
   vertical-align: middle;
 }

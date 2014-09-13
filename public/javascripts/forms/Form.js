@@ -425,7 +425,7 @@ CreateRehearsalPlan.prototype.init = function() {
 
       this.run_through_unselected(result.run_through_songs.map(function(song) {
         return {
-          band_song_id: ko.observable(song.band_song_id),
+          value: ko.observable(song.band_song_id),
           description: ko.computed(function() {
             var display_date = song.last_rehearsal_date ?
               new Date(song.last_rehearsal_date).toDateString() :
