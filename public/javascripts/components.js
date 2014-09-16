@@ -8,7 +8,7 @@ function ListSelector(params) {
   this.class = params.class;
 }
 
-ListSelector.prototype.handleSourceOptionClick_ = function(data, event, element, context) {
+ListSelector.prototype.handleOptionClick_ = function(data, event, element, context) {
   var selected_class = 'list_selector_selected';
 
   function changeClassList(el, set) {
@@ -128,15 +128,15 @@ var list_selector = {
     '    overflow-x: hidden;',
     '    overflow-y: auto;',
     '  }',
-    '  .list_selector_option {',
+    '  .list_selector_option, .list_selector_option::selection {',
     '    text-overflow: ellipsis;',
     '    overflow: hidden;',
     '    white-space: nowrap;',
     '  }',
-    '  .list_selector_option.list_selector_selected:nth-child(odd):not(:hover) {',
+    '  .list_selector_option.list_selector_selected:nth-child(odd):not(:hover), st_selector_option.list_selector_selected:nth-child(odd):not(:hover)::selection {',
     '    background-color: #7AA;',
     '  }',
-    '  .list_selector_option.list_selector_selected:nth-child(even):not(:hover) {',
+    '  .list_selector_option.list_selector_selected:nth-child(even):not(:hover), st_selector_option.list_selector_selected:nth-child(even):not(:hover)::selection {',
     '    background-color: #9CC;',
     '  }',
     '  .list_selector_option.list_selector_selected:hover {',
@@ -146,17 +146,17 @@ var list_selector = {
     '    color: #999;',
     '    background-color: #444;',
     '  }',
-    '  .list_selector_option:nth-child(odd):not(:hover) {',
+    '  .list_selector_option:nth-child(odd):not(:hover), st_selector_option:nth-child(odd):not(:hover)::selection {',
     '    background-color: #CCC;',
     '  }',
-    '  .list_selector_option:nth-child(even):not(:hover) {',
+    '  .list_selector_option:nth-child(even):not(:hover), st_selector_option:nth-child(even):not(:hover)::selection {',
     '    background-color: #FFF;',
     '  }',
     '</style>',
     '',
     '  <div class="list_selector">',
     '    <div class="list_selector_list list_selector_source" data-bind="foreach: source_list">',
-    '      <div class="list_selector_option" data-bind="text: description, attr: { title: description, value: value }, click: function(data, event) { $parent.handleSourceOptionClick_(data, event, $element, $context); }"></div>',
+    '      <div class="list_selector_option" data-bind="text: description, attr: { title: description, value: value }, click: function(data, event) { $parent.handleOptionClick_(data, event, $element, $context); }"></div>',
     '    </div>',
     '  </div>',
     '  <div class="list_selector_control">',
@@ -165,7 +165,7 @@ var list_selector = {
     '  </div>',
     '  <div class="list_selector list_selector_destination">',
     '    <div class="list_selector_list" data-bind="foreach: destination_list">',
-    '      <div class="list_selector_option" data-bind="text: description, attr: { title: description }"></div>',
+    '      <div class="list_selector_option" data-bind="text: description, attr: { title: description, value: value }, click: function(data, event) { $parent.handleOptionClick_(data, event, $element, $context); }"></div>',
     '    </div>',
     '  </div>'
   ].join(' ')
