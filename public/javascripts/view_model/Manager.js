@@ -399,6 +399,10 @@ function Manager(for_test) {
       }.bind(this), event);
     }
   }.bind(this);
+
+  this.testClick = function() {
+    console.log('Test Click');
+  };
 }
 
 function app_start() {
