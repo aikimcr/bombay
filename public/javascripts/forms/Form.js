@@ -415,16 +415,9 @@ CreateRehearsalPlan.prototype.show = function() {
 CreateRehearsalPlan.prototype.init = function() {
   var svc = service.getInstance();
 
-  var query_date = new Date(this.rehearsal_date()).toISOString().substr(0, 10);
-  svc.get(
-    '/plan_lists?band_id=' + manager.current_band().id() + '&rehearsal_date=' + query_date,
-    function(result_code, result) {
-      if (result_code != 200 && result_code != 304) {
-        throw new Error('Get Plan Lists got result_code ' + result_code);
-      }
-
-      var sequence = 0;
-      this.run_through_unselected(result.run_through_songs.map(function(song) {
+  function mapSongs(list) {
+    var sequence = 0;
+    return list.map(function(song) {
         sequence++;
         return {
           sort_key: ko.observable(sequence),
@@ -441,8 +434,19 @@ CreateRehearsalPlan.prototype.init = function() {
             return '(' + sequence + ')' + song.song_name + ': ' + display_status + '(' + display_date + ')';
           }.bind(this))
         };
-      }));
-      this.learning_unselected(result.learning_songs);
+      }.bind(this));
+  }
+
+  var query_date = new Date(this.rehearsal_date()).toISOString().substr(0, 10);
+  svc.get(
+    '/plan_lists?band_id=' + manager.current_band().id() + '&rehearsal_date=' + query_date,
+    function(result_code, result) {
+      if (result_code != 200 && result_code != 304) {
+        throw new Error('Get Plan Lists got result_code ' + result_code);
+      }
+
+      this.run_through_unselected(mapSongs(result.run_through_songs));
+      this.learning_unselected(mapSongs(result.learning_songs));
     }.bind(this)
   );
   Form.prototype.init.call(this);
