@@ -9,6 +9,6 @@ div#create_rehearsal_plan_form(data-bind="visible: forms.create_rehearsal_plan.i
       div.dialog_body
         div.title(data-bind="text: forms.create_rehearsal_plan.message")
         form(data-bind="submit: postFormChange", form_key="create_rehearsal_plan")
-          list-selector(class="create_rehearsal_run_through" params="source: forms.create_rehearsal_plan.run_through_unselected, destination: forms.create_rehearsal_plan.run_through_selected, class: 'create_rehearsal_run_through'")
+          list-selector(class="create_rehearsal_run_through" params="source: forms.create_rehearsal_plan.run_through_unselected, destination: forms.create_rehearsal_plan.run_through_selected, class: 'create_rehearsal_run_through', sort_reverse: false")
 
           input(type="submit", value="Create")

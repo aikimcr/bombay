@@ -48,7 +48,7 @@ function artist_and_song_sql(sql, status_list, rating_list, artist_id, song_id, 
   return [song_id, band_song_id, status_list, rating_list];
 }
 
-describe('rehearsal_plan', function() {
+describe.only('rehearsal_plan', function() {
   describe('lib', function() {
     before(function(done) { test_util.db.resetDb(done); });
 
@@ -95,56 +95,64 @@ describe('rehearsal_plan', function() {
         song_name: 'Song 1 by Artist 1',
         song_status: 2,
         last_rehearsal_date: null,
-        average_rating: 3
+        average_rating: 3,
+        score: 30716.807523202726
       }, {
         band_song_id: 7,
         song_id: 7,
         song_name: 'Song 1 by Artist 4',
         song_status: 2,
         last_rehearsal_date: null,
-        average_rating: 3
+        average_rating: 3,
+        score: 30716.807523202726
       }, {
         band_song_id: 4,
         song_id: 4,
         song_name: 'Song 2 by Artist 2',
         song_status: 2,
         last_rehearsal_date: null,
-        average_rating: 3
+        average_rating: 3,
+        score: 30716.807523202726
       }, {
         band_song_id: 5,
         song_id: 5,
         song_name: 'Song 1 by Artist 3',
         song_status: 3,
         last_rehearsal_date: null,
-        average_rating: 4
+        average_rating: 4,
+        score: 30634.87714591962
       }, {
         band_song_id: 2,
         song_id: 2,
         song_name: 'Song 2 by Artist 1',
         song_status: 3,
         last_rehearsal_date: null,
-        average_rating: 4
+        average_rating: 4,
+        score: 30634.87714591962
       }, {
         band_song_id: 8,
         song_id: 8,
         song_name: 'Song 2 by Artist 4',
         song_status: 3,
         last_rehearsal_date: null,
-        average_rating: 4
+        average_rating: 4,
+        score: 30634.87714591962
       }, {
         band_song_id: 3,
         song_id: 3,
         song_name: 'Song 1 by Artist 2',
         song_status: 4,
         last_rehearsal_date: null,
-        average_rating: 5
+        average_rating: 5,
+        score: 30575.671146786826
       }, {
         band_song_id: 6,
         song_id: 6,
         song_name: 'Song 2 by Artist 3',
         song_status: 4,
         last_rehearsal_date: null,
-        average_rating: 5
+        average_rating: 5,
+        score: 30575.671146786826
       }];
 
       learning_list = [{
@@ -153,28 +161,32 @@ describe('rehearsal_plan', function() {
         song_name: 'Song 1 by Artist 5',
         song_status: 0,
         last_rehearsal_date: null,
-        average_rating: 5
+        average_rating: 5,
+        score: 116.09640474436813
       }, {
         band_song_id: 12,
         song_id: 12,
         song_name: 'Song 2 by Artist 6',
         song_status: 1,
         last_rehearsal_date: null,
-        average_rating: 5
+        average_rating: 5,
+        score: 116.09640474436813
       }, {
         band_song_id: 11,
         song_id: 11,
         song_name: 'Song 1 by Artist 6',
         song_status: 0,
         last_rehearsal_date: null,
-        average_rating: 4
+        average_rating: 4,
+        score: 80
       }, {
         band_song_id: 10,
         song_id: 10,
         song_name: 'Song 2 by Artist 5',
         song_status: 1,
         last_rehearsal_date: null,
-        average_rating: 3
+        average_rating: 3,
+        score: 47.54887502163469
       }];
 
       done();
@@ -215,56 +227,64 @@ describe('rehearsal_plan', function() {
         song_name: 'Song 2 by Artist 4',
         song_status: 3,
         last_rehearsal_date: null,
-        average_rating: 4
+        average_rating: 4,
+        score: 30634.87714591962
       }, {
         band_song_id: 3,
         song_id: 3,
         song_name: 'Song 1 by Artist 2',
         song_status: 4,
         last_rehearsal_date: null,
-        average_rating: 5
+        average_rating: 5,
+        score: 30575.671146786826
       }, {
         band_song_id: 6,
         song_id: 6,
         song_name: 'Song 2 by Artist 3',
         song_status: 4,
         last_rehearsal_date: null,
-        average_rating: 5
+        average_rating: 5,
+        score: 30575.671146786826
       }, {
         band_song_id: 1,
         song_id: 1,
         song_name: 'Song 1 by Artist 1',
         song_status: 2,
         last_rehearsal_date: rehearsal_date.toISOString().substr(0, 10),
-        average_rating: 3
+        average_rating: 3,
+        score: 146.13637641589872
       }, {
         band_song_id: 7,
         song_id: 7,
         song_name: 'Song 1 by Artist 4',
         song_status: 2,
         last_rehearsal_date: rehearsal_date.toISOString().substr(0, 10),
-        average_rating: 3
+        average_rating: 3,
+        score: 146.13637641589872
       }, {
         band_song_id: 4,
         song_id: 4,
         song_name: 'Song 2 by Artist 2',
         song_status: 2,
         last_rehearsal_date: rehearsal_date.toISOString().substr(0, 10),
-        average_rating: 3
+        average_rating: 3,
+        score: 146.13637641589872
       }, {
         band_song_id: 5,
         song_id: 5,
         song_name: 'Song 1 by Artist 3',
         song_status: 3,
         last_rehearsal_date: rehearsal_date.toISOString().substr(0, 10),
-        average_rating: 4
+        average_rating: 4,
+        score: 64.20599913279622
       }, {
         band_song_id: 2,
         song_id: 2,
         song_name: 'Song 2 by Artist 1',
         song_status: 3,
         last_rehearsal_date: rehearsal_date.toISOString().substr(0, 10),
-        average_rating: 4
+        average_rating: 4,
+        score: 64.20599913279622
       }];
 
       learning_list = [{
@@ -273,28 +293,32 @@ describe('rehearsal_plan', function() {
         song_name: 'Song 1 by Artist 5',
         song_status: 0,
         last_rehearsal_date: rehearsal_date.toISOString().substr(0, 10),
-        average_rating: 5
+        average_rating: 5,
+        score: 104.63781322576567
       }, {
         band_song_id: 12,
         song_id: 12,
         song_name: 'Song 2 by Artist 6',
         song_status: 1,
         last_rehearsal_date: rehearsal_date.toISOString().substr(0, 10),
-        average_rating: 5
+        average_rating: 5,
+        score: 104.63781322576567
       }, {
         band_song_id: 11,
         song_id: 11,
         song_name: 'Song 1 by Artist 6',
         song_status: 0,
         last_rehearsal_date: null,
-        average_rating: 4
+        average_rating: 4,
+        score: 80
       }, {
         band_song_id: 10,
         song_id: 10,
         song_name: 'Song 2 by Artist 5',
         song_status: 1,
         last_rehearsal_date: null,
-        average_rating: 3
+        average_rating: 3,
+        score: 47.54887502163469
       }];
       old_rehearsal_date = rehearsal_date;
 
@@ -351,63 +375,72 @@ describe('rehearsal_plan', function() {
         song_name: 'Song 1 by Artist 5',
         song_status: 2,
         last_rehearsal_date: null,
-        average_rating: 5
+        average_rating: 5,
+        score: 30718.807523202726
       }, {
         band_song_id: 4,
         song_id: 4,
         song_name: 'Song 2 by Artist 2',
         song_status: 2,
         last_rehearsal_date: old_rehearsal_date.toISOString().substr(0, 10),
-        average_rating: 3
+        average_rating: 3,
+        score: 166.13637641589872
       }, {
         band_song_id: 1,
         song_id: 1,
         song_name: 'Song 1 by Artist 1',
         song_status: 2,
         last_rehearsal_date: rehearsal_date.toISOString().substr(0, 10),
-        average_rating: 3
+        average_rating: 3,
+        score: 146.13637641589872
       }, {
         band_song_id: 7,
         song_id: 7,
         song_name: 'Song 1 by Artist 4',
         song_status: 2,
         last_rehearsal_date: rehearsal_date.toISOString().substr(0, 10),
-        average_rating: 3
+        average_rating: 3,
+        score: 146.13637641589872
       }, {
         band_song_id: 5,
         song_id: 5,
         song_name: 'Song 1 by Artist 3',
         song_status: 3,
         last_rehearsal_date: old_rehearsal_date.toISOString().substr(0, 10),
-        average_rating: 4
+        average_rating: 4,
+        score: 84.20599913279622
       }, {
         band_song_id: 2,
         song_id: 2,
         song_name: 'Song 2 by Artist 1',
         song_status: 3,
         last_rehearsal_date: old_rehearsal_date.toISOString().substr(0, 10),
-        average_rating: 4
+        average_rating: 4,
+        score: 84.20599913279622
       }, {
         band_song_id: 8,
         song_id: 8,
         song_name: 'Song 2 by Artist 4',
         song_status: 3,
         last_rehearsal_date: rehearsal_date.toISOString().substr(0, 10),
-        average_rating: 4
+        average_rating: 4,
+        score: 64.20599913279622
       }, {
         band_song_id: 3,
         song_id: 3,
         song_name: 'Song 1 by Artist 2',
         song_status: 4,
         last_rehearsal_date: rehearsal_date.toISOString().substr(0, 10),
-        average_rating: 5
+        average_rating: 5,
+        score: 5
       }, {
         band_song_id: 6,
         song_id: 6,
         song_name: 'Song 2 by Artist 3',
         song_status: 4,
         last_rehearsal_date: rehearsal_date.toISOString().substr(0, 10),
-        average_rating: 5
+        average_rating: 5,
+        score: 5
       }];
 
       learning_list = [{
@@ -416,21 +449,24 @@ describe('rehearsal_plan', function() {
         song_name: 'Song 2 by Artist 6',
         song_status: 1,
         last_rehearsal_date: rehearsal_date.toISOString().substr(0, 10),
-        average_rating: 5
+        average_rating: 5,
+        score: 104.63781322576567
       }, {
         band_song_id: 11,
         song_id: 11,
         song_name: 'Song 1 by Artist 6',
         song_status: 0,
         last_rehearsal_date: null,
-        average_rating: 4
+        average_rating: 4,
+        score: 80
       }, {
         band_song_id: 10,
         song_id: 10,
         song_name: 'Song 2 by Artist 5',
         song_status: 1,
         last_rehearsal_date: null,
-        average_rating: 3
+        average_rating: 3,
+        score: 47.54887502163469
       }];
 
       rehearsal_plan.save(rehearsal_date, run_through, learning, function(err) {
@@ -656,56 +692,64 @@ describe('rehearsal_plan', function() {
           song_name: 'Song 1 by Artist 1',
           song_status: 2,
           last_rehearsal_date: null,
-          average_rating: 3
+          average_rating: 3,
+          score: 30716.807523202726
         }, {
           band_song_id: 7,
           song_id: 7,
           song_name: 'Song 1 by Artist 4',
           song_status: 2,
           last_rehearsal_date: null,
-          average_rating: 3
+          average_rating: 3,
+          score: 30716.807523202726
         }, {
           band_song_id: 4,
           song_id: 4,
           song_name: 'Song 2 by Artist 2',
           song_status: 2,
           last_rehearsal_date: null,
-          average_rating: 3
+          average_rating: 3,
+          score: 30716.807523202726
         }, {
           band_song_id: 5,
           song_id: 5,
           song_name: 'Song 1 by Artist 3',
           song_status: 3,
           last_rehearsal_date: null,
-          average_rating: 4
+          average_rating: 4,
+          score: 30634.87714591962
         }, {
           band_song_id: 2,
           song_id: 2,
           song_name: 'Song 2 by Artist 1',
           song_status: 3,
           last_rehearsal_date: null,
-          average_rating: 4
+          average_rating: 4,
+          score: 30634.87714591962
         }, {
           band_song_id: 8,
           song_id: 8,
           song_name: 'Song 2 by Artist 4',
           song_status: 3,
           last_rehearsal_date: null,
-          average_rating: 4
+          average_rating: 4,
+          score: 30634.87714591962
         }, {
           band_song_id: 3,
           song_id: 3,
           song_name: 'Song 1 by Artist 2',
           song_status: 4,
           last_rehearsal_date: null,
-          average_rating: 5
+          average_rating: 5,
+          score: 30575.671146786826
         }, {
           band_song_id: 6,
           song_id: 6,
           song_name: 'Song 2 by Artist 3',
           song_status: 4,
           last_rehearsal_date: null,
-          average_rating: 5
+          average_rating: 5,
+          score: 30575.671146786826
         }],
         learning_songs: [{
           band_song_id: 9,
@@ -713,28 +757,32 @@ describe('rehearsal_plan', function() {
           song_name: 'Song 1 by Artist 5',
           song_status: 0,
           last_rehearsal_date: null,
-          average_rating: 5
+          average_rating: 5,
+          score: 116.09640474436813
         }, {
           band_song_id: 12,
           song_id: 12,
           song_name: 'Song 2 by Artist 6',
           song_status: 1,
           last_rehearsal_date: null,
-          average_rating: 5
+          average_rating: 5,
+          score: 116.09640474436813
         }, {
           band_song_id: 11,
           song_id: 11,
           song_name: 'Song 1 by Artist 6',
           song_status: 0,
           last_rehearsal_date: null,
-          average_rating: 4
+          average_rating: 4,
+          score: 80
         }, {
           band_song_id: 10,
           song_id: 10,
           song_name: 'Song 2 by Artist 5',
           song_status: 1,
           last_rehearsal_date: null,
-          average_rating: 3
+          average_rating: 3,
+          score: 47.54887502163469
         }]
       };
       res.json = function(result_code, result) {

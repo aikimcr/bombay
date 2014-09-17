@@ -423,8 +423,11 @@ CreateRehearsalPlan.prototype.init = function() {
         throw new Error('Get Plan Lists got result_code ' + result_code);
       }
 
+      var sequence = 0;
       this.run_through_unselected(result.run_through_songs.map(function(song) {
+        sequence++;
         return {
+          sort_key: ko.observable(sequence),
           value: ko.observable(song.band_song_id),
           description: ko.computed(function() {
             var display_date = song.last_rehearsal_date ?
@@ -435,7 +438,7 @@ CreateRehearsalPlan.prototype.init = function() {
               return map_row.value == song.song_status;
             })[0].value_text;
 
-            return song.song_name + ': ' + display_status + '(' + display_date + ')';
+            return '(' + sequence + ')' + song.song_name + ': ' + display_status + '(' + display_date + ')';
           }.bind(this))
         };
       }));

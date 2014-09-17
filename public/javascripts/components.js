@@ -1,5 +1,6 @@
 function ListSelector(params) {
   this.source_list = params.source;
+  this.sort_reverse = params.sort_reverse;
   this.destination_list = params.destination;
   this.last_click = null;
   this.last_selected_range = [];
@@ -58,6 +59,30 @@ ListSelector.prototype.handleOptionClick_ = function(data, event, element, conte
   }
 };
 
+ListSelector.prototype.sortList_ = function(list) {
+  var sorted_list = list().sort(function(a, b) {
+    if ('sort_key' in a) {
+      if ('sort_key' in b) {
+        if (a.sort_key() < b.sort_key()) {
+          return this.sort_reverse ? 1 : -1;
+        } else if (a.sort_key() > b.sort_key()) {
+          return this.sort_reverse ? -1 : 1;
+        } else {
+          return 0;
+        }
+      } else {
+        return this.sort_reverse ? -1 : 1;
+      }
+    } else if ('sort_key' in b) {
+      return this.sort_reverse ? 1 : -1;
+    } else {
+      return 0;
+    }
+  }.bind(this));
+
+  list(sorted_list);
+};
+
 ListSelector.prototype.moveList_ = function(source, destination, event, selector) {
   var control_list = event
     .target
@@ -85,6 +110,9 @@ ListSelector.prototype.moveList_ = function(source, destination, event, selector
       destination.push(row);
     }
   }
+
+  this.sortList_(source);
+  this.sortList_(destination);
 };
 
 ListSelector.prototype.moveToDestination = function(data, event) {
@@ -138,7 +166,7 @@ var list_selector = {
     '    border-top: solid 5px;',
     '    border-bottom: solid 5px;',
     '    width: 290px;',
-    '    height: 300px;',
+    '    height: 170px;',
     '    overflow-x: hidden;',
     '    overflow-y: auto;',
     '  }',
