@@ -1,21 +1,18 @@
 function ListSelector(params) {
   this.source_list = params.source;
   this.destination_list = params.destination;
-  this.select_list = ko.observableArray();
-  this.deselect_list = ko.observableArray();
   this.last_click = null;
   this.last_selected_range = [];
   this.class = params.class;
 }
 
+ListSelector.selected_class = 'list_selector_selected';;
 ListSelector.prototype.handleOptionClick_ = function(data, event, element, context) {
-  var selected_class = 'list_selector_selected';
-
   function changeClassList(el, set) {
     if (set) {
-      el.classList.add(selected_class);
+      el.classList.add(ListSelector.selected_class);
     } else {
-      el.classList.remove(selected_class);
+      el.classList.remove(ListSelector.selected_class);
     }
   }
 
@@ -23,14 +20,14 @@ ListSelector.prototype.handleOptionClick_ = function(data, event, element, conte
     var all_options = element.parentElement.children;
 
     for(var i = 0;i < all_options.length;i++) {
-      all_options[i].classList.remove(selected_class);
+      all_options[i].classList.remove(ListSelector.selected_class);
     }
   }
 
   if (event.shiftKey && this.last_click !== null) {
     var all_options = element.parentElement.children;
     var idx = context.$index();
-    var last_set = all_options[this.last_click].classList.contains(selected_class);
+    var last_set = all_options[this.last_click].classList.contains(ListSelector.selected_class);
 
     this.last_selected_range.forEach(function(item) {
       changeClassList(item.element, item.was_set);
@@ -41,7 +38,7 @@ ListSelector.prototype.handleOptionClick_ = function(data, event, element, conte
       for(var i = this.last_click;i <= idx;i++) {
         this.last_selected_range.push({
           element: all_options[i],
-          was_set: all_options[i].classList.contains(selected_class)
+          was_set: all_options[i].classList.contains(ListSelector.selected_class)
         });
         changeClassList(all_options[i], last_set);
       }
@@ -49,23 +46,38 @@ ListSelector.prototype.handleOptionClick_ = function(data, event, element, conte
       for(var i = this.last_click;i >= idx;i--) {
         this.last_selected_range.push({
           element: all_options[i],
-          was_set: all_options[i].classList.contains(selected_class)
+          was_set: all_options[i].classList.contains(ListSelector.selected_class)
         });
         changeClassList(all_options[i], last_set);
       }
     }
   } else {
-    changeClassList(element, !element.classList.contains(selected_class));
+    changeClassList(element, !element.classList.contains(ListSelector.selected_class));
     this.last_click = context.$index();
     this.last_selected_range = [];
   }
 };
 
-ListSelector.prototype.moveList_ = function(source, destination, control) {
-  var i;
-  while(i = control.shift()) {
+ListSelector.prototype.moveList_ = function(source, destination, event, selector) {
+  var control_list = event
+    .target
+    .parentElement
+    .parentElement
+    .querySelector(selector)
+    .children;
+
+  var control = [];
+  for(var i = 0; i < control_list.length; i++) {
+    if (control_list[i].classList.contains(ListSelector.selected_class)) {
+      var row_value = parseInt(control_list[i].attributes.getNamedItem('value').value, 10);
+      control.push(row_value);
+    }
+  }
+
+  var value;
+  while(value = control.shift()) {
     var rows = source.remove(function(item) {
-      return item.value() == i;
+      return item.value() == value;
     });
 
     var row;
@@ -75,19 +87,21 @@ ListSelector.prototype.moveList_ = function(source, destination, control) {
   }
 };
 
-ListSelector.prototype.moveToSelected = function() {
+ListSelector.prototype.moveToDestination = function(data, event) {
   this.moveList_(
     this.source_list,
     this.destination_list,
-    this.select_list
+    event,
+    '.list_selector_source'
   );
 };
 
-ListSelector.prototype.moveToUnselected = function() {
+ListSelector.prototype.moveToSource = function(data, event) {
   this.moveList_(
     this.destination_list,
     this.source_list,
-    this.deselect_list
+    event,
+    '.list_selector_destination'
   );
 };
 
@@ -160,11 +174,11 @@ var list_selector = {
     '    </div>',
     '  </div>',
     '  <div class="list_selector_control">',
-    '    <button data-bind="click: moveToSelected">&gt;&gt;&gt;</button>',
-    '    <button data-bind="click: moveToUnselected">&lt;&lt;&lt;</button>',
+    '    <button data-bind="click: moveToDestination">&gt;&gt;&gt;</button>',
+    '    <button data-bind="click: moveToSource">&lt;&lt;&lt;</button>',
     '  </div>',
-    '  <div class="list_selector list_selector_destination">',
-    '    <div class="list_selector_list" data-bind="foreach: destination_list">',
+    '  <div class="list_selector">',
+    '    <div class="list_selector_list list_selector_destination" data-bind="foreach: destination_list">',
     '      <div class="list_selector_option" data-bind="text: description, attr: { title: description, value: value }, click: function(data, event) { $parent.handleOptionClick_(data, event, $element, $context); }"></div>',
     '    </div>',
     '  </div>'
