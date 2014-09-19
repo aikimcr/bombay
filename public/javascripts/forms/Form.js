@@ -471,3 +471,33 @@ CreateRehearsalPlan.prototype.loadLists = function() {
 CreateRehearsalPlan.prototype.init = function() {
   this.loadLists();
 };
+
+CreateRehearsalPlan.prototype.postChange_ = function(callback) {
+  var run_through_sequence = 0;
+  var learning_sequence = 0;
+
+  function map_songs(list) {
+    var sequence = 1;
+    var params = list.map(function (song) {
+      return {
+        band_song_id: song.value(),
+        sequence: sequence++
+      };
+    });
+    return JSON.stringify(params);
+  }
+
+  var params = {
+    rehearsal_date: this.rehearsal_date().toISOString().substr(0, 10),
+    run_through_songs: map_songs(this.run_through_selected()),
+    learning_songs: map_songs(this.learning_selected())
+  };
+
+  var svc = service.getInstance();
+  svc.post('/plan', function(result_code, result) {
+    if (result_code == 200 || result_code == 304) {
+      console.log('created plan');//XXX
+    }
+    callback(result_code, result);
+  }.bind(this), params);
+};

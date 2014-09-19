@@ -6,16 +6,16 @@ div#create_rehearsal_plan_form(data-bind="visible: forms.create_rehearsal_plan.i
         div.close_button
           button.close_button(data-bind="click: forms.create_rehearsal_plan.hide.bind(forms.create_rehearsal_plan)") X
 
-      div.dialog_body
-        div.title(data-bind="text: forms.create_rehearsal_plan.message")
-        form(data-bind="submit: postFormChange", form_key="create_rehearsal_plan")
-          date-selector(data-bind="value: forms.create_rehearsal_plan.rehearsal_date")
+      div.dialog_body(data-bind="with: forms.create_rehearsal_plan")
+        div.title(data-bind="text: message")
+        form(data-bind="submit: postChange", form_key="create_rehearsal_plan")
+          date-selector(data-bind="value: rehearsal_date")
           div Run Through Songs
-          list-selector(params="sort_reverse: false" data-bind="value: forms.create_rehearsal_plan.run_through_selected, sourceList: forms.create_rehearsal_plan.run_through_unselected")
+          list-selector(params="sort_reverse: false" data-bind="value: run_through_selected, sourceList: run_through_unselected")
 
           hr
           div Songs To Work On
-          list-selector(params="sort_reverse: false", data-bind="value: forms.create_rehearsal_plan.learning_selected, sourceList: forms.create_rehearsal_plan.learning_unselected")
+          list-selector(params="sort_reverse: false", data-bind="value: learning_selected, sourceList: learning_unselected")
 
           hr
           input(type="submit", value="Create")

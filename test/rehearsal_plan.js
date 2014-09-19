@@ -48,7 +48,7 @@ function artist_and_song_sql(sql, status_list, rating_list, artist_id, song_id, 
   return [song_id, band_song_id, status_list, rating_list];
 }
 
-describe.only('rehearsal_plan', function() {
+describe('rehearsal_plan', function() {
   describe('lib', function() {
     before(function(done) { test_util.db.resetDb(done); });
 
@@ -800,10 +800,25 @@ describe.only('rehearsal_plan', function() {
     });
 
     it('should save a plan', function(done) {
+      var run_through_sequence = 0;
+      var learning_sequence = 0;
       req.body = {
         rehearsal_date: plan_lists.rehearsal_date,
-        run_through_songs: plan_lists.run_through_songs.splice(0, 5),
-        learning_songs: plan_lists.learning_songs.splice(0, 2)
+        run_through_songs: JSON.stringify(plan_lists.run_through_songs.splice(0, 5).map(function(song) {
+          
+          run_through_sequence++;
+          return({
+            band_song_id: song.band_song_id,
+            sequence: run_through_sequence
+          });
+        })),
+        learning_songs: JSON.stringify(plan_lists.learning_songs.splice(0, 2).map(function(song) {
+          learning_sequence++;
+          return({
+            band_song_id: song.band_song_id,
+            sequence: learning_sequence
+          });
+        }))
       };
       var expected = {
         rehearsal_plan: {

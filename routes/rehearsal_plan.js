@@ -47,13 +47,17 @@ function getPlan_(plan_id, req, res) {
 }
 
 exports.postPlan = function(req, res) {
+  var run_through_songs = JSON.parse(req.body.run_through_songs);
+  var learning_songs = JSON.parse(req.body.learning_songs);
+
   rehearsal_plan.save(
     new Date(req.body.rehearsal_date),
-    req.body.run_through_songs,
-    req.body.learning_songs,
+    run_through_songs,
+    learning_songs,
     function(err, plan_id) {
       if (err) {
-        res.response(500, err);
+        console.log(err);
+        res.send(500, err);
       } else {
         getPlan_(plan_id, req, res);
       }
