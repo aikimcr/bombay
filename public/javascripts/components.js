@@ -1,10 +1,23 @@
-function ListSelector(params) {
-  this.source_list = params.source;
-  this.sort_reverse = params.sort_reverse;
-  this.destination_list = params.destination;
+function ListSelector(params, componentInfo) {
+  this.component_info = componentInfo;
+  this.source_list = ko.observableArray(componentInfo.element.sourceList);
+  this.destination_list = ko.observableArray(componentInfo.element.value);
+
+  this.sort_reverse = !!params.sort_reverse;
+
   this.last_click = null;
   this.last_selected_range = [];
-  this.class = params.class;
+
+  var source_element = componentInfo.element.querySelector('.list_selector_source');
+  source_element.addEventListener('change', function(e) {
+    this.source_list(this.component_info.element.sourceList);
+    this.destination_list(this.component_info.element.value)
+  }.bind(this));
+
+  setInterval(function() {
+    this.source_list(this.component_info.element.sourceList);
+    this.destination_list(this.component_info.element.value)
+  }.bind(this), 500);
 }
 
 ListSelector.selected_class = 'list_selector_selected';;
@@ -113,6 +126,8 @@ ListSelector.prototype.moveList_ = function(source, destination, event, selector
 
   this.sortList_(source);
   this.sortList_(destination);
+  this.component_info.element.value = destination();
+  this.component_info.element.dispatchEvent(new Event('change'));
 };
 
 ListSelector.prototype.moveToDestination = function(data, event) {
@@ -136,8 +151,7 @@ ListSelector.prototype.moveToSource = function(data, event) {
 var list_selector = {
   viewModel: {
     createViewModel: function(params, componentInfo) {
-      var ls = new ListSelector(params);
-      return ls;
+      return new ListSelector(params, componentInfo);
     }
   },
   template: [
@@ -214,3 +228,105 @@ var list_selector = {
 };
 
 ko.components.register('list-selector', list_selector);
+
+function DateSelector(params, componentInfo) {
+  this.date = ko.observable(new Date(componentInfo.element.value));
+  this.component_info = componentInfo;
+
+  this.year = ko.computed({
+    read: function() {
+      return this.date().getFullYear();
+    }.bind(this),
+    write: function(value) {
+      this.date().setFullYear(value);
+      this.changeValue_();
+    }.bind(this)
+  });
+
+  this.month = ko.computed({
+    read: function() {
+      return this.date().getMonth() + 1;
+    }.bind(this),
+    write: function(value) {
+      this.date().setMonth(value - 1);
+      this.changeValue_();
+    }.bind(this)
+  });
+
+  this.day_of_month = ko.computed({
+    read: function() {
+      return this.date().getDate();
+    }.bind(this),
+    write: function(value) {
+      this.date().setDate(value);
+      this.changeValue_();
+    }.bind(this)
+  });
+
+  this.days_in_month = ko.computed(function() {
+    var work_date = new Date(this.date());
+    work_date.setMonth(work_date.getMonth() + 1);
+    work_date.setDate(0);
+    var selector_list = [];
+    for(var i=1; i <= work_date.getDate(); i++) {
+      selector_list.push({label: i, value: i});
+    }
+    return selector_list;
+  }.bind(this));
+
+  setInterval(function() {
+    this.date(new Date(this.component_info.element.value));
+  }.bind(this), 500);
+}
+
+DateSelector.prototype.changeValue_ = function() {
+  if (this.date() != 'Invalid Date') {
+    this.component_info.element.value = new Date(this.date().toISOString().substr(0, 10));
+    this.component_info.element.dispatchEvent(new Event('change'));
+  }
+};
+
+var date_selector = {
+  viewModel: {
+    createViewModel: function(params, componentInfo) {
+      return new DateSelector(params, componentInfo);
+    }
+  },
+  template: [
+    '<div class="date_selector">',
+    '  <select data-bind="value: year">',
+    '    <option value="2014">2014</option>',
+    '    <option value="2015">2015</option>',
+    '    <option value="2016">2016</option>',
+    '  </select>',
+    '  <select data-bind="value:month">',
+    '    <option value="1">January(01)</option>',
+    '    <option value="2">Februrary(02)</option>',
+    '    <option value="3">March(03)</option>',
+    '    <option value="4">April(04)</option>',
+    '    <option value="5">May(05)</option>',
+    '    <option value="6">June(06)</option>',
+    '    <option value="7">July(07)</option>',
+    '    <option value="8">August(08)</option>',
+    '    <option value="9">September(09)</option>',
+    '    <option value="10">October(10)</option>',
+    '    <option value="11">November(11)</option>',
+    '    <option value="12">December(12)</option>',
+    '  </select>',
+    '  <select data-bind="value: day_of_month, options: days_in_month, optionsText: \'label\', optionsValue: \'value\'"></select>',
+    '</div>',
+  ].join(' ')
+};
+
+ko.components.register('date-selector', date_selector);
+
+ko.bindingHandlers.sourceList = {
+  update: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
+    element.sourceList = valueAccessor()();
+    var source_element = element.querySelector('.list_selector_source');
+
+    if (source_element) {
+      source_element.dispatchEvent(new Event('change'));
+    }
+  }
+};

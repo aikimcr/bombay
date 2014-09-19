@@ -397,22 +397,36 @@ AddBandSong.prototype.postChange_ = function(callback) {
 
 function CreateRehearsalPlan() {
   Form.call(this, [manager.song_ratings]);
-  this.rehearsal_date = ko.observable(new Date().toDateString());
+  this.rehearsal_date = ko.observable(new Date());
   this.run_through_unselected = ko.observableArray();
-  this.run_through_preselected = ko.observableArray();
   this.run_through_selected = ko.observableArray();
-  this.run_through_deselected = ko.observableArray();
   this.learning_unselected = ko.observableArray();
   this.learning_selected = ko.observableArray();
+
+  this.handleEvent = function(e) {
+    if (e.type === 'change' && e.target.tagName.toLowerCase() === 'date-selector') {
+      this.rehearsal_date(new Date(e.target.value));
+      this.loadLists();
+    }
+  };
 }
 util.inherits(CreateRehearsalPlan, Form);
 
 CreateRehearsalPlan.prototype.show = function() {
   this.init();
   Form.prototype.show.call(this);
+
+  var dsel = document.querySelector('form[form_key="create_rehearsal_plan"] > date-selector');
+  dsel.addEventListener('change', this);
 };
 
-CreateRehearsalPlan.prototype.init = function() {
+CreateRehearsalPlan.prototype.hide = function() {
+  var dsel = document.querySelector('form[form_key="create_rehearsal_plan"] > date-selector');
+  dsel.removeEventListener('change', this);
+  Form.prototype.hide.call(this);
+};
+
+CreateRehearsalPlan.prototype.loadLists = function() {
   var svc = service.getInstance();
 
   function mapSongs(list) {
@@ -446,38 +460,14 @@ CreateRehearsalPlan.prototype.init = function() {
       }
 
       this.run_through_unselected(mapSongs(result.run_through_songs));
+      this.run_through_selected([]);
       this.learning_unselected(mapSongs(result.learning_songs));
+      this.learning_selected([]);
     }.bind(this)
   );
   Form.prototype.init.call(this);
 };
 
-CreateRehearsalPlan.prototype.moveList_ = function(source, destination, control) {
-  var i;
-  while(i = control.shift()) {
-    var rows = source.remove(function(item) {
-      return item.band_song_id() == i;
-    });
-
-    var row;
-    while(row = rows.shift()) {
-      destination.push(row);
-    }
-  }
-};
-
-CreateRehearsalPlan.prototype.moveToSelected = function() {
-  this.moveList_(
-    this.run_through_unselected,
-    this.run_through_selected,
-    this.run_through_preselected
-  );
-};
-
-CreateRehearsalPlan.prototype.moveToUnselected = function() {
-  this.moveList_(
-    this.run_through_selected,
-    this.run_through_unselected,
-    this.run_through_deselected
-  );
+CreateRehearsalPlan.prototype.init = function() {
+  this.loadLists();
 };

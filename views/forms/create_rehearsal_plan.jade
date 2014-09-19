@@ -9,12 +9,13 @@ div#create_rehearsal_plan_form(data-bind="visible: forms.create_rehearsal_plan.i
       div.dialog_body
         div.title(data-bind="text: forms.create_rehearsal_plan.message")
         form(data-bind="submit: postFormChange", form_key="create_rehearsal_plan")
+          date-selector(data-bind="value: forms.create_rehearsal_plan.rehearsal_date")
           div Run Through Songs
-          list-selector(class="create_rehearsal_run_through" params="source: forms.create_rehearsal_plan.run_through_unselected, destination: forms.create_rehearsal_plan.run_through_selected, class: 'create_rehearsal_run_through', sort_reverse: false")
+          list-selector(params="sort_reverse: false" data-bind="value: forms.create_rehearsal_plan.run_through_selected, sourceList: forms.create_rehearsal_plan.run_through_unselected")
 
           hr
           div Songs To Work On
-          list-selector(class="create_rehearsal_learning" params="source: forms.create_rehearsal_plan.learning_unselected, destination: forms.create_rehearsal_plan.learning_selected, class: 'create_rehearsal_learning', sort_reverse: false")
+          list-selector(params="sort_reverse: false", data-bind="value: forms.create_rehearsal_plan.learning_selected, sourceList: forms.create_rehearsal_plan.learning_unselected")
 
           hr
           input(type="submit", value="Create")
