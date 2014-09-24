@@ -13,6 +13,25 @@ orm.table = function(context_base, table_name, model_key, url, columns) {
 orm.table.prototype.create = function(data, callback) {
   var url = this.url;
   var svc = service.getInstance();
+
+  var svc_data = {};
+
+  Object.keys(this.columns).forEach(function(column_name) {
+    if (column_name in data) {
+      if (ko.isObservable(data[column_name])) {
+        svc_data[column_name] = data[column_name]();
+      } else {
+        svc_data[column_name];
+      }
+    }
+  });
+
+  if (ko.isObservable(data['id'])) {
+    svc_data['id'] = data['id']();
+  } else {
+    svnc_data['id'] = data['id'];
+  }
+
   svc.post(url, function(result_code, result) {
     if (result_code == 200) {
       var model = result[this.model_key];
@@ -31,30 +50,22 @@ orm.table.prototype.create = function(data, callback) {
     } else {
       callback(result_code, result);
     }
-  }.bind(this), data);
+  }.bind(this), svc_data);
 };
 
-orm.table.prototype.delete = function(row, confirm_callback, callback, opt_event) {
-  confirm_callback(this, row, opt_event, function(delete_it) {
-    if (delete_it) {
-      var svc = service.getInstance();
-      var url = this.url + '?id=' + row.id();
-      svc.delete(url, function(result_code, result) {
-        if (result_code == 200) {
-          var list_key = this.list_key;
-          var model_key = this.model_key;
-          this.list.delete(row);
-          if (callback) callback(null, result);
-        } else if (result_code == 304) {
-          if (callback) callback(new Error('Already Deleted', result));
-        } else {
-          if (callback) callback(result_code, result);
-        }
-      }.bind(this));
+orm.table.prototype.delete = function(id, callback) {
+  var svc = service.getInstance();
+  var url = this.url + '?id=' + id;
+  svc.delete(url, function(result_code, result) {
+    if (result_code == 200) {
+      var row = this.list.delete(id);
+      if (callback) callback(null, row);
+    } else if (result_code == 304) {
+      if (callback) callback(new Error('Already Deleted', result));
     } else {
-      if (callback) callback(new Error('Not Deleted'));
+      if (callback) callback(result_code, result);
     }
-  });
+  }.bind(this));
 };
 
 orm.table.prototype.get = function(id, callback) {
@@ -64,9 +75,10 @@ orm.table.prototype.get = function(id, callback) {
     if (result_code == 200 || result_code == 304) {
       var model =  result[this.model_key];
       var row = new orm.table.row(this, model);
+      this.list.insert(row);
       callback(null, row);
     } else {
-      callback(result_code);
+      callback(result_code, result);
     }
   }.bind(this));
 };
@@ -84,7 +96,7 @@ orm.table.prototype.load = function(callback) {
           list_model.push(new orm.table.row(this, model));
         }.bind(this));
         this.list.set(list_model);
-        callback(null, this.list);
+        callback(null, list_model);
       } else {
         callback(new Error('no_result', {model_key: this.model_key, error: result.toString()}))
       }
@@ -158,8 +170,9 @@ orm.table.list.prototype.delete = function(id) {
 
 // The main entry point for defining a view model.
 orm.define = function(context_base, table_name, definition, options) {
+  options = options || {};
   var model_key = options['model_key'] || table_name;
-  var url = './' + options['url'] || table_name;
+  var url = options['url'] ? options['url'] : './' + table_name;
   var columns = {};
 
   Object.keys(definition).forEach(function(column_name) {

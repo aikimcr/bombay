@@ -109,6 +109,46 @@ describe('KnockoutOrm Object Definitions', function() {
       done();
     });
   });
+
+  describe('define a table', function(done) {
+    var test_context;
+
+    var table_name = 'Oxbow';
+    var columns = {
+      trout: { type: 'string' },
+      cichlid: { type: 'integer' }
+    };
+
+    before(function(done) {
+      test_context = new TestContext();
+      done();
+    });
+
+    it('should create a table object', function(done) {
+      var table = orm.define(test_context, table_name, columns);
+      should.exist(table);
+      table.should.have.property('table_name', table_name);
+      table.should.have.property('model_key', table_name);
+      table.should.have.property('url', './' + table_name);
+      table.should.have.property('columns');
+      table.columns.should.eql(columns);
+      done();
+    });
+
+    it('should create a table object with options', function(done) {
+      var table = orm.define(test_context, table_name, columns, {
+        model_key: 'Lake',
+        url: './amazon'
+      });
+      should.exist(table);
+      table.should.have.property('table_name', table_name);
+      table.should.have.property('model_key', 'Lake');
+      table.should.have.property('url', './amazon');
+      table.should.have.property('columns');
+      table.columns.should.eql(columns);
+      done();
+    });
+  });
 });
 
 describe('KnockoutOrm list management', function() {
@@ -251,7 +291,7 @@ describe('KnockoutOrm list management', function() {
   });
 });
 
-describe.only('Table Management', function() {
+describe('Table Management', function() {
   var instance_stub;
   var test_context;
   var table;
@@ -297,8 +337,33 @@ describe.only('Table Management', function() {
         callback(200, req_model);
       },
       delete: function(url, callback) {
+        url.should.equal('./' + table_name + '?id=2');
+
+        callback(200, {id: 2});
       },
       get: function(url, callback) {
+        var req_model = {};
+        if (url == './' + table_name) {
+          req_model['all_' + table_name + 's'] = [{
+            id: 4,
+            species: 'salmon',
+            count: 38
+          }, {
+            id: 5,
+            species: 'mbuna',
+            count: 2530
+          }];
+        } else {
+          url.should.eql('./' + table_name + '?id=3')
+
+          req_model[table_name] = {
+            id: 3,
+            species: 'bass',
+            count: 5
+          };
+        }
+
+        callback(200, req_model);
       }
     };
     instance_stub = sinon.stub(service, 'getInstance', function() { return stub_service; });
@@ -320,11 +385,116 @@ describe.only('Table Management', function() {
     }, function(result_code, result) {
       should.not.exist(result_code);
       should.exist(result);
-      result.should.eql({
-        id: 1,
-        species: 'trout',
-        count: 540
-      });
+
+      result.should.have.property('id');
+      ko.isObservable(result.id).should.be.true;
+      result.id().should.equal(1);
+
+      result.should.have.property('species');
+      ko.isObservable(result.species).should.be.true;
+      result.species().should.equal('trout');
+
+      result.should.have.property('count');
+      ko.isObservable(result.count).should.be.true;
+      result.count().should.equal(540);
+
+      var list_row = table.list.get(1);
+      should.exist(list_row);
+
+      done();
+    });
+  });
+
+  it('should call the delete api', function(done) {
+    table.list.insert({
+      id: ko.observable(2),
+      species: ko.observable('tilapia'),
+      count: ko.observable(1000)
+    });
+    table.delete(2, function(result_code, result) {
+      should.not.exist(result_code);
+      should.exist(result);
+
+      result.should.have.property('id');
+      ko.isObservable(result.id).should.be.true;
+      result.id().should.equal(2);
+
+      result.should.have.property('species');
+      ko.isObservable(result.species).should.be.true;
+      result.species().should.equal('tilapia');
+
+      result.should.have.property('count');
+      ko.isObservable(result.count).should.be.true;
+      result.count().should.equal(1000);
+
+      var list_row = table.list.get(2);
+      should.not.exist(list_row);
+
+      done();
+    });
+  });
+
+  it('should call the get api', function(done) {
+    table.get(3, function(result_code, result) {
+      should.not.exist(result_code);
+      should.exist(result);
+
+      result.should.have.property('id');
+      ko.isObservable(result.id).should.be.true;
+      result.id().should.equal(3);
+
+      result.should.have.property('species');
+      ko.isObservable(result.species).should.be.true;
+      result.species().should.equal('bass');
+
+      result.should.have.property('count');
+      ko.isObservable(result.count).should.be.true;
+      result.count().should.equal(5);
+
+      var list_row = table.list.get(3);
+      should.exist(list_row);
+
+      done();
+    });
+  });
+
+  it('should call the load api', function(done) {
+    table.load(function(result_code, result) {
+      should.not.exist(result_code);
+      should.exist(result);
+
+      result[0].should.have.property('id');
+      ko.isObservable(result[0].id).should.be.true;
+      result[0].id().should.equal(4);
+
+      result[0].should.have.property('species');
+      ko.isObservable(result[0].species).should.be.true;
+      result[0].species().should.equal('salmon');
+
+      result[0].should.have.property('count');
+      ko.isObservable(result[0].count).should.be.true;
+      result[0].count().should.equal(38);
+
+      var list_row = table.list.get(4);
+      should.exist(list_row);
+
+      result[1].should.have.property('id');
+      ko.isObservable(result[1].id).should.be.true;
+      result[1].id().should.equal(5);
+
+      result[1].should.have.property('species');
+      ko.isObservable(result[1].species).should.be.true;
+      result[1].species().should.equal('mbuna');
+
+      result[1].should.have.property('count');
+      ko.isObservable(result[1].count).should.be.true;
+      result[1].count().should.equal(2530);
+
+      list_row = table.list.get(5);
+      should.exist(list_row);
+
+      table.list.length().should.equal(2);
+
       done();
     });
   });
