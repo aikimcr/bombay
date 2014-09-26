@@ -7,7 +7,18 @@ orm.table = function(context_base, table_name, model_key, url, columns) {
   this.model_key = model_key;
   this.url = url;
   this.columns = columns;
+  this.joins = [];
   this.list = context_base[model_key + 's'];
+
+  Object.keys(this.columns).forEach(function(column_name) {
+    var column_def = this.columns[column_name];
+    if (column_def['type'] === 'reference') {
+      column_def['reference_table'].joins.push({
+        table: this,
+        column_name: column_name
+      });
+    }
+  }.bind(this));
 };
 
 orm.table.prototype.create = function(data, callback) {
@@ -115,8 +126,38 @@ orm.table.row = function(table, model) {
 
   Object.keys(this.table.columns).forEach(function(column_name) {
     var column_def = this.table.columns[column_name];
+
     this[column_name] = ko.observable(model[column_name]);
+
+    if (column_def['type'] === 'reference') {
+      var reference_table = column_def['reference_table'];
+      this[reference_table.table_name] = ko.computed(function() {
+        return reference_table.list.get(this[column_name]());
+      }.bind(this));
+
+      var reference_row = reference_table.list.get(this[column_name]());
+
+      if (reference_row) {
+        reference_row.addJoins(this.table, column_name);
+      }
+    }
   }.bind(this));
+
+  this.table.joins.forEach(function(join) {
+    this.addJoins(join[table], join[column_name]);
+  }.bind(this));
+};
+
+orm.table.row.prototype.addJoins = function(join_table, join_column) {
+  var accessor = join_table.table_name + 'List';
+
+  if (!this[accessor]) {
+    this[accessor] = ko.computed(function() {
+      var filter = {};
+      filter[join_column] = this.id();
+      return join_table.list.find(filter);
+    }.bind(this));
+  }
 };
 
 // List management.
@@ -134,6 +175,27 @@ orm.table.list.prototype.get = function(id) {
   return ko.utils.arrayFirst(this.list(), function(item) {
     return item.id() == id;
   }.bind(this));
+};
+
+orm.table.list.prototype.find = function(filter) {
+  if (filter == null) {
+    return this.list();
+  }
+
+  var filter_function = filter;
+  if (typeof(filter) == 'object') {
+    filter_function = function(row) {
+      return Object.keys(filter).map(function(column_name) {
+        return row[column_name]() == filter[column_name];
+      }).reduce(function(prev, curr) {
+        return prev && curr;
+      }, true);
+    }
+  } else if (typeof(filter) != 'function') {
+    throw new Error('Invalid filter specified');
+  }
+
+  return this.list().filter(filter_function);
 };
 
 orm.table.list.prototype.set = function(list_model) {

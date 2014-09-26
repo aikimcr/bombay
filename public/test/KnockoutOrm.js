@@ -223,10 +223,46 @@ describe('KnockoutOrm list management', function() {
     var row;
     
     (function() {
-      row = list.get(3)
+      row = list.get(3);
     }).should.not.throw();
 
     should.not.exist(row);
+    done();
+  });
+
+  it('should find the rows using field match', function(done) {
+    var rows;
+
+    (function() {
+      rows = list.find({name: 'danio'});
+    }).should.not.throw();
+
+    should.exist(rows);
+    rows.length.should.equal(1);
+    rows[0].id().should.equal(2);
+    rows[0].name().should.equal('danio');
+
+    done();
+  });
+
+  it('should find the rows using a filter', function(done) {
+    var rows;
+
+    (function() {
+      rows = list.find(function(row) {
+        return row.name().match(/an/);
+      });
+    }).should.not.throw();
+
+    should.exist(rows);
+    rows.length.should.equal(2);
+
+    rows[0].id().should.equal(1);
+    rows[0].name().should.equal('angel');
+
+    rows[1].id().should.equal(2);
+    rows[1].name().should.equal('danio');
+
     done();
   });
 
@@ -373,6 +409,8 @@ describe('Table Management', function() {
   after(function(done) {
     test_context = null;
     table = null;
+    instance_stub.restore();
+    instance_stub = null;
     done();
   });
 
@@ -494,6 +532,150 @@ describe('Table Management', function() {
       should.exist(list_row);
 
       table.list.length().should.equal(2);
+
+      done();
+    });
+  });
+});
+
+describe('Joins', function() {
+  var instance_stub;
+  var test_context;
+  var master_table;
+  var detail_table;
+
+  before(function(done) {
+    var model_list = {
+      genus: [{
+        id: 1,
+        name: 'pseudotropheus'
+      }, {
+        id: 2,
+        name: 'labidochromis'
+      }, {
+        id: 3,
+        name: 'haplochromis'
+      }],
+      species: [{
+        id: 1,
+        genus_id: 1,
+        name: 'zebra'
+      }, {
+        id: 2,
+        genus_id: 1,
+        name: ''
+      }]
+    };
+
+    var stub_service = {
+      post: function(url, callback, data) {
+        var table_name = url.match(/\.\/(\w+)(\?)*/)[1];
+        var req_body = {};
+        var req_model = {};
+        Object.keys(data).forEach(function(column_name) {
+          req_body[column_name] = data[column_name];
+        });
+        req_body.id = 4;
+        req_model[table_name] = req_body;
+        model_list[table_name][3] = req_body;
+        callback(200, req_model);
+      },
+      delete: function(url, callback) {
+        var id = url.match(/id=(\d+)/)[1];
+        var table_name = url.match(/\.\/(\w+)(\?)*/)[1];
+        model_list[table_name][id - 1] = null;
+        callback(200, {id: id});
+      },
+      get: function(url, callback) {
+        var table_name = url.match(/\.\/(\w+)(\?)*/)[1];
+        var req_model = {};
+        if (url == './' + table_name) {
+          req_model['all_' + table_name + 's'] = model_list[table_name];
+        } else {
+          var id = url.match(/id=(\d+)/)[1];
+          req_model[table_name] = model_list[table_name][id - 1];
+        }
+
+        callback(200, req_model);
+      }
+    };
+
+    instance_stub = sinon.stub(service, 'getInstance', function() { return stub_service; });
+    done();
+  });
+
+  before(function(done) {
+    test_context = new TestContext();
+    master_table = orm.define(test_context, 'genus', {name: {type: 'string'}});
+
+    master_table.load(function(result_code, result) {
+      if (result_code) {
+        done(result_code);
+      } else {
+        done();
+      }
+    });
+  });
+
+  after(function(done) {
+    test_context = null;
+    master_table = null;
+    detail_table = null;
+    instance_stub.restore();
+    instance_stub = null;
+    done();
+  });
+
+  it('should define a table with a reference to master', function(done) {
+    detail_table = orm.define(test_context, 'species', {
+      genus_id: {type: 'reference', reference_table: master_table},
+      name: {type: 'string'}
+    });
+
+    should.exist(detail_table);
+    master_table.joins.length.should.equal(1);
+    master_table.joins[0].should.have.property('table');
+    master_table.joins[0].should.have.property('column_name');
+    master_table.joins[0].column_name.should.equal('genus_id');
+
+    detail_table.load(function(result_code, result) {
+      should.not.exist(result_code);
+      should.exist(result);
+      result.length.should.be.greaterThan(0);
+      done();
+    });
+  });
+
+  it('should get the master record', function(done) {
+    var detail_row = detail_table.list.get(1);
+    should.exist(detail_row);
+    detail_row.should.have.property('genus_id');
+    ko.isObservable(detail_row.genus_id).should.be.true;
+
+    var master_row = detail_row.genus();
+    should.exist(master_row);
+    master_row.id().should.equal(detail_row.genus_id());
+
+    done();
+  });
+
+  it('should get all the detail records', function(done) {
+    var master_row = master_table.list.get(1);
+    var detail_rows = master_row.speciesList();
+    should.exist(detail_rows);
+    detail_rows.length.should.be.greaterThan(0);
+
+    detail_rows.forEach(function(row) {
+      row.should.have.property('id');
+      ko.isObservable(row.id).should.be.true;
+      row.id().should.be.greaterThan(0);
+
+      row.should.have.property('genus_id');
+      ko.isObservable(row.genus_id).should.be.true;
+      row.genus_id().should.equal(master_row.id());
+      
+      row.should.have.property('name');
+      ko.isObservable(row.name).should.be.true;
 
       done();
     });
