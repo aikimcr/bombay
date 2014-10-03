@@ -230,6 +230,148 @@ orm.table.list.prototype.delete = function(id) {
   return rows[0];
 };
 
+// List sorting
+orm.table.list.sort = function(list) {
+  this.list = list instanceof orm.table.list ? list.list : list;
+  this.sort_type = ko.observable();
+  this.compare_list = {};
+  this.compare_labels = [];
+
+  this.getList = ko.computed(function() {
+    if (this.sort_type()) {
+      var compare = this.compare_list[this.sort_type()];
+
+      if (compare) {
+        return this.list().map(function(row) { return row; }).sort(compare);
+      } else {
+        return this.list();
+      }
+    } else {
+      return this.list();
+    }
+  }.bind(this));
+};
+
+orm.table.list.sort.prototype.addCompare = function(name, label, compare) {
+  var compare_function;
+
+  function field_compare(row_a, row_b, column, direction) {
+    direction = direction || 'asc';
+    if (row_a[column]() < row_b[column]()) return direction == 'desc' ? 1 : -1;
+    if (row_a[column]() > row_b[column]()) return direction == 'desc' ? -1 : 1;
+    return 0;
+  }
+
+  if (typeof(compare) == 'string') {
+    compare_function = function(row_a, row_b) {
+      return field_compare(row_a, row_b, compare);
+    };
+  } else if (typeof(compare) == 'object') {
+    compare_function = function(row_a, row_b) {
+      var column = Object.keys(compare)[0];
+      return field_compare(row_a, row_b, column, compare[column]);
+    };
+  } else if (typeof(compare) == 'function') {
+    compare_function = compare;
+  }
+
+  this.compare_list[name] = compare_function;
+  this.compare_labels.push({value: name, label: label});
+  if (!this.sort_type()) this.sort_type(name);
+};
+
+orm.table.list.sort.prototype.labels = function() {
+  return this.compare_labels;
+};
+
+orm.table.list.sort.prototype.setType = function(new_type) {
+  this.sort_type(new_type);
+};
+
+// Filters
+orm.table.list.filter = function(list) {
+  this.list = list instanceof orm.table.list ? list.list : list;
+  this.filter_compare = function(row) { return true; }.bind(this);
+  this.active = ko.observable(false);
+  this.filter_value = ko.observable();
+
+  this.getList = ko.computed(function() {
+    if (this.active()) {
+      return ko.utils.arrayFilter(this.list(), this.filter_compare);
+    } else {
+      return this.list();
+    }
+  }.bind(this));
+};
+
+orm.table.list.filter.prototype.setCompare = function(filter_compare) {
+  var old_active = this.active();
+  this.active(false);
+  this.filter_compare = filter_compare.bind(this);
+  this.active(old_active);
+};
+
+orm.table.list.filter.prototype.setFilterValue = function(value) {
+  this.filter_value(value);
+  this.setActive(true);
+};
+
+orm.table.list.filter.prototype.clearFilterValue = function() {
+  this.filter_value(null);
+  this.setActive(false);
+};
+
+orm.table.list.filter.prototype.setActive = function(is_active) {
+  this.active(is_active);
+};
+
+orm.table.list.filter.columnFilterFactory = function(list, filter_type, column_name) {
+  var filter = new orm.table.list.filter(list);
+  var filter_compare;
+
+  if (filter_type === 'match') {
+    filter.setCompare(function(column_name, item) {
+      if (this.filter_value() === null || this.filter_value() === '') return true;
+      return item[column_name]().toLowerCase().match(this.filter_value().toLowerCase());
+    }.bind(filter, column_name));
+  } else if (filter_type === 'min') {
+    filter.setCompare(function(column_name, item) {
+      if (this.filter_value() === null || this.filter_value() === '') return true;
+      var value = parseInt(item[column_name](), 10);
+      var filter_value = parseInt(this.filter_value(), 10);
+      return value >= filter_value;
+    }.bind(filter, column_name));
+  } else if (filter_type === 'max') {
+    filter.setCompare(function(column_name, item) {
+      if (this.filter_value() === null || this.filter_value() === '') return true;
+      var value = parseInt(item[column_name](), 10);
+      var filter_value = parseInt(this.filter_value(), 10);
+      return value <= filter_value;
+    }.bind(filter, column_name));
+  } else if (filter_type === 'integer') {
+    filter.setCompare(function(column_name, item) {
+      if (this.filter_value() === null || this.filter_value() === '') return true;
+      var value = parseInt(item[column_name](), 10);
+      var filter_value = parseInt(this.filter_value(), 10);
+      return value === filter_value;
+    }.bind(filter, column_name));
+  } else if (filter_type === 'equal') {
+    filter.setCompare(function(column_name, item) {
+      if (this.filter_value() === null || this.filter_value() === '') return true;
+      return item[column_name]() === this.filter_value();
+    }.bind(filter, column_name));
+  } else if (filter_type === 'bool') {
+    filter.setCompare(function(column_name, item) {
+      if (this.filter_value() === null || this.filter_value() === '') return true;
+      var value = !! item[column_name]();
+      var filter_value = !! this.filter_value();
+      return value === filter_value;
+    }.bind(filter, column_name));
+  }
+
+  return filter;
+};
+
 // The main entry point for defining a view model.
 orm.define = function(context_base, table_name, definition, options) {
   options = options || {};

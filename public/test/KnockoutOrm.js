@@ -156,174 +156,430 @@ describe('KnockoutOrm list management', function() {
   var start_list = [];
   var list_names = ['platypus', 'angel', 'danio', 'discus', 'wrasse', 'tetra'];
 
-  before(function(done) {
-    list = new orm.table.list('Oxbow');
-    done();
-  });
-
-  before(function(done) {
-    for(var i=1;i<=5;i++) {
-      start_list.push({
-        id: ko.observable(i),
-        name: ko.observable(list_names[i])
-      });
-    }
-    done();
-  });
-
-  after(function(done) {
-    list = null;
-    done();
-  });
-
-  it('should fill in the list', function(done) {
-    list.length().should.equal(0);
-    var error = list.set(start_list);
-
-    should.not.exist(error);
-    list.length().should.equal(5);
-
-    list.list().forEach(function(row, index) {
-      row.should.have.property('id');
-      row.id().should.equal(index + 1);
+  describe('basic operations', function() {
+    before(function(done) {
+      list = new orm.table.list('Oxbow');
+      done();
     });
 
-    done();
-  });
+    before(function(done) {
+      for(var i=1;i<=5;i++) {
+        start_list.push({
+          id: ko.observable(i),
+          name: ko.observable(list_names[i])
+        });
+      }
+      done();
+    });
 
-  it('should get the row', function(done) {
-    var row;
-    
-    (function() {
-      row = list.get(2)
-    }).should.not.throw();
+    after(function(done) {
+      list = null;
+      done();
+    });
 
-    should.exist(row);
-    row.id().should.equal(2);
-    row.name().should.equal('danio');
-    done();
-  });
+    it('should fill in the list', function(done) {
+      list.length().should.equal(0);
+      var error = list.set(start_list);
 
-  it('should delete the row', function(done) {
-    var row;
+      should.not.exist(error);
+      list.length().should.equal(5);
 
-    (function() {
-      row = list.delete(3);
-    }).should.not.throw();
-
-    should.exist(row);
-    row.id().should.equal(3);
-    row.name().should.equal('discus');
-
-    list.length().should.equal(4);
-    done();
-  });
-
-  it('should not get the row', function(done) {
-    var row;
-    
-    (function() {
-      row = list.get(3);
-    }).should.not.throw();
-
-    should.not.exist(row);
-    done();
-  });
-
-  it('should find the rows using field match', function(done) {
-    var rows;
-
-    (function() {
-      rows = list.find({name: 'danio'});
-    }).should.not.throw();
-
-    should.exist(rows);
-    rows.length.should.equal(1);
-    rows[0].id().should.equal(2);
-    rows[0].name().should.equal('danio');
-
-    done();
-  });
-
-  it('should find the rows using a filter', function(done) {
-    var rows;
-
-    (function() {
-      rows = list.find(function(row) {
-        return row.name().match(/an/);
+      list.list().forEach(function(row, index) {
+        row.should.have.property('id');
+        row.id().should.equal(index + 1);
       });
-    }).should.not.throw();
 
-    should.exist(rows);
-    rows.length.should.equal(2);
+      done();
+    });
 
-    rows[0].id().should.equal(1);
-    rows[0].name().should.equal('angel');
+    it('should get the row', function(done) {
+      var row;
+      
+      (function() {
+        row = list.get(2)
+      }).should.not.throw();
 
-    rows[1].id().should.equal(2);
-    rows[1].name().should.equal('danio');
+      should.exist(row);
+      row.id().should.equal(2);
+      row.name().should.equal('danio');
+      done();
+    });
 
-    done();
+    it('should delete the row', function(done) {
+      var row;
+
+      (function() {
+        row = list.delete(3);
+      }).should.not.throw();
+
+      should.exist(row);
+      row.id().should.equal(3);
+      row.name().should.equal('discus');
+
+      list.length().should.equal(4);
+      done();
+    });
+
+    it('should not get the row', function(done) {
+      var row;
+      
+      (function() {
+        row = list.get(3);
+      }).should.not.throw();
+
+      should.not.exist(row);
+      done();
+    });
+
+    it('should find the rows using field match', function(done) {
+      var rows;
+
+      (function() {
+        rows = list.find({name: 'danio'});
+      }).should.not.throw();
+
+      should.exist(rows);
+      rows.length.should.equal(1);
+      rows[0].id().should.equal(2);
+      rows[0].name().should.equal('danio');
+
+      done();
+    });
+
+    it('should find the rows using a filter', function(done) {
+      var rows;
+
+      (function() {
+        rows = list.find(function(row) {
+          return row.name().match(/an/);
+        });
+      }).should.not.throw();
+
+      should.exist(rows);
+      rows.length.should.equal(2);
+
+      rows[0].id().should.equal(1);
+      rows[0].name().should.equal('angel');
+
+      rows[1].id().should.equal(2);
+      rows[1].name().should.equal('danio');
+
+      done();
+    });
+
+    it('should insert a row', function(done) {
+      var row = {
+        id: ko.observable(20),
+        name: ko.observable('loach')
+      };
+
+      (function() {
+        list.insert(row, false);
+      }).should.not.throw();
+
+      var new_row = list.get(20);
+
+      should.exist(new_row);
+      new_row.id().should.equal(20);
+      new_row.name().should.equal('loach');
+
+      list.length().should.equal(5);
+      done();
+    });
+
+    it('should clobber the row', function(done) {
+      var row = {
+        id: ko.observable(20),
+        name: ko.observable('goby')
+      };
+
+      (function() {
+        list.insert(row, true);
+      }).should.not.throw();
+
+      var new_row = list.get(20);
+
+      should.exist(new_row);
+      new_row.id().should.equal(20);
+      new_row.name().should.equal('goby');
+
+      list.length().should.equal(5);
+      done();
+    });
+
+    it('should get an error', function(done) {
+      var row = {
+        id: ko.observable(20),
+        name: ko.observable('loach')
+      };
+
+      (function() {
+        list.insert(row, false);
+      }).should.throw();
+
+      var new_row = list.get(20);
+
+      should.exist(new_row);
+      new_row.id().should.equal(20);
+      new_row.name().should.equal('goby');
+
+      list.length().should.equal(5);
+      done();
+    });
   });
 
-  it('should insert a row', function(done) {
-    var row = {
-      id: ko.observable(20),
-      name: ko.observable('loach')
-    };
+  describe('sorting', function() {
+    var sort;
 
-    (function() {
-      list.insert(row, false);
-    }).should.not.throw();
+    before(function(done) {
+      list = new orm.table.list('Oxbow');
+      done();
+    });
 
-    var new_row = list.get(20);
+    before(function(done) {
+      start_list = [];
+      for(var i=1;i<=5;i++) {
+        start_list.push({
+          id: ko.observable(i),
+          name: ko.observable(list_names[i])
+        });
+      }
+      var error = list.set(start_list);
+      done();
+    });
 
-    should.exist(new_row);
-    new_row.id().should.equal(20);
-    new_row.name().should.equal('loach');
+    after(function(done) {
+      list = null;
+      done();
+    });
 
-    list.length().should.equal(5);
-    done();
+    it('should create a sort', function(done) {
+      sort = new orm.table.list.sort(list);
+      should.exist(sort);
+      done();
+    });
+
+    it('should add a field compare', function(done) {
+      sort.addCompare('name_asc', 'Name Ascending', 'name');
+      sort.sort_type().should.equal('name_asc');
+      sort.labels().should.eql([{
+        value: 'name_asc', label: 'Name Ascending'
+      }]);
+      var sorted = sort.getList();
+      sorted.length.should.eql(list.length());
+      var indexes = [[0, 0], [1, 1], [2, 2], [3, 4], [4, 3]];
+      
+      indexes.forEach(function(index) {
+        sorted[index[0]].id().should.equal(list.list()[index[1]].id());
+        sorted[index[0]].name().should.equal(list.list()[index[1]].name());
+      });
+
+      done();
+    });
+
+    it('should add an object compare', function(done) {
+      sort.addCompare('name_desc', 'Name Descending', {name: 'desc'});
+      sort.sort_type().should.equal('name_asc');
+      sort.labels().should.eql([{
+        value: 'name_asc', label: 'Name Ascending'
+      }, {
+        value: 'name_desc', label: 'Name Descending'
+      }]);
+      var sorted = sort.getList();
+      sorted.length.should.eql(list.length());
+      var indexes = [[0, 0], [1, 1], [2, 2], [3, 4], [4, 3]];
+      
+      indexes.forEach(function(index) {
+        sorted[index[0]].id().should.equal(list.list()[index[1]].id());
+        sorted[index[0]].name().should.equal(list.list()[index[1]].name());
+      });
+
+      done();
+    });
+
+    it('should set the sort_type', function(done) {
+      sort.setType('name_desc');
+      var sorted = sort.getList();
+      sorted.length.should.eql(list.length());
+      var indexes = [[0, 3], [1, 4], [2, 2], [3, 1], [4, 0]];
+      
+      indexes.forEach(function(index) {
+        sorted[index[0]].id().should.equal(list.list()[index[1]].id());
+        sorted[index[0]].name().should.equal(list.list()[index[1]].name());
+      });
+
+      done();
+    });
   });
 
-  it('should clobber the row', function(done) {
-    var row = {
-      id: ko.observable(20),
-      name: ko.observable('goby')
-    };
+  describe('filters', function() {
+    var filter;
 
-    (function() {
-      list.insert(row, true);
-    }).should.not.throw();
+    before(function(done) {
+      list = new orm.table.list('Oxbow');
+      done();
+    });
 
-    var new_row = list.get(20);
+    before(function(done) {
+      start_list = [];
+      for(var i=1;i<=5;i++) {
+        start_list.push({
+          id: ko.observable(i),
+          name: ko.observable(list_names[i])
+        });
+      }
+      var error = list.set(start_list);
+      done();
+    });
 
-    should.exist(new_row);
-    new_row.id().should.equal(20);
-    new_row.name().should.equal('goby');
+    after(function(done) {
+      list = null;
+      done();
+    });
 
-    list.length().should.equal(5);
-    done();
+    it('should create a filter', function(done) {
+      filter = new orm.table.list.filter(list);
+      should.exist(filter);
+      done();
+    });
+
+    it('should return the original list', function(done) {
+      var filtered = filter.getList();
+      filtered.length.should.eql(list.list().length);
+
+      var indexes = [[0, 0], [1, 1], [2, 2], [3, 3], [4, 4]];
+      
+      indexes.forEach(function(index) {
+        filtered[index[0]].id().should.equal(list.list()[index[1]].id());
+        filtered[index[0]].name().should.equal(list.list()[index[1]].name());
+      });
+
+      done();
+    });
+
+    it('should still get the original list', function(done) {
+      filter.setActive(true);
+      var filtered = filter.getList();
+      filtered.length.should.eql(list.list().length);
+
+      var indexes = [[0, 0], [1, 1], [2, 2], [3, 3], [4, 4]];
+      
+      indexes.forEach(function(index) {
+        filtered[index[0]].id().should.equal(list.list()[index[1]].id());
+        filtered[index[0]].name().should.equal(list.list()[index[1]].name());
+      });
+
+      done();
+    });
+
+    it('should get only get the first two rows', function(done) {
+      filter.setCompare(function(row) {
+        return row.id() === 1 || row.id() === 2;
+      }.bind(filter));
+
+      filter.setActive(true);
+      var filtered = filter.getList();
+      filtered.length.should.eql(2);
+
+      var indexes = [[0, 0], [1, 1]];
+      
+      indexes.forEach(function(index) {
+        filtered[index[0]].id().should.equal(list.list()[index[1]].id());
+        filtered[index[0]].name().should.equal(list.list()[index[1]].name());
+      });
+
+      done();
+    });
+
+    it('should create a match filter', function(done) {
+      filter = null;
+      filter = orm.table.list.filter.columnFilterFactory(list, 'match', 'name');
+      should.exist(filter);
+      filter.setFilterValue('an');
+
+      var filtered = filter.getList();
+      filtered.length.should.eql(2);
+
+      var indexes = [[0, 0], [1, 1]];
+      
+      indexes.forEach(function(index) {
+        filtered[index[0]].id().should.equal(list.list()[index[1]].id());
+        filtered[index[0]].name().should.equal(list.list()[index[1]].name());
+      });
+
+      done();
+    });
   });
 
-  it('should get an error', function(done) {
-    var row = {
-      id: ko.observable(20),
-      name: ko.observable('loach')
-    };
+  describe('chains', function() {
+    var sort;
+    var filter;
 
-    (function() {
-      list.insert(row, false);
-    }).should.throw();
+    before(function(done) {
+      list = new orm.table.list('Oxbow');
+      done();
+    });
 
-    var new_row = list.get(20);
+    before(function(done) {
+      start_list = [];
+      for(var i=1;i<=5;i++) {
+        start_list.push({
+          id: ko.observable(i),
+          name: ko.observable(list_names[i])
+        });
+      }
+      var error = list.set(start_list);
+      done();
+    });
 
-    should.exist(new_row);
-    new_row.id().should.equal(20);
-    new_row.name().should.equal('goby');
+    it('should create a filter', function(done) {
+      filter = orm.table.list.filter.columnFilterFactory(list, 'match', 'name');
+      filter.setFilterValue('e');
+      done();
+    });
 
-    list.length().should.equal(5);
-    done();
+    after(function(done) {
+      list = null;
+      sort = null;
+      filter = null;
+      done();
+    });
+
+    it('should chain the sort', function(done) {
+      sort = new orm.table.list.sort(filter.getList);
+      sort.addCompare('name_desc', 'Name Descending', {name: 'desc'});
+      sort.setType('name_desc');
+      done();
+    });
+
+    it('should get the sorted, filtered rows', function(done) {
+      var filtered = sort.getList();
+      filtered.length.should.eql(3);
+
+      var indexes = [[0, 3], [1, 4], [2, 0]];
+      
+      indexes.forEach(function(index) {
+        filtered[index[0]].id().should.equal(list.list()[index[1]].id());
+        filtered[index[0]].name().should.equal(list.list()[index[1]].name());
+      });
+
+      done();
+    });
+
+    it('should get them again', function(done) {
+      list.insert({id: ko.observable(30), name: ko.observable('tropheus')});
+      var filtered = sort.getList();
+      filtered.length.should.eql(4);
+
+      var indexes = [[0, 3], [1, 5], [2, 4], [3, 0]];
+      
+      indexes.forEach(function(index) {
+        filtered[index[0]].id().should.equal(list.list()[index[1]].id());
+        filtered[index[0]].name().should.equal(list.list()[index[1]].name());
+      });
+
+      done();
+    });
   });
 });
 
