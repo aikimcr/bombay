@@ -26,7 +26,8 @@
     "ursa": "*",
     "base64": "*",
     "emailjs": "*",
-    "orm": "*"
+    "orm": "*",
+    "q": "*"
   },
   "repository": {
     "type": "git",
