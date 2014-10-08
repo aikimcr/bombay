@@ -6,7 +6,7 @@ div.app_context(id="bands", data-bind="if: $root.current_person().system_admin, 
         button.edit_button(id="add_bands", data-bind="click: forms.add_band.show.bind(forms.add_band)") +
         label(for="add_bands") Add Band
 
-      div.filters
+      div.filters(data-bind="with: band")
         table
           thead
             tr
@@ -16,33 +16,33 @@ div.app_context(id="bands", data-bind="if: $root.current_person().system_admin, 
           tbody
             tr
               td
-                div.sort(data-bind="with: bands")
-                  select(data-bind="value: sort_type, options: sort_compare_labels, optionsText: 'label', optionsValue: 'value'")
+                div.sort(data-bind="with: sort")
+                  select(data-bind="value: sort_type, options: labels, optionsText: 'label', optionsValue: 'value'")
 
               td
-                div.filter(data-bind="with: bands.filter_values")
+                div.filter(data-bind="with: filters.name")
                   div.filter_label Name
-                  input(type="text", data-bind="value: name, valueUpdate: 'afterkeydown'")
+                  input(type="text", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
               
-                div.filter(data-bind="with: bands.filter_values")
+                div.filter
                   div.filter_title Member Count
-                  div
+                  div(data-bind="with: filters.min_member_count")
                     div.filter_label Min
-                    input(type="number", inputmode="numeric", data-bind="value: minimum_member_count, valueUpdate: 'afterkeydown'")
+                    input(type="number", inputmode="numeric", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
 
-                  div
+                  div(data-bind="with: filters.max_member_count")
                     div.filter_label Max
-                    input(type="number", inputmode="numeric", data-bind="value: maximum_member_count, valueUpdate: 'afterkeydown'")
+                    input(type="number", inputmode="numeric", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
 
-                div.filter(data-bind="with: bands.filter_values")
+                div.filter
                   div.filter_title Song Count
-                  div
+                  div(data-bind="with: filters.min_song_count")
                     div.filter_label Min
-                    input(type="number", inputmode="numeric", data-bind="value: minimum_song_count, valueUpdate: 'afterkeydown'")
+                    input(type="number", inputmode="numeric", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
 
-                  div
+                  div(data-bind="with: filters.max_member_count")
                     div.filter_label Max
-                    input(type="number", inputmode="numeric", data-bind="value: maximum_song_count, valueUpdate: 'afterkeydown'")
+                    input(type="number", inputmode="numeric", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
 
       div.list
         table
