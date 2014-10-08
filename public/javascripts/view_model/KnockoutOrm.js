@@ -308,7 +308,12 @@ orm.table.list.filter = function(list) {
 
   this.getList = ko.computed(function() {
     if (this.active()) {
-      return ko.utils.arrayFilter(this.list(), this.filter_compare);
+      if (this.filter_value === null || this.filter_value === '') {
+        this.clearFilterValue();
+        return this.list();
+      } else {
+        return ko.utils.arrayFilter(this.list(), this.filter_compare);
+      }
     } else {
       return this.list();
     }
