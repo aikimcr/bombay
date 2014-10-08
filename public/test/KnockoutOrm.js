@@ -802,25 +802,15 @@ describe('Joins', function() {
 
   before(function(done) {
     var model_list = {
-      genus: [{
-        id: 1,
-        name: 'pseudotropheus'
-      }, {
-        id: 2,
-        name: 'labidochromis'
-      }, {
-        id: 3,
-        name: 'haplochromis'
-      }],
-      species: [{
-        id: 1,
-        genus_id: 1,
-        name: 'zebra'
-      }, {
-        id: 2,
-        genus_id: 1,
-        name: ''
-      }]
+      genus: [
+        { id: 1, name: 'pseudotropheus' },
+        { id: 2, name: 'labidochromis' },
+        { id: 3, name: 'haplochromis' }
+      ],
+      species: [
+        { id: 1, genus_id: 1, name: 'zebra' },
+        { id: 2, genus_id: 1, name: 'ater' }
+      ]
     };
 
     var stub_service = {
@@ -932,8 +922,262 @@ describe('Joins', function() {
       
       row.should.have.property('name');
       ko.isObservable(row.name).should.be.true;
-
-      done();
     });
+
+    done();
+  });
+});
+
+describe('Advanced table definitions', function() {
+  var instance_stub;
+  var test_context;
+  var master_table;
+  var detail_table;
+
+  before(function(done) {
+    test_context = new TestContext();
+
+    var model_list = {
+      genus: [
+        { id: 1, name: 'pseudotropheus' },
+        { id: 2, name: 'labidochromis' },
+        { id: 3, name: 'haplochromis' }
+      ],
+      species: [
+        { id: 1, genus_id: 1, name: 'zebra' },
+        { id: 2, genus_id: 1, name: 'ater' },
+        { id: 3, genus_id: 1, name: 'elongotus' },
+        { id: 4, genus_id: 1, name: 'crabro' },
+
+        { id: 5, genus_id: 2, name: 'caeruleus' },
+        { id: 6, genus_id: 2, name: 'gigas' },
+        { id: 7, genus_id: 2, name: 'mbenjii' },
+
+        { id: 8, genus_id: 3, name: 'labiatus' },
+        { id: 9, genus_id: 3, name: 'gigas' }
+      ]
+    };
+
+    var stub_service = {
+      post: function(url, callback, data) {
+        var table_name = url.match(/\.\/(\w+)(\?)*/)[1];
+        var req_body = {};
+        var req_model = {};
+        Object.keys(data).forEach(function(column_name) {
+          req_body[column_name] = data[column_name];
+        });
+        req_body.id = 4;
+        req_model[table_name] = req_body;
+        model_list[table_name][3] = req_body;
+        callback(200, req_model);
+      },
+      delete: function(url, callback) {
+        var id = url.match(/id=(\d+)/)[1];
+        var table_name = url.match(/\.\/(\w+)(\?)*/)[1];
+        model_list[table_name][id - 1] = null;
+        callback(200, {id: id});
+      },
+      get: function(url, callback) {
+        var table_name = url.match(/\.\/(\w+)(\?)*/)[1];
+        var req_model = {};
+        if (url == './' + table_name) {
+          req_model['all_' + table_name + 's'] = model_list[table_name];
+        } else {
+          var id = url.match(/id=(\d+)/)[1];
+          req_model[table_name] = model_list[table_name][id - 1];
+        }
+
+        callback(200, req_model);
+      }
+    };
+
+    instance_stub = sinon.stub(service, 'getInstance', function() { return stub_service; });
+    done();
+  });
+
+  after(function(done) {
+    test_context = null;
+    master_table = null;
+    detail_table = null;
+    instance_stub.restore();
+    instance_stub = null;
+    done();
+  });
+
+  it('should define a table with filters', function(done) {
+    try {
+    master_table = orm.define(
+      test_context,
+      'genus',
+      {name: {type: 'string'}},
+      {
+        filters: [{
+          name: 'maxSpecies',
+          type: 'max',
+          column_name: 'speciesCount'
+        }, {
+          name: 'minSpecies',
+          type: 'min',
+          column_name: 'speciesCount'
+        }, {
+          name: 'name',
+          type: 'match',
+          column_name: 'name'
+        }],
+        sort: [{
+          name: 'name_asc',
+          label: 'Name (Lo-Hi)',
+          definition: {name: 'asc'}
+        }, {
+          name: 'name_desc',
+          label: 'Name (Hi-Lo)',
+          definition: {name: 'desc'}
+        }, {
+          name: 'species_count_asc',
+          label: 'Species Count (Lo-Hi)',
+          definition: {speciesCount: 'asc'}
+        }, {
+          name: 'species_count_desc',
+          label: 'Species Count (Hi-Lo)',
+          definition: {speciesCount: 'desc'}
+        }]
+      }
+    );
+    } catch (e) {
+      should.not.exist(e);
+    };
+
+    should.exist(master_table);
+    master_table.should.have.property('filters');
+    master_table.filters.should.have.property('maxSpecies');
+    master_table.filters.should.have.property('minSpecies');
+    master_table.filters.should.have.property('name');
+
+    master_table.should.have.property('sort');
+
+    done();
+  });
+
+  it('should define the detail table', function(done) {
+    detail_table = orm.define(
+      test_context, 
+      'species', {
+        genus_id: {type: 'reference', reference_table: master_table},
+        name: {type: 'string'}
+      },
+      {
+        filters: [{
+          name: 'name',
+          type: 'match',
+          column_name: 'name'
+        }],
+        sort: [{
+          name: 'name_asc',
+          label: 'Name (Lo-Hi)',
+          definition: {name: 'asc'}
+        }, {
+          name: 'name_desc',
+          label: 'Name (Hi-Lo)',
+          definition: {name: 'desc'}
+        }]
+      }
+    );
+
+    should.exist(detail_table);
+    detail_table.should.have.property('filters');
+    detail_table.filters.should.have.property('name');
+
+    detail_table.should.have.property('sort');
+
+    done();
+  });
+
+  it('should load the records', function(done) {
+    master_table.load(function(result_code, result) {
+      if (result_code) {
+        done(result_code);
+      } else {
+        detail_table.load(function(result_code, result) {
+          if (result_code) {
+            done(result_code);
+          } else {
+            done();
+          }
+        });
+      }
+    });
+  });
+
+  it('should get all the master_rows sorted by name, ascending', function(done) {
+    master_table.sort.setType('name_asc');
+    var genus_list = master_table.sort.getList();
+
+    should.exist(genus_list);
+    genus_list.length.should.equal(3);
+
+    genus_list[0].name().should.equal('haplochromis');
+    genus_list[1].name().should.equal('labidochromis');
+    genus_list[2].name().should.equal('pseudotropheus');
+
+    done();
+  });
+
+  it('should get all the master rows with at least three species', function(done) {
+    master_table.sort.setType('name_asc');
+    master_table.filters['minSpecies'].setFilterValue(3);
+    var genus_list = master_table.sort.getList();
+    
+    should.exist(genus_list);
+    genus_list.length.should.equal(2);
+
+    genus_list[0].name().should.equal('labidochromis');
+    genus_list[1].name().should.equal('pseudotropheus');
+
+    done();
+  });
+
+  it('should get all the master rows with at exactly three species', function(done) {
+    master_table.sort.setType('name_asc');
+    master_table.filters['minSpecies'].setFilterValue(3);
+    master_table.filters['maxSpecies'].setFilterValue(3);
+    var genus_list = master_table.sort.getList();
+    
+    should.exist(genus_list);
+    genus_list.length.should.equal(1);
+
+    genus_list[0].name().should.equal('labidochromis');
+
+    done();
+  });
+
+  it('should get the master rows with a name matching "chromis" sorted by name, descending', function(done) {
+    master_table.sort.setType('name_desc');
+    master_table.filters['minSpecies'].clearFilterValue();
+    master_table.filters['maxSpecies'].clearFilterValue();
+    master_table.filters['name'].setFilterValue('chromis');
+    var genus_list = master_table.sort.getList();
+    
+    should.exist(genus_list);
+    genus_list.length.should.equal(2);
+
+    genus_list[0].name().should.equal('labidochromis');
+    genus_list[1].name().should.equal('haplochromis');
+
+    done();
+  });
+
+  it('should get all the master_rows sorted by species count, descending', function(done) {
+    master_table.sort.setType('species_count_desc');
+    master_table.filters['name'].clearFilterValue();
+    var genus_list = master_table.sort.getList();
+
+    should.exist(genus_list);
+    genus_list.length.should.equal(3);
+
+    genus_list[0].name().should.equal('pseudotropheus');
+    genus_list[1].name().should.equal('labidochromis');
+    genus_list[2].name().should.equal('haplochromis');
+
+    done();
   });
 });

@@ -144,18 +144,29 @@ orm.table.row = function(table, model) {
   }.bind(this));
 
   this.table.joins.forEach(function(join) {
-    this.addJoins(join[table], join[column_name]);
+    this.addJoins(join['table'], join['column_name']);
   }.bind(this));
 };
 
 orm.table.row.prototype.addJoins = function(join_table, join_column) {
   var accessor = join_table.table_name + 'List';
+  accessor = accessor.replace(/_(.)/g, function(match, p1) {
+    return p1.toUpperCase();
+  });
 
   if (!this[accessor]) {
     this[accessor] = ko.computed(function() {
       var filter = {};
       filter[join_column] = this.id();
       return join_table.list.find(filter);
+    }.bind(this));
+  }
+
+  var counter = accessor.replace(/List$/, 'Count');
+
+  if (!this[counter]) {
+    this[counter] = ko.computed(function() {
+      return this[accessor]().length;
     }.bind(this));
   }
 };
@@ -384,5 +395,36 @@ orm.define = function(context_base, table_name, definition, options) {
   });
 
   context_base[model_key + 's'] = new orm.table.list(table_name);
-  return new orm.table(context_base, table_name, model_key, url, columns);
+  var table_result = new orm.table(context_base, table_name, model_key, url, columns);
+
+  var filters = options['filters'] || [];
+  var filtered_list = table_result.list;
+  table_result.filters = {};
+
+  filters.forEach(function(def) {
+    table_result.filters[def.name] = orm.table.list.filter.columnFilterFactory(
+      filtered_list,
+      def.type,
+      def.column_name
+    );
+    filtered_list = table_result.filters[def.name].getList;
+  });
+
+  var sorts = options['sort'] || [{
+    name: 'id_asc',
+    label: 'Row ID (Lo-Hi)',
+    definition: {id: 'asc'}
+  }];
+
+  table_result.sort = new orm.table.list.sort(filtered_list);
+
+  sorts.forEach(function(def) {
+    table_result.sort.addCompare(
+      def.name,
+      def.label,
+      def.definition
+    );
+  });
+
+  return table_result;
 };
