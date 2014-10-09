@@ -1070,6 +1070,14 @@ describe('Advanced table definitions', function() {
           name: 'name',
           type: 'match',
           column_name: 'name'
+        }, {
+          name: 'genus_id',
+          type: 'id',
+          select_list: {
+            row_list: master_table.list,
+            label_column: 'name'
+          },
+          column_name: 'genus_id'
         }],
         sort: [{
           name: 'name_asc',
@@ -1194,7 +1202,7 @@ describe('Advanced table definitions', function() {
     done();
   });
 
-  it('should get all the master_rows sorted by genus name, ascending', function(done) {
+  it('should get all the detail_rows sorted by genus name, ascending', function(done) {
     detail_table.sort.setType('genus_name_asc');
     var species_list = detail_table.sort.getList();
 
@@ -1212,5 +1220,36 @@ describe('Advanced table definitions', function() {
     species_list[8].genus_name().should.equal('pseudotropheus');
 
     done();
+  });
+
+  it('should get the detail_rows for genus_id one, sorted by name, ascending', function(done) {
+    detail_table.sort.setType('name_asc');
+    detail_table.filters['genus_id'].setFilterValue(1);
+    var species_list = detail_table.sort.getList();
+
+    should.exist(species_list);
+    species_list.length.should.equal(4);
+
+    species_list[0].name().should.equal('ater');
+    species_list[1].name().should.equal('crabro');
+    species_list[2].name().should.equal('elongotus');
+    species_list[3].name().should.equal('zebra');
+
+    done();
+  });
+
+  if('should get the select list, sorted by label', function(done) {
+    var select_list = detail_table.filters['genus_id'].select_list();
+
+    should.exist(select_list);
+    select_list.length.should.equal(3);
+
+    select_list.should.eql([{
+      value: 3, label: 'haplochromis'
+    }, {
+      value: 2, label: 'labidochromis'
+    }, {
+      value: 1, label: 'pseudotropheus'
+    }]);
   });
 });

@@ -54,7 +54,7 @@ div.app_context(id="bands", data-bind="if: $root.current_person().system_admin, 
               th Song Count
               th
 
-          tbody(data-bind="foreach: bands.filtered_list")
+          tbody(data-bind="foreach: band.sort.getList")
             tr
               td(data-bind="click: $root.edit_table_object.bind($root.forms.edit_band)") &#x270e;
               td(data-bind="text: name")

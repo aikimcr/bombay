@@ -6,7 +6,7 @@ div.app_context(id="songs", data-bind="visible: $root.current_tab().value == 6")
         button.edit_button(id="add_songs", data-bind="click: forms.add_song.show.bind(forms.add_song)") +
         label(for="add_songs") Add Song
 
-      div.filters
+      div.filters(data-bind="with: artist")
         table
           thead
             tr
@@ -16,27 +16,27 @@ div.app_context(id="songs", data-bind="visible: $root.current_tab().value == 6")
           tbody
             tr
               td
-                div.sort(data-bind="with: songs")
-                  select(data-bind="value: sort_type, options: sort_compare_labels, optionsText: 'label', optionsValue: 'value'")
+                div.sort(data-bind="with: sort")
+                  select(data-bind="value: sort_type, options: labels, optionsText: 'label', optionsValue: 'value'")
 
               td
-                div.filter(data-bind="with: songs.filter_values")
+                div.filter(data-bind="with: filters.name")
                   div.filter_label Song Name
-                  input(type="text", data-bind="value: name, valueUpdate: 'afterkeydown'")
+                  input(type="text", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
 
-                div.filter(data-bind="with: songs.filter_values")
+                div.filter(data-bind="with: filters.artist_id")
                   div.filter_label Artist
-                  div(data-bind="searchableSelect: artist_id, optionsList: $root.artists.list, optionsText: 'name', optionsValue: 'id', optionsCaption: '-All Artists-'")
+                  div(data-bind="searchableSelect: filter_balue, optionsList: select_list, optionsText: 'label', optionsValue: 'value', optionsCaption: '-All Artists-'")
               
-                div.filter(data-bind="with: songs.filter_values")
+                div.filter
                   div.filter_title Band Count
-                  div
+                  div(data-bind="with: filters.min_band_count")
                     div.filter_label Min
-                    input(type="number", inputmode="numeric", data-bind="value: minimum_band_count, valueUpdate: 'afterkeydown'")
+                    input(type="number", inputmode="numeric", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
 
-                  div
+                  div(data-bind="with: filters.max_band_count")
                     div.filter_label Max
-                    input(type="number", inputmode="numeric", data-bind="value: maximum_band_count, valueUpdate: 'afterkeydown'")
+                    input(type="number", inputmode="numeric", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
 
       div.list
         table
@@ -49,7 +49,7 @@ div.app_context(id="songs", data-bind="visible: $root.current_tab().value == 6")
               th Bands
               th
 
-          tbody(data-bind="foreach: songs.filtered_list")
+          tbody(data-bind="foreach: song.sort.getList")
             tr
               td(data-bind="click: $root.edit_table_object.bind($root.forms.edit_song)") &#x270e;
               td(data-bind="text: name")

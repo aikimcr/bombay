@@ -351,7 +351,7 @@ orm.table.list.filter.prototype.setActive = function(is_active) {
   this.active(is_active);
 };
 
-orm.table.list.filter.columnFilterFactory = function(list, filter_type, column_name) {
+orm.table.list.filter.columnFilterFactory = function(list, filter_type, column_name, select_list) {
   var filter = new orm.table.list.filter(list);
   var filter_compare;
 
@@ -393,6 +393,23 @@ orm.table.list.filter.columnFilterFactory = function(list, filter_type, column_n
       var filter_value = !! this.filter_value();
       return value === filter_value;
     }.bind(filter, column_name));
+  } else if (filter_type === 'id') {
+    filter.setCompare(function(column_name, item) {
+      if (this.filter_value() === null || this.filter_value() === '') return true;
+      return item[column_name]() === this.filter_value();
+    }.bind(filter, column_name));
+
+    filter['select_list'] = ko.computed(function() {
+      var row_list = select_list.row_list;
+      if (row_list instanceof orm.table.list) row_list = row_list.list;
+      return ko.utils.arrayMap(row_list(), function(row) {
+        return {value: row['id'](), label: row[select_list.label_column]};
+      }).sort(function(row_a, row_b) {
+        if (row_a.label < row_b.label) return -1;
+        if (row_a.label > row_b.label) return 1;
+        return 0;
+      });
+    }.bind(this));
   }
 
   return filter;
@@ -422,7 +439,8 @@ orm.define = function(context_base, table_name, definition, options) {
     table_result.filters[def.name] = orm.table.list.filter.columnFilterFactory(
       filtered_list,
       def.type,
-      def.column_name
+      def.column_name,
+      def.select_list
     );
     filtered_list = table_result.filters[def.name].getList;
   });

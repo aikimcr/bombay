@@ -119,14 +119,8 @@ function Manager(for_test) {
 
   this.createBandTable();
   this.createPersonTable();
-  var artist = orm.define(this, 'artist', {
-    name: {type: 'string'}
-  });
-  var song = orm.define(this, 'song', {
-    name: {type: 'string'},
-    artist_id: {type: 'reference', reference_table: artist},
-    key_signature: {type: 'string'}
-  }):
+  this.createArtistTable();
+  this.createSongTable();
   var band_member = orm.define(this, 'band_member', {
     band_id: {type: 'reference', reference_table: band},
     person_id: {type: 'reference', reference_table: person},
@@ -522,7 +516,7 @@ Manager.prototype.createPersonTable = function() {
       definition: {full_name: 'asc'}
     }, {
       name: 'full_name_desc',
-      label: 'Full Name (Lo-Hi)',
+      label: 'Full Name (Hi-Lo)',
       definition: {full_name: 'desc'}
     }, {
       name: 'email_asc',
@@ -530,12 +524,99 @@ Manager.prototype.createPersonTable = function() {
       definition: {email: 'asc'}
     }, {
       name: 'email_desc',
-      label: 'E-Mail (Lo-Hi)',
+      label: 'E-Mail (Hi-Lo)',
       definition: {email: 'desc'}
     }]
   });
+};
 
+Manager.prototype.createArtistTable() {
+  var artist = orm.define(this, 'artist', {
+    name: {type: 'string'}
+  }, {
+    filters: [{
+      name: 'max_song_count',
+      type: 'max',
+      column_name: 'songCount'
+    }, {
+      name: 'min_song_count',
+      type: 'min',
+      column_name: 'songCount'
+    }, {
+      name: 'name',
+      type: 'match',
+      column_name: 'name'
+    }],
+    sort: [{
+      name: 'name_asc',
+      label: 'Name (Lo-Hi)',
+      definition: {name: 'asc'}
+    }, {
+      name: 'name_desc',
+      label: 'Name (Hi-Lo)',
+      definition: {name: 'desc'}
+    }, {
+      name: 'song_count_asc',
+      label: 'Song Count (Lo-Hi)',
+      definition: {songCount: 'asc'}
+    }, {
+      name: 'song_count_desc',
+      label: 'Song Count (Hi-Lo)',
+      definition: {songCount: 'desc'}
+    }]
+  });
+};
 
+Manager.prototype.createSongTable() {
+  var song = orm.define(this, 'song', {
+    name: {type: 'string'},
+    artist_id: {type: 'reference', reference_table: artist},
+    key_signature: {type: 'string'}
+  }, {
+    filters: [{
+      name: 'max_band_count',
+      type: 'max',
+      column_name: 'bandCount'
+    }, {
+      name: 'min_band_count',
+      type: 'min',
+      column_name: 'bandCount'
+    }, {
+      name: 'artist_id', 
+      type: 'id',
+      select_list: {
+        row_list: this.artist.list,
+        label_column: 'name'
+      },
+      column_name: 'artist_id'
+    }, {
+      name: 'name',
+      type: 'match',
+      columna_name: 'name'
+    }],
+    sort: [{
+      name: 'name_asc',
+      label: 'Name (Lo-Hi)',
+      definition: {name: 'asc'}
+    }, {
+      name: 'name_desc',
+      label: 'Name (Hi-Lo)',
+      definition: {name: 'desc'}
+    }, {
+      name: 'artist_name_asc',
+      label: 'Artist Name (Lo-Hi)',
+      definition: {artist_name: 'asc'}
+    }, {
+      name: 'artist_name_desc',
+      label: 'Artist Name (Hi-Lo)',
+      definition: {artist_name: 'desc'}
+    }],
+    computes: [{
+      name: 'artist_name',
+      parent: 'artist',
+      column_name: 'name'
+    }]
+  }):
 };
 
 function app_start() {
