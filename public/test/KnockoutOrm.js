@@ -1079,6 +1079,19 @@ describe('Advanced table definitions', function() {
           name: 'name_desc',
           label: 'Name (Hi-Lo)',
           definition: {name: 'desc'}
+        }, {
+          name: 'genus_name_asc',
+          label: 'Genus Name (Lo-Hi)',
+          definition: {genus_name: 'asc'}
+        }, {
+          name: 'genus_name_desc',
+          label: 'Genus Name (Hi-Lo)',
+          definition: {genus_name: 'desc'}
+        }],
+        computes: [{
+          name: 'genus_name',
+          parent: 'genus',
+          column_name: 'name'
         }]
       }
     );
@@ -1177,6 +1190,26 @@ describe('Advanced table definitions', function() {
     genus_list[0].name().should.equal('pseudotropheus');
     genus_list[1].name().should.equal('labidochromis');
     genus_list[2].name().should.equal('haplochromis');
+
+    done();
+  });
+
+  it('should get all the master_rows sorted by genus name, ascending', function(done) {
+    detail_table.sort.setType('genus_name_asc');
+    var species_list = detail_table.sort.getList();
+
+    should.exist(species_list);
+    species_list.length.should.equal(9);
+
+    species_list[0].genus_name().should.equal('haplochromis');
+    species_list[1].genus_name().should.equal('haplochromis');
+    species_list[2].genus_name().should.equal('labidochromis');
+    species_list[3].genus_name().should.equal('labidochromis');
+    species_list[4].genus_name().should.equal('labidochromis');
+    species_list[5].genus_name().should.equal('pseudotropheus');
+    species_list[6].genus_name().should.equal('pseudotropheus');
+    species_list[7].genus_name().should.equal('pseudotropheus');
+    species_list[8].genus_name().should.equal('pseudotropheus');
 
     done();
   });

@@ -1,7 +1,7 @@
 function orm() { }
 
 // Table Management
-orm.table = function(context_base, table_name, model_key, url, columns) {
+orm.table = function(context_base, table_name, model_key, url, columns, computes) {
   this.context_base = context_base;
   this.table_name = table_name;
   this.model_key = model_key;
@@ -19,6 +19,8 @@ orm.table = function(context_base, table_name, model_key, url, columns) {
       });
     }
   }.bind(this));
+
+  this.computes = computes || [];
 };
 
 orm.table.prototype.create = function(data, callback) {
@@ -145,6 +147,14 @@ orm.table.row = function(table, model) {
 
   this.table.joins.forEach(function(join) {
     this.addJoins(join['table'], join['column_name']);
+  }.bind(this));
+
+  this.table.computes.forEach(function(def) {
+    if ('parent' in def) {
+      this[def.name] = ko.computed(function() {
+        return this[def.parent]()[def.column_name]();
+      }.bind(this));
+    }
   }.bind(this));
 };
 
@@ -399,8 +409,10 @@ orm.define = function(context_base, table_name, definition, options) {
     columns[column_name] = definition[column_name];
   });
 
+  var computes = options['computes'] || [];
+
   context_base[model_key + 's'] = new orm.table.list(table_name);
-  var table_result = new orm.table(context_base, table_name, model_key, url, columns);
+  var table_result = new orm.table(context_base, table_name, model_key, url, columns, computes);
 
   var filters = options['filters'] || [];
   var filtered_list = table_result.list;
