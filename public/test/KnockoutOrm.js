@@ -532,7 +532,7 @@ describe('KnockoutOrm list management', function() {
       done();
     });
 
-    it('should create a filter', function(done) {
+    before(function(done) {
       filter = orm.table.list.filter.columnFilterFactory(list, 'match', 'name');
       filter.setFilterValue('e');
       done();
@@ -928,6 +928,172 @@ describe('Joins', function() {
   });
 });
 
+describe('Views', function() {
+  var instance_stub;
+  var test_context;
+  var table;
+  var view_one;
+  var view_two;
+
+  before(function() {
+    test_context = new TestContext();
+
+    var model_list = {
+      genus: [
+        { id: 1, name: 'pseudotropheus' },
+        { id: 2, name: 'labidochromis' },
+        { id: 3, name: 'haplochromis' },
+        { id: 4, name: 'labeotropheus' }
+      ],
+    };
+
+    var stub_service = {
+      post: function(url, callback, data) {
+        var table_name = url.match(/\.\/(\w+)(\?)*/)[1];
+        var req_body = {};
+        var req_model = {};
+        Object.keys(data).forEach(function(column_name) {
+          req_body[column_name] = data[column_name];
+        });
+        req_body.id = 4;
+        req_model[table_name] = req_body;
+        model_list[table_name][3] = req_body;
+        callback(200, req_model);
+      },
+      delete: function(url, callback) {
+        var id = url.match(/id=(\d+)/)[1];
+        var table_name = url.match(/\.\/(\w+)(\?)*/)[1];
+        model_list[table_name][id - 1] = null;
+        callback(200, {id: id});
+      },
+      get: function(url, callback) {
+        var table_name = url.match(/\.\/(\w+)(\?)*/)[1];
+        var req_model = {};
+        if (url == './' + table_name) {
+          req_model['all_' + table_name + 's'] = model_list[table_name];
+        } else {
+          var id = url.match(/id=(\d+)/)[1];
+          req_model[table_name] = model_list[table_name][id - 1];
+        }
+
+        callback(200, req_model);
+      }
+    };
+
+    instance_stub = sinon.stub(service, 'getInstance', function() { return stub_service; });
+  });
+
+  before(function(done) {
+    table = orm.define(
+      test_context,
+      'genus',
+      {name: {type: 'string'}}
+    );
+
+    table.load(function(result_code, result) {
+      if (result_code) {
+        done(result_code);
+      } else {
+        done();
+      }
+    });
+  });
+
+  after(function() {
+    test_context = null;
+    table = null;
+    instance_stub.restore();
+    instance_stub = null;
+  });
+
+  it('should define the first table view', function() {
+    view_one = new orm.table.view(
+      table,
+      [{
+        name: 'name',
+        type: 'match',
+        column_name: 'name'
+      }],
+      [{
+        name: 'name_asc',
+        label: 'Name (Lo-Hi)',
+        definition: {name: 'asc'}
+      }, {
+        name: 'name_desc',
+        label: 'Name (Lo-Hi)',
+        definition: {name: 'desc'}
+      }]
+    );
+
+    should.exist(view_one);
+    view_one.should.have.property('filters');
+    view_one.filters.should.have.property('name');
+
+    view_one.should.have.property('sort');
+    view_one.sort.should.be.instanceof(orm.table.list.sort);
+  });
+
+  it('should define the second table view', function() {
+    view_two = new orm.table.view(
+      table,
+      [{
+        name: 'name',
+        type: 'match',
+        column_name: 'name'
+      }],
+      [{
+        name: 'name_asc',
+        label: 'Name (Lo-Hi)',
+        definition: {name: 'asc'}
+      }, {
+        name: 'name_desc',
+        label: 'Name (Lo-Hi)',
+        definition: {name: 'desc'}
+      }]
+    );
+
+    should.exist(view_two);
+    view_two.should.have.property('filters');
+    view_two.filters.should.have.property('name');
+
+    view_two.should.have.property('sort');
+    view_two.sort.should.be.instanceof(orm.table.list.sort);
+  });
+
+  it('should get the "chromis" list, sorted by name ascending', function() {
+    view_one.filters.name.setFilterValue('chromis');
+    view_one.sort.setType('name_asc');
+    var chromis_list = view_one.getList();
+
+    should.exist(chromis_list);
+    chromis_list.length.should.equal(2);
+
+    chromis_list[0].name().should.equal('haplochromis');
+    chromis_list[1].name().should.equal('labidochromis');
+  });
+
+  it('should get the "tropheus" list, sorted by name ascending', function() {
+    view_two.filters.name.setFilterValue('tropheus');
+    view_two.sort.setType('name_asc');
+    var tropheus_list = view_two.getList();
+
+    should.exist(tropheus_list);
+    tropheus_list.length.should.equal(2);
+
+    tropheus_list[0].name().should.equal('labeotropheus');
+    tropheus_list[1].name().should.equal('pseudotropheus');
+  });
+
+  it('should get different lists for each view', function() {
+    var chromis_list = view_one.getList();
+    var tropheus_list = view_two.getList();
+
+    should.exist(chromis_list);
+    should.exist(tropheus_list);
+    chromis_list.should.not.eql(tropheus_list);
+  });
+});
+
 describe('Advanced table definitions', function() {
   var instance_stub;
   var test_context;
@@ -1004,8 +1170,7 @@ describe('Advanced table definitions', function() {
     done();
   });
 
-  it('should define a table with filters', function(done) {
-    try {
+  it('should define a table with filters', function() {
     master_table = orm.define(
       test_context,
       'genus',
@@ -1043,9 +1208,6 @@ describe('Advanced table definitions', function() {
         }]
       }
     );
-    } catch (e) {
-      should.not.exist(e);
-    };
 
     should.exist(master_table);
     master_table.should.have.property('filters');
@@ -1054,11 +1216,54 @@ describe('Advanced table definitions', function() {
     master_table.filters.should.have.property('name');
 
     master_table.should.have.property('sort');
+    master_table.sort.should.be.instanceof(orm.table.list.sort);
 
-    done();
+    master_table.should.have.property('views');
+    master_table.views.should.have.property('default');
+    master_table.views.default.should.be.instanceof(orm.table.view);
+
+    master_table.views.default.should.have.property('filters');
+    master_table.views.default.filters.should.have.property('maxSpecies');
+    master_table.views.default.filters.should.have.property('minSpecies');
+    master_table.views.default.filters.should.have.property('name');
+
+    master_table.views.default.should.have.property('sort');
+    master_table.views.default.sort.should.be.instanceof(orm.table.list.sort);
   });
 
-  it('should define the detail table', function(done) {
+  it('should define the detail table', function() {
+    var filter_defines = [{
+      name: 'name',
+      type: 'match',
+      column_name: 'name'
+    }, {
+      name: 'genus_id',
+      type: 'id',
+      select_list: {
+        row_list: master_table.list,
+        label_column: 'name'
+      },
+      column_name: 'genus_id'
+    }];
+
+    var sort_defines = [{
+      name: 'name_asc',
+      label: 'Name (Lo-Hi)',
+      definition: {name: 'asc'}
+    }, {
+      name: 'name_desc',
+      label: 'Name (Hi-Lo)',
+      definition: {name: 'desc'}
+    }, {
+      name: 'genus_name_asc',
+      label: 'Genus Name (Lo-Hi)',
+      definition: {genus_name: 'asc'}
+    }, {
+      name: 'genus_name_desc',
+      label: 'Genus Name (Hi-Lo)',
+      definition: {genus_name: 'desc'}
+    }];
+
     detail_table = orm.define(
       test_context, 
       'species', {
@@ -1066,40 +1271,17 @@ describe('Advanced table definitions', function() {
         name: {type: 'string'}
       },
       {
-        filters: [{
-          name: 'name',
-          type: 'match',
-          column_name: 'name'
-        }, {
-          name: 'genus_id',
-          type: 'id',
-          select_list: {
-            row_list: master_table.list,
-            label_column: 'name'
-          },
-          column_name: 'genus_id'
-        }],
-        sort: [{
-          name: 'name_asc',
-          label: 'Name (Lo-Hi)',
-          definition: {name: 'asc'}
-        }, {
-          name: 'name_desc',
-          label: 'Name (Hi-Lo)',
-          definition: {name: 'desc'}
-        }, {
-          name: 'genus_name_asc',
-          label: 'Genus Name (Lo-Hi)',
-          definition: {genus_name: 'asc'}
-        }, {
-          name: 'genus_name_desc',
-          label: 'Genus Name (Hi-Lo)',
-          definition: {genus_name: 'desc'}
-        }],
+        filters: filter_defines,
+        sort: sort_defines,
         computes: [{
           name: 'genus_name',
           parent: 'genus',
           column_name: 'name'
+        }],
+        views: [{
+          name: 'alternate',
+          filters: filter_defines,
+          sort: sort_defines,
         }]
       }
     );
@@ -1109,8 +1291,26 @@ describe('Advanced table definitions', function() {
     detail_table.filters.should.have.property('name');
 
     detail_table.should.have.property('sort');
+    detail_table.sort.should.be.instanceof(orm.table.list.sort);
 
-    done();
+    detail_table.should.have.property('views');
+    detail_table.views.should.have.property('default');
+    detail_table.views.default.should.be.instanceof(orm.table.view);
+
+    detail_table.views.default.should.have.property('filters');
+    detail_table.views.default.filters.should.have.property('name');
+
+    detail_table.views.default.should.have.property('sort');
+    detail_table.views.default.sort.should.be.instanceof(orm.table.list.sort);
+
+    detail_table.views.should.have.property('alternate');
+    detail_table.views.alternate.should.be.instanceof(orm.table.view);
+
+    detail_table.views.alternate.should.have.property('filters');
+    detail_table.views.alternate.filters.should.have.property('name');
+
+    detail_table.views.alternate.should.have.property('sort');
+    detail_table.views.alternate.sort.should.be.instanceof(orm.table.list.sort);
   });
 
   it('should load the records', function(done) {
@@ -1129,7 +1329,7 @@ describe('Advanced table definitions', function() {
     });
   });
 
-  it('should get all the master_rows sorted by name, ascending', function(done) {
+  it('should get all the master_rows sorted by name, ascending', function() {
     master_table.sort.setType('name_asc');
     var genus_list = master_table.sort.getList();
 
@@ -1139,11 +1339,9 @@ describe('Advanced table definitions', function() {
     genus_list[0].name().should.equal('haplochromis');
     genus_list[1].name().should.equal('labidochromis');
     genus_list[2].name().should.equal('pseudotropheus');
-
-    done();
   });
 
-  it('should get all the master rows with at least three species', function(done) {
+  it('should get all the master rows with at least three species', function() {
     master_table.sort.setType('name_asc');
     master_table.filters['minSpecies'].setFilterValue(3);
     var genus_list = master_table.sort.getList();
@@ -1153,11 +1351,9 @@ describe('Advanced table definitions', function() {
 
     genus_list[0].name().should.equal('labidochromis');
     genus_list[1].name().should.equal('pseudotropheus');
-
-    done();
   });
 
-  it('should get all the master rows with at exactly three species', function(done) {
+  it('should get all the master rows with at exactly three species', function() {
     master_table.sort.setType('name_asc');
     master_table.filters['minSpecies'].setFilterValue(3);
     master_table.filters['maxSpecies'].setFilterValue(3);
@@ -1167,11 +1363,9 @@ describe('Advanced table definitions', function() {
     genus_list.length.should.equal(1);
 
     genus_list[0].name().should.equal('labidochromis');
-
-    done();
   });
 
-  it('should get the master rows with a name matching "chromis" sorted by name, descending', function(done) {
+  it('should get the master rows with a name matching "chromis" sorted by name, descending', function() {
     master_table.sort.setType('name_desc');
     master_table.filters['minSpecies'].clearFilterValue();
     master_table.filters['maxSpecies'].clearFilterValue();
@@ -1183,11 +1377,9 @@ describe('Advanced table definitions', function() {
 
     genus_list[0].name().should.equal('labidochromis');
     genus_list[1].name().should.equal('haplochromis');
-
-    done();
   });
 
-  it('should get all the master_rows sorted by species count, descending', function(done) {
+  it('should get all the master_rows sorted by species count, descending', function() {
     master_table.sort.setType('species_count_desc');
     master_table.filters['name'].clearFilterValue();
     var genus_list = master_table.sort.getList();
@@ -1198,11 +1390,9 @@ describe('Advanced table definitions', function() {
     genus_list[0].name().should.equal('pseudotropheus');
     genus_list[1].name().should.equal('labidochromis');
     genus_list[2].name().should.equal('haplochromis');
-
-    done();
   });
 
-  it('should get all the detail_rows sorted by genus name, ascending', function(done) {
+  it('should get all the detail_rows sorted by genus name, ascending', function() {
     detail_table.sort.setType('genus_name_asc');
     var species_list = detail_table.sort.getList();
 
@@ -1218,11 +1408,9 @@ describe('Advanced table definitions', function() {
     species_list[6].genus_name().should.equal('pseudotropheus');
     species_list[7].genus_name().should.equal('pseudotropheus');
     species_list[8].genus_name().should.equal('pseudotropheus');
-
-    done();
   });
 
-  it('should get the detail_rows for genus_id one, sorted by name, ascending', function(done) {
+  it('should get the detail_rows for genus_id one, sorted by name, ascending', function() {
     detail_table.sort.setType('name_asc');
     detail_table.filters['genus_id'].setFilterValue(1);
     var species_list = detail_table.sort.getList();
@@ -1234,11 +1422,9 @@ describe('Advanced table definitions', function() {
     species_list[1].name().should.equal('crabro');
     species_list[2].name().should.equal('elongotus');
     species_list[3].name().should.equal('zebra');
-
-    done();
   });
 
-  if('should get the select list, sorted by label', function(done) {
+  it('should get the select list, sorted by label', function() {
     var select_list = detail_table.filters['genus_id'].select_list();
 
     should.exist(select_list);

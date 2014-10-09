@@ -403,7 +403,7 @@ orm.table.list.filter.columnFilterFactory = function(list, filter_type, column_n
       var row_list = select_list.row_list;
       if (row_list instanceof orm.table.list) row_list = row_list.list;
       return ko.utils.arrayMap(row_list(), function(row) {
-        return {value: row['id'](), label: row[select_list.label_column]};
+        return {value: row['id'](), label: row[select_list.label_column]()};
       }).sort(function(row_a, row_b) {
         if (row_a.label < row_b.label) return -1;
         if (row_a.label > row_b.label) return 1;
@@ -413,6 +413,42 @@ orm.table.list.filter.columnFilterFactory = function(list, filter_type, column_n
   }
 
   return filter;
+};
+
+// Define table views
+orm.table.view = function(table, filters, sorts) {
+  var filtered_list = table.list;
+  this.filters = {};
+
+  filters = filters || [];
+  filters.forEach(function(def) {
+    this.filters[def.name] = orm.table.list.filter.columnFilterFactory(
+      filtered_list,
+      def.type,
+      def.column_name,
+      def.select_list
+    );
+    filtered_list = this.filters[def.name].getList;
+  }.bind(this));
+
+  this.sort = new orm.table.list.sort(filtered_list);
+  sorts = sorts || [{
+    name: 'id_asc',
+    label: 'Row ID (Lo-Hi)',
+    definition: {id: 'asc'}
+  }];
+
+  sorts.forEach(function(def) {
+    this.sort.addCompare(
+      def.name,
+      def.label,
+      def.definition
+    );
+  }.bind(this));
+};
+
+orm.table.view.prototype.getList = function() {
+  return this.sort.getList();
 };
 
 // The main entry point for defining a view model.
@@ -431,34 +467,15 @@ orm.define = function(context_base, table_name, definition, options) {
   context_base[model_key + 's'] = new orm.table.list(table_name);
   var table_result = new orm.table(context_base, table_name, model_key, url, columns, computes);
 
-  var filters = options['filters'] || [];
-  var filtered_list = table_result.list;
-  table_result.filters = {};
+  var default_view = new orm.table.view(table_result, options['filters'], options['sort']);
+  table_result.views = {default: default_view};
+  table_result.filters = default_view.filters;
+  table_result.sort = default_view.sort;
 
-  filters.forEach(function(def) {
-    table_result.filters[def.name] = orm.table.list.filter.columnFilterFactory(
-      filtered_list,
-      def.type,
-      def.column_name,
-      def.select_list
-    );
-    filtered_list = table_result.filters[def.name].getList;
-  });
+  var views = options['views'] || [];
 
-  var sorts = options['sort'] || [{
-    name: 'id_asc',
-    label: 'Row ID (Lo-Hi)',
-    definition: {id: 'asc'}
-  }];
-
-  table_result.sort = new orm.table.list.sort(filtered_list);
-
-  sorts.forEach(function(def) {
-    table_result.sort.addCompare(
-      def.name,
-      def.label,
-      def.definition
-    );
+  views.forEach(function(def) {
+    table_result.views[def.name] = new orm.table.view(table_result, def['filters'], def['sort']);
   });
 
   return table_result;
