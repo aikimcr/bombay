@@ -1110,17 +1110,17 @@ describe('Advanced table definitions', function() {
         { id: 3, name: 'haplochromis' }
       ],
       species: [
-        { id: 1, genus_id: 1, name: 'zebra' },
-        { id: 2, genus_id: 1, name: 'ater' },
-        { id: 3, genus_id: 1, name: 'elongotus' },
-        { id: 4, genus_id: 1, name: 'crabro' },
+        { id: 1, genus_id: 1, name: 'zebra', count: 50 },
+        { id: 2, genus_id: 1, name: 'ater', count: 5 },
+        { id: 3, genus_id: 1, name: 'elongotus', count: 15 },
+        { id: 4, genus_id: 1, name: 'crabro', count: 20 },
 
-        { id: 5, genus_id: 2, name: 'caeruleus' },
-        { id: 6, genus_id: 2, name: 'gigas' },
-        { id: 7, genus_id: 2, name: 'mbenjii' },
+        { id: 5, genus_id: 2, name: 'caeruleus', count: 17 },
+        { id: 6, genus_id: 2, name: 'gigas', count: 10 },
+        { id: 7, genus_id: 2, name: 'mbenjii', count: 30 },
 
-        { id: 8, genus_id: 3, name: 'labiatus' },
-        { id: 9, genus_id: 3, name: 'gigas' }
+        { id: 8, genus_id: 3, name: 'labiatus', count: 60 },
+        { id: 9, genus_id: 3, name: 'gigas', count: 2 }
       ]
     };
 
@@ -1188,6 +1188,15 @@ describe('Advanced table definitions', function() {
           name: 'name',
           type: 'match',
           column_name: 'name'
+        }],
+        computes: [{
+          name: 'species_average_count',
+          average: 'speciesList',
+          column_name: 'count'
+        }, {
+          name: 'species_sum_count', 
+          sum: 'speciesList',
+          column_name: 'count'
         }],
         sort: [{
           name: 'name_asc',
@@ -1268,7 +1277,8 @@ describe('Advanced table definitions', function() {
       test_context, 
       'species', {
         genus_id: {type: 'reference', reference_table: master_table},
-        name: {type: 'string'}
+        name: {type: 'string'},
+        count: {type: 'number'}
       },
       {
         filters: filter_defines,
@@ -1318,6 +1328,10 @@ describe('Advanced table definitions', function() {
       if (result_code) {
         done(result_code);
       } else {
+        master_table.list.list().forEach(function(row) {
+          row.speciesList().should.eql([]);
+        });
+
         detail_table.load(function(result_code, result) {
           if (result_code) {
             done(result_code);
@@ -1379,7 +1393,7 @@ describe('Advanced table definitions', function() {
     genus_list[1].name().should.equal('haplochromis');
   });
 
-  it('should get all the master_rows sorted by species count, descending', function() {
+  it('should get all the master_rows sorted by species count, descending with aggregates', function() {
     master_table.sort.setType('species_count_desc');
     master_table.filters['name'].clearFilterValue();
     var genus_list = master_table.sort.getList();
@@ -1388,8 +1402,14 @@ describe('Advanced table definitions', function() {
     genus_list.length.should.equal(3);
 
     genus_list[0].name().should.equal('pseudotropheus');
+    genus_list[0].species_sum_count().should.equal(90);
+    genus_list[0].species_average_count().should.equal(22.5);
+    genus_list[1].species_sum_count().should.equal(57);
     genus_list[1].name().should.equal('labidochromis');
+    genus_list[1].species_average_count().should.equal(19)
+    genus_list[2].species_sum_count().should.equal(62);
     genus_list[2].name().should.equal('haplochromis');
+    genus_list[2].species_average_count().should.equal(31)
   });
 
   it('should get all the detail_rows sorted by genus name, ascending', function() {
@@ -1437,5 +1457,39 @@ describe('Advanced table definitions', function() {
     }, {
       value: 1, label: 'pseudotropheus'
     }]);
+  });
+
+  it('should clone the view with only haplochromis', function() {
+    var master_row = master_table.list.find({name: 'haplochromis'})[0];
+    var new_view = detail_table.views.alternate.cloneWithNewList(master_row.speciesList);
+
+    should.exist(new_view);
+    new_view.should.be.instanceof(orm.table.view);
+
+    var species_list = new_view.getList();
+
+    should.exist(species_list);
+    species_list.length.should.equal(2);
+    species_list[0].genus_name().should.equal('haplochromis');
+    species_list[0].name().should.equal('gigas');
+    species_list[1].genus_name().should.equal('haplochromis');
+    species_list[1].name().should.equal('labiatus');
+
+    var big_list = detail_table.views.alternate.getList();
+
+    should.exist(big_list);
+    big_list.length.should.equal(9);
+    big_list.should.not.eql(species_list);
+  });
+
+  it('should have cloned views for all master row species lists', function() {
+    master_table.list.list().forEach(function(master_row) {
+      master_row.should.have.property('speciesList');
+      master_row.speciesList.should.have.property('views');
+      master_row.speciesList.views.should.have.property('default');
+      master_row.speciesList.views.default.should.be.instanceof(orm.table.view);
+      master_row.speciesList.views.should.have.property('alternate');
+      master_row.speciesList.views.alternate.should.be.instanceof(orm.table.view);
+    });
   });
 });

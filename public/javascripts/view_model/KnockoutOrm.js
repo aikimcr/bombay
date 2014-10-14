@@ -149,10 +149,38 @@ orm.table.row = function(table, model) {
     this.addJoins(join['table'], join['column_name']);
   }.bind(this));
 
+  function get_sum(details, column_name) {
+    if (details) {
+      return details.reduce(function(prev, curr) {
+        return prev + curr[column_name]();
+      }, 0);
+    } else {
+      return null;
+    }
+  }
+
   this.table.computes.forEach(function(def) {
     if ('parent' in def) {
       this[def.name] = ko.computed(function() {
         return this[def.parent]()[def.column_name]();
+      }.bind(this));
+    } else if ('sum' in def) {
+      this[def.name] = ko.computed(function() {
+        if (this[def.sum]) {
+          return get_sum(this[def.sum](), def.column_name);
+        } else {
+          return null;
+        }
+      }.bind(this));
+    } else if ('average' in def) {
+      return this[def.name] = ko.computed(function() {
+        if (this[def.average]) {
+          var details = this[def.average]();
+          var sum = get_sum(details, def.column_name);
+          return (details && details.length > 0) ? sum / details.length : 0;
+        } else {
+          return null;
+        }
       }.bind(this));
     }
   }.bind(this));
@@ -169,6 +197,11 @@ orm.table.row.prototype.addJoins = function(join_table, join_column) {
       var filter = {};
       filter[join_column] = this.id();
       return join_table.list.find(filter);
+    }.bind(this));
+
+    this[accessor].views = {};
+    Object.keys(join_table.views).forEach(function(view_name) {
+      this[accessor].views[view_name] = join_table.views[view_name].cloneWithNewList(this[accessor]);
     }.bind(this));
   }
 
@@ -417,7 +450,17 @@ orm.table.list.filter.columnFilterFactory = function(list, filter_type, column_n
 
 // Define table views
 orm.table.view = function(table, filters, sorts) {
-  var filtered_list = table.list;
+  this.createSortAndFilters_(table.list, filters, sorts);
+
+  this.cloneWithNewList = function(new_list) {
+    var new_view = Object.create(this);
+    new_view.createSortAndFilters_(new_list, filters, sorts);
+    return new_view;
+  };
+};
+
+orm.table.view.prototype.createSortAndFilters_ = function(list, filters, sorts) {
+  var filtered_list = list;
   this.filters = {};
 
   filters = filters || [];
