@@ -182,6 +182,22 @@ orm.table.row = function(table, model) {
           return null;
         }
       }.bind(this));
+    } else if ('crossref' in def) {
+      return this[def.name] = ko.computed(function() {
+        if (this[def.details]) {
+          var details = this[def.details]();
+          var crossref_row = def.crossref();
+          if (details && crossref_row) {
+            return ko.utils.arrayFilter(details, function(row) {
+              return row[def.column_name]() === crossref_row.id();
+            });
+          } else {
+            return [];
+          }
+        } else {
+          return null;
+        }
+      }.bind(this));
     }
   }.bind(this));
 };

@@ -1099,6 +1099,8 @@ describe('Advanced table definitions', function() {
   var test_context;
   var master_table;
   var detail_table;
+  var cross_ref_table;
+  var cross_ref_row = ko.observable();
 
   before(function(done) {
     test_context = new TestContext();
@@ -1110,17 +1112,21 @@ describe('Advanced table definitions', function() {
         { id: 3, name: 'haplochromis' }
       ],
       species: [
-        { id: 1, genus_id: 1, name: 'zebra', count: 50 },
-        { id: 2, genus_id: 1, name: 'ater', count: 5 },
-        { id: 3, genus_id: 1, name: 'elongotus', count: 15 },
-        { id: 4, genus_id: 1, name: 'crabro', count: 20 },
+        { id: 1, genus_id: 1, habitat_id: 1, name: 'zebra', count: 50 },
+        { id: 2, genus_id: 1, habitat_id: 1, name: 'ater', count: 5 },
+        { id: 3, genus_id: 1, habitat_id: 1, name: 'elongotus', count: 15 },
+        { id: 4, genus_id: 1, habitat_id: 1, name: 'crabro', count: 20 },
 
-        { id: 5, genus_id: 2, name: 'caeruleus', count: 17 },
-        { id: 6, genus_id: 2, name: 'gigas', count: 10 },
-        { id: 7, genus_id: 2, name: 'mbenjii', count: 30 },
+        { id: 5, genus_id: 2, habitat_id: 1, name: 'caeruleus', count: 17 },
+        { id: 6, genus_id: 2, habitat_id: 2, name: 'gigas', count: 10 },
+        { id: 7, genus_id: 2, habitat_id: 1, name: 'mbenjii', count: 30 },
 
-        { id: 8, genus_id: 3, name: 'labiatus', count: 60 },
-        { id: 9, genus_id: 3, name: 'gigas', count: 2 }
+        { id: 8, genus_id: 3, habitat_id: 2, name: 'labiatus', count: 60 },
+        { id: 9, genus_id: 3, habitat_id: 2, name: 'gigas', count: 2 }
+      ],
+      habitat: [
+        { id: 1, name: 'mbuna' },
+        { id: 2, name: 'pelagic' }
       ]
     };
 
@@ -1197,6 +1203,11 @@ describe('Advanced table definitions', function() {
           name: 'species_sum_count', 
           sum: 'speciesList',
           column_name: 'count'
+        }, {
+          name: 'species_by_habitat',
+          crossref: cross_ref_row,
+          details: 'speciesList',
+          column_name: 'habitat_id'
         }],
         sort: [{
           name: 'name_asc',
@@ -1240,6 +1251,18 @@ describe('Advanced table definitions', function() {
     master_table.views.default.sort.should.be.instanceof(orm.table.list.sort);
   });
 
+  it('should define the cross_ref table', function() {
+    cross_ref_table = orm.define(
+      test_context,
+      'habitat',
+      {
+        name: {type: 'string'}
+      }
+    );
+
+    should.exist(cross_ref_table);
+  });
+
   it('should define the detail table', function() {
     var filter_defines = [{
       name: 'name',
@@ -1275,8 +1298,10 @@ describe('Advanced table definitions', function() {
 
     detail_table = orm.define(
       test_context, 
-      'species', {
+      'species',
+      {
         genus_id: {type: 'reference', reference_table: master_table},
+        habitat_id: {type: 'reference', reference_table: cross_ref_table},
         name: {type: 'string'},
         count: {type: 'number'}
       },
@@ -1330,13 +1355,24 @@ describe('Advanced table definitions', function() {
       } else {
         master_table.list.list().forEach(function(row) {
           row.speciesList().should.eql([]);
+          row.species_by_habitat().should.eql([]);
         });
 
-        detail_table.load(function(result_code, result) {
+        cross_ref_table.load(function(result_code, result) {
           if (result_code) {
             done(result_code);
           } else {
-            done();
+            detail_table.load(function(result_code, result) {
+              if (result_code) {
+                done(result_code);
+              } else {
+                master_table.list.list().forEach(function(row) {
+                  row.species_by_habitat().should.eql([]);
+                });
+
+                done();
+              }
+            });
           }
         });
       }
@@ -1491,5 +1527,15 @@ describe('Advanced table definitions', function() {
       master_row.speciesList.views.should.have.property('alternate');
       master_row.speciesList.views.alternate.should.be.instanceof(orm.table.view);
     });
+  });
+
+  it('should get just the species filtered by the habitat', function() {
+    cross_ref_row(cross_ref_table.list.list()[1]);
+    var master_row = master_table.list.find({name: 'labidochromis'})[0];
+    var species_list = master_row.species_by_habitat();
+
+    should.exist(species_list);
+    species_list.length.should.equal(1);
+    species_list[0].name().should.equal('gigas');
   });
 });
