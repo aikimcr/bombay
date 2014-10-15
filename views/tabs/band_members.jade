@@ -1,12 +1,12 @@
 div.app_context(id="band_members", data-bind="visible: $root.current_tab().value == 4")
   div.app_context_header Band Members
   div.app_context_item
-    div.display
-      div.control(data-bind="if: $root.current_band_member().band_admin")
+    div.display(data-bind="if: current_band")
+      div.control(data-bind="if: current_band_member().band_admin")
         button.edit_button(id="add_band_member", data-bind="click: forms.add_band_member.show.bind(forms.add_band_member)") +
         label(for="add_band_member") Add Members
 
-      div.filters
+      div.filters(data-bind="with: current_band().bandMemberList().views.band_persons")
         table
           thead
             tr
@@ -16,21 +16,21 @@ div.app_context(id="band_members", data-bind="visible: $root.current_tab().value
           tbody
             tr
               td
-                div.sort(data-bind="with: band_members")
-                  select(data-bind="value: sort_type, options: sort_compare_labels, optionsText: 'label', optionsValue: 'value'")
+                div.sort(data-bind="with: sort")
+                  select(data-bind="value: sort_type, options: labels, optionsText: 'label', optionsValue: 'value'")
 
               td
-                div.filter(data-bind="with: band_members.filter_values")
+                div.filter(data-bind="with: filters.full_name")
                   div.filter_label Person Name
-                  input(type="text", data-bind="value: person_name, valueUpdate: 'afterkeydown'")
+                  input(type="text", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
 
-                div.filter(data-bind="with: band_members.filter_values")
+                div.filter(data-bind="with: filters.email")
                   div.filter_label Person Email
-                  input(type="text", data-bind="value: person_email, valueUpdate: 'afterkeydown'")
+                  input(type="text", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
  
-                div.filter(data-bind="with: band_members.filter_values")
+                div.filter(data-bind="with: filters.band_admin")
                   div.filter_label Only Band Admins
-                  input(type="checkbox", data-bind="checked: band_admin")
+                  input(type="checkbox", data-bind="checked: filter_value")
 
       div.list
         table
@@ -41,7 +41,7 @@ div.app_context(id="band_members", data-bind="visible: $root.current_tab().value
               th Admin
               th(data-bind="if: $root.current_band_member().band_admin")
 
-          tbody(data-bind="foreach: current_members")
+          tbody(data-bind="foreach: current_band().bandMemberList")
             tr
               td(data-bind="text: person().full_name")
               td(data-bind="text: person().email")

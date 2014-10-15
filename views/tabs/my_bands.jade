@@ -1,12 +1,12 @@
 div.app_context(id="my_bands", data-bind="visible: $root.current_tab().value == 3")
   div.app_context_header Bands
   div.app_context_item
-    div.display
+    div.display(data-bind="if: current_person()")
       div.control
         button.edit_button(id="join_bands", data-bind="click: forms.join_band.show.bind(forms.join_band)") +
         label(for="join_bands") Join Band
 
-      div.filters
+      div.filters(data_bind="with: current_person().bandMemberList().views.person_bands")
         table
           thead
             tr
@@ -16,13 +16,13 @@ div.app_context(id="my_bands", data-bind="visible: $root.current_tab().value == 
           tbody
             tr
               td
-                div.sort(data-bind="with: band_members")
-                  select(data-bind="value: sort_type, options: $root.membership_sorts, optionsText: 'label', optionsValue: 'value'")
+                div.sort(data-bind="with: sort")
+                  select(data-bind="value: sort_type, options: labels, optionsText: 'label', optionsValue: 'value'")
 
               td
-                div.filter(data-bind="with: band_members.filter_values")
+                div.filter(data-bind="with: filters.band_name")
                   div.filter_label Name
-                  input(type="text", data-bind="value: band_name, valueUpdate: 'afterkeydown'")
+                  input(type="text", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
               
       div.list
         table
@@ -31,7 +31,7 @@ div.app_context(id="my_bands", data-bind="visible: $root.current_tab().value == 
               th Name
               th
 
-          tbody(data-bind="foreach: current_memberships")
+          tbody(data-bind="foreach: current_person().bandMemberList")
             tr
               td(data-bind="text: band().name")
               td

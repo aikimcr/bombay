@@ -121,18 +121,9 @@ function Manager(for_test) {
   this.createPersonTable();
   this.createArtistTable();
   this.createSongTable();
-  var band_member = orm.define(this, 'band_member', {
-    band_id: {type: 'reference', reference_table: band},
-    person_id: {type: 'reference', reference_table: person},
-    band_admin: {type: 'boolean'}
-  });
-  var band_song = orm.define(this, 'band_song', {
-    band_id: {type: 'reference', reference_table: band},
-    song_id: {type: 'reference', reference_table: song},
-    key_signature: {type: 'string'},
-    primary_vocal_id: {type: 'reference', reference_table: band_member},
-    secondary_vocal_id: {type: 'reference', reference_table: band_member}
-  });
+  this.createBandMember();
+  this.createBandSong();
+
   var song_rating = orm.define(this, 'song_rating', {
     band_member_id: {type: 'reference', reference_table: band_member},
     band_song_id: {type: 'reference', reference_table: band_song},
@@ -617,6 +608,118 @@ Manager.prototype.createSongTable() {
       column_name: 'name'
     }]
   }):
+};
+
+Manager.prototype.createBandMember = function() {
+  var band_member = orm.define(this, 'band_member', {
+    band_id: {type: 'reference', reference_table: band},
+    person_id: {type: 'reference', reference_table: person},
+    band_admin: {type: 'boolean'}
+  }, {
+    computes: [{
+      name: 'band_name',
+      parent: 'band',
+      column_name: 'name'
+    }, {
+      name: 'person_full_name',
+      parent: 'person',
+      column_name: 'full_name'
+    }, {
+      name: 'person_email',
+      parent: 'person',
+      column_name: 'email'
+    }],
+    views: [{
+      name: 'person_bands',
+      filters: [{
+        name: 'band_name',
+        type: 'match',
+        column_name: 'band_name'
+      }],
+      sort: [{
+        name: 'band_name_asc',
+        label: 'Band Name (Lo-Hi)',
+        definition: {band_name: 'asc'}
+      }, {
+        name: 'band_name_desc',
+        label: 'Band Name (Hi-Lo)',
+        definition: {band_name: 'desc'}
+      }]
+    }, {
+      name: 'band_persons',
+      filters: [{
+        name: 'band_admin',
+        type: 'bool',
+        column_name: 'band_admin'
+      }, {
+        name: 'person_email',
+        type: 'match',
+        column_name: 'person_email'
+      }, {
+        name: 'person_full_name',
+        type: 'match',
+        column_name: 'person_full_name'
+      }],
+      sort: [{
+        name: 'person_full_name_asc',
+        label: 'Member Full Name (Lo-Hi)',
+        definition: {person_full_name: 'asc'}
+      }, {
+        name: 'person_full_name_desc',
+        label: 'Member Full Name (Hi-Lo)',
+        definition: {person_full_name: 'desc'}
+      }, {
+        name: 'person_email_asc',
+        label: 'Member E-Mail Name (Lo-Hi)',
+        definition: {person_email: 'asc'}
+      }, {
+        name: 'person_email_desc',
+        label: 'Member E-Mail (Hi-Lo)',
+        definition: {person_email: 'desc'}
+      }]
+    }]
+  });
+};
+
+Manager.prototype.createBandSong() {
+  var band_song = orm.define(this, 'band_song', {
+    band_id: {type: 'reference', reference_table: band},
+    song_id: {type: 'reference', reference_table: song},
+    key_signature: {type: 'string'},
+    primary_vocal_id: {type: 'reference', reference_table: band_member},
+    secondary_vocal_id: {type: 'reference', reference_table: band_member}
+  }, {
+    computes: [{
+      name: 'band_name',
+      parent: 'band',
+      column_name: 'name'
+    }, {
+      name: 'song_name',
+      parent: 'song',
+      column_name: 'name'
+    }, {
+      name: 'artist_name',
+      parent: 'song',
+      column_name: 'artist().name'
+    }, {
+      name: 'artist_name',
+      parent: 'song',
+      column_name: 'artist().name'
+    }, {
+      name: 'average_rating', 
+      average: 'songRatingList',
+      column_name: 'rating'
+    }, {
+      name: 'member_rating',
+      crossref: this.current_person,
+      details: 'songRatingList',
+      column_name: ''
+    }],
+    filters: [{
+    }],
+    sort: [{
+    }]
+  });
 };
 
 function app_start() {
