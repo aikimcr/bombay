@@ -1208,6 +1208,10 @@ describe('Advanced table definitions', function() {
           crossref: cross_ref_row,
           details: 'speciesList',
           column_name: 'habitat_id'
+        }, {
+          name: 'habitats',
+          sub_join: 'speciesList',
+          join_list: 'habitat'
         }],
         sort: [{
           name: 'name_asc',
@@ -1537,5 +1541,15 @@ describe('Advanced table definitions', function() {
     should.exist(species_list);
     species_list.length.should.equal(1);
     species_list[0].name().should.equal('gigas');
+  });
+
+  it('should get the genus habitats', function() {
+    var master_row = master_table.list.find({name: 'labidochromis'})[0];
+    var habitat_list = master_row.habitats();
+
+    should.exist(habitat_list);
+    habitat_list.length.should.equal(2);
+    habitat_list[0].name().should.equal('mbuna');
+    habitat_list[1].name().should.equal('pelagic');
   });
 });

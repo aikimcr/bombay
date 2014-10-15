@@ -1,0 +1,59 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Mocha Tests</title>
+  <link rel="stylesheet" href="./lib/mocha.css" />
+</head>
+<body>
+  <div id="mocha">Client Side Mocha Tests</div>
+  <input type="hidden" name="pubkey" value="MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAJ4+czkdnq6/dqAoPCGSrdf2drOLpORpiqSXVeYirZ4YTHa5uRE7HYdSXLipExn1GsLd5J+Ot3p4N2FniR5LbW8CAwEAAQ==" />
+
+  <script>
+    var xyzzy = 'This is a place for a break';
+    window.console.log('Breaker, Breaker 19');
+    var priv_key_text = [
+    'MIIBOgIBAAJBAJ4+czkdnq6/dqAoPCGSrdf2drOLpORpiqSXVeYirZ4YTHa5uRE7',
+    'HYdSXLipExn1GsLd5J+Ot3p4N2FniR5LbW8CAwEAAQJASt5jJ4/DBwyhNG802/GI',
+    '/JeoW5RjRIpGxU6wnnyjxhscfcyGNvurAEWS22x46yag8PJyQ32tTdPg/vvmIQ3c',
+    '0QIhAMzsLito4Bmh24Jgq3Ulrm23Jn5qwHCDxb2sP0bC6gJJAiEAxa/Fr2WDqR6z',
+    'I3xEBecizVCDGkyd/QZ07UmOGTd5cfcCIDb+m1VjC+FVIsfWka0as7kWEeqTU5ne',
+    'g07nzwN6g7qhAiEAi0SLhkeD+68PEN7IpUfycqZX1j1HyCu2UDzTiNxWCH0CIBI/',
+    'mMd4eg8KHglqO1RaqOr47G4O9R8DxXX1h4Dl4Js+'
+    ];
+
+    var priv_key = priv_key_text.join('');
+  </script>
+  <!-- Third Party Code -->
+  <script src="../javascripts/lib/knockout-3.0.0.js"></script>
+  <script src="../javascripts/lib/q.js"></script>
+
+  <!-- local libraries -->
+  <script src="../javascripts/Sapphire.js"></script>
+
+  <!-- Mocha and Chai -->
+  <script src="./lib/chai.js"></script>
+  <script src="./lib/mocha.js"></script>
+  <script>mocha.setup('bdd')</script>
+  <script src="./lib/sinon.js"></script>
+  <script src="./lib/sinon-chai.js"></script>
+
+  <!-- Test Utility Code -->
+  <script src="./lib/test_methods.js"></script>
+  <script src="./lib/service.js"></script>
+  <script src="./lib/confirm_dialog.js"></script>
+
+  <!-- Code under Test. -->
+  <script src="../javascripts/constants.js"></script>
+  <script src="../javascripts/util.js"></script>
+  <script src="../javascripts/view_model/KnockoutOrm.js"></script>
+  <script src="../javascripts/view_model/Manager.js"></script>
+
+  <!-- Test code. -->
+  <script src="./Manager.js"></script>
+  <script>
+    mocha.checkLeaks();
+    mocha.globals(['jQuery']);
+    mocha.run();
+  </script>
+</body>
+</html>

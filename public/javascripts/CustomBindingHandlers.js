@@ -1,6 +1,72 @@
 var manager;
 
-function Manager() {
+ko.bindingHandlers.searchableSelect = Sapphire.searchableSelect;
+
+ko.bindingHandlers.clickRating = {
+    init: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
+      var getTargetValue = function(event) {
+        return parseInt(event.target.getAttribute('value'));
+      };
+
+      element.classList.add('rating_container');
+      for (var i = 1; i <= 5; i++) {
+        var clicker = document.createElement('div');
+        clicker.setAttribute('value', i);
+        clicker.classList.add('rating_clicker');
+        element.appendChild(clicker);
+      }
+
+      element.addEventListener('mouseover', function(event) {
+        var clickers = event.target.parentElement.children;
+        var index = getTargetValue(event);
+
+        for(var i=0; i < clickers.length; i++) {
+          clickers[i].classList.remove('rating_clicker_hover');
+          if (i < index) clickers[i].classList.add('rating_clicker_hover');
+        }
+      });
+      element.addEventListener('mouseout', function(event) {
+        var clickers = event.target.parentElement.children;
+        var index = getTargetValue(event);
+
+        for(var i=0; i < clickers.length; i++) {
+          clickers[i].classList.remove('rating_clicker_hover');
+        }
+      });
+      element.addEventListener('click', function(event) {
+        var index = getTargetValue(event);
+        var observable = valueAccessor();
+        observable(index);
+      });
+    },
+    update: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
+      var observable = valueAccessor();
+      var index = observable();
+      var clickers = element.children;
+
+      for(var i=0; i < clickers.length; i++) {
+        clickers[i].classList.remove('rating_clicker_selected');
+        if (i < index) clickers[i].classList.add('rating_clicker_selected');
+      }
+    }
+};
+
+ko.bindingHandlers.showRating = {
+    init: function(element, valueAccessor) {
+      element.classList.add('rating_container');
+      var rating = document.createElement('div');
+      rating.classList.add('rating_value');
+      element.appendChild(rating);
+    },
+    update: function(element, valueAccessor) {
+      var observable = valueAccessor();
+      var value = parseInt((observable() * 10) + .5) / 10;
+      var width = parseInt(value * 20) + 'px';
+      element.firstChild.style.width = width;
+    },
+};
+
+function Manager(for_test) {
   manager = this;
 
   this.song_status_map = [
@@ -57,15 +123,27 @@ function Manager() {
   this.createSongTable();
   this.createBandMember();
   this.createBandSong();
-  this.createSongRating();
-  this.createRequest();
 
-  // XXX this.reports = new ReportList();
+  var song_rating = orm.define(this, 'song_rating', {
+    band_member_id: {type: 'reference', reference_table: band_member},
+    band_song_id: {type: 'reference', reference_table: band_song},
+    rating: {type: 'integer'},
+    is_new: {thpe: 'boolean'},
+  });
+  var request = orm.define(this, 'request', {
+    request_type: {type: 'integer'},
+    timestamp: {type: 'date'},
+    person_id: {type: 'reference', reference_table: person},
+    band_id: {type: 'reference', reference_table: band},
+    description: {type: 'string'},
+    status: {type: 'integer'}
+  });
+
+  this.reports = new ReportList();
 
   this.current_person = ko.observable();
   this.current_band = ko.observable();
 
-/*
   band.load(function(err, result) {
     if (err) throw err;
 
@@ -112,10 +190,7 @@ function Manager() {
   }.bind(this));
 
   this.reports.load();
-*/
 
-//XXX This sucks.  Do it better.
-/*
   this.tab_list = ko.computed(function() {
     var result = tab_list = [
       { value: 3, value_text: 'My Bands' },
@@ -136,9 +211,7 @@ function Manager() {
   }.bind(this));
 
   this.current_tab = ko.observable(this.tab_list[0]);
-*/
 
-/* XXX It's possible I can eliminate this whole block of code
   this.current_band_member = ko.computed(function() {
     if (this.current_band() && this.current_person()) {
       var members = current_band().bandMemberList();
@@ -205,9 +278,7 @@ function Manager() {
       return this.songs.list();
     }
   }.bind(this)).extend({ throttle: 50 });
-*/
 
-/*
   this.current_reports = ko.computed(function() {
     if (this.current_band() && this.current_band().id() > 0) {
       var band_reports = this.reports.list()[this.current_band().id()] || ko.observableArray();
@@ -228,9 +299,7 @@ function Manager() {
       return [];
     }
   }.bind(this)).extend({ throttle: 50 });
-*/
 
-/*
   this.forms = {};
   if (!for_test) {
     this.forms.add_band = new AddBand();
@@ -334,11 +403,10 @@ function Manager() {
   this.testClick = function() {
     console.log('Test Click');
   };
-*/
 }
 
 Manager.prototype.createBandTable = function() {
-  this.band = orm.define(
+  var band = orm.define(
     this,
     'band',
     {name: {type: 'string'}},
@@ -394,25 +462,20 @@ Manager.prototype.createBandTable = function() {
 };
 
 Manager.prototype.createPersonTable = function() {
-  this.person = orm.define(this, 'person', {
+  var person = orm.define(this, 'person', {
     name: {type: 'string'},
     full_name: {type: 'string'},
     email: {type: 'string'},
     system_admin: {type: 'boolean'}
   }, {
-    computes: [{
-      name: 'bandList',
-      sub_join: 'bandMemberList',
-      join_list: 'band'
-    }],
     filters: [{
       name: 'max_band_count',
       type: 'max',
-      column_name: 'bandMemberCount'
+      column_name: 'bandCount'
     }, {
       name: 'min_band_count',
       type: 'min',
-      column_name: 'bandMemberCount'
+      column_name: 'bandCount'
     }, {
       name: 'system_admin',
       type: 'bool',
@@ -458,8 +521,8 @@ Manager.prototype.createPersonTable = function() {
   });
 };
 
-Manager.prototype.createArtistTable = function() {
-  this.artist = orm.define(this, 'artist', {
+Manager.prototype.createArtistTable() {
+  var artist = orm.define(this, 'artist', {
     name: {type: 'string'}
   }, {
     filters: [{
@@ -495,10 +558,10 @@ Manager.prototype.createArtistTable = function() {
   });
 };
 
-Manager.prototype.createSongTable = function() {
-  this.song = orm.define(this, 'song', {
+Manager.prototype.createSongTable() {
+  var song = orm.define(this, 'song', {
     name: {type: 'string'},
-    artist_id: {type: 'reference', reference_table: this.artist},
+    artist_id: {type: 'reference', reference_table: artist},
     key_signature: {type: 'string'}
   }, {
     filters: [{
@@ -541,16 +604,16 @@ Manager.prototype.createSongTable = function() {
     }],
     computes: [{
       name: 'artist_name',
-      parent: 'artists',
+      parent: 'artist',
       column_name: 'name'
     }]
-  });
+  }):
 };
 
 Manager.prototype.createBandMember = function() {
-  this.band_member = orm.define(this, 'band_member', {
-    band_id: {type: 'reference', reference_table: this.band},
-    person_id: {type: 'reference', reference_table: this.person},
+  var band_member = orm.define(this, 'band_member', {
+    band_id: {type: 'reference', reference_table: band},
+    person_id: {type: 'reference', reference_table: person},
     band_admin: {type: 'boolean'}
   }, {
     computes: [{
@@ -563,7 +626,7 @@ Manager.prototype.createBandMember = function() {
       column_name: 'full_name'
     }, {
       name: 'person_email',
-      parent: 'persons',
+      parent: 'person',
       column_name: 'email'
     }],
     views: [{
@@ -618,13 +681,13 @@ Manager.prototype.createBandMember = function() {
   });
 };
 
-Manager.prototype.createBandSong = function() {
-  this.band_song = orm.define(this, 'band_song', {
-    band_id: {type: 'reference', reference_table: this.band},
-    song_id: {type: 'reference', reference_table: this.song},
+Manager.prototype.createBandSong() {
+  var band_song = orm.define(this, 'band_song', {
+    band_id: {type: 'reference', reference_table: band},
+    song_id: {type: 'reference', reference_table: song},
     key_signature: {type: 'string'},
-    primary_vocal_id: {type: 'reference', reference_table: this.band_member},
-    secondary_vocal_id: {type: 'reference', reference_table: this.band_member}
+    primary_vocal_id: {type: 'reference', reference_table: band_member},
+    secondary_vocal_id: {type: 'reference', reference_table: band_member}
   }, {
     computes: [{
       name: 'band_name',
@@ -646,7 +709,6 @@ Manager.prototype.createBandSong = function() {
       name: 'average_rating', 
       average: 'songRatingList',
       column_name: 'rating'
-/*
     }, {
       name: 'member_rating',
       crossref: this.current_person,
@@ -656,28 +718,7 @@ Manager.prototype.createBandSong = function() {
     filters: [{
     }],
     sort: [{
-*/
     }]
-  });
-};
-
-Manager.prototype.createSongRating = function() {
-  this.song_rating = orm.define(this, 'song_rating', {
-    band_member_id: {type: 'reference', reference_table: this.band_member},
-    band_song_id: {type: 'reference', reference_table: this.band_song},
-    rating: {type: 'integer'},
-    is_new: {thpe: 'boolean'},
-  });
-};
-
-Manager.prototype.createRequest = function() {
-  this.request = orm.define(this, 'request', {
-    request_type: {type: 'integer'},
-    timestamp: {type: 'date'},
-    person_id: {type: 'reference', reference_table: this.person},
-    band_id: {type: 'reference', reference_table: this.band},
-    description: {type: 'string'},
-    status: {type: 'integer'}
   });
 };
 

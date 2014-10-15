@@ -198,6 +198,28 @@ orm.table.row = function(table, model) {
           return null;
         }
       }.bind(this));
+    } else if ('sub_join' in def) {
+      return this[def.name] = ko.computed(function() {
+        if (this[def.sub_join]) {
+          var sub_join = this[def.sub_join]();
+          if (sub_join) {
+            var result = {};
+
+            sub_join.forEach(function(detail_row) {
+              var join_list = detail_row[def.join_list]();
+              result[join_list.id()] = join_list;
+            });
+
+            return Object.keys(result).map(function(key) {
+              return result[key];
+            });
+          } else {
+            return [];
+          }
+        } else {
+          return null;
+        }
+      }.bind(this));
     }
   }.bind(this));
 };
