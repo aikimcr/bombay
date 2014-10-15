@@ -55,6 +55,8 @@
   <script src="./KnockoutOrm.js"></script>
 
   <script>
+    mocha.checkLeaks();
+    mocha.globals(['jQuery']);
     mocha.run();
   </script>
 </body>
