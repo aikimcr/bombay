@@ -65,55 +65,6 @@ function Manager() {
   this.current_person = ko.observable();
   this.current_band = ko.observable();
 
-/*
-  band.load(function(err, result) {
-    if (err) throw err;
-
-    person.load(function(err, result) {
-      if (err) throw err;
-
-      var svc = service.getInstance();
-      svc.get('./session_info', function(result_code, result) {
-        if (result_code != 200 && result_code != 304) {
-          throw new Error('Unexpected result ' + result_code);
-        }
-        
-        this.current_person(person.get(result.person_id()));
-      }.bind(this));
-
-      band_member.load(function(err, result) {
-        if (err) throw err;
-
-        if (result.length > 0) {
-          var memberships = person.memberList();
-
-          if (memberships.length > 0) {
-            this.current_band(band.list.get(memberships[0].band_id()));
-          }
-        }
-      }.bind(this));
-    }.bind(this));
-  }.bind(this));
-
-  artist.load(function(err, result) {
-    if (err) throw err;
-  }.bind(this));
-  song.load(function(err, result) {
-    if (err) throw err;
-  }.bind(this));
-  band_song.load(function(err, result) {
-    if (err) throw err;
-  }.bind(this));
-  song_rating.load(function(err, result) {
-    if (err) throw err;
-  }.bind(this));
-  request.load.load(function(err, result) {
-    if (err) throw err;
-  }.bind(this));
-
-  this.reports.load();
-*/
-
 //XXX This sucks.  Do it better.
 /*
   this.tab_list = ko.computed(function() {
@@ -541,7 +492,7 @@ Manager.prototype.createSongTable = function() {
     }],
     computes: [{
       name: 'artist_name',
-      parent: 'artists',
+      parent: 'artist',
       column_name: 'name'
     }]
   });
@@ -563,7 +514,7 @@ Manager.prototype.createBandMember = function() {
       column_name: 'full_name'
     }, {
       name: 'person_email',
-      parent: 'persons',
+      parent: 'person',
       column_name: 'email'
     }],
     views: [{
@@ -637,11 +588,7 @@ Manager.prototype.createBandSong = function() {
     }, {
       name: 'artist_name',
       parent: 'song',
-      column_name: 'artist().name'
-    }, {
-      name: 'artist_name',
-      parent: 'song',
-      column_name: 'artist().name'
+      column_name: 'artist_name'
     }, {
       name: 'average_rating', 
       average: 'songRatingList',
@@ -666,7 +613,7 @@ Manager.prototype.createSongRating = function() {
     band_member_id: {type: 'reference', reference_table: this.band_member},
     band_song_id: {type: 'reference', reference_table: this.band_song},
     rating: {type: 'integer'},
-    is_new: {thpe: 'boolean'},
+    is_new: {type: 'boolean'},
   });
 };
 
@@ -679,6 +626,115 @@ Manager.prototype.createRequest = function() {
     description: {type: 'string'},
     status: {type: 'integer'}
   });
+};
+
+Manager.prototype.loadTables = function(cb) {
+  this.loadBands_()
+    .then(this.loadPersons_())
+    .then(this.loadSession_())
+    .then(this.loadMembers_())
+    .then(this.loadArtists_())
+    .then(this.loadSongs_())
+    .then(this.loadBandSongs_())
+    .then(this.loadSongRatings_())
+    .then(this.loadRequests_())
+    .then(cb)
+    .done();
+};
+
+Manager.prototype.loadBands_ = function() {
+  return Q.promise(function(resolve, reject, notify) {
+    this.band.load(function(err, result) {
+      if (err) return reject(err, result);
+      return resolve(null, result);
+    });
+  }.bind(this));
+};
+
+Manager.prototype.loadPersons_ = function() {
+  return Q.promise(function(resolve, reject, notify) {
+    this.person.load(function(err, result) {
+      if (err) return reject(err, result);
+      return resolve(null, result);
+    });
+  }.bind(this));
+};
+
+Manager.prototype.loadSession_ = function() {
+  return Q.promise(function(resolve, reject, notify) {
+    var svc = service.getInstance();
+    svc.get('./session_info', function(result_code, result) {
+      if (result_code != 200 && result_code != 304) {
+        reject(new Error('Unexpected result ' + result_code));
+      }
+      
+      this.current_person(this.person.list.get(result.person.id));
+      resolve(null, result);
+    }.bind(this));
+  }.bind(this));
+};
+
+Manager.prototype.loadMembers_ = function() {
+  return Q.promise(function(resolve, reject, notify) {
+    this.band_member.load(function(err, result) {
+      if (err) return reject(err, result);
+
+      if (result.length > 0) {
+        var memberships = this.current_person().bandMemberList();
+
+        if (memberships.length > 0) {
+          this.current_band(this.band.list.get(memberships[0].band_id()));
+        }
+      }
+
+      return resolve(null, result);
+    }.bind(this));
+  }.bind(this));
+};
+
+Manager.prototype.loadArtists_ = function() {
+  return Q.promise(function(resolve, reject, notify) {
+    this.artist.load(function(err, result) {
+      if (err) return reject(err, result);
+      return resolve(null, result);
+    });
+  }.bind(this));
+};
+
+Manager.prototype.loadSongs_ = function() {
+  return Q.promise(function(resolve, reject, notify) {
+    this.song.load(function(err, result) {
+      if (err) return reject(err, result);
+      return resolve(null, result);
+    });
+  }.bind(this));
+};
+
+Manager.prototype.loadBandSongs_ = function() {
+  return Q.promise(function(resolve, reject, notify) {
+    this.band_song.load(function(err, result) {
+      if (err) return reject(err, result);
+      return resolve(null, result);
+    });
+  }.bind(this));
+};
+
+Manager.prototype.loadSongRatings_ = function() {
+  return Q.promise(function(resolve, reject, notify) {
+    this.song_rating.load(function(err, result) {
+      if (err) return reject(err, result);
+      return resolve(null, result);
+    });
+  }.bind(this));
+};
+
+Manager.prototype.loadRequests_ = function() {
+  return Q.promise(function(resolve, reject, notify) {
+    this.request.load(function(err, result) {
+      if (err) return reject(err, result);
+      return resolve(null, result);
+    });
+  }.bind(this));
 };
 
 function app_start() {

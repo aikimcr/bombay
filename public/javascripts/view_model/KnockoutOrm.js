@@ -160,66 +160,75 @@ orm.table.row = function(table, model) {
   }
 
   this.table.computes.forEach(function(def) {
-    if ('parent' in def) {
-      this[def.name] = ko.computed(function() {
-        return this[def.parent]()[def.column_name]();
-      }.bind(this));
-    } else if ('sum' in def) {
-      this[def.name] = ko.computed(function() {
-        if (this[def.sum]) {
-          return get_sum(this[def.sum](), def.column_name);
-        } else {
-          return null;
-        }
-      }.bind(this));
-    } else if ('average' in def) {
-      return this[def.name] = ko.computed(function() {
-        if (this[def.average]) {
-          var details = this[def.average]();
-          var sum = get_sum(details, def.column_name);
-          return (details && details.length > 0) ? sum / details.length : 0;
-        } else {
-          return null;
-        }
-      }.bind(this));
-    } else if ('crossref' in def) {
-      return this[def.name] = ko.computed(function() {
-        if (this[def.details]) {
-          var details = this[def.details]();
-          var crossref_row = def.crossref();
-          if (details && crossref_row) {
-            return ko.utils.arrayFilter(details, function(row) {
-              return row[def.column_name]() === crossref_row.id();
-            });
+    try {
+      if ('parent' in def) {
+        this[def.name] = ko.computed(function() {
+          return this[def.parent]()[def.column_name]();
+        }.bind(this));
+      } else if ('sum' in def) {
+        this[def.name] = ko.computed(function() {
+          if (this[def.sum]) {
+            return get_sum(this[def.sum](), def.column_name);
           } else {
-            return [];
+            return null;
           }
-        } else {
-          return null;
-        }
-      }.bind(this));
-    } else if ('sub_join' in def) {
-      return this[def.name] = ko.computed(function() {
-        if (this[def.sub_join]) {
-          var sub_join = this[def.sub_join]();
-          if (sub_join) {
-            var result = {};
-
-            sub_join.forEach(function(detail_row) {
-              var join_list = detail_row[def.join_list]();
-              result[join_list.id()] = join_list;
-            });
-
-            return Object.keys(result).map(function(key) {
-              return result[key];
-            });
+        }.bind(this));
+      } else if ('average' in def) {
+        return this[def.name] = ko.computed(function() {
+          if (this[def.average]) {
+            var details = this[def.average]();
+            var sum = get_sum(details, def.column_name);
+            return (details && details.length > 0) ? sum / details.length : 0;
           } else {
-            return [];
+            return null;
           }
-        } else {
-          return null;
-        }
-      }.bind(this));
+        }.bind(this));
+      } else if ('crossref' in def) {
+        return this[def.name] = ko.computed(function() {
+          if (this[def.details]) {
+            var details = this[def.details]();
+            var crossref_row = def.crossref();
+            if (details && crossref_row) {
+              return ko.utils.arrayFilter(details, function(row) {
+                return row[def.column_name]() === crossref_row.id();
+              });
+            } else {
+              return [];
+            }
+          } else {
+            return null;
+          }
+        }.bind(this));
+      } else if ('sub_join' in def) {
+        return this[def.name] = ko.computed(function() {
+          if (this[def.sub_join]) {
+            var sub_join = this[def.sub_join]();
+            if (sub_join) {
+              var result = {};
+
+              sub_join.forEach(function(detail_row) {
+                var join_list = detail_row[def.join_list]();
+                result[join_list.id()] = join_list;
+              });
+
+              return Object.keys(result).map(function(key) {
+                return result[key];
+              });
+            } else {
+              return [];
+            }
+          } else {
+            return null;
+          }
+        }.bind(this));
+      }
+    } catch (err) {
+      var def_string = Object.keys(def).map(function(key) {
+        return key + ': ' + def[key];
+      }).join(', ');
+      var err_string = err + ', compute def = { ' + def_string + ' }';
+      console.log(err_string);
+      throw new Error(err_string);
     }
   }.bind(this));
 };
