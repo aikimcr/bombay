@@ -1,5 +1,4 @@
 describe('Instantiate Manager', function() {
-//XXX Need to mock out the service.
   var instance_stub;
 
   before(function() {
@@ -245,5 +244,18 @@ describe('Instantiate Manager', function() {
     manager.band_songs.list()[1].average_rating().should.equal(3);
     manager.band_songs.list()[2].band_name().should.equal('The Stickbugs');
     manager.band_songs.list()[2].average_rating().should.equal(1.5);
+  });
+
+  it('should get the band member rating for each band song', function(done) {
+    setTimeout(function() { // Give Knockout a change to catch up.
+      should.not.exist(manager.band_songs.list()[0].currentMemberRating());
+      should.exist(manager.band_songs.list()[1].currentMemberRating());
+      manager.band_songs.list()[1].currentMemberRating().should.be.instanceOf(orm.table.row);
+      manager.band_songs.list()[1].currentMemberRating().should.have.property('rating');
+      manager.band_songs.list()[1].member_rating().should.equal(3);
+      manager.band_songs.list()[1].is_new().should.be.true;
+      should.not.exist(manager.band_songs.list()[2].currentMemberRating());
+      done();
+    }, 50);
   });
 });

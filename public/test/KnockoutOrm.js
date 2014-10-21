@@ -1359,7 +1359,7 @@ describe('Advanced table definitions', function() {
       } else {
         master_table.list.list().forEach(function(row) {
           row.speciesList().should.eql([]);
-          row.species_by_habitat().should.eql([]);
+          should.not.exist(row.species_by_habitat());
         });
 
         cross_ref_table.load(function(result_code, result) {
@@ -1371,7 +1371,7 @@ describe('Advanced table definitions', function() {
                 done(result_code);
               } else {
                 master_table.list.list().forEach(function(row) {
-                  row.species_by_habitat().should.eql([]);
+                  should.not.exist(row.species_by_habitat());
                 });
 
                 done();
@@ -1533,14 +1533,34 @@ describe('Advanced table definitions', function() {
     });
   });
 
-  it('should get just the species filtered by the habitat', function() {
+  it('should get just the species filtered by the habitat (single entry)', function() {
     cross_ref_row(cross_ref_table.list.list()[1]);
     var master_row = master_table.list.find({name: 'labidochromis'})[0];
-    var species_list = master_row.species_by_habitat();
+    var species = master_row.species_by_habitat();
 
-    should.exist(species_list);
-    species_list.length.should.equal(1);
-    species_list[0].name().should.equal('gigas');
+    should.exist(species);
+    species.should.not.be.instanceOf(Array);
+    species.should.have.property('name');
+    ko.isObservable(species.name).should.be.true;
+    species.name().should.equal('gigas');
+  });
+
+  it('should get just the species filtered by the habitat (multi entry)', function() {
+    cross_ref_row(cross_ref_table.list.list()[0]);
+    var master_row = master_table.list.find({name: 'labidochromis'})[0];
+    var species = master_row.species_by_habitat();
+
+    should.exist(species);
+    species.should.be.instanceOf(Array);
+    species.length.should.equal(2);
+
+    species[0].should.have.property('name');
+    ko.isObservable(species[0].name).should.be.true;
+    species[0].name().should.equal('caeruleus');
+
+    species[1].should.have.property('name');
+    ko.isObservable(species[1].name).should.be.true;
+    species[1].name().should.equal('mbenjii');
   });
 
   it('should get the genus habitats', function() {

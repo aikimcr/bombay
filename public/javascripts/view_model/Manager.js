@@ -51,6 +51,21 @@ function Manager() {
     { value: 'G#m', value_text: 'G#m' }
   ];
 
+  this.current_person = ko.observable();
+  this.current_band = ko.observable();
+
+  this.current_band_member = ko.computed(function() {
+    if (this.current_band() && this.current_person()) {
+      var members = this.current_band().bandMemberList();
+      var result = ko.utils.arrayFirst(members, function(member_row) {
+        return member_row.person_id() == this.current_person().id();
+      }.bind(this))
+      return result;
+    } else {
+      return null;
+    }
+  }.bind(this)).extend({ throttle: 50 });
+
   this.createBandTable();
   this.createPersonTable();
   this.createArtistTable();
@@ -62,11 +77,7 @@ function Manager() {
 
   // XXX this.reports = new ReportList();
 
-  this.current_person = ko.observable();
-  this.current_band = ko.observable();
-
 //XXX This sucks.  Do it better.
-/*
   this.tab_list = ko.computed(function() {
     var result = tab_list = [
       { value: 3, value_text: 'My Bands' },
@@ -87,21 +98,8 @@ function Manager() {
   }.bind(this));
 
   this.current_tab = ko.observable(this.tab_list[0]);
-*/
 
-/* XXX It's possible I can eliminate this whole block of code
-  this.current_band_member = ko.computed(function() {
-    if (this.current_band() && this.current_person()) {
-      var members = current_band().bandMemberList();
-      var result = ko.utils.arrayFirst(members, function(member_row) {
-        return member_row.person_id() == this.current_person.id();
-      }.bind(this))
-      return result;
-    } else {
-      return null;
-    }
-  }.bind(this)).extend({ throttle: 50 });
-
+/ XXX It's possible I can eliminate this whole block of code
   this.current_bands = ko.computed(function() {
     return ko.utils.arrayMap(
       this.current_person().bandMemberList(), 
@@ -573,6 +571,7 @@ Manager.prototype.createBandSong = function() {
   this.band_song = orm.define(this, 'band_song', {
     band_id: {type: 'reference', reference_table: this.band},
     song_id: {type: 'reference', reference_table: this.song},
+    song_status: {type: 'integer'}, //XXX S.B. enum
     key_signature: {type: 'string'},
     primary_vocal_id: {type: 'reference', reference_table: this.band_member},
     secondary_vocal_id: {type: 'reference', reference_table: this.band_member}
@@ -586,6 +585,10 @@ Manager.prototype.createBandSong = function() {
       parent: 'song',
       column_name: 'name'
     }, {
+      name: 'artist_id',
+      parent: 'song',
+      column_name: 'artist_id'
+    }, {
       name: 'artist_name',
       parent: 'song',
       column_name: 'artist_name'
@@ -593,17 +596,73 @@ Manager.prototype.createBandSong = function() {
       name: 'average_rating', 
       average: 'songRatingList',
       column_name: 'rating'
-/*
+    }, {
+      name: 'currentMemberRating',
+      crossref: this.current_band_member,
+      details: 'songRatingList',
+      column_name: 'band_member_id'
     }, {
       name: 'member_rating',
-      crossref: this.current_person,
-      details: 'songRatingList',
-      column_name: ''
+      parent: 'currentMemberRating',
+      column_name: 'rating'
+    }, {
+      name: 'is_new',
+      parent: 'current_member_rating',
+      column_name: 'is_new'
     }],
     filters: [{
+      name: 'is_new',
+      type: 'bool',
+      column_name: 'is_new'
+    }, {
+      name: 'max_average_rating',
+      type: 'max',
+      column_name: 'average_rating'
+    }, {
+      name: 'min_average_rating',
+      type: 'min',
+      column_name: 'average_rating'
+    }, {
+      name: 'max_song_status',
+      type: 'max',
+      column_name: 'song_status'
+    }, {
+      name: 'min_song_status',
+      type: 'min',
+      column_name: 'song_status'
+    }, {
+      name: 'artist_id', 
+      type: 'id',
+      select_list: {
+        row_list: this.artist.list,
+        label_column: 'name'
+      },
+      column_name: 'artist_id'
     }],
     sort: [{
-*/
+      name: 'song_name_asc',
+      label: 'Song Name (Lo-Hi)',
+      definition: {song_name: 'asc'}
+    }, {
+      name: 'song_name_desc',
+      label: 'Song Name (Hi-Lo)',
+      definition: {song_name: 'desc'}
+    }, {
+      name: 'artist_name_asc',
+      label: 'Artist Name (Lo-Hi)',
+      definition: {artist_name: 'asc'}
+    }, {
+      name: 'artist_name_desc',
+      label: 'Artist Name (Hi-Lo)',
+      definition: {artist_name: 'desc'}
+    }, {
+      name: 'average_rating_asc',
+      label: 'Average Rating (Lo-Hi)',
+      definition: {average_rating: 'asc'}
+    }, {
+      name: 'average_rating_desc',
+      label: 'Average Rating (Hi-Lo)',
+      definition: {average_rating: 'desc'}
     }]
   });
 };

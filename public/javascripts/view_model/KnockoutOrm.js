@@ -189,11 +189,19 @@ orm.table.row = function(table, model) {
             var details = this[def.details]();
             var crossref_row = def.crossref();
             if (details && crossref_row) {
-              return ko.utils.arrayFilter(details, function(row) {
+              var result = ko.utils.arrayFilter(details, function(row) {
                 return row[def.column_name]() === crossref_row.id();
               });
+
+              if (result.length === 1) {
+                return result[0];
+              } else if (result.length === 0) {
+                return null;
+              } else {
+                return result;
+              }
             } else {
-              return [];
+              return null;
             }
           } else {
             return null;
@@ -206,10 +214,17 @@ orm.table.row = function(table, model) {
             if (sub_join) {
               var result = {};
 
-              sub_join.forEach(function(detail_row) {
-                var join_list = detail_row[def.join_list]();
-                result[join_list.id()] = join_list;
-              });
+              if (Array.isArray(sub_join)) {
+                sub_join.forEach(function(detail_row) {
+                  var join_list = detail_row[def.join_list]();
+                  result[join_list.id()] = join_list;
+                });
+              } else {
+                var join_list = sub_join[def.join_list]();
+                join_list.forEach(function(detail_row) {
+                  result[detail_row.id()] = detail_row;
+                });
+              }
 
               return Object.keys(result).map(function(key) {
                 return result[key];

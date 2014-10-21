@@ -3,10 +3,10 @@ div.app_context(id="band_songs", data-bind="visible: $root.current_tab().value =
   div.app_context_item
     div.display
       div.control
-        button.edit_button(id="add_band_songs", data-bind="click: forms.add_band_song.show.bind(forms.add_band_song)") +
-        label(for="add_band_songs") Add Band Song
+        //- button.edit_button(id="add_band_songs", data-bind="click: forms.add_band_song.show.bind(forms.add_band_song)") +
+        //- label(for="add_band_songs") Add Band Song
 
-      div.filters
+      div.filters(data-bind="with: current_band().bandSongList")
         table
           thead
             tr
@@ -16,42 +16,42 @@ div.app_context(id="band_songs", data-bind="visible: $root.current_tab().value =
           tbody
             tr
               td
-                div.sort(data-bind="with: band_songs")
-                  select(data-bind="value: sort_type, options: sort_compare_labels, optionsText: 'label', optionsValue: 'value'")
+                div.sort(data-bind="with: sort")
+                  select(data-bind="value: sort_type, options: labels, optionsText: 'label', optionsValue: 'value'")
 
               td
                 div.filter-list
-                  div.filter(data-bind="with: band_songs.filter_values")
+                  div.filter(data-bind="with: filters.song_name")
                     div.filter_label Song Name
-                    input(type="text", data-bind="value: song_name, valueUpdate: 'afterkeydown'")
+                    input(type="text", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
   
-                  div.filter(data-bind="with: band_songs.filter_values")
+                  div.filter(data-bind="with: filters.artist_id")
                     div.filter_label Artist
-                    div(data-bind="searchableSelect: artist_id, optionsList: manager.artists.list, optionsText: 'name', optionsValue: 'id', optionsCaption: '-All Artists-'")
+                    div(data-bind="searchableSelect: filter_value, optionsList: select_list, optionsText: 'name', optionsValue: 'id', optionsCaption: '-All Artists-'")
                 
-                  div.filter(data-bind="with: band_songs.filter_values")
+                  div.filter
                     div.filter_title Status
-                    div
+                    div(data-bind="with: filters.min_song_status")
                       div.filter_label Min
-                      select(data-bind="value: minimum_status, options: $root.song_status_map, optionsText: 'value_text', optionsValue: 'value'");
+                      select(data-bind="value: filter_value, options: $root.song_status_map, optionsText: 'value_text', optionsValue: 'value'");
   
-                    div
+                    div(data-bind="with: filters.max_song_status")
                       div.filter_label Max
-                      select(data-bind="value: maximum_status, options: $root.song_status_map, optionsText: 'value_text', optionsValue: 'value'");
+                      select(data-bind="value: filter_value, options: $root.song_status_map, optionsText: 'value_text', optionsValue: 'value'");
   
-                  div.filter(data-bind="with: band_songs.filter_values")
+                  div.filter
                     div.filter_title Average Rating
-                    div
+                    div(data-bind="with: filters.min_average_rating")
                       div.filter_label Min
-                      div(data-bind="clickRating: minimum_average_rating")
+                      div(data-bind="clickRating: filter_value")
   
-                    div
+                    div(data-bind="with: filters.max_average_rating")
                       div.filter_label Max
-                      div(data-bind="clickRating: maximum_average_rating")
+                      div(data-bind="clickRating: filter_value")
   
-                  div.filter(data-bind="with: band_songs.filter_values")
+                  div.filter(data-bind="with: filters.is_new")
                     div.filter_title New/Old Song
-                      select(data-bind="value: is_new")
+                      select(data-bind="value: filter_value")
                         option(value='') --All Songs--
                         option(value='1') New Songs
                         option(value='0') Old Songs
@@ -65,9 +65,9 @@ div.app_context(id="band_songs", data-bind="visible: $root.current_tab().value =
                   table
                     tr
                       td Name
-                      td(data-bind="text: song().name")
+                      td(data-bind="text: song_name")
                       td Artist
-                      td(data-bind="text: song().artist().name")
+                      td(data-bind="text: artist_name")
                       td
                         div(data-bind="if: $root.current_band_member().band_admin")
                           button.edit_button(data-bind="click: $root.delete_table_object") -

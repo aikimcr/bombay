@@ -3,8 +3,8 @@ div.app_context(id="band_members", data-bind="visible: $root.current_tab().value
   div.app_context_item
     div.display(data-bind="if: current_band")
       div.control(data-bind="if: current_band_member().band_admin")
-        button.edit_button(id="add_band_member", data-bind="click: forms.add_band_member.show.bind(forms.add_band_member)") +
-        label(for="add_band_member") Add Members
+        //- button.edit_button(id="add_band_member", data-bind="click: forms.add_band_member.show.bind(forms.add_band_member)") +
+        //- label(for="add_band_member") Add Members
 
       div.filters(data-bind="with: current_band().bandMemberList().views.band_persons")
         table
