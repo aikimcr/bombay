@@ -64,7 +64,33 @@ function Manager() {
     } else {
       return null;
     }
-  }.bind(this)).extend({ throttle: 50 });
+  }.bind(this));
+
+  this.current_band_list = ko.computed(function() {
+    if (this.current_person()) {
+      return ko.utils.arrayMap(this.current_person().bandMemberList(), function(member) {
+        return member.band();
+      });
+    } else {
+      return [];
+    }
+  }.bind(this));
+
+  this.current_full_name = ko.computed(function() {
+    if (this.current_person()) {
+      return this.current_person().full_name();
+    } else {
+      return null;
+    }
+  }.bind(this));
+
+  this.current_is_system_admin = ko.computed(function() {
+    if (this.current_person()) {
+      return this.current_person().system_admin();
+    } else {
+      return false;
+    }
+  }.bind(this));
 
   this.createBandTable();
   this.createPersonTable();
@@ -79,6 +105,7 @@ function Manager() {
 
 //XXX This sucks.  Do it better.
   this.tab_list = ko.computed(function() {
+/*
     var result = tab_list = [
       { value: 3, value_text: 'My Bands' },
       { value: 4, value_text: 'Band Members' },
@@ -93,16 +120,18 @@ function Manager() {
     }
 
     result.unshift({ value: 0, value_text: 'Dashboard' });
+*/
 
+    var result = [{ value: 1, value_text: 'All Bands', }];
     return result;
   }.bind(this));
 
   this.current_tab = ko.observable(this.tab_list[0]);
 
-/ XXX It's possible I can eliminate this whole block of code
+/* XXX It's possible I can eliminate this whole block of code
   this.current_bands = ko.computed(function() {
     return ko.utils.arrayMap(
-      this.current_person().bandMemberList(), 
+      this.current_person().bandMemberList(),
       function(member_row) { return member_row.band() }
     );
   }.bind(this)).extend({ throttle: 50 });
@@ -294,19 +323,19 @@ Manager.prototype.createBandTable = function() {
     {
       filters: [{
         name: 'max_song_count',
-        type: 'max', 
+        type: 'max',
         column_name: 'bandSongCount'
       }, {
         name: 'min_song_count',
-        type: 'min', 
+        type: 'min',
         column_name: 'bandSongCount'
       }, {
         name: 'max_member_count',
-        type: 'max', 
+        type: 'max',
         column_name: 'bandMemberCount'
       }, {
         name: 'min_member_count',
-        type: 'min', 
+        type: 'min',
         column_name: 'bandMemberCount'
       }, {
         name: 'name',
@@ -459,7 +488,7 @@ Manager.prototype.createSongTable = function() {
       type: 'min',
       column_name: 'bandCount'
     }, {
-      name: 'artist_id', 
+      name: 'artist_id',
       type: 'id',
       select_list: {
         row_list: this.artist.list,
@@ -593,7 +622,7 @@ Manager.prototype.createBandSong = function() {
       parent: 'song',
       column_name: 'artist_name'
     }, {
-      name: 'average_rating', 
+      name: 'average_rating',
       average: 'songRatingList',
       column_name: 'rating'
     }, {
@@ -607,7 +636,7 @@ Manager.prototype.createBandSong = function() {
       column_name: 'rating'
     }, {
       name: 'is_new',
-      parent: 'current_member_rating',
+      parent: 'currentMemberRating',
       column_name: 'is_new'
     }],
     filters: [{
@@ -631,7 +660,7 @@ Manager.prototype.createBandSong = function() {
       type: 'min',
       column_name: 'song_status'
     }, {
-      name: 'artist_id', 
+      name: 'artist_id',
       type: 'id',
       select_list: {
         row_list: this.artist.list,
@@ -676,6 +705,57 @@ Manager.prototype.createSongRating = function() {
   });
 };
 
+Manager.prototype.request_actions = function(row) {
+  var possible_actions = [{
+    value: 'delete',
+    label: 'Delete',
+    permissions: 'originator',
+    status: 'resolved'
+  }, {
+    value: 'reopen',
+    label: 'Reopen',
+    permissions: 'originator',
+    status: 'rejected'
+  }, {
+    value: 'accept',
+    label: 'Accept',
+    permissions: 'owner',
+    status: 'pending'
+  }, {
+    value: 'reject',
+    label: 'Reject',
+    permissions: 'owner_or_originator',
+    status: 'pending'
+  }];
+
+  var is_originator = function() {
+    return (manager.current_person().system_admin() ||
+            (row.request_type() == constants.request_type.join_band && row.isSelf()) ||
+            (row.request_type() == constants.request_type.add_band_member && row.isAdmin()));
+  };
+
+  var is_owner = function() {
+    return (manager.current_person().system_admin() ||
+            (row.request_type() == constants.request_type.join_band && row.isAdmin()) ||
+            (row.request_type() == constants.request_type.add_band_member && row.isSelf()));
+  };
+
+  return possible_actions.filter(function(action) {
+    if (action.permissions === 'originator' && is_originator() ||
+        action.permissions === 'owner' && is_owner() ||
+        action.permissions === 'owner_or_originator' && (is_owner() || is_originator())) {
+      return ((action.status === 'resolved' &&
+               (row.status() == constants.request_status.accepted ||
+                row.status() == constants.request_status.rejected)) ||
+              (action.status === 'rejected' &&
+               row.status() == constants.request_status.rejected) ||
+              (action.status === 'pending' &&
+               (row.status() == constants.request_status.pending)));
+    }
+    return false;
+  });
+};
+
 Manager.prototype.createRequest = function() {
   this.request = orm.define(this, 'request', {
     request_type: {type: 'integer'},
@@ -684,6 +764,50 @@ Manager.prototype.createRequest = function() {
     band_id: {type: 'reference', reference_table: this.band},
     description: {type: 'string'},
     status: {type: 'integer'}
+  }, {
+    computes: [{
+      name: 'person_name',
+      parent: 'person',
+      column_name: 'name'
+    }, {
+      name: 'band_name',
+      parent: 'band',
+      column_name: 'name'
+    }, {
+      name: 'pretty_request_type',
+      map: constants.pretty_request_type,
+      column_name: 'request_type'
+    }, {
+      name: 'pretty_status',
+      map: constants.pretty_request_status,
+      column_name: 'status'
+    }, {
+      name: 'is_admin',
+      compute: function(row) {
+        var members = ko.utils.arrayFilter(row.person().bandMemberList(), function(member) {
+          return member.band_id() == row.bind_id() && member.band_admin();
+        });
+        return members.length > 0;
+      }.bind(this)
+    }, {
+      name: 'actions_list',
+      compute: this.request_actions.bind(this)
+    }],
+    filters: [{
+      name: 'request_type',
+      type: 'map',
+      column_name: 'request_type',
+      map: constants.pretty_request_type
+    }],
+    sort: [{
+      name: 'time_asc',
+      label: 'Request Time (Lo-Hi)',
+      definition: {timestamp: 'asc'}
+    }, {
+      name: 'time_desc',
+      label: 'Request Time (Hi-Lo)',
+      definition: {timestamp: 'desc'}
+    }]
   });
 };
 
@@ -726,7 +850,7 @@ Manager.prototype.loadSession_ = function() {
       if (result_code != 200 && result_code != 304) {
         reject(new Error('Unexpected result ' + result_code));
       }
-      
+
       this.current_person(this.person.list.get(result.person.id));
       resolve(null, result);
     }.bind(this));
@@ -795,7 +919,3 @@ Manager.prototype.loadRequests_ = function() {
     });
   }.bind(this));
 };
-
-function app_start() {
-  ko.applyBindings(new Manager());
-}

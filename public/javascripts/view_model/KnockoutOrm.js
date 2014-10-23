@@ -129,7 +129,11 @@ orm.table.row = function(table, model) {
   Object.keys(this.table.columns).forEach(function(column_name) {
     var column_def = this.table.columns[column_name];
 
-    this[column_name] = ko.observable(model[column_name]);
+    if (column_def['type'] === 'boolean') {
+      this[column_name] = ko.observable(!!model[column_name]);
+    } else {
+      this[column_name] = ko.observable(model[column_name]);
+    }
 
     if (column_def['type'] === 'reference') {
       var reference_table = column_def['reference_table'];
@@ -163,7 +167,21 @@ orm.table.row = function(table, model) {
     try {
       if ('parent' in def) {
         this[def.name] = ko.computed(function() {
-          return this[def.parent]()[def.column_name]();
+          if (def.parent in this) {
+            var parent = this[def.parent]();
+
+            if (parent) {
+              if (def.column_name in parent) {
+                return parent[def.column_name]();
+              } else {
+                throw new Error(def.parent + ' has no ' + def.column_name + ' column');
+              }
+            } else {
+              return null;
+            }
+          } else {
+            throw new Error(this.table.table_name + ' has no parent ' + def.parent);
+          }
         }.bind(this));
       } else if ('sum' in def) {
         this[def.name] = ko.computed(function() {
@@ -235,6 +253,14 @@ orm.table.row = function(table, model) {
           } else {
             return null;
           }
+        }.bind(this));
+      } else if ('map' in def) {
+        return this[def.name] = ko.computed(function() {
+          return def.map[this[def.column_name]()];
+        }.bind(this));
+      } else if ('compute' in def) {
+        return this[def.name] = ko.computed(function() {
+          return def.compute(this);
         }.bind(this));
       }
     } catch (err) {
@@ -446,51 +472,66 @@ orm.table.list.filter.prototype.setActive = function(is_active) {
   this.active(is_active);
 };
 
-orm.table.list.filter.columnFilterFactory = function(list, filter_type, column_name, select_list) {
+orm.table.list.filter.columnFilterFactory = function(list, filter_type, column_name, select_list, filter_map) {
   var filter = new orm.table.list.filter(list);
   var filter_compare;
 
   if (filter_type === 'match') {
     filter.setCompare(function(column_name, item) {
-      if (this.filter_value() === null || this.filter_value() === '') return true;
+      if (this.filter_value() == null || this.filter_value() === '') return true;
       return item[column_name]().toLowerCase().match(this.filter_value().toLowerCase());
     }.bind(filter, column_name));
   } else if (filter_type === 'min') {
     filter.setCompare(function(column_name, item) {
-      if (this.filter_value() === null || this.filter_value() === '') return true;
+      if (this.filter_value() == null || this.filter_value() === '') return true;
       var value = parseInt(item[column_name](), 10);
       var filter_value = parseInt(this.filter_value(), 10);
       return value >= filter_value;
     }.bind(filter, column_name));
   } else if (filter_type === 'max') {
     filter.setCompare(function(column_name, item) {
-      if (this.filter_value() === null || this.filter_value() === '') return true;
+      if (this.filter_value() == null || this.filter_value() === '') return true;
       var value = parseInt(item[column_name](), 10);
       var filter_value = parseInt(this.filter_value(), 10);
       return value <= filter_value;
     }.bind(filter, column_name));
   } else if (filter_type === 'integer') {
     filter.setCompare(function(column_name, item) {
-      if (this.filter_value() === null || this.filter_value() === '') return true;
+      if (this.filter_value() == null || this.filter_value() === '') return true;
       var value = parseInt(item[column_name](), 10);
       var filter_value = parseInt(this.filter_value(), 10);
       return value === filter_value;
     }.bind(filter, column_name));
   } else if (filter_type === 'equal') {
     filter.setCompare(function(column_name, item) {
-      if (this.filter_value() === null || this.filter_value() === '') return true;
+      if (this.filter_value() == null || this.filter_value() === '') return true;
       return item[column_name]() === this.filter_value();
     }.bind(filter, column_name));
   } else if (filter_type === 'bool') {
     filter.setCompare(function(column_name, item) {
-      if (this.filter_value() === null || this.filter_value() === '') return true;
+      if (this.filter_value() == null || this.filter_value() === '') return true;
       var value = !! item[column_name]();
       var filter_value = !! this.filter_value();
       return value === filter_value;
     }.bind(filter, column_name));
+  } else if (filter_type === 'map') {
+    filter.setCompare(function(column_name, item) {
+      if (this.filter_value() == null || this.filter_value() === '') return true;
+      return item[column_name]() === this.filter_value();
+    }.bind(filter, column_name));
+
+    filter['select_list'] = ko.computed(function() {
+      return ko.utils.arrayMap(Object.keys(filter_map), function(key) {
+        return {value: key, label: filter_map[key]};
+      }).sort(function(row_a, row_b) {
+        if (row_a.label < row_b.label) return -1;
+        if (row_a.label > row_b.label) return 1;
+        return 0;
+      });
+    }.bind(this));
   } else if (filter_type === 'id') {
     filter.setCompare(function(column_name, item) {
-      if (this.filter_value() === null || this.filter_value() === '') return true;
+      if (this.filter_value() == null || this.filter_value() === '') return true;
       return item[column_name]() === this.filter_value();
     }.bind(filter, column_name));
 
@@ -531,7 +572,8 @@ orm.table.view.prototype.createSortAndFilters_ = function(list, filters, sorts) 
       filtered_list,
       def.type,
       def.column_name,
-      def.select_list
+      def.select_list,
+      def.map
     );
     filtered_list = this.filters[def.name].getList;
   }.bind(this));

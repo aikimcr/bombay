@@ -34,30 +34,30 @@ div.app_context(id="dashboard", data-bind="visible: $root.current_tab().value ==
               th Type
               th Status
 
-          tbody(data-bind='foreach: current_requests')
+          tbody(data-bind='foreach: request.sort.getList')
             tr
               td
                 div
                   select(data-bind="enable: actions_list().length, options: actions_list, optionsText: 'label', optionsValue: 'value', optionsCaption: '-Select Action-', event: { change: $root.send_request_action }")
 
               td(data-bind="text: timestamp")
-              td(data-bind="text: person_name()")
-              td(data-bind="text: band_name()")
-              td(data-bind="text: pretty_request_type()")
-              td(data-bind="text: pretty_status()")
+              td(data-bind="text: person_name")
+              td(data-bind="text: band_name")
+              td(data-bind="text: pretty_request_type")
+              td(data-bind="text: pretty_status")
 
-      div.list.dashboard_list
-        div.title Reports
-        div.title(data-bind="text: request_msg")
-        table
-          thead
-            tr
-              th Type
-              th Date
-
-          tbody(data-bind='foreach: current_reports')
-            tr
-              td
-                a(data-bind="text: report_type, attr: { href: url }")
-
-              td(data-bind="text: date")
+//-      div.list.dashboard_list
+//-        div.title Reports
+//-        div.title(data-bind="text: request_msg")
+//-        table
+//-          thead
+//-            tr
+//-              th Type
+//-              th Date
+//-
+//-          tbody(data-bind='foreach: current_reports')
+//-            tr
+//-              td
+//-                a(data-bind="text: report_type, attr: { href: url }")
+//-
+//-              td(data-bind="text: date")

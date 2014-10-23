@@ -1,4 +1,4 @@
-div.app_context(id="bands", data-bind="if: $root.current_person().system_admin, visible: $root.current_tab().value == 1")
+div.app_context(id="bands", data-bind="if: current_is_system_admin, visible: $root.current_tab().value == 1")
   div.app_context_header All Bands
   div.app_context_item
     div.display
@@ -17,30 +17,35 @@ div.app_context(id="bands", data-bind="if: $root.current_person().system_admin, 
             tr
               td
                 div.sort(data-bind="with: sort")
-                  select(data-bind="value: sort_type, options: labels, optionsText: 'label', optionsValue: 'value'")
+                  select(data-bind="value: sort_type, options: compare_labels, optionsText: 'label', optionsValue: 'value'")
 
               td
                 div.filter(data-bind="with: filters.name")
+                  input(type="checkbox", data-bind="checked: active")
                   div.filter_label Name
                   input(type="text", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
-              
+
                 div.filter
                   div.filter_title Member Count
                   div(data-bind="with: filters.min_member_count")
+                    input(type="checkbox", data-bind="checked: active")
                     div.filter_label Min
                     input(type="number", inputmode="numeric", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
 
                   div(data-bind="with: filters.max_member_count")
+                    input(type="checkbox", data-bind="checked: active")
                     div.filter_label Max
                     input(type="number", inputmode="numeric", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
 
                 div.filter
                   div.filter_title Song Count
                   div(data-bind="with: filters.min_song_count")
+                    input(type="checkbox", data-bind="checked: active")
                     div.filter_label Min
                     input(type="number", inputmode="numeric", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
 
-                  div(data-bind="with: filters.max_member_count")
+                  div(data-bind="with: filters.max_song_count")
+                    input(type="checkbox", data-bind="checked: active")
                     div.filter_label Max
                     input(type="number", inputmode="numeric", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
 
@@ -48,17 +53,17 @@ div.app_context(id="bands", data-bind="if: $root.current_person().system_admin, 
         table
           thead
             tr
-              th
+              //- th
               th Name
               th Member Count
               th Song Count
-              th
+              //- th
 
           tbody(data-bind="foreach: band.sort.getList")
             tr
-              td(data-bind="click: $root.edit_table_object.bind($root.forms.edit_band)") &#x270e;
+              //- td(data-bind="click: $root.edit_table_object.bind($root.forms.edit_band)") &#x270e;
               td(data-bind="text: name")
-              td(data-bind="text: band_member_count")
-              td(data-bind="text: band_song_count")
-              td(data-bind="ifnot: isPopulated")
-                button.edit_button(data-bind="click: $root.delete_table_object") -
+              td(data-bind="text: bandMemberCount")
+              td(data-bind="text: bandSongCount")
+              //- td(data-bind="ifnot: isPopulated")
+                //- button.edit_button(data-bind="click: $root.delete_table_object") -
