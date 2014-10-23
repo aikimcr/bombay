@@ -116,13 +116,16 @@ function Manager() {
 
     if (this.current_person() && this.current_person().system_admin()) {
       result.unshift({ value: 2, value_text: 'All People' });
-      result.unshift({ value: 1, value_text: 'All Bands', });
+      result.unshift({ value: 1, value_text: 'All Bands' });
     }
 
     result.unshift({ value: 0, value_text: 'Dashboard' });
 */
 
-    var result = [{ value: 1, value_text: 'All Bands', }];
+    var result = [
+      { value: 1, value_text: 'All Bands' },
+      { value: 2, value_text: 'All People' }
+    ];
     return result;
   }.bind(this));
 
