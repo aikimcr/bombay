@@ -302,6 +302,27 @@ orm.table.row.prototype.addJoins = function(join_table, join_column) {
   }
 };
 
+/*
+// Forms
+orm.table.form = function(table) {
+  this.table = table;
+};
+
+orm.table.form.prototype.show(row) {
+  this.row = row;
+
+  var svc = service.getInstance();
+  var url = '/forms/' + this.table.table_name + '.html';
+  svc.get(url, function(result_code, result) {
+    if (result_code == 200 || result_code == 304) {
+
+    } else {
+      callback(result_code, result);
+    }
+  }.bind(this));
+};
+*/
+
 // List management.
 // This should all be synchronous.
 orm.table.list = function(table_name) {

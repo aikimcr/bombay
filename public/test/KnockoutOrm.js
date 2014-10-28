@@ -194,7 +194,7 @@ describe('KnockoutOrm list management', function() {
 
     it('should get the row', function(done) {
       var row;
-      
+
       (function() {
         row = list.get(2)
       }).should.not.throw();
@@ -222,7 +222,7 @@ describe('KnockoutOrm list management', function() {
 
     it('should not get the row', function(done) {
       var row;
-      
+
       (function() {
         row = list.get(3);
       }).should.not.throw();
@@ -368,7 +368,7 @@ describe('KnockoutOrm list management', function() {
       var sorted = sort.getList();
       sorted.length.should.eql(list.length());
       var indexes = [[0, 0], [1, 1], [2, 2], [3, 4], [4, 3]];
-      
+
       indexes.forEach(function(index) {
         sorted[index[0]].id().should.equal(list.list()[index[1]].id());
         sorted[index[0]].name().should.equal(list.list()[index[1]].name());
@@ -388,7 +388,7 @@ describe('KnockoutOrm list management', function() {
       var sorted = sort.getList();
       sorted.length.should.eql(list.length());
       var indexes = [[0, 0], [1, 1], [2, 2], [3, 4], [4, 3]];
-      
+
       indexes.forEach(function(index) {
         sorted[index[0]].id().should.equal(list.list()[index[1]].id());
         sorted[index[0]].name().should.equal(list.list()[index[1]].name());
@@ -402,7 +402,7 @@ describe('KnockoutOrm list management', function() {
       var sorted = sort.getList();
       sorted.length.should.eql(list.length());
       var indexes = [[0, 3], [1, 4], [2, 2], [3, 1], [4, 0]];
-      
+
       indexes.forEach(function(index) {
         sorted[index[0]].id().should.equal(list.list()[index[1]].id());
         sorted[index[0]].name().should.equal(list.list()[index[1]].name());
@@ -448,7 +448,7 @@ describe('KnockoutOrm list management', function() {
       filtered.length.should.eql(list.list().length);
 
       var indexes = [[0, 0], [1, 1], [2, 2], [3, 3], [4, 4]];
-      
+
       indexes.forEach(function(index) {
         filtered[index[0]].id().should.equal(list.list()[index[1]].id());
         filtered[index[0]].name().should.equal(list.list()[index[1]].name());
@@ -463,7 +463,7 @@ describe('KnockoutOrm list management', function() {
       filtered.length.should.eql(list.list().length);
 
       var indexes = [[0, 0], [1, 1], [2, 2], [3, 3], [4, 4]];
-      
+
       indexes.forEach(function(index) {
         filtered[index[0]].id().should.equal(list.list()[index[1]].id());
         filtered[index[0]].name().should.equal(list.list()[index[1]].name());
@@ -482,7 +482,7 @@ describe('KnockoutOrm list management', function() {
       filtered.length.should.eql(2);
 
       var indexes = [[0, 0], [1, 1]];
-      
+
       indexes.forEach(function(index) {
         filtered[index[0]].id().should.equal(list.list()[index[1]].id());
         filtered[index[0]].name().should.equal(list.list()[index[1]].name());
@@ -501,7 +501,7 @@ describe('KnockoutOrm list management', function() {
       filtered.length.should.eql(2);
 
       var indexes = [[0, 0], [1, 1]];
-      
+
       indexes.forEach(function(index) {
         filtered[index[0]].id().should.equal(list.list()[index[1]].id());
         filtered[index[0]].name().should.equal(list.list()[index[1]].name());
@@ -557,7 +557,7 @@ describe('KnockoutOrm list management', function() {
       filtered.length.should.eql(3);
 
       var indexes = [[0, 3], [1, 4], [2, 0]];
-      
+
       indexes.forEach(function(index) {
         filtered[index[0]].id().should.equal(list.list()[index[1]].id());
         filtered[index[0]].name().should.equal(list.list()[index[1]].name());
@@ -572,7 +572,7 @@ describe('KnockoutOrm list management', function() {
       filtered.length.should.eql(4);
 
       var indexes = [[0, 3], [1, 5], [2, 4], [3, 0]];
-      
+
       indexes.forEach(function(index) {
         filtered[index[0]].id().should.equal(list.list()[index[1]].id());
         filtered[index[0]].name().should.equal(list.list()[index[1]].name());
@@ -611,7 +611,7 @@ describe('Table Management', function() {
     );
     done();
   });
-  
+
   before(function(done) {
     var stub_service = {
       post: function(url, callback, data) {
@@ -919,7 +919,7 @@ describe('Joins', function() {
       row.should.have.property('genus_id');
       ko.isObservable(row.genus_id).should.be.true;
       row.genus_id().should.equal(master_row.id());
-      
+
       row.should.have.property('name');
       ko.isObservable(row.name).should.be.true;
     });
@@ -1200,7 +1200,7 @@ describe('Advanced table definitions', function() {
           average: 'speciesList',
           column_name: 'count'
         }, {
-          name: 'species_sum_count', 
+          name: 'species_sum_count',
           sum: 'speciesList',
           column_name: 'count'
         }, {
@@ -1301,7 +1301,7 @@ describe('Advanced table definitions', function() {
     }];
 
     detail_table = orm.define(
-      test_context, 
+      test_context,
       'species',
       {
         genus_id: {type: 'reference', reference_table: master_table},
@@ -1399,7 +1399,7 @@ describe('Advanced table definitions', function() {
     master_table.sort.setType('name_asc');
     master_table.filters['minSpecies'].setFilterValue(3);
     var genus_list = master_table.sort.getList();
-    
+
     should.exist(genus_list);
     genus_list.length.should.equal(2);
 
@@ -1412,7 +1412,7 @@ describe('Advanced table definitions', function() {
     master_table.filters['minSpecies'].setFilterValue(3);
     master_table.filters['maxSpecies'].setFilterValue(3);
     var genus_list = master_table.sort.getList();
-    
+
     should.exist(genus_list);
     genus_list.length.should.equal(1);
 
@@ -1425,7 +1425,7 @@ describe('Advanced table definitions', function() {
     master_table.filters['maxSpecies'].clearFilterValue();
     master_table.filters['name'].setFilterValue('chromis');
     var genus_list = master_table.sort.getList();
-    
+
     should.exist(genus_list);
     genus_list.length.should.equal(2);
 

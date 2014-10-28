@@ -388,6 +388,72 @@ app.get('/logout', function(req, res) {
 // SessionInfo
 app.get('/session_info', validation.requireLogin, route_db.getSessionInfo);
 
+// Forms
+app.get('/forms/:form_type', function(req, res) {
+  var form_name = path.join('forms', req.params.form_type.replace(/\.html/,''));
+  res.render(form_name);
+});
+
+// Ajax Testing
+
+function ajax_test_parser(req, res) {
+  console.log(req.params);
+  var info = {
+    format: req.params.format,
+    params: req.params || [],
+    query: req.query || {},
+    body: req.body || {},
+    route: req.route,
+    path: req.path,
+    xhr: req.xhr,
+    protocel: req.protocol,
+    content_type: req.get('Content-Type'),
+    referrer: req.get('Referrer')
+  };
+
+  if (req.params.format === 'json') {
+    res.json(200, info)
+  } else if (req.params.format === 'html') {
+    var result = [];
+    result.push('<style>div { padding-left: 5px; margin: 5px; border-style: solid; }</style>')
+    Object.keys(info).forEach(function(key) {
+      result.push('<div>' + key + ': ');
+      var value = info[key];
+
+      if (Array.isArray(value)) {
+        value.forEach(function(element, index) {
+          result.push('<div>' + index + ': ' + element + '</div>');
+        });
+      } else if (typeof(value) === 'object') {
+        Object.keys(value).forEach(function(subkey) {
+          result.push('<div>' + subkey + ': ');
+          result.push(value[subkey]);
+          result.push('</div>');
+        });
+      } else {
+        result.push(value);
+      }
+
+      result.push('</div>');
+    });
+    res.set('Content-Type', 'text/html');
+    res.send(200, result.join('\n'));
+  } else {
+    res.set('Content-Type', 'text/plain');
+    res.send(200, util.inspect(info));
+  }
+}
+
+app.get('/ajax_testing/:format', ajax_test_parser);
+app.get('/ajax_testing/:format/*', ajax_test_parser);
+app.put('/ajax_testing/:format', ajax_test_parser);
+app.put('/ajax_testing/:format/*', ajax_test_parser);
+app.post('/ajax_testing/:format', ajax_test_parser);
+app.post('/ajax_testing/:format/*', ajax_test_parser);
+app.delete('/ajax_testing/:format', ajax_test_parser);
+app.delete('/ajax_testing/:format/*', ajax_test_parser);
+
+
 //console.log(app.routes);
 
 http.createServer(app).listen(app.get('port'), function(){
