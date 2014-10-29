@@ -397,7 +397,6 @@ app.get('/forms/:form_type', function(req, res) {
 // Ajax Testing
 
 function ajax_test_parser(req, res) {
-  console.log(req.params);
   var info = {
     format: req.params.format,
     params: req.params || [],
@@ -417,16 +416,16 @@ function ajax_test_parser(req, res) {
     var result = [];
     result.push('<style>div { padding-left: 5px; margin: 5px; border-style: solid; }</style>')
     Object.keys(info).forEach(function(key) {
-      result.push('<div>' + key + ': ');
+      result.push('<div class="' + key + '">' + key + ': ');
       var value = info[key];
 
       if (Array.isArray(value)) {
         value.forEach(function(element, index) {
-          result.push('<div>' + index + ': ' + element + '</div>');
+          result.push('<div class="' + index + '">' + index + ': ' + element + '</div>');
         });
       } else if (typeof(value) === 'object') {
         Object.keys(value).forEach(function(subkey) {
-          result.push('<div>' + subkey + ': ');
+          result.push('<div class="' + subkey + '">' + subkey + ': ');
           result.push(value[subkey]);
           result.push('</div>');
         });

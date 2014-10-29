@@ -39,15 +39,16 @@ Ajax.prototype.cancelAllRequests = function() {
   }, this);
 };
 
-Ajax.prototype.getRequest = function(url) {
-  var request = new Ajax.Request(url);
+Ajax.prototype.getRequest = function(url, response_type) {
+  var request = new Ajax.Request(url, response_type);
   this.requests_[request.key] = request;
   return request;
 };
 
-Ajax.Request = function(url) {
+Ajax.Request = function(url, response_type) {
   this.key = Date.now() + url.substr(0, 10);
   this.url = url;
+  this.response_type = response_type || '';
   this.service_ = new XMLHttpRequest();
 };
 
@@ -56,35 +57,7 @@ Ajax.Request.prototype.handleReadyStateChange = function(callback) {
   if (service.readyState === 4) {
     Ajax.getInstance().removeRequestByKey(this.key);
     if (service.status === 200 || service.status === 304) {
-      var response_type = service.responseType;
-
-      if (response_type === '') {
-        var content_header = service.getResponseHeader('Content-Type');
-
-        if (content_header.match(/json$/)) response_type = 'json';
-      }
-
-      if (response_type === 'json') {
-        var parse_error = null;
-        var parsed_json = null;
-        try {
-          parsed_json = JSON.parse(service.responseText);
-        } catch(e) {
-          window.console.log('Error parsing json response text "' + service.responseText + '"');
-          window.console.log(e);
-          Ajax.getInstance().cancelAllRequests();
-          parse_error = e;
-        };
-        callback(parse_error, parsed_json);
-      } else if (response_type === 'document') {
-        if (service.responseXML == null) {
-          callback(null, service.responseText);
-        } else {
-          callback(null, service.responseXML);
-        }
-      } else {
-        callback(service.status, service.responseText);
-      }
+      callback(null, service.response);
     } else {
       window.console.log(service.status + service.statusText + ' error on ' + this.url);
       callback(service.status, service.statusText);
@@ -103,6 +76,7 @@ Ajax.Request.prototype.sendRequest_ = function(sender, callback) {
         if (err) return reject(new Error(err + ': ' + result));
         return resolve(result);
       });
+      this.service_.responseType = this.response_type;
       sender();
     }.bind(this));
 
