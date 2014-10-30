@@ -160,8 +160,8 @@ orm.table.prototype.load = function(callback) {
 };
 
 orm.table.prototype.showForm = function(table, event) {
-  this.form = new orm.table.form(this);
-  this.form.show();
+  this.form = new orm.table.form(table);
+  this.form.show(event.pageX, event.pageY);
 };
 
 orm.table.prototype.disposeForm = function() {
@@ -350,13 +350,48 @@ orm.table.row.prototype.addJoins = function(join_table, join_column) {
   }
 };
 
+orm.table.row.prototype.showForm = function(row, event) {
+  this.table.form = new orm.table.form(this.table);
+  this.table.form.show(event.pageX, event.pageY, this);
+};
+
+orm.table.row.prototype.deleteRow = function(row, event) {
+  this.dialog = new orm.table.confirm_dialog('/confirm_dialog', this);
+  this.dialog.show(event.pageX, event.pageY, function() {
+    this.table.delete(this.id());
+    this.dialog.dispose();
+    this.dialog = null;
+  }.bind(this), function() {
+    this.dialog.dispose();
+    this.dialog = null;
+  }.bind(this));
+};
+
+orm.table.row.prototype.toString = function() {
+  if (this.description) {
+    return this.description();
+  } else if (this.full_name) {
+    return this.full_name();
+  } else if (this.name) {
+    return this.name();
+  } else {
+    var col_vals = [];
+
+    Object.keys(this.table.columns).forEach(function(column_name) {
+      col_vals.push(column_name + ': ' + this[column_name]());
+    });
+
+    return col_vals.join(', ');
+  }
+};
+
 // Forms
 orm.table.form = function(table) {
   this.table = table;
   this.message = ko.observable();
 };
 
-orm.table.form.prototype.show = function(row) {
+orm.table.form.prototype.show = function(x, y, row) {
   this.row = {};
 
   if (row) {
@@ -379,6 +414,9 @@ orm.table.form.prototype.show = function(row) {
     this.form_element = form_html.body.removeChild(form_html.body.firstChild);
     document.body.appendChild(this.form_element);
     ko.applyBindings(this, this.form_element);
+    var d_body = this.form_element.querySelector('.dialog');
+    d_body.style.top = y.toString() + 'px';
+    d_body.style.left = x.toString() + 'px';
   }.bind(this)).fail(function(err) {
     throw err;
   });
@@ -399,6 +437,44 @@ orm.table.form.prototype.submit = function(form) {
 
 orm.table.form.prototype.dispose = function() {
   document.body.removeChild(this.form_element);
+};
+
+orm.table.confirm_dialog = function(url, data) {
+  this.url = url;
+  this.data = data;
+};
+
+orm.table.confirm_dialog.prototype.show = function(x, y, confirm, reject) {
+  this.confirm = confirm;
+  this.reject = reject;
+
+  var request = Ajax.getInstance().getRequest(this.url, 'document');
+  request.get().then(function(dialog_html) {
+    this.dialog_element = dialog_html.body.removeChild(dialog_html.body.firstChild);
+    document.body.appendChild(this.dialog_element);
+    ko.applyBindings(this, this.dialog_element);
+    var d_body = this.dialog_element.querySelector('.dialog');
+    d_body.style.top = y.toString() + 'px';
+    d_body.style.left = x.toString() + 'px';
+  }.bind(this)).fail(function(err) {
+    throw err;
+  });
+};
+
+orm.table.confirm_dialog.prototype.handleConfirm = function() {
+  this.confirm();
+};
+
+orm.table.confirm_dialog.prototype.handleCancel = function() {
+  this.reject();
+};
+
+orm.table.confirm_dialog.prototype.dispose = function() {
+  document.body.removeChild(this.dialog_element);
+  this.data = null;
+  this.url = null;
+  this.confirm = null;
+  this.reject = null;
 };
 
 // List management.

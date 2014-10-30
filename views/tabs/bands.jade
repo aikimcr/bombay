@@ -53,17 +53,17 @@ div.app_context(id="bands", data-bind="if: current_is_system_admin, visible: $ro
         table
           thead
             tr
-              //- th
+              th
               th Name
               th Member Count
               th Song Count
-              //- th
+              th
 
           tbody(data-bind="foreach: band.sort.getList")
             tr
-              //- td(data-bind="click: $root.edit_table_object.bind($root.forms.edit_band)") &#x270e;
+              td(data-bind="click: showForm") &#x270e;
               td(data-bind="text: name")
               td(data-bind="text: bandMemberCount")
               td(data-bind="text: bandSongCount")
-              //- td(data-bind="ifnot: isPopulated")
-                //- button.edit_button(data-bind="click: $root.delete_table_object") -
+              td(data-bind="ifnot: is_populated")
+                button.edit_button(data-bind="click: deleteRow") -

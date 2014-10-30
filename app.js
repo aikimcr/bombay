@@ -394,6 +394,10 @@ app.get('/forms/:form_type', function(req, res) {
   res.render(form_name);
 });
 
+app.get('/confirm_dialog', function(req, res) {
+  res.render('confirm_dialog');
+});
+
 // Ajax Testing
 
 function ajax_test_parser(req, res) {

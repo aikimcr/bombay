@@ -1,13 +1,19 @@
-div#confirm_dialog(data-bind="visible: confirm_dialog.isVisible")
+div#confirm_dialog
   div.dialog_background
     div.dialog
       div.title_bar
         div.title Confirm Dialog
         div.close_button
-          button.close_button(data-bind="click: function() { confirm_dialog.doCancel() }") X
+          button.close_button(data-bind="click: handleCancel") X
 
       div.dialog_body
-        div.dialog_message(data-bind="text: confirm_dialog.messageText")
+        div.dialog_message
+          span Are you sure you want to delete
+          span &nbsp;
+          span(data-bind="text: data.table.table_name")
+          span &nbsp;
+          span(data-bind="text: data.toString()")
+
         div.dialog_buttons
-          div.dialog_button(data-bind="click: function() { confirm_dialog.doOkay() }") Okay
-          div.dialog_button(data-bind="click: function() { confirm_dialog.doCancel() }") Cancel
+          div.dialog_button(data-bind="click: handleConfirm") Okay
+          div.dialog_button(data-bind="click: handleCancel") Cancel

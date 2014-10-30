@@ -324,6 +324,12 @@ Manager.prototype.createBandTable = function() {
     'band',
     {name: {type: 'string'}},
     {
+      computes: [{
+        name: 'is_populated',
+        compute: function(row) {
+          return row.bandSongCount() || row.bandMemberCount();
+        }.bind(this)
+      }],
       filters: [{
         name: 'max_song_count',
         type: 'max',
