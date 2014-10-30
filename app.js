@@ -390,7 +390,7 @@ app.get('/session_info', validation.requireLogin, route_db.getSessionInfo);
 
 // Forms
 app.get('/forms/:form_type', function(req, res) {
-  var form_name = path.join('forms', req.params.form_type.replace(/\.html/,''));
+  var form_name = path.join('forms', req.params.form_type.replace(/\.html$/,''));//XXX
   res.render(form_name);
 });
 

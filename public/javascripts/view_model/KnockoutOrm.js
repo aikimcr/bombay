@@ -39,11 +39,15 @@ orm.table.prototype.create = function(data, callback) {
     }
   });
 
-  if (ko.isObservable(data['id'])) {
-    svc_data['id'] = data['id']();
-  } else {
-    svnc_data['id'] = data['id'];
+  if (data['id']) {
+    if (ko.isObservable(data['id'])) {
+      if (data['id']()) svc_data['id'] = data['id']();
+    } else {
+      svc_data['id'] = data['id'];
+    }
   }
+
+  callback = callback || function(err, row) { if (err) throw err; };
 
   svc.post(url, function(result_code, result) {
     if (result_code == 200) {
@@ -56,12 +60,46 @@ orm.table.prototype.create = function(data, callback) {
         return callback(err, row);
       };
 
-      callback(null, row);
+      return callback(null, row);
     } else if (result_code == 304) {
       var row = this.list.get(result[this.model_key].id);
-      callback(null, row);
+      return callback(null, row);
     } else {
-      callback(result_code, result);
+      return callback(result_code, result);
+    }
+  }.bind(this), svc_data);
+};
+
+orm.table.prototype.modify = function(data, callback) {
+  var svc = service.getInstance();
+  var url = this.url;
+  var svc_data = {};
+
+  if (ko.isObservable(data['id'])) {
+    svc_data['id'] = data['id']();
+  } else {
+    svc_data['id'] = data['id'];
+  }
+
+  Object.keys(this.columns).forEach(function(column_name) {
+    if (column_name in data) {
+      if (ko.isObservable(data[column_name])) {
+        svc_data[column_name] = data[column_name]();
+      } else {
+        svc_data[column_name];
+      }
+    }
+  });
+
+  svc.put(url, function(result_code, result) {
+    if (result_code == 200) {
+      var row = this.list.get(result[this.model_key].id);
+      Object.keys(this.columns).forEach(function(column_name) {
+        if (result[this.model_key][column_name] && result[this.model_key][column_name] !== row[column_name]()) {
+          row[column_name](result[this.model_key][column_name]);
+        }
+      }.bind(this));
+      callback(null, row);
     }
   }.bind(this), svc_data);
 };
@@ -119,6 +157,16 @@ orm.table.prototype.load = function(callback) {
       callback(result_code, result);
     }
   }.bind(this));
+};
+
+orm.table.prototype.showForm = function(table, event) {
+  this.form = new orm.table.form(this);
+  this.form.show();
+};
+
+orm.table.prototype.disposeForm = function() {
+  this.form.dispose();
+  this.form = null;
 };
 
 // View Model Row.
@@ -302,26 +350,56 @@ orm.table.row.prototype.addJoins = function(join_table, join_column) {
   }
 };
 
-/*
 // Forms
 orm.table.form = function(table) {
   this.table = table;
+  this.message = ko.observable();
 };
 
-orm.table.form.prototype.show(row) {
-  this.row = row;
+orm.table.form.prototype.show = function(row) {
+  this.row = {};
 
-  var svc = service.getInstance();
+  if (row) {
+    this.button_text = 'Update';
+    this.row['id'] = ko.observable(row['id']());
+    Object.keys(this.table.columns).forEach(function(column_name) {
+      this.row[column_name] = ko.observable(row[column_name]());
+    }.bind(this));
+  } else {
+    this.button_text = 'Add';
+    this.row['id'] = ko.observable();
+    Object.keys(this.table.columns).forEach(function(column_name) {
+      this.row[column_name] = ko.observable();
+    }.bind(this));
+  }
+
   var url = '/forms/' + this.table.table_name + '.html';
-  svc.get(url, function(result_code, result) {
-    if (result_code == 200 || result_code == 304) {
-
-    } else {
-      callback(result_code, result);
-    }
-  }.bind(this));
+  var request = Ajax.getInstance().getRequest(url, 'document');
+  request.get().then(function(form_html) {
+    this.form_element = form_html.body.removeChild(form_html.body.firstChild);
+    document.body.appendChild(this.form_element);
+    ko.applyBindings(this, this.form_element);
+  }.bind(this)).fail(function(err) {
+    throw err;
+  });
 };
-*/
+
+orm.table.form.prototype.submit = function(form) {
+  function handle_return(err, result) {
+    if (err) return this.message(err.toString());
+    return this.table.disposeForm();
+  };
+
+  if(this.row['id']()) {
+    this.table.modify(this.row, handle_return.bind(this));
+  } else {
+    this.table.create(this.row, handle_return.bind(this));
+  }
+};
+
+orm.table.form.prototype.dispose = function() {
+  document.body.removeChild(this.form_element);
+};
 
 // List management.
 // This should all be synchronous.

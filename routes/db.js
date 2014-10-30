@@ -318,7 +318,7 @@ function request_require_self(action, result) {
     return result.request_type == constants.request_type.join_band;
   }
   return false;
-}; 
+};
 
 exports.createRequest = function(req, res) {
   var action = req.params.action;

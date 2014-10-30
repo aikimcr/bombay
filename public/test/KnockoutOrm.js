@@ -628,6 +628,19 @@ describe('Table Management', function() {
         req_model[table_name] = req_body;
         callback(200, req_model);
       },
+      put: function(url, callback, data) {
+        url.should.equal('./' + table_name);
+
+        var req_body = {};
+        Object.keys(data).forEach(function(column_name) {
+          column_name.should.not.equal('description');
+          ko.isObservable(data[column_name]).should.be.false;
+          req_body[column_name] = data[column_name];
+        });
+        var req_model = {};
+        req_model[table_name] = req_body;
+        callback(200, req_model);
+      },
       delete: function(url, callback) {
         url.should.equal('./' + table_name + '?id=2');
 
@@ -672,7 +685,6 @@ describe('Table Management', function() {
 
   it('should call the create api', function(done) {
     table.create({
-      id: ko.observable(1),
       species: ko.observable('trout'),
       count: ko.observable(540),
       description: ko.observable('Trout are plentiful')
@@ -691,6 +703,35 @@ describe('Table Management', function() {
       result.should.have.property('count');
       ko.isObservable(result.count).should.be.true;
       result.count().should.equal(540);
+
+      var list_row = table.list.get(1);
+      should.exist(list_row);
+
+      done();
+    });
+  });
+
+  it('should call the modify api', function(done) {
+    table.modify({
+      id: ko.observable(1),
+      species: ko.observable('salmon'),
+      count: ko.observable(542),
+      description: ko.observable('Trout are plentiful')
+    }, function(result_code, result) {
+      should.not.exist(result_code);
+      should.exist(result);
+
+      result.should.have.property('id');
+      ko.isObservable(result.id).should.be.true;
+      result.id().should.equal(1);
+
+      result.should.have.property('species');
+      ko.isObservable(result.species).should.be.true;
+      result.species().should.equal('salmon');
+
+      result.should.have.property('count');
+      ko.isObservable(result.count).should.be.true;
+      result.count().should.equal(542);
 
       var list_row = table.list.get(1);
       should.exist(list_row);
