@@ -105,27 +105,26 @@ function Manager() {
 
 //XXX This sucks.  Do it better.
   this.tab_list = ko.computed(function() {
-/*
+
     var result = tab_list = [
+/*
       { value: 3, value_text: 'My Bands' },
       { value: 4, value_text: 'Band Members' },
-      { value: 5, value_text: 'Artists' },
+*/
+      { value: 5, value_text: 'Artists' }/*,
       { value: 6, value_text: 'All Songs' },
       { value: 7, value_text: 'Band Songs' }
+*/
     ];
 
     if (this.current_person() && this.current_person().system_admin()) {
       result.unshift({ value: 2, value_text: 'All People' });
       result.unshift({ value: 1, value_text: 'All Bands' });
     }
-
+/*
     result.unshift({ value: 0, value_text: 'Dashboard' });
 */
 
-    var result = [
-      { value: 1, value_text: 'All Bands' },
-      { value: 2, value_text: 'All People' }
-    ];
     return result;
   }.bind(this));
 

@@ -1,0 +1,13 @@
+div
+  div.dialog_background
+    div.dialog
+      div.title_bar
+        div.title Artist Editor
+        div.close_button(data-bind="with: table")
+          button.close_button(data-bind="click: disposeForm") X
+
+      div.dialog_body
+        div.title(data-bind="text: message")
+        form(data-bind="submit: submit")
+          input(data-bind="value: row.name", type="text", placeholder="New Artist Name")
+          input(type="submit", data-bind="attr: {value: button_text}")
