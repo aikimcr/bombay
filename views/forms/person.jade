@@ -1,0 +1,15 @@
+div
+  div.dialog_background
+    div.dialog
+      div.title_bar
+        div.title Person Editor
+        div.close_button(data-bind="with: table")
+          button.close_button(data-bind="click: disposeForm") X
+
+      div.dialog_body
+        div.title(data-bind="text: message")
+        form(data-bind="submit: submit")
+          input(data-bind="value: row.name", type="text", placeholder="New Login Name")
+          input(data-bind="value: row.full_name", type="text", placeholder="Full Name")
+          input(data-bind="value: row.email", type="email", placeholder="E-Mail")
+          input(type="submit", data-bind="attr: {value: button_text}")

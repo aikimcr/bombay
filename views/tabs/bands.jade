@@ -3,7 +3,7 @@ div.app_context(id="bands", data-bind="if: current_is_system_admin, visible: $ro
   div.app_context_item
     div.display
       div.control(data-bind="with: band")
-        button.edit_button(id="add_bands", data-bind="click: showForm") +
+        button.edit_button(data-bind="click: showForm") +
         label(for="add_bands") Add Band
 
       div.filters(data-bind="with: band")

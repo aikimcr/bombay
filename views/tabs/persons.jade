@@ -2,9 +2,9 @@ div.app_context(id="persons", data-bind="if: current_is_system_admin, visible: $
   div.app_context_header All Persons
   div.app_context_item
     div.display
-      div.control
-        //- button.edit_button(id="add_persons", data-bind="click: forms.add_person.show.bind(forms.add_person)") +
-        //- label(for="add_persons") Add Person
+      div.control(data-bind="with: person")
+        button.edit_button(data-bind="click: showForm") +
+        label(for="add_persons") Add Person
 
       div.filters(data-bind="with: person")
         table
@@ -61,7 +61,7 @@ div.app_context(id="persons", data-bind="if: current_is_system_admin, visible: $
               th Email
               th Admin
               th Memberships
-              //- th
+              th
 
           tbody(data-bind="foreach: person.sort.getList")
             tr
@@ -72,5 +72,5 @@ div.app_context(id="persons", data-bind="if: current_is_system_admin, visible: $
                 //- input(name="system_admin", type="checkbox", data-bind="checked: system_admin, event: { change: $root.update_table_object }")
 
               td(data-bind="text: bandMemberCount")
-              //- td(data-bind="ifnot: bandMemberCount")
-                //- button.edit_button(data-bind="click: $root.delete_table_object") -
+              td(data-bind="ifnot: bandMemberCount")
+                button.edit_button(data-bind="click: deleteRow") -
