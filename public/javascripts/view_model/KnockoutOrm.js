@@ -86,7 +86,7 @@ orm.table.prototype.modify = function(data, callback) {
       if (ko.isObservable(data[column_name])) {
         svc_data[column_name] = data[column_name]();
       } else {
-        svc_data[column_name];
+        svc_data[column_name] = data[column_name];
       }
     }
   });
@@ -95,7 +95,7 @@ orm.table.prototype.modify = function(data, callback) {
     if (result_code == 200) {
       var row = this.list.get(result[this.model_key].id);
       Object.keys(this.columns).forEach(function(column_name) {
-        if (result[this.model_key][column_name] && result[this.model_key][column_name] !== row[column_name]()) {
+        if (column_name in result[this.model_key] && result[this.model_key][column_name] !== row[column_name]()) {
           row[column_name](result[this.model_key][column_name]);
         }
       }.bind(this));
@@ -353,6 +353,29 @@ orm.table.row.prototype.addJoins = function(join_table, join_column) {
 orm.table.row.prototype.showForm = function(row, event) {
   this.table.form = new orm.table.form(this.table);
   this.table.form.show(event.pageX, event.pageY, this);
+};
+
+orm.table.row.prototype.modifyRow = function(row, event) {
+  var target = event.target;
+  var tagname = event.target.tagName.toLowerCase();
+
+  if (tagname === 'input' || tagname === 'select') {
+    var column_name = target.name;
+
+    if (column_name) {
+      var value = target.value;
+
+      if (target.type === 'checkbox') value = target.checked;
+
+      function handle_return(err, result) {
+        if (err) console.log(err.toString());//XXX Handle errors better.
+      };
+
+      var data = {id: row.id()};
+      data[column_name] = value;
+      this.table.modify(data, handle_return.bind(this));
+    }
+  }
 };
 
 orm.table.row.prototype.deleteRow = function(row, event) {

@@ -62,7 +62,14 @@ function putModel(res, model_name, options, result_key) {
   var model = db_orm[model_name];
   model.get(options.id, function(err, row) {
     handleJSONResponse(res, err, function() {
-      var data = JSON.parse(JSON.stringify(options));
+      var data = {};
+      Object.keys(options).forEach(function(key) {
+        try {
+          data[key] = JSON.parse(options[key]);
+        } catch(e) {
+          data[key] = options[key];
+        }
+      });
       delete data['id'];
       row.save(data, function(err) {
         if (err) {

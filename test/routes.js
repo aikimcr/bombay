@@ -25,7 +25,7 @@ describe('routes', function() {
       {file: './test/support/addBandSongs.sql'},
 
       // Blow away the defaults and add some predictable ones.
-      {file: './test/support/addSongRatings.sql'}, 
+      {file: './test/support/addSongRatings.sql'},
     ], done);
   });
 
@@ -155,7 +155,7 @@ describe('routes', function() {
         }, {
 	  id: 4, name: 'The Beatles'
         }, {
-	  id: 2, name: 'ZZ Top'      
+	  id: 2, name: 'ZZ Top'
         }];
         var res = {
           json: function(result_code, result) {
@@ -194,7 +194,7 @@ describe('routes', function() {
         }, {
 	  id: 7, name: 'Stairway To Heaven', artist_id: 3
         }, {
-	  id: 3, name: 'You Shook Me All Night Long', artist_id: 1      
+	  id: 3, name: 'You Shook Me All Night Long', artist_id: 1
         }];
         var res = {
           json: function(result_code, result) {
@@ -384,7 +384,7 @@ describe('routes', function() {
 
   describe('#post', function() {
     describe('#band', function() {
-      // Band creation should be a system_admin function.  The 
+      // Band creation should be a system_admin function.  The
       // process should be to create a band, create a person then
       // make that person a band_member with band_admin privileges
       // for the new band.
@@ -665,6 +665,33 @@ describe('routes', function() {
           full_name: 'System Admin User',
           email: 'admin@musichero.foo',
           system_admin: true
+        };
+        db_orm.Person.get(1, function(err, row) {
+          should.not.exist(err);
+          test_util.check_record(row, expected, ['id', 'name', 'full_name', 'email', 'system_admin']);
+          done();
+        });
+      });
+
+      it('should update the person to be not system_admin', function(done) {
+        req.query = {id: 1, system_admin: 'false', email: 'admin@musiczero.foo'};
+        var expected = {id: 1, system_admin: false, email: 'admin@musiczero.foo'};
+        var res = {
+          json: function(result_code, result) {
+            person_id = test_util.check_result(result, 'person', expected);
+            done();
+          }
+        };
+        routes.putPersonTable(req, res);
+      });
+
+      it('should get the person', function(done) {
+        var expected = {
+          id: 1,
+          name: 'admin',
+          full_name: 'System Admin User',
+          email: 'admin@musiczero.foo',
+          system_admin: false
         };
         db_orm.Person.get(1, function(err, row) {
           should.not.exist(err);
