@@ -1,0 +1,28 @@
+div
+  div.dialog_background
+    div.dialog
+      div.title_bar
+        div.title Song Editor
+        div.close_button(data-bind="with: table")
+          button.close_button(data-bind="click: disposeForm") X
+
+      div.control(data-bind="with: table.reftables.artist")
+        button.edit_button(id="add_artists", data-bind="click: showForm") +
+        label(for="add_artists") Add Artist
+
+      div.dialog_body
+        div.title(data-bind="text: message")
+        form(data-bind="submit: submit")
+          input(data-bind="value: row.name", type="text", placeholder="New Song Name")
+          div(data-bind="searchableSelect: row.artist_id, \
+                         optionsList: table.reftables.artist.sort.getList, \
+                         optionsValue: 'id', \
+                         optionsText: 'name'")
+
+          div(data-bind="searchableSelect: row.key_signature, \
+                         enable: manager.current_band_member().band_admin, \
+                         optionsList: table.columns.key_signature.value_map, \
+                         optionsText: 'value_text', \
+                         optionsValue: 'value'")
+
+          input(type="submit", data-bind="attr: {value: button_text}")

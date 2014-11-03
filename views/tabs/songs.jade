@@ -2,11 +2,11 @@ div.app_context(id="songs", data-bind="visible: $root.current_tab().value == 6")
   div.app_context_header Songs
   div.app_context_item
     div.display
-      div.control
-        //- button.edit_button(id="add_songs", data-bind="click: forms.add_song.show.bind(forms.add_song)") +
-        //- label(for="add_songs") Add Song
+      div.control(data-bind="with: song")
+        button.edit_button(id="add_songs", data-bind="click: showForm") +
+        label(for="add_songs") Add Song
 
-      div.filters(data-bind="with: artist")
+      div.filters(data-bind="with: song")
         table
           thead
             tr
@@ -17,24 +17,31 @@ div.app_context(id="songs", data-bind="visible: $root.current_tab().value == 6")
             tr
               td
                 div.sort(data-bind="with: sort")
-                  select(data-bind="value: sort_type, options: labels, optionsText: 'label', optionsValue: 'value'")
+                  select(data-bind="value: sort_type, \
+                         options: compare_labels, \
+                         optionsText: 'label', \
+                         optionsValue: 'value'")
 
               td
                 div.filter(data-bind="with: filters.name")
+                  input(type="checkbox", data-bind="checked: active")
                   div.filter_label Song Name
                   input(type="text", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
 
                 div.filter(data-bind="with: filters.artist_id")
+                  input(type="checkbox", data-bind="checked: active")
                   div.filter_label Artist
-                  div(data-bind="searchableSelect: filter_balue, optionsList: select_list, optionsText: 'label', optionsValue: 'value', optionsCaption: '-All Artists-'")
-              
+                  div(data-bind="searchableSelect: filter_value, optionsList: select_list, optionsText: 'label', optionsValue: 'value', optionsCaption: '-All Artists-'")
+
                 div.filter
                   div.filter_title Band Count
                   div(data-bind="with: filters.min_band_count")
+                    input(type="checkbox", data-bind="checked: active")
                     div.filter_label Min
                     input(type="number", inputmode="numeric", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
 
                   div(data-bind="with: filters.max_band_count")
+                    input(type="checkbox", data-bind="checked: active")
                     div.filter_label Max
                     input(type="number", inputmode="numeric", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
 
@@ -51,11 +58,17 @@ div.app_context(id="songs", data-bind="visible: $root.current_tab().value == 6")
 
           tbody(data-bind="foreach: song.sort.getList")
             tr
-              td(data-bind="click: $root.edit_table_object.bind($root.forms.edit_song)") &#x270e;
+              td(data-bind="click: showForm") &#x270e;
               td(data-bind="text: name")
-              td(data-bind="text: artist().name")
+              td(data-bind="text: artist_name")
               td
-                select(name="key_signature", data-bind="value: key_signature, options: manager.key_signature_map, optionsText: 'value_text', optionsValue: 'value', event: { change: $root.update_table_object }")
-              td(data-bind="text: band_count")
-              td(data-bind="ifnot: band_count")
-                button.edit_button(data-bind="click: $root.delete_table_object") -
+                select(name="key_signature"
+                       data-bind="value: key_signature, \
+                       options: table.columns.key_signature.value_map, \
+                       optionsText: 'value_text', \
+                       optionsValue: 'value', \
+                       event: { change: modifyRow }")
+
+              td(data-bind="text: bandSongCount")
+              td(data-bind="ifnot: bandSongCount")
+                button.edit_button(data-bind="click: deleteRow") -

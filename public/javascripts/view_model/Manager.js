@@ -111,8 +111,8 @@ function Manager() {
       { value: 3, value_text: 'My Bands' },
       { value: 4, value_text: 'Band Members' },
 */
-      { value: 5, value_text: 'Artists' }/*,
-      { value: 6, value_text: 'All Songs' },
+      { value: 5, value_text: 'Artists' },
+      { value: 6, value_text: 'All Songs' }/*,
       { value: 7, value_text: 'Band Songs' }
 */
     ];
@@ -485,7 +485,7 @@ Manager.prototype.createSongTable = function() {
   this.song = orm.define(this, 'song', {
     name: {type: 'string'},
     artist_id: {type: 'reference', reference_table: this.artist},
-    key_signature: {type: 'string'}
+    key_signature: {type: 'enum', value_map: this.key_signature_map}
   }, {
     filters: [{
       name: 'max_band_count',
@@ -506,7 +506,7 @@ Manager.prototype.createSongTable = function() {
     }, {
       name: 'name',
       type: 'match',
-      columna_name: 'name'
+      column_name: 'name'
     }],
     sort: [{
       name: 'name_asc',

@@ -69,7 +69,10 @@ div.app_context(id="persons", data-bind="if: current_is_system_admin, visible: $
               td(data-bind="text: full_name")
               td(data-bind="text: email")
               td
-                input(name="system_admin", type="checkbox", data-bind="checked: system_admin, event: { change: modifyRow }")
+                input(name="system_admin"
+                      type="checkbox"
+                      data-bind="checked: system_admin, \
+                                 event: { change: modifyRow }")
 
               td(data-bind="text: bandMemberCount")
               td(data-bind="ifnot: bandMemberCount")

@@ -17,7 +17,10 @@ div.app_context(id="bands", data-bind="if: current_is_system_admin, visible: $ro
             tr
               td
                 div.sort(data-bind="with: sort")
-                  select(data-bind="value: sort_type, options: compare_labels, optionsText: 'label', optionsValue: 'value'")
+                  select(data-bind="value: sort_type, \
+                         options: compare_labels, \
+                         optionsText: 'label', \
+                         optionsValue: 'value'")
 
               td
                 div.filter(data-bind="with: filters.name")

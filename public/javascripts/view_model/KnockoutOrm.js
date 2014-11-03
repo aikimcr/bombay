@@ -9,18 +9,35 @@ orm.table = function(context_base, table_name, model_key, url, columns, computes
   this.columns = columns;
   this.joins = [];
   this.list = context_base[model_key + 's'];
+  this.reftables = {};
 
   Object.keys(this.columns).forEach(function(column_name) {
     var column_def = this.columns[column_name];
     if (column_def['type'] === 'reference') {
-      column_def['reference_table'].joins.push({
+      var reftable = column_def['reference_table'];
+      reftable.joins.push({
         table: this,
         column_name: column_name
       });
+      this.reftables[reftable.table_name] = reftable;
     }
   }.bind(this));
 
   this.computes = computes || [];
+};
+
+orm.table.prototype.dispose = function() {
+  this.disposeForm();
+  this.reftables = null;
+  this.list.dispose();
+  delete context_base[this.model_key + 's'];
+  this.list = null;
+  this.joins = null;
+  this.columns = null;
+  this.url = null;
+  this.model_key = null;
+  this.table_name = null;
+  this.context_base = null;
 };
 
 orm.table.prototype.create = function(data, callback) {
@@ -165,8 +182,10 @@ orm.table.prototype.showForm = function(table, event) {
 };
 
 orm.table.prototype.disposeForm = function() {
-  this.form.dispose();
-  this.form = null;
+  if (this.form) {
+    this.form.dispose();
+    this.form = null;
+  }
 };
 
 // View Model Row.
@@ -179,6 +198,9 @@ orm.table.row = function(table, model) {
 
     if (column_def['type'] === 'boolean') {
       this[column_name] = ko.observable(!!model[column_name]);
+    } else if (column_def['type'] === 'reference' || column_def['type'] === 'integer') {
+      var real_value = parseInt(model[column_name], 10);
+      this[column_name] = ko.observable(real_value);
     } else {
       this[column_name] = ko.observable(model[column_name]);
     }
@@ -350,6 +372,8 @@ orm.table.row.prototype.addJoins = function(join_table, join_column) {
   }
 };
 
+orm.table.row.prototype.dispose = function() { }; // It's possible columns need to be disposed in a particular order.
+
 orm.table.row.prototype.showForm = function(row, event) {
   this.table.form = new orm.table.form(this.table);
   this.table.form.show(event.pageX, event.pageY, this);
@@ -505,6 +529,15 @@ orm.table.confirm_dialog.prototype.dispose = function() {
 orm.table.list = function(table_name) {
   this.table_name = ko.observable(table_name);
   this.list = ko.observableArray([]);
+};
+
+orm.table.list.prototype.dispose = function() {
+  while (this.list().length > 0) {
+    var row = this.list.shift;
+    row.dispose();
+  }
+  this.list = null;
+  this.table_name = null;
 };
 
 orm.table.list.prototype.length = function() {
