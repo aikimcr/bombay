@@ -43,7 +43,11 @@ function getPostData(model_name, options) {
   var data = {};
   db_orm.columns[model_name].forEach(function (column) {
     if (column != 'id' && column in options) {
-      data[column] = options[column];
+      try {
+        data[column] = JSON.parse(options[column]);
+      } catch(e) {
+        data[column] = options[column];
+      };
     }
   });
   return data;

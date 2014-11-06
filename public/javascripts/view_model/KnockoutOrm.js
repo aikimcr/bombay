@@ -426,15 +426,16 @@ orm.table.row.prototype.toString = function() {
 
     Object.keys(this.table.columns).forEach(function(column_name) {
       col_vals.push(column_name + ': ' + this[column_name]());
-    });
+    }.bind(this));
 
     return col_vals.join(', ');
   }
 };
 
 // Forms
-orm.table.form = function(table) {
+orm.table.form = function(table, form_url) {
   this.table = table;
+  this.url = form_url;
   this.message = ko.observable();
 };
 
@@ -455,7 +456,7 @@ orm.table.form.prototype.show = function(x, y, row) {
     }.bind(this));
   }
 
-  var url = '/forms/' + this.table.table_name + '.html';
+  var url = this.form_url ? this.form_url : '/forms/' + this.table.table_name + '.html';
   var request = Ajax.getInstance().getRequest(url, 'document');
   request.get().then(function(form_html) {
     this.form_element = form_html.body.removeChild(form_html.body.firstChild);
@@ -559,7 +560,9 @@ orm.table.list.prototype.find = function(filter) {
   if (typeof(filter) == 'object') {
     filter_function = function(row) {
       return Object.keys(filter).map(function(column_name) {
-        return row[column_name]() == filter[column_name];
+        var filter_value = filter[column_name];
+        if (ko.isObservable(filter_value)) filter_value = filter_value();
+        return row[column_name]() == filter_value;
       }).reduce(function(prev, curr) {
         return prev && curr;
       }, true);
@@ -710,6 +713,7 @@ orm.table.list.filter.columnFilterFactory = function(list, filter_type, column_n
   if (filter_type === 'match') {
     filter.setCompare(function(column_name, item) {
       if (this.filter_value() == null || this.filter_value() === '') return true;
+      if (item[column_name]() == null) return false;
       return item[column_name]().toLowerCase().match(this.filter_value().toLowerCase());
     }.bind(filter, column_name));
   } else if (filter_type === 'min') {
@@ -740,7 +744,6 @@ orm.table.list.filter.columnFilterFactory = function(list, filter_type, column_n
     }.bind(filter, column_name));
   } else if (filter_type === 'bool') {
     filter.setCompare(function(column_name, item) {
-      if (this.filter_value() == null || this.filter_value() === '') return true;
       var value = !! item[column_name]();
       var filter_value = !! this.filter_value();
       return value === filter_value;
@@ -783,8 +786,10 @@ orm.table.list.filter.columnFilterFactory = function(list, filter_type, column_n
 };
 
 // Define table views
-orm.table.view = function(table, filters, sorts) {
-  this.createSortAndFilters_(table.list, filters, sorts);
+orm.table.view = function(table_or_list, filters, sorts) {
+  var list = table_or_list instanceof orm.table ? table_or_list.list : table_or_list;
+
+  this.createSortAndFilters_(list, filters, sorts);
 
   this.cloneWithNewList = function(new_list) {
     var new_view = Object.create(this);

@@ -155,6 +155,8 @@ describe('KnockoutOrm list management', function() {
   var list;
   var start_list = [];
   var list_names = ['platypus', 'angel', 'danio', 'discus', 'wrasse', 'tetra'];
+  var foo_ids = [-1, 1, 1, 3, 2, 2];
+  var colors = ['brown', 'black', 'striped', 'red', 'blue', 'blue'];
 
   describe('basic operations', function() {
     before(function(done) {
@@ -166,7 +168,9 @@ describe('KnockoutOrm list management', function() {
       for(var i=1;i<=5;i++) {
         start_list.push({
           id: ko.observable(i),
-          name: ko.observable(list_names[i])
+          name: ko.observable(list_names[i]),
+          foo_id: ko.observable(foo_ids[i]),
+          color: ko.observable(colors[i])
         });
       }
       done();
@@ -231,7 +235,7 @@ describe('KnockoutOrm list management', function() {
       done();
     });
 
-    it('should find the rows using field match', function(done) {
+    it('should find the rows using field match', function() {
       var rows;
 
       (function() {
@@ -242,8 +246,98 @@ describe('KnockoutOrm list management', function() {
       rows.length.should.equal(1);
       rows[0].id().should.equal(2);
       rows[0].name().should.equal('danio');
+      rows[0].foo_id().should.equal(1);
+      rows[0].color().should.equal('striped');
+    });
 
-      done();
+    it('should find the rows using field match', function() {
+      var rows;
+
+      (function() {
+        rows = list.find({color: 'blue'});
+      }).should.not.throw();
+
+      should.exist(rows);
+      rows.length.should.equal(2);
+      rows[0].id().should.equal(4);
+      rows[0].name().should.equal('wrasse');
+      rows[0].foo_id().should.equal(2);
+      rows[0].color().should.equal('blue');
+
+      rows.length.should.equal(2);
+      rows[1].id().should.equal(5);
+      rows[1].name().should.equal('tetra');
+      rows[1].foo_id().should.equal(2);
+      rows[1].color().should.equal('blue');
+    });
+
+    it('should find the rows using field match (observable filter value)', function() {
+      var rows;
+
+      (function() {
+        rows = list.find({color: ko.observable('blue')});
+      }).should.not.throw();
+
+      should.exist(rows);
+      rows.length.should.equal(2);
+      rows[0].id().should.equal(4);
+      rows[0].name().should.equal('wrasse');
+      rows[0].foo_id().should.equal(2);
+      rows[0].color().should.equal('blue');
+
+      rows.length.should.equal(2);
+      rows[1].id().should.equal(5);
+      rows[1].name().should.equal('tetra');
+      rows[1].foo_id().should.equal(2);
+      rows[1].color().should.equal('blue');
+    });
+
+    it('should find the rows using fields match', function() {
+      var rows;
+
+      (function() {
+        rows = list.find({id: 2, name: 'danio'});
+      }).should.not.throw();
+
+      should.exist(rows);
+      rows.length.should.equal(1);
+      rows[0].id().should.equal(2);
+      rows[0].name().should.equal('danio');
+      rows[0].foo_id().should.equal(1);
+      rows[0].color().should.equal('striped');
+    });
+
+    it('should find the rows using fields match', function() {
+      var rows;
+
+      (function() {
+        rows = list.find({foo_id: 2, color: 'blue'});
+      }).should.not.throw();
+
+      should.exist(rows);
+      rows.length.should.equal(2);
+      rows[0].id().should.equal(4);
+      rows[0].name().should.equal('wrasse');
+      rows[0].foo_id().should.equal(2);
+      rows[0].color().should.equal('blue');
+
+      rows.length.should.equal(2);
+      rows[1].id().should.equal(5);
+      rows[1].name().should.equal('tetra');
+      rows[1].foo_id().should.equal(2);
+      rows[1].color().should.equal('blue');
+    });
+
+    it('should not find any rows', function() {
+      var rows;
+
+      (function() {
+        rows = list.find({foo_id: 1, color: 'blue'});
+      }).should.not.throw();
+
+      should.exist(rows);
+      rows.length.should.equal(0);
+      rows.should.eql([]);
     });
 
     it('should find the rows using a filter', function(done) {

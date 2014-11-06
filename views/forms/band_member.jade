@@ -1,0 +1,22 @@
+div
+  div.dialog_background
+    div.dialog
+      div.title_bar
+        div.title Add Band Member
+        div.close_button(data-bind="with: table")
+          button.close_button(data-bind="click: disposeForm") X
+
+      div.control(data-bind="with: table.reftables.person")
+        button.edit_button(id="add_people", data-bind="click: showForm") +
+        label(for="add_people") Add Person
+
+      div.dialog_body
+        div.title(data-bind="text: message")
+        form(data-bind="submit: submit")
+          input(type="hidden", data-bind="value: row.band_id")
+          div(data-bind="searchableSelect: row.person_id, \
+                         optionsList: table.otherPersons, \
+                         optionsValue: 'id', \
+                         optionsText: 'full_name'")
+
+          input(type="submit", data-bind="attr: {value: button_text}")

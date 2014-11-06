@@ -109,8 +109,8 @@ function Manager() {
     var result = tab_list = [
 /*
       { value: 3, value_text: 'My Bands' },
-      { value: 4, value_text: 'Band Members' },
 */
+      { value: 4, value_text: 'Band Members' },
       { value: 5, value_text: 'Artists' },
       { value: 6, value_text: 'All Songs' }/*,
       { value: 7, value_text: 'Band Songs' }
@@ -136,38 +136,6 @@ function Manager() {
       this.current_person().bandMemberList(),
       function(member_row) { return member_row.band() }
     );
-  }.bind(this)).extend({ throttle: 50 });
-
-  this.other_bands = ko.computed(function() {
-    return ko.utils.arrayFilter(this.bands.list(), function(band_row) {
-      if (this.current_person()) {
-        var filter = orm.table.list.filter.columnFilterFactory(
-          band_row.bandMemberList,
-          'equal',
-          'person_id'
-        );
-        filter.setFilterValue(this.current_person().id());
-        return filter.getList().length == 0;
-      } else {
-        return this.bands.list();
-      }
-    }.bind(this));
-  }.bind(this)).extend({ throttle: 50 });
-
-  this.non_band_members = ko.computed(function() {
-    if (this.current_band()) {
-      return ko.utils.arrayFilter(this.persons.list(), function(person_row) {
-        var filter = orm.table.list.filter.columnFilterFactory(
-          person_row.bandMemberList,
-          'equal',
-          'band_id'
-        );
-        filter.setFilterValue(this.current_band().id());
-        return filter.getList().length == 0;
-      }.bind(this));
-    } else {
-      return this.persons.list();
-    }
   }.bind(this)).extend({ throttle: 50 });
 
   this.non_band_songs = ko.computed(function() {
@@ -211,74 +179,6 @@ function Manager() {
 */
 
 /*
-  this.forms = {};
-  if (!for_test) {
-    this.forms.add_band = new AddBand();
-    this.forms.edit_band = new EditBand();
-    this.forms.join_band = new JoinBand();
-    this.forms.add_person = new AddPerson();
-    this.forms.edit_profile = new EditProfile();
-    this.forms.change_password = new ChangePassword();
-    this.forms.add_band_member = new AddBandMember();
-    this.forms.add_artist = new AddArtist();
-    this.forms.edit_artist = new EditArtist();
-    this.forms.add_song = new AddSong();
-    this.forms.edit_song = new EditSong();
-    this.forms.add_band_song = new AddBandSong();
-    this.forms.create_rehearsal_plan = new CreateRehearsalPlan();
-  }
-
-  this.confirm_dialog = new confirm_dialog();
-
-  this.postFormChange = function(form_element) {
-    var form_key = form_element.attributes.getNamedItem('form_key');
-    if (! form_key) throw new Error('No form key for ' + form_element.toString());
-    var form = this.forms[form_key.value];
-    return form.postChange(form_element);
-  };
-
-  this.putFormChange = function(form_element) {
-    var form_key = form_element.attributes.getNamedItem('form_key');
-    if (! form_key) throw new Error('No form key for ' + form_element.toString());
-    var form = this.forms[form_key.value];
-    var form_result = form.putChange(form_element);
-    form.hide();
-    return form_result;
-  };
-
-  this.edit_table_object = function(data, event) {
-    window.console.log(event);
-    window.console.log(data);
-    this.show(data);
-  };
-
-  this.delete_table_object = function(data, event) {
-    data.delete(function(result_code, result) {
-      if (result_code != 200 && result_code != 304) {
-        throw new Error(result); //XXX  Display a message?
-      }
-    }, event);
-  };
-
-  this.update_table_object = function(data, event) {
-    var target = event.target;
-    var name = target.name;
-    var value = target.type == 'checkbox' ? target.checked : target.value;
-    var changeset = {};
-    changeset[name] = value;
-    data.update(changeset, function(result_code, result) {
-      if (result_code == 200 || result_code == 304) {
-        data.refresh(function(result_code) {
-          if (result_code != 200 && result_code != 304) {
-            window.console.log(result_code);
-          }
-        });
-      } else {
-        window.console.log(result_code);
-      }
-    });
-  };
-
   this.request_msg = ko.observable('');
   this.send_request_action = function(data, event) {
     request_action = event.target.parentElement.querySelector('select').value;
@@ -327,6 +227,24 @@ Manager.prototype.createBandTable = function() {
         name: 'is_populated',
         compute: function(row) {
           return row.bandSongCount() || row.bandMemberCount();
+        }.bind(this)
+      }, {
+        name: 'otherPersons',
+        compute: function(row) {
+          var person_list = ko.utils.arrayFilter(this.person.list.list(), function(person) {
+            var members = this.band_member.list.find({
+              person_id: person.id,
+              band_id: row.id
+            });
+            return (!members) || members.length <= 0;
+          }.bind(this));
+          return person_list.sort(function(a, b) {
+            if (a.full_name() < b.full_name()) return -1;
+            if (a.full_name() > b.full_name()) return 1;
+            if (a.name() < b.name()) return -1;
+            if (a.name() > b.name()) return 1;
+            return 0;
+          });
         }.bind(this)
       }],
       filters: [{
@@ -390,6 +308,22 @@ Manager.prototype.createPersonTable = function() {
       name: 'bandList',
       sub_join: 'bandMemberList',
       join_list: 'band'
+    }, {
+      name: 'otherBands',
+      compute: function(row) {
+        var band_list = ko.utils.arrayFilter(this.band.list.list(), function(band) {
+          var members = this.band_member.list.find({
+            person_id: row.id,
+            band_id: band.id
+          });
+          return (!members) || members.length <= 0;
+        }.bind(this));
+        return band_list.sort(function(a, b) {
+          if (a.name() < b.name()) return -1;
+          if (a.name() > b.name()) return 1;
+          return 0;
+        });
+      }.bind(this)
     }],
     filters: [{
       name: 'max_band_count',
@@ -602,6 +536,30 @@ Manager.prototype.createBandMember = function() {
       }]
     }]
   });
+
+  this.band_member.otherPersons = ko.computed(function() {
+    if (this.current_band()) {
+      return this.current_band().otherPersons();
+    } else {
+      return [];
+    }
+  }.bind(this)).extend({ throttle: 500 });
+
+  this.band_member.otherBands = ko.computed(function() {
+    if (this.current_person()) {
+      return this.current_person().otherBands();
+    } else {
+      return [];
+    }
+  }.bind(this)).extend({ throttle: 500 });
+
+  this.band_member.add_member_form = {
+    showForm: function(show_form_object, element) {
+      this.band_member.showForm(this.band_member, element);
+      this.band_member.form.row.band_id(this.current_band().id());
+      this.band_member.form.row.band_admin(false);
+    }.bind(this)
+  };
 };
 
 Manager.prototype.createBandSong = function() {

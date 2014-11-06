@@ -127,6 +127,18 @@ Sapphire.searchableSelect = {
       return filtered_options;
     }.bind(search_object));
 
+    if (! search_object.working_value()) {
+      if (search_object.select_list().length > 0) {
+        var options_value = allBindings.get('optionsValue');
+        if (options_value) {
+          search_object.working_value(search_object.select_list()[0][options_value]());
+        } else {
+          search_object.working_value(search_object.select_list()[0]);
+        }
+        observable(search_object.working_value());
+      }
+    }
+
     search_object.change_filter_ = function(data, event) {
       if (allBindings.has('optionsCaption') &&
           data.select_list().length > 0 &&
@@ -158,7 +170,7 @@ Sapphire.searchableSelect = {
       selector_bind,
       null, null, null, select_element
     );
-                     
+
     search_object.change_selector_ = function(data, event) {
       observable(data.working_value());
     };
@@ -186,7 +198,7 @@ Sapphire.searchableSelect = {
 
     var search_button = search_object.createSVGElement(
       'search_button', 18, 18,
-      Sapphire.magnifying_glass, 
+      Sapphire.magnifying_glass,
       {display: 'inline-block', 'vertical-align': 'middle'},
       null, selector_box
     );
