@@ -176,8 +176,8 @@ orm.table.prototype.load = function(callback) {
   }.bind(this));
 };
 
-orm.table.prototype.showForm = function(table, event) {
-  this.form = new orm.table.form(table);
+orm.table.prototype.showForm = function(table, event, url) {
+  this.form = new orm.table.form(table, url);
   this.form.show(event.pageX, event.pageY);
 };
 
@@ -374,8 +374,8 @@ orm.table.row.prototype.addJoins = function(join_table, join_column) {
 
 orm.table.row.prototype.dispose = function() { }; // It's possible columns need to be disposed in a particular order.
 
-orm.table.row.prototype.showForm = function(row, event) {
-  this.table.form = new orm.table.form(this.table);
+orm.table.row.prototype.showForm = function(row, event, url) {
+  this.table.form = new orm.table.form(this.table, url);
   this.table.form.show(event.pageX, event.pageY, this);
 };
 
@@ -456,7 +456,7 @@ orm.table.form.prototype.show = function(x, y, row) {
     }.bind(this));
   }
 
-  var url = this.form_url ? this.form_url : '/forms/' + this.table.table_name + '.html';
+  var url = this.url ? this.url : '/forms/' + this.table.table_name + '.html';
   var request = Ajax.getInstance().getRequest(url, 'document');
   request.get().then(function(form_html) {
     this.form_element = form_html.body.removeChild(form_html.body.firstChild);

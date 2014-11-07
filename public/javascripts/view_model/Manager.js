@@ -103,13 +103,10 @@ function Manager() {
 
   // XXX this.reports = new ReportList();
 
-//XXX This sucks.  Do it better.
   this.tab_list = ko.computed(function() {
 
     var result = tab_list = [
-/*
       { value: 3, value_text: 'My Bands' },
-*/
       { value: 4, value_text: 'Band Members' },
       { value: 5, value_text: 'Artists' },
       { value: 6, value_text: 'All Songs' }/*,
@@ -131,13 +128,6 @@ function Manager() {
   this.current_tab = ko.observable(this.tab_list[0]);
 
 /* XXX It's possible I can eliminate this whole block of code
-  this.current_bands = ko.computed(function() {
-    return ko.utils.arrayMap(
-      this.current_person().bandMemberList(),
-      function(member_row) { return member_row.band() }
-    );
-  }.bind(this)).extend({ throttle: 50 });
-
   this.non_band_songs = ko.computed(function() {
     if (this.current_band()) {
       return ko.utils.arrayFilter(this.songs.list(), function(song_row) {
@@ -485,6 +475,11 @@ Manager.prototype.createBandMember = function() {
       name: 'person_email',
       parent: 'person',
       column_name: 'email'
+    }, {
+      name: 'description',
+      compute: function(row) {
+        return row.person_full_name() + ' of ' + row.band_name();
+      }
     }],
     views: [{
       name: 'person_bands',
@@ -557,6 +552,14 @@ Manager.prototype.createBandMember = function() {
     showForm: function(show_form_object, element) {
       this.band_member.showForm(this.band_member, element);
       this.band_member.form.row.band_id(this.current_band().id());
+      this.band_member.form.row.band_admin(false);
+    }.bind(this)
+  };
+
+  this.band_member.join_band_form = {
+    showForm: function(show_form_object, element) {
+      this.band_member.showForm(this.band_member, element, '/forms/join_band.html');
+      this.band_member.form.row.person_id(this.current_person().id());
       this.band_member.form.row.band_admin(false);
     }.bind(this)
   };

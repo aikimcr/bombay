@@ -2,11 +2,11 @@ div.app_context(id="my_bands", data-bind="visible: $root.current_tab().value == 
   div.app_context_header Bands
   div.app_context_item
     div.display(data-bind="if: current_person()")
-      div.control
-        //- button.edit_button(id="join_bands", data-bind="click: forms.join_band.show.bind(forms.join_band)") +
-        //- label(for="join_bands") Join Band
+      div.control(data-bind="with: band_member.join_band_form")
+        button.edit_button(id="join_bands", data-bind="click: showForm") +
+        label(for="join_bands") Join Band
 
-      div.filters(data_bind="with: current_person().bandMemberList().views.person_bands")
+      div.filters(data-bind="with: current_person().bandMemberList.views.person_bands")
         table
           thead
             tr
@@ -17,13 +17,14 @@ div.app_context(id="my_bands", data-bind="visible: $root.current_tab().value == 
             tr
               td
                 div.sort(data-bind="with: sort")
-                  select(data-bind="value: sort_type, options: labels, optionsText: 'label', optionsValue: 'value'")
+                  select(data-bind="value: sort_type, options: compare_labels, optionsText: 'label', optionsValue: 'value'")
 
               td
                 div.filter(data-bind="with: filters.band_name")
+                  input(type="checkbox", data-bind="checked: active")
                   div.filter_label Name
                   input(type="text", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
-              
+
       div.list
         table
           thead
@@ -31,8 +32,8 @@ div.app_context(id="my_bands", data-bind="visible: $root.current_tab().value == 
               th Name
               th
 
-          tbody(data-bind="foreach: current_person().bandMemberList")
+          tbody(data-bind="foreach: current_person().bandMemberList.views.person_bands.sort.getList")
             tr
-              td(data-bind="text: band().name")
+              td(data-bind="text: band_name")
               td
-                button.edit_button(data-bind="click: $root.delete_table_object") -
+                button.edit_button(data-bind="click: deleteRow") -
