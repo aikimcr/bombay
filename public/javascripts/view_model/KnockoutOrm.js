@@ -342,6 +342,10 @@ orm.table.row = function(table, model) {
       throw new Error(err_string);
     }
   }.bind(this));
+
+  this.testBind = ko.computed(function() {
+    return "YO! " + this.toString();
+  }.bind(this));
 };
 
 orm.table.row.prototype.addJoins = function(join_table, join_column) {
@@ -351,10 +355,21 @@ orm.table.row.prototype.addJoins = function(join_table, join_column) {
   });
 
   if (!this[accessor]) {
+    this[accessor + '_dyn'] = function() {
+      return ko.utils.arrayFilter(join_table.list.list(), function(join_row) {
+        return join_row[join_column]() == this.id();
+      }.bind(this));
+    }.bind(this);
+
     this[accessor] = ko.computed(function() {
+/*
       var filter = {};
       filter[join_column] = this.id();
       return join_table.list.find(filter);
+*/
+      return ko.utils.arrayFilter(join_table.list.list(), function(join_row) {
+        return join_row[join_column]() == this.id();
+      }.bind(this));
     }.bind(this));
 
     this[accessor].views = {};
@@ -383,8 +398,16 @@ orm.table.row.prototype.modifyRow = function(row, event) {
   var target = event.target;
   var tagname = event.target.tagName.toLowerCase();
 
-  if (tagname === 'input' || tagname === 'select') {
+  if (tagname === 'input' || tagname === 'select' || 'value' in target) {
     var column_name = target.name;
+
+    if (!column_name) {
+      try {
+        column_name = target.attributes.getNamedItem('name').value;
+      } catch(e) {
+        column_name = null;
+      }
+    }
 
     if (column_name) {
       var value = target.value;

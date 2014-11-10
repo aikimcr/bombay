@@ -2,6 +2,7 @@ ko.bindingHandlers.searchableSelect = Sapphire.searchableSelect;
 
 ko.bindingHandlers.clickRating = {
     init: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
+      element.value = 0;
       var getTargetValue = function(event) {
         return parseInt(event.target.getAttribute('value'));
       };
@@ -35,7 +36,9 @@ ko.bindingHandlers.clickRating = {
         var index = getTargetValue(event);
         var observable = valueAccessor();
         observable(index);
-      });
+        element.value = index;
+        this.dispatchEvent(new Event('change'));
+      }.bind(element));
     },
     update: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
       var observable = valueAccessor();
@@ -46,6 +49,8 @@ ko.bindingHandlers.clickRating = {
         clickers[i].classList.remove('rating_clicker_selected');
         if (i < index) clickers[i].classList.add('rating_clicker_selected');
       }
+      element.value = index;
+      element.dispatchEvent(new Event('change'));
     }
 };
 
@@ -63,4 +68,3 @@ ko.bindingHandlers.showRating = {
       element.firstChild.style.width = width;
     },
 };
-

@@ -1,12 +1,12 @@
 div.app_context(id="band_songs", data-bind="visible: $root.current_tab().value == 7")
   div.app_context_header Band Songs
   div.app_context_item
-    div.display
-      div.control
-        //- button.edit_button(id="add_band_songs", data-bind="click: forms.add_band_song.show.bind(forms.add_band_song)") +
-        //- label(for="add_band_songs") Add Band Song
+    div.display(data-bind="if: current_band")
+      div.control(data-bind="with: band_song")
+        button.edit_button(id="add_band_songs", data-bind="click: showForm") +
+        label(for="add_band_songs") Add Band Song
 
-      div.filters(data-bind="with: current_band().bandSongList")
+      div.filters(data-bind="with: current_band().bandSongList.views.default")
         table
           thead
             tr
@@ -24,31 +24,31 @@ div.app_context(id="band_songs", data-bind="visible: $root.current_tab().value =
                   div.filter(data-bind="with: filters.song_name")
                     div.filter_label Song Name
                     input(type="text", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
-  
+
                   div.filter(data-bind="with: filters.artist_id")
                     div.filter_label Artist
                     div(data-bind="searchableSelect: filter_value, optionsList: select_list, optionsText: 'name', optionsValue: 'id', optionsCaption: '-All Artists-'")
-                
+
                   div.filter
                     div.filter_title Status
                     div(data-bind="with: filters.min_song_status")
                       div.filter_label Min
                       select(data-bind="value: filter_value, options: $root.song_status_map, optionsText: 'value_text', optionsValue: 'value'");
-  
+
                     div(data-bind="with: filters.max_song_status")
                       div.filter_label Max
                       select(data-bind="value: filter_value, options: $root.song_status_map, optionsText: 'value_text', optionsValue: 'value'");
-  
+
                   div.filter
                     div.filter_title Average Rating
                     div(data-bind="with: filters.min_average_rating")
                       div.filter_label Min
                       div(data-bind="clickRating: filter_value")
-  
+
                     div(data-bind="with: filters.max_average_rating")
                       div.filter_label Max
                       div(data-bind="clickRating: filter_value")
-  
+
                   div.filter(data-bind="with: filters.is_new")
                     div.filter_title New/Old Song
                       select(data-bind="value: filter_value")
@@ -58,7 +58,7 @@ div.app_context(id="band_songs", data-bind="visible: $root.current_tab().value =
 
       div.list
         table
-          tbody(data-bind="foreach: current_band_songs")
+          tbody(data-bind="foreach: current_band().bandSongList.views.default.sort.getList()")
             tr
               td
                 div
@@ -70,7 +70,7 @@ div.app_context(id="band_songs", data-bind="visible: $root.current_tab().value =
                       td(data-bind="text: artist_name")
                       td
                         div(data-bind="if: $root.current_band_member().band_admin")
-                          button.edit_button(data-bind="click: $root.delete_table_object") -
+                          button.edit_button(data-bind="click: deleteRow") -
 
                     tr
                       td Status
@@ -79,23 +79,49 @@ div.app_context(id="band_songs", data-bind="visible: $root.current_tab().value =
 
                       td Key
                       td
-                        select(name="key_signature", data-bind="value: key_signature, enable: $root.current_band_member().band_admin, options: manager.key_signature_map, optionsText: 'value_text', optionsValue: 'value', event: { change: $root.update_table_object }")
+                        select(name="key_signature"
+                               data-bind="value: key_signature, \
+                                          enable: $root.current_band_member().band_admin, \
+                                          options: table.columns.key_signature.value_map, \
+                                          optionsText: 'value_text', \
+                                          optionsValue: 'value', \
+                                          event: { change: modifyRow }")
                       td
 
                     tr
-                      td Member Rating
-                      td(data-bind="clickRating: member_rating")
+                      td(data-bind="event: { click: $root.testClick }") Member Rating
+                      td(data-bin="attr: { row_id: id }")
+                        div(data-bind="if: currentMemberRating")
+                          div(data-bind="with: currentMemberRating")
+                            div(name="rating"
+                                data-bind="clickRating: rating, \
+                                           event: { change: modifyRow }")
+
                       td Average Rating
                       td(data-bind="showRating: average_rating")
                       td
-                        div(data-bind="if: my_rating().is_new") NEW
+                        div(data-bind="if: is_new") NEW
 
                     tr
                       td Primary Vocals
                       td
-                        select(name="primary_vocal_id", data-bind="value: primary_vocal_id, enable: $root.current_band_member().band_admin, options: $root.current_members, optionsText: 'full_name', optionsValue: 'id', optionsCaption: '-- Not Set --', event: { change: $root.update_table_object }")
+                        select(name="primary_vocal_id"
+                               data-bind="value: primary_vocal_id, \
+                               enable: $root.current_band_member().band_admin, \
+                               options: $root.current_band().bandMemberList, \
+                               optionsText: 'person_full_name', \
+                               optionsValue: 'id', \
+                               optionsCaption: '-- Not Set --', \
+                               event: { change: modifyRow }")
 
                       td Secondary Vocals
                       td
-                        select(name="secondary_vocal_id", data-bind="value: secondary_vocal_id, enable: $root.current_band_member().band_admin, options: $root.current_members, optionsText: 'full_name', optionsValue: 'id', optionsCaption: '-- Not Set --', event: { change: $root.update_table_object }")
+                        select(name="secondary_vocal_id"
+                               data-bind="value: secondary_vocal_id, \
+                               enable: $root.current_band_member().band_admin, \
+                               options: $root.current_band().bandMemberList, \
+                               optionsText: 'person_full_name', \
+                               optionsValue: 'id', \
+                               optionsCaption: '-- Not Set --', \
+                               event: { change: modifyRow }")
                       td

@@ -109,9 +109,8 @@ function Manager() {
       { value: 3, value_text: 'My Bands' },
       { value: 4, value_text: 'Band Members' },
       { value: 5, value_text: 'Artists' },
-      { value: 6, value_text: 'All Songs' }/*,
+      { value: 6, value_text: 'All Songs' },
       { value: 7, value_text: 'Band Songs' }
-*/
     ];
 
     if (this.current_person() && this.current_person().system_admin()) {
@@ -126,24 +125,6 @@ function Manager() {
   }.bind(this));
 
   this.current_tab = ko.observable(this.tab_list[0]);
-
-/* XXX It's possible I can eliminate this whole block of code
-  this.non_band_songs = ko.computed(function() {
-    if (this.current_band()) {
-      return ko.utils.arrayFilter(this.songs.list(), function(song_row) {
-        var filter = orm.table.list.filter.columnFilterFactory(
-          song_row.bandSongList,
-          'equal',
-          'band_id'
-        );
-        filter.setFilterValue(this.current_band().id());
-        return filter.getList().length == 0;
-      }.bind(this));
-    } else {
-      return this.songs.list();
-    }
-  }.bind(this)).extend({ throttle: 50 });
-*/
 
 /*
   this.current_reports = ko.computed(function() {
@@ -200,11 +181,10 @@ function Manager() {
       }.bind(this), event);
     }
   }.bind(this);
-
+*/
   this.testClick = function() {
     console.log('Test Click');
   };
-*/
 }
 
 Manager.prototype.createBandTable = function() {
@@ -231,6 +211,22 @@ Manager.prototype.createBandTable = function() {
           return person_list.sort(function(a, b) {
             if (a.full_name() < b.full_name()) return -1;
             if (a.full_name() > b.full_name()) return 1;
+            if (a.name() < b.name()) return -1;
+            if (a.name() > b.name()) return 1;
+            return 0;
+          });
+        }.bind(this)
+      }, {
+        name: 'otherSongs',
+        compute: function(row) {
+          var song_list = ko.utils.arrayFilter(this.song.list.list(), function(song) {
+            var songs = this.band_song.list.find({
+              song_id: song.id,
+              band_id: row.id
+            });
+            return (!songs) || songs.length <= 0;
+          }.bind(this));
+          return song_list.sort(function(a, b) {
             if (a.name() < b.name()) return -1;
             if (a.name() > b.name()) return 1;
             return 0;
@@ -569,8 +565,8 @@ Manager.prototype.createBandSong = function() {
   this.band_song = orm.define(this, 'band_song', {
     band_id: {type: 'reference', reference_table: this.band},
     song_id: {type: 'reference', reference_table: this.song},
-    song_status: {type: 'integer'}, //XXX S.B. enum
-    key_signature: {type: 'string'},
+    song_status: {type: 'enum', value_map: this.song_status_map},
+    key_signature: {type: 'enum', value_map: this.key_signature_map},
     primary_vocal_id: {type: 'reference', reference_table: this.band_member},
     secondary_vocal_id: {type: 'reference', reference_table: this.band_member}
   }, {
@@ -663,6 +659,14 @@ Manager.prototype.createBandSong = function() {
       definition: {average_rating: 'desc'}
     }]
   });
+
+  this.band_member.otherSongs = ko.computed(function() {
+    if (this.current_band()) {
+      return this.current_band().otherSongs();
+    } else {
+      return [];
+    }
+  }.bind(this)).extend({ throttle: 500 });
 };
 
 Manager.prototype.createSongRating = function() {

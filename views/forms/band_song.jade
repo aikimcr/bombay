@@ -1,0 +1,21 @@
+div
+  div.dialog_background
+    div.dialog
+      div.title_bar
+        div.title Add Band Song
+        div.close_button(data-bind="with: table")
+          button.close_button(data-bind="click: disposeForm") X
+
+      div.control(data-bind="with: table.reftables.song")
+        button.edit_button(id="add_songs", data-bind="click: showForm") +
+        label(for="add_songs") Add Song
+
+      div.dialog_body
+        div.title(data-bind="text: message")
+        form(data-bind="submit: submit")
+          div(data-bind="searchableSelect: row.song_id, \
+                         optionsList: table.otherSongs, \
+                         optionsValue: 'id'
+                         optionsText: 'description'")
+
+          input(type="submit", data-bind="attr: {value: button_text}")

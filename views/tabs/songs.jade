@@ -64,10 +64,10 @@ div.app_context(id="songs", data-bind="visible: $root.current_tab().value == 6")
               td
                 select(name="key_signature"
                        data-bind="value: key_signature, \
-                       options: table.columns.key_signature.value_map, \
-                       optionsText: 'value_text', \
-                       optionsValue: 'value', \
-                       event: { change: modifyRow }")
+                                  options: table.columns.key_signature.value_map, \
+                                  optionsText: 'value_text', \
+                                  optionsValue: 'value', \
+                                  event: { change: modifyRow }")
 
               td(data-bind="text: bandSongCount")
               td(data-bind="ifnot: bandSongCount")
