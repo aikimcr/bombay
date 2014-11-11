@@ -449,6 +449,11 @@ Manager.prototype.createSongTable = function() {
       name: 'artist_name',
       parent: 'artist',
       column_name: 'name'
+    }, {
+      name: 'description',
+      compute: function(row) {
+        return row.name() + ' by ' + row.artist_name();
+      }
     }]
   });
 };
@@ -587,6 +592,10 @@ Manager.prototype.createBandSong = function() {
       parent: 'song',
       column_name: 'artist_name'
     }, {
+      name: 'description',
+      parent: 'song',
+      column_name: 'description'
+    }, {
       name: 'average_rating',
       average: 'songRatingList',
       column_name: 'rating'
@@ -632,6 +641,10 @@ Manager.prototype.createBandSong = function() {
         label_column: 'name'
       },
       column_name: 'artist_id'
+    }, {
+      name: 'song_name',
+      type: 'match',
+      column_name: 'song_name'
     }],
     sort: [{
       name: 'song_name_asc',
@@ -660,13 +673,22 @@ Manager.prototype.createBandSong = function() {
     }]
   });
 
-  this.band_member.otherSongs = ko.computed(function() {
+  this.band_song.otherSongs = ko.computed(function() {
     if (this.current_band()) {
       return this.current_band().otherSongs();
     } else {
       return [];
     }
   }.bind(this)).extend({ throttle: 500 });
+
+  this.band_song.add_song_form = {
+    showForm: function(show_form_object, element) {
+      this.band_song.showForm(this.band_song, element);
+      this.band_song.form.row.band_id(this.current_band().id());
+      this.band_song.form.row.key_signature('');
+      this.band_song.form.row.song_status(-1);
+    }.bind(this)
+  };
 };
 
 Manager.prototype.createSongRating = function() {

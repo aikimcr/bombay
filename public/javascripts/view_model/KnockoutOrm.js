@@ -77,6 +77,23 @@ orm.table.prototype.create = function(data, callback) {
         return callback(err, row);
       };
 
+      Object.keys(result).forEach(function(sub_model_key) {
+        if (sub_model_key == this.model_key) return;
+        if (sub_model_key in this.context_base) {
+          var sub_table_name = this.context_base[sub_model_key].table_name();
+          var sub_table = this.context_base[sub_table_name];
+          result[sub_model_key].forEach(function(sub_model) {
+            var sub_row = new orm.table.row(this, sub_model);
+
+            try {
+              this.list.insert(sub_row);
+            } catch (err) {
+              return callback(err, sub_row);
+            }
+          }.bind(sub_table));
+        }
+      }.bind(this));
+
       return callback(null, row);
     } else if (result_code == 304) {
       var row = this.list.get(result[this.model_key].id);
@@ -113,7 +130,8 @@ orm.table.prototype.modify = function(data, callback) {
       var row = this.list.get(result[this.model_key].id);
       Object.keys(this.columns).forEach(function(column_name) {
         if (column_name in result[this.model_key] && result[this.model_key][column_name] !== row[column_name]()) {
-          row[column_name](result[this.model_key][column_name]);
+          if (result[this.model_key][column_name] == '' && row[column_name]() == null) return;
+          return row[column_name](result[this.model_key][column_name]);
         }
       }.bind(this));
       callback(null, row);

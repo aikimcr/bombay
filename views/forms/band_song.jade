@@ -15,7 +15,7 @@ div
         form(data-bind="submit: submit")
           div(data-bind="searchableSelect: row.song_id, \
                          optionsList: table.otherSongs, \
-                         optionsValue: 'id'
+                         optionsValue: 'id', \
                          optionsText: 'description'")
 
           input(type="submit", data-bind="attr: {value: button_text}")

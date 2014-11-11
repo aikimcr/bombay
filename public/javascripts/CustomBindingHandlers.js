@@ -36,21 +36,24 @@ ko.bindingHandlers.clickRating = {
         var index = getTargetValue(event);
         var observable = valueAccessor();
         observable(index);
-        element.value = index;
-        this.dispatchEvent(new Event('change'));
+        //element.value = index;
+        //this.dispatchEvent(new Event('change'));
       }.bind(element));
     },
     update: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
       var observable = valueAccessor();
       var index = observable();
-      var clickers = element.children;
 
-      for(var i=0; i < clickers.length; i++) {
-        clickers[i].classList.remove('rating_clicker_selected');
-        if (i < index) clickers[i].classList.add('rating_clicker_selected');
+      if (element.value != index) {
+        var clickers = element.children;
+
+        for(var i=0; i < clickers.length; i++) {
+          clickers[i].classList.remove('rating_clicker_selected');
+          if (i < index) clickers[i].classList.add('rating_clicker_selected');
+        }
+        element.value = index;
+        element.dispatchEvent(new Event('change'));
       }
-      element.value = index;
-      element.dispatchEvent(new Event('change'));
     }
 };
 

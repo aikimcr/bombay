@@ -2,7 +2,7 @@ div.app_context(id="band_songs", data-bind="visible: $root.current_tab().value =
   div.app_context_header Band Songs
   div.app_context_item
     div.display(data-bind="if: current_band")
-      div.control(data-bind="with: band_song")
+      div.control(data-bind="with: band_song.add_song_form")
         button.edit_button(id="add_band_songs", data-bind="click: showForm") +
         label(for="add_band_songs") Add Band Song
 
@@ -17,40 +17,50 @@ div.app_context(id="band_songs", data-bind="visible: $root.current_tab().value =
             tr
               td
                 div.sort(data-bind="with: sort")
-                  select(data-bind="value: sort_type, options: labels, optionsText: 'label', optionsValue: 'value'")
+                  select(data-bind="value: sort_type, \
+                         options: compare_labels, \
+                         optionsText: 'label', \
+                         optionsValue: 'value'")
 
               td
                 div.filter-list
                   div.filter(data-bind="with: filters.song_name")
+                    input(type="checkbox", data-bind="checked: active")
                     div.filter_label Song Name
                     input(type="text", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
 
                   div.filter(data-bind="with: filters.artist_id")
+                    input(type="checkbox", data-bind="checked: active")
                     div.filter_label Artist
                     div(data-bind="searchableSelect: filter_value, optionsList: select_list, optionsText: 'name', optionsValue: 'id', optionsCaption: '-All Artists-'")
 
                   div.filter
                     div.filter_title Status
                     div(data-bind="with: filters.min_song_status")
+                      input(type="checkbox", data-bind="checked: active")
                       div.filter_label Min
                       select(data-bind="value: filter_value, options: $root.song_status_map, optionsText: 'value_text', optionsValue: 'value'");
 
                     div(data-bind="with: filters.max_song_status")
+                      input(type="checkbox", data-bind="checked: active")
                       div.filter_label Max
                       select(data-bind="value: filter_value, options: $root.song_status_map, optionsText: 'value_text', optionsValue: 'value'");
 
                   div.filter
                     div.filter_title Average Rating
                     div(data-bind="with: filters.min_average_rating")
+                      input(type="checkbox", data-bind="checked: active")
                       div.filter_label Min
                       div(data-bind="clickRating: filter_value")
 
                     div(data-bind="with: filters.max_average_rating")
+                      input(type="checkbox", data-bind="checked: active")
                       div.filter_label Max
                       div(data-bind="clickRating: filter_value")
 
                   div.filter(data-bind="with: filters.is_new")
                     div.filter_title New/Old Song
+                      input(type="checkbox", data-bind="checked: active")
                       select(data-bind="value: filter_value")
                         option(value='') --All Songs--
                         option(value='1') New Songs
@@ -75,7 +85,13 @@ div.app_context(id="band_songs", data-bind="visible: $root.current_tab().value =
                     tr
                       td Status
                       td
-                        select(name="song_status", data-bind="value: song_status, options: $root.song_status_map, enable: $root.current_band_member().band_admin, optionsText: 'value_text', optionsValue: 'value', event: { change: $root.update_table_object }")
+                        select(name="song_status"
+                               data-bind="value: song_status, \
+                                          options: $root.song_status_map, \
+                                          enable: $root.current_band_member().band_admin, \
+                                          optionsText: 'value_text', \
+                                          optionsValue: 'value', \
+                                          event: { change: modifyRow }")
 
                       td Key
                       td
