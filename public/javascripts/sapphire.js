@@ -97,7 +97,6 @@ Sapphire.searchableSelect = {
   init: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
     var observable = valueAccessor();
 
-    element.style.display = 'inline-block';
     element.classList.add('searchable_select');
 
     var search_object = Sapphire.getNewContext(element, 'searchable_select', bindingContext);

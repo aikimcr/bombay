@@ -126,7 +126,7 @@ body {
   border-style: solid;
   border-width: 1px;
   margin: 5px 0 5px 0;
-  height: 115px;
+  min-height: 80px;
 }
 .display .filters tbody {
   vertical-align: top;
@@ -143,9 +143,8 @@ body {
   display: block;
   overflow-x: scroll;
   overflow-y: hidden;
-  max-width: 850px;
-  height: 75px;
-  white-space: nowrap;
+  max-width: 900px;
+  min-height: 40px;
   border-style: solid;
   padding: 5px 10px 0 10px;
 }
@@ -156,7 +155,7 @@ body {
   padding: 1px;
   vertical-align: top;
   min-height: 25px;
-  margin-right: 5px;
+  margin: 5px;
 }
 .display .filters .filter label {
   vertical-align: top;
@@ -170,6 +169,9 @@ body {
 }
 .display .filters .filter > div > .filter_label + div {
   display: inline-block;
+}
+.display .filters .filter input[type="checkbox"]:not(:checked) ~ :last-child {
+  display: none;
 }
 .display .list {
   overflow: auto;
@@ -329,6 +331,7 @@ body {
 }
 .rating_container {
   width: 100px;
+  margin: auto 5px auto 5px;
 }
 .rating_value {
   display: inline-block;
@@ -367,4 +370,7 @@ body {
   background-size: 20px;
   background-color: #fff;
   color: #fff;
+}
+.searchable_select {
+  display: inline-block;
 }

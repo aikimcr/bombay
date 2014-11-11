@@ -40,6 +40,18 @@ orm.table.prototype.dispose = function() {
   this.context_base = null;
 };
 
+orm.table.prototype.deleteRowById = function(id) {
+  var row = this.list.get(id);
+
+  row.child_joins.forEach(function(child_list) {
+    child_list().forEach(function(child_row) {
+      child_row.table.deleteRowById(child_row.id());
+    });
+  })
+
+  return this.list.delete(id);
+};
+
 orm.table.prototype.create = function(data, callback) {
   var url = this.url;
   var svc = service.getInstance();
@@ -144,7 +156,7 @@ orm.table.prototype.delete = function(id, callback) {
   var url = this.url + '?id=' + id;
   svc.delete(url, function(result_code, result) {
     if (result_code == 200) {
-      var row = this.list.delete(id);
+      var row = this.deleteRowById(id);
       if (callback) callback(null, row);
     } else if (result_code == 304) {
       if (callback) callback(new Error('Already Deleted', result));
@@ -210,6 +222,7 @@ orm.table.prototype.disposeForm = function() {
 orm.table.row = function(table, model) {
   this.table = table;
   this.id = ko.observable(model.id);
+  this.child_joins = [];
 
   Object.keys(this.table.columns).forEach(function(column_name) {
     var column_def = this.table.columns[column_name];
@@ -373,18 +386,7 @@ orm.table.row.prototype.addJoins = function(join_table, join_column) {
   });
 
   if (!this[accessor]) {
-    this[accessor + '_dyn'] = function() {
-      return ko.utils.arrayFilter(join_table.list.list(), function(join_row) {
-        return join_row[join_column]() == this.id();
-      }.bind(this));
-    }.bind(this);
-
     this[accessor] = ko.computed(function() {
-/*
-      var filter = {};
-      filter[join_column] = this.id();
-      return join_table.list.find(filter);
-*/
       return ko.utils.arrayFilter(join_table.list.list(), function(join_row) {
         return join_row[join_column]() == this.id();
       }.bind(this));
@@ -394,6 +396,8 @@ orm.table.row.prototype.addJoins = function(join_table, join_column) {
     Object.keys(join_table.views).forEach(function(view_name) {
       this[accessor].views[view_name] = join_table.views[view_name].cloneWithNewList(this[accessor]);
     }.bind(this));
+
+    this.child_joins.push(this[accessor]);
   }
 
   var counter = accessor.replace(/List$/, 'Count');
@@ -405,7 +409,9 @@ orm.table.row.prototype.addJoins = function(join_table, join_column) {
   }
 };
 
-orm.table.row.prototype.dispose = function() { }; // It's possible columns need to be disposed in a particular order.
+orm.table.row.prototype.dispose = function() {
+  this.child_joins = null;
+}; // It's possible columns need to be disposed in a particular order.
 
 orm.table.row.prototype.showForm = function(row, event, url) {
   this.table.form = new orm.table.form(this.table, url);
@@ -764,11 +770,25 @@ orm.table.list.filter.columnFilterFactory = function(list, filter_type, column_n
       var filter_value = parseInt(this.filter_value(), 10);
       return value >= filter_value;
     }.bind(filter, column_name));
+  } else if (filter_type === 'min_float') {
+    filter.setCompare(function(column_name, item) {
+      if (this.filter_value() == null || this.filter_value() === '') return true;
+      var value = item[column_name]();
+      var filter_value = this.filter_value();
+      return value >= filter_value;
+    }.bind(filter, column_name));
   } else if (filter_type === 'max') {
     filter.setCompare(function(column_name, item) {
       if (this.filter_value() == null || this.filter_value() === '') return true;
       var value = parseInt(item[column_name](), 10);
       var filter_value = parseInt(this.filter_value(), 10);
+      return value <= filter_value;
+    }.bind(filter, column_name));
+  } else if (filter_type === 'max_float') {
+    filter.setCompare(function(column_name, item) {
+      if (this.filter_value() == null || this.filter_value() === '') return true;
+      var value = item[column_name]();
+      var filter_value = this.filter_value();
       return value <= filter_value;
     }.bind(filter, column_name));
   } else if (filter_type === 'integer') {
@@ -781,6 +801,8 @@ orm.table.list.filter.columnFilterFactory = function(list, filter_type, column_n
   } else if (filter_type === 'equal') {
     filter.setCompare(function(column_name, item) {
       if (this.filter_value() == null || this.filter_value() === '') return true;
+      if (this.filter_value() === 'false') return ! item[column_name]();
+      if (this.filter_value() === 'true') return !! item[column_name]();
       return item[column_name]() === this.filter_value();
     }.bind(filter, column_name));
   } else if (filter_type === 'bool') {

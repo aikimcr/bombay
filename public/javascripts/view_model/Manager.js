@@ -615,15 +615,15 @@ Manager.prototype.createBandSong = function() {
     }],
     filters: [{
       name: 'is_new',
-      type: 'bool',
+      type: 'equal',
       column_name: 'is_new'
     }, {
       name: 'max_average_rating',
-      type: 'max',
+      type: 'max_float',
       column_name: 'average_rating'
     }, {
       name: 'min_average_rating',
-      type: 'min',
+      type: 'min_float',
       column_name: 'average_rating'
     }, {
       name: 'max_song_status',
@@ -670,6 +670,14 @@ Manager.prototype.createBandSong = function() {
       name: 'average_rating_desc',
       label: 'Average Rating (Hi-Lo)',
       definition: {average_rating: 'desc'}
+    }, {
+      name: 'song_status_asc',
+      label: 'Song Status (Lo-Hi)',
+      definition: { song_status: 'asc' }
+    }, {
+      name: 'song_status_desc',
+      label: 'Song Status (Hi-Lo)',
+      definition: { song_status: 'desc' }
     }]
   });
 

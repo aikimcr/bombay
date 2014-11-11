@@ -23,27 +23,32 @@ div.app_context(id="songs", data-bind="visible: $root.current_tab().value == 6")
                          optionsValue: 'value'")
 
               td
-                div.filter(data-bind="with: filters.name")
-                  input(type="checkbox", data-bind="checked: active")
-                  div.filter_label Song Name
-                  input(type="text", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
-
-                div.filter(data-bind="with: filters.artist_id")
-                  input(type="checkbox", data-bind="checked: active")
-                  div.filter_label Artist
-                  div(data-bind="searchableSelect: filter_value, optionsList: select_list, optionsText: 'label', optionsValue: 'value', optionsCaption: '-All Artists-'")
-
-                div.filter
-                  div.filter_title Band Count
-                  div(data-bind="with: filters.min_band_count")
+                div.filter-list
+                  div.filter(data-bind="with: filters.name")
                     input(type="checkbox", data-bind="checked: active")
-                    div.filter_label Min
-                    input(type="number", inputmode="numeric", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
+                    div.filter_label Song Name
+                    input(type="text", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
 
-                  div(data-bind="with: filters.max_band_count")
+                  div.filter(data-bind="with: filters.artist_id")
                     input(type="checkbox", data-bind="checked: active")
-                    div.filter_label Max
-                    input(type="number", inputmode="numeric", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
+                    div.filter_label Artist
+                    div(data-bind="searchableSelect: filter_value, \
+                                   optionsList: select_list, \
+                                   optionsText: 'label', \
+                                   optionsValue: 'value', \
+                                   optionsCaption: '-All Artists-'")
+
+                  div.filter
+                    div.filter_title Band Count
+                    div(data-bind="with: filters.min_band_count")
+                      input(type="checkbox", data-bind="checked: active")
+                      div.filter_label Min
+                      input(type="number", inputmode="numeric", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
+
+                    div(data-bind="with: filters.max_band_count")
+                      input(type="checkbox", data-bind="checked: active")
+                      div.filter_label Max
+                      input(type="number", inputmode="numeric", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
 
       div.list
         table

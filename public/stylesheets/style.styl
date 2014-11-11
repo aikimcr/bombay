@@ -60,10 +60,10 @@ body
     border-radius: 10px
     border-style: solid
     border-color: main-border-color
-  
+
     .title
       font-weight: bold
-  
+
     .submit
       font-size: 300%
       font-weight: bold
@@ -157,7 +157,7 @@ body
     border-style: solid
     border-width: 1px
     margin: 5px 0 5px 0
-    height: 115px
+    min-height: 80px
 
     tbody
       vertical-align: top
@@ -174,9 +174,8 @@ body
       display: block
       overflow-x: scroll
       overflow-y: hidden
-      max-width: display-width - 250px
-      height: 75px
-      white-space: nowrap
+      max-width: display-width - 200px
+      min-height: 40px
       border-style: solid
       padding: 5px 10px 0 10px
 
@@ -187,7 +186,7 @@ body
       padding: 1px
       vertical-align: top
       min-height: 25px
-      margin-right: 5px
+      margin: 5px
 
       label
         vertical-align: top
@@ -202,6 +201,9 @@ body
       > div > .filter_label + div
         display: inline-block
 
+      input[type="checkbox"]:not(:checked) ~ :last-child
+        display: none
+
   .list
     overflow: auto
     width: display-width - 20px;
@@ -214,7 +216,7 @@ body
       border-width: 1px;
       border-radius: 10px
       padding: 5px
-  
+
       table
         min-width: display-width - 50px
 
@@ -233,17 +235,17 @@ body
 
     tr:nth-child(even)
       background-color: stripe-color-even
-  
+
     tr:nth-child(odd)
       background-color: stripe-color-odd
-  
+
     th
       padding: 5px 5px 0 10px
       border-style none solid solid none
       border-width 0 1px 5px 0
       background-color: table-header-background-color
       color: table-header-color
-  
+
     td
       padding: 10px 5px 0 10px
       border-style: none solid none none
@@ -251,7 +253,7 @@ body
 
     th, td
       text-align: left
-  
+
     th:last-child, td:last-child
       text-align: left
       border-right-style: none
@@ -362,6 +364,7 @@ body
 
 .rating_container
   width: 100px
+  margin: auto 5px auto 5px
 
 .rating_value
   display: inline-block
@@ -399,4 +402,6 @@ body
   background-size: 20px
   background-color: white
   color: white
-  
+
+.searchable_select
+  display: inline-block

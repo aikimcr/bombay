@@ -20,22 +20,23 @@ div.app_context(id="artists", data-bind="visible: $root.current_tab().value == 5
                   select(data-bind="value: sort_type, options: compare_labels, optionsText: 'label', optionsValue: 'value'")
 
               td
-                div.filter(data-bind="with: filters.name")
-                  input(type="checkbox", data-bind="checked: active")
-                  div.filter_label Name
-                  input(type="text", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
-
-                div.filter
-                  div.filter_title Song Count
-                  div(data-bind="with: filters.min_song_count")
+                div.filter-list
+                  div.filter(data-bind="with: filters.name")
                     input(type="checkbox", data-bind="checked: active")
-                    div.filter_label Min
-                    input(type="number", inputmode="numeric", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
+                    div.filter_label Name
+                    input(type="text", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
 
-                  div(data-bind="with: filters.max_song_count")
-                    input(type="checkbox", data-bind="checked: active")
-                    div.filter_label Max
-                    input(type="number", inputmode="numeric", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
+                  div.filter
+                    div.filter_title Song Count
+                    div(data-bind="with: filters.min_song_count")
+                      input(type="checkbox", data-bind="checked: active")
+                      div.filter_label Min
+                      input(type="number", inputmode="numeric", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
+
+                    div(data-bind="with: filters.max_song_count")
+                      input(type="checkbox", data-bind="checked: active")
+                      div.filter_label Max
+                      input(type="number", inputmode="numeric", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
 
       div.list
         table

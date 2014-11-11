@@ -23,34 +23,35 @@ div.app_context(id="bands", data-bind="if: current_is_system_admin, visible: $ro
                          optionsValue: 'value'")
 
               td
-                div.filter(data-bind="with: filters.name")
-                  input(type="checkbox", data-bind="checked: active")
-                  div.filter_label Name
-                  input(type="text", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
-
-                div.filter
-                  div.filter_title Member Count
-                  div(data-bind="with: filters.min_member_count")
+                div.filter-list
+                  div.filter(data-bind="with: filters.name")
                     input(type="checkbox", data-bind="checked: active")
-                    div.filter_label Min
-                    input(type="number", inputmode="numeric", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
+                    div.filter_label Name
+                    input(type="text", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
 
-                  div(data-bind="with: filters.max_member_count")
-                    input(type="checkbox", data-bind="checked: active")
-                    div.filter_label Max
-                    input(type="number", inputmode="numeric", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
+                  div.filter
+                    div.filter_title Member Count
+                    div(data-bind="with: filters.min_member_count")
+                      input(type="checkbox", data-bind="checked: active")
+                      div.filter_label Min
+                      input(type="number", inputmode="numeric", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
 
-                div.filter
-                  div.filter_title Song Count
-                  div(data-bind="with: filters.min_song_count")
-                    input(type="checkbox", data-bind="checked: active")
-                    div.filter_label Min
-                    input(type="number", inputmode="numeric", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
+                    div(data-bind="with: filters.max_member_count")
+                      input(type="checkbox", data-bind="checked: active")
+                      div.filter_label Max
+                      input(type="number", inputmode="numeric", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
 
-                  div(data-bind="with: filters.max_song_count")
-                    input(type="checkbox", data-bind="checked: active")
-                    div.filter_label Max
-                    input(type="number", inputmode="numeric", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
+                  div.filter
+                    div.filter_title Song Count
+                    div(data-bind="with: filters.min_song_count")
+                      input(type="checkbox", data-bind="checked: active")
+                      div.filter_label Min
+                      input(type="number", inputmode="numeric", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
+
+                    div(data-bind="with: filters.max_song_count")
+                      input(type="checkbox", data-bind="checked: active")
+                      div.filter_label Max
+                      input(type="number", inputmode="numeric", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
 
       div.list
         table

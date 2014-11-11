@@ -20,10 +20,11 @@ div.app_context(id="my_bands", data-bind="visible: $root.current_tab().value == 
                   select(data-bind="value: sort_type, options: compare_labels, optionsText: 'label', optionsValue: 'value'")
 
               td
-                div.filter(data-bind="with: filters.band_name")
-                  input(type="checkbox", data-bind="checked: active")
-                  div.filter_label Name
-                  input(type="text", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
+                div.filter-list
+                  div.filter(data-bind="with: filters.band_name")
+                    input(type="checkbox", data-bind="checked: active")
+                    div.filter_label Name
+                    input(type="text", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
 
       div.list
         table

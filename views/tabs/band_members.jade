@@ -21,20 +21,21 @@ div.app_context(id="band_members", data-bind="visible: $root.current_tab().value
                   select(data-bind="value: sort_type, options: compare_labels, optionsText: 'label', optionsValue: 'value'")
 
               td
-                div.filter(data-bind="with: filters.person_full_name")
-                  input(type="checkbox", data-bind="checked: active")
-                  div.filter_label Person Name
-                  input(type="text", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
+                div.filter-list
+                  div.filter(data-bind="with: filters.person_full_name")
+                    input(type="checkbox", data-bind="checked: active")
+                    div.filter_label Person Name
+                    input(type="text", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
 
-                div.filter(data-bind="with: filters.person_email")
-                  input(type="checkbox", data-bind="checked: active")
-                  div.filter_label Person Email
-                  input(type="text", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
+                  div.filter(data-bind="with: filters.person_email")
+                    input(type="checkbox", data-bind="checked: active")
+                    div.filter_label Person Email
+                    input(type="text", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
 
-                div.filter(data-bind="with: filters.band_admin")
-                  input(type="checkbox", data-bind="checked: active")
-                  div.filter_label Only Band Admins
-                  input(type="checkbox", data-bind="checked: filter_value")
+                  div.filter(data-bind="with: filters.band_admin")
+                    input(type="checkbox", data-bind="checked: active")
+                    div.filter_label Only Band Admins
+                    input(type="checkbox", data-bind="checked: filter_value")
 
       div.list
         table

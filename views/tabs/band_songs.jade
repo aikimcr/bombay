@@ -32,7 +32,11 @@ div.app_context(id="band_songs", data-bind="visible: $root.current_tab().value =
                   div.filter(data-bind="with: filters.artist_id")
                     input(type="checkbox", data-bind="checked: active")
                     div.filter_label Artist
-                    div(data-bind="searchableSelect: filter_value, optionsList: select_list, optionsText: 'name', optionsValue: 'id', optionsCaption: '-All Artists-'")
+                    div(data-bind="searchableSelect: filter_value, \
+                                   optionsList: select_list, \
+                                   optionsText: 'label', \
+                                   optionsValue: 'value', \
+                                   optionsCaption: '-All Artists-'")
 
                   div.filter
                     div.filter_title Status
@@ -60,11 +64,11 @@ div.app_context(id="band_songs", data-bind="visible: $root.current_tab().value =
 
                   div.filter(data-bind="with: filters.is_new")
                     div.filter_title New/Old Song
-                      input(type="checkbox", data-bind="checked: active")
-                      select(data-bind="value: filter_value")
-                        option(value='') --All Songs--
-                        option(value='1') New Songs
-                        option(value='0') Old Songs
+                    input(type="checkbox", data-bind="checked: active")
+                    select(data-bind="value: filter_value")
+                      option(value='') --All Songs--
+                      option(value='true') New Songs
+                      option(value='false') Old Songs
 
       div.list
         table
