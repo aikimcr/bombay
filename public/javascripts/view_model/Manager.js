@@ -100,6 +100,7 @@ function Manager() {
   this.createBandSong();
   this.createSongRating();
   this.createRequest();
+  this.createReport();
 
   // XXX this.reports = new ReportList();
 
@@ -806,6 +807,52 @@ Manager.prototype.createRequest = function() {
   }.bind(this.request);
 };
 
+Manager.prototype.createReport = function() {
+  this.report = orm.define(this, 'report', {
+    name: {type: 'string' },
+    band_id: {type: 'reference', reference_table: this.band},
+    report_type: {type: 'string'},
+    timestamp: {type: 'date'},
+  }, {
+    computes: [{
+      name: 'band_name',
+      parent: 'band',
+      column_name: 'name'
+    }, {
+      name: 'url',
+      compute: function(row) {
+        return '/report/' + row.band_id() + '/' + row.name();
+      }
+    }],
+    filters: [{
+      name: 'report_type',
+      type: 'match',
+      column_name: 'report_type'
+    }, {
+      name: 'name',
+      type: 'match',
+      column_name: 'name'
+    }],
+    sort: [{
+      name: 'name_asc',
+      label: 'Report Name (Lo-Hi)',
+      definition: {name: 'asc'}
+    }, {
+      name: 'name_desc',
+      label: 'Report Name (Hi-Lo)',
+      definition: {name: 'desc'}
+    }, {
+      name: 'time_asc',
+      label: 'Request Time (Lo-Hi)',
+      definition: {timestamp: 'asc'}
+    }, {
+      name: 'time_desc',
+      label: 'Request Time (Hi-Lo)',
+      definition: {timestamp: 'desc'}
+    }]
+  });
+};
+
 Manager.prototype.loadTables = function(cb) {
   this.loadBands_()
     .then(this.loadPersons_())
@@ -816,6 +863,7 @@ Manager.prototype.loadTables = function(cb) {
     .then(this.loadBandSongs_())
     .then(this.loadSongRatings_())
     .then(this.loadRequests_())
+    .then(this.loadReports_())
     .then(cb)
     .done();
 };
@@ -909,6 +957,15 @@ Manager.prototype.loadSongRatings_ = function() {
 Manager.prototype.loadRequests_ = function() {
   return Q.promise(function(resolve, reject, notify) {
     this.request.load(function(err, result) {
+      if (err) return reject(err, result);
+      return resolve(null, result);
+    });
+  }.bind(this));
+};
+
+Manager.prototype.loadReports_ = function() {
+  return Q.promise(function(resolve, reject, notify) {
+    this.report.load(function(err, result) {
       if (err) return reject(err, result);
       return resolve(null, result);
     });

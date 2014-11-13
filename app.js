@@ -358,8 +358,8 @@ app.post('/login',
 );
 
 // Reports handlers
-app.get('/reports', validation.requireLogin, reports.getReports);
-app.get('/reports/:band_id/:report', validation.requireLogin, reports.sendReport);
+app.get('/report', validation.requireLogin, reports.getReports);
+app.get('/report/:band_id/:report', validation.requireLogin, reports.sendReport);
 
 // Encryption handlers
 app.get('/encryption', encryption.encryption);

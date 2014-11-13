@@ -51,18 +51,18 @@ div.app_context(id="dashboard", data-bind="visible: $root.current_tab().value ==
               td(data-bind="text: pretty_request_type")
               td(data-bind="text: pretty_status")
 
-//-      div.list.dashboard_list
-//-        div.title Reports
-//-        div.title(data-bind="text: request_msg")
-//-        table
-//-          thead
-//-            tr
-//-              th Type
-//-              th Date
-//-
-//-          tbody(data-bind='foreach: current_reports')
-//-            tr
-//-              td
-//-                a(data-bind="text: report_type, attr: { href: url }")
-//-
-//-              td(data-bind="text: date")
+      div.list.dashboard_list(data-bind="if: current_band")
+        div.title Reports
+        div.title(data-bind="text: report.last_error")
+        table
+          thead
+            tr
+              th Type
+              th Date
+
+          tbody(data-bind='foreach: current_band().reportList.views.default.sort.getList')
+            tr
+              td
+                a(data-bind="text: report_type, attr: { href: url }")
+
+              td(data-bind="text: timestamp")

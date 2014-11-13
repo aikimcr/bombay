@@ -16,36 +16,32 @@ exports.getReports = function(req, res) {
     if (err) {
       res.json(500, err);
     } else {
-      var report_list = {};
+      var report_id = 1;
+      var report_list = [];
 
       rows.forEach(function(member) {
         var reports_dir = path_util.reports_path(member.band_id);
-        report_list[member.band_id]  = fs.readdirSync(reports_dir).map(function(report_name) {
-          var match = report_name.match(/(.*)_([0-9]{4})_([0-9]{2})_([0-9]{2})_([0-9]{2})_([0-9]{2})_([0-9]{2})\.html$/);
-          var epoch = 'latest';
+        report_list = report_list.concat(fs.readdirSync(reports_dir).map(function(report_name) {
+          var report_path = path.join(reports_dir, report_name);
+          var report_stat = fs.statSync(report_path);
+          var epoch = report_stat.mtime;
+          var match = report_name.match(/(.*)_[0-9]/);
 
-          if (match) {
-            var dt = new Date();
-            dt.setUTCFullYear(match[2]);
-            dt.setUTCMonth(parseInt(match[3], 10) - 1);
-            dt.setUTCDate(match[4]);
-            dt.setUTCHours(match[5]);
-            dt.setUTCMinutes(match[6]);
-            dt.setUTCSeconds(match[7]);
-            epoch = dt.valueOf();
-          } else {
+          if (!match) {
             match = report_name.match(/(.*)\.html$/);
           }
 
           return {
+            id: report_id++,
+            band_id: member.band_id,
             report_type: match[1] || '<unknown>',
             name: report_name,
-            epoch: epoch
+            timestamp: epoch
           };
-        });
+        }));
       });
 
-      res.json(200, report_list);
+      res.json(200, {all_reports: report_list});
     }
   });
 };
