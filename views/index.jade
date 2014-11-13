@@ -5,7 +5,9 @@ block content
   div.navigation
     div.tab_selector
       div
-        select(data-bind="options: $root.tab_list, value: current_tab, optionsText: 'value_text'")
+        select(data-bind="options: $root.tab_list, \
+                          value: current_tab, \
+                          optionsText: 'value_text'")
 
     div.band_selector
       div Current Band
@@ -26,10 +28,9 @@ block content
     include tabs/artists.jade
     include tabs/songs.jade
     include tabs/band_songs.jade
-    //- include tabs/dashboard.jade
+    include tabs/dashboard.jade
 
   //- div.forms
     //- include forms/edit_profile.jade
     //- include forms/change_password.jade
-    //- include forms/add_band_song.jade
     //- include forms/create_rehearsal_plan.jade

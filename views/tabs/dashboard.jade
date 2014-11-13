@@ -20,10 +20,10 @@ div.app_context(id="dashboard", data-bind="visible: $root.current_tab().value ==
               td
                 div.filter
 
-              
-      div.list.dashboard_list
+
+      div.list.dashboard_list(data-bind="with: request")
         div.title Requests
-        div.title(data-bind="text: request_msg")
+        div.title(data-bind="text: last_error")
         table
           thead
             tr
@@ -34,11 +34,16 @@ div.app_context(id="dashboard", data-bind="visible: $root.current_tab().value ==
               th Type
               th Status
 
-          tbody(data-bind='foreach: request.sort.getList')
+          tbody(data-bind='foreach: sort.getList')
             tr
               td
                 div
-                  select(data-bind="enable: actions_list().length, options: actions_list, optionsText: 'label', optionsValue: 'value', optionsCaption: '-Select Action-', event: { change: $root.send_request_action }")
+                  select(data-bind="enable: actions_list().length, \
+                                    options: actions_list, \
+                                    optionsText: 'label', \
+                                    optionsValue: 'value', \
+                                    optionsCaption: '-Select Action-', \
+                                    event: { change: table.applyRequestAction }")
 
               td(data-bind="text: timestamp")
               td(data-bind="text: person_name")

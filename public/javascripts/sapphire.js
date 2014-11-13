@@ -130,7 +130,9 @@ Sapphire.searchableSelect = {
       if (search_object.select_list().length > 0) {
         var options_value = allBindings.get('optionsValue');
         if (options_value) {
-          search_object.working_value(search_object.select_list()[0][options_value]());
+          var value = search_object.select_list()[0][options_value];
+          if (ko.isObservable(value)) value = value();
+          search_object.working_value(value);
         } else {
           search_object.working_value(search_object.select_list()[0]);
         }

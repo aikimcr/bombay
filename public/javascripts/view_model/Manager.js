@@ -104,7 +104,6 @@ function Manager() {
   // XXX this.reports = new ReportList();
 
   this.tab_list = ko.computed(function() {
-
     var result = tab_list = [
       { value: 3, value_text: 'My Bands' },
       { value: 4, value_text: 'Band Members' },
@@ -117,9 +116,8 @@ function Manager() {
       result.unshift({ value: 2, value_text: 'All People' });
       result.unshift({ value: 1, value_text: 'All Bands' });
     }
-/*
+
     result.unshift({ value: 0, value_text: 'Dashboard' });
-*/
 
     return result;
   }.bind(this));
@@ -149,39 +147,6 @@ function Manager() {
   }.bind(this)).extend({ throttle: 50 });
 */
 
-/*
-  this.request_msg = ko.observable('');
-  this.send_request_action = function(data, event) {
-    request_action = event.target.parentElement.querySelector('select').value;
-    if (request_action == 'delete') {
-      data.delete(function(result_code, result) {
-        if (result_code != 200 && result_code != 304) {
-          this.request_msg(result);
-        } else {
-          this.band_members.load();
-          this.song_ratings.load();
-          this.request_msg('');
-        }
-      }.bind(this), event);
-    } else if (request_action != '') {
-      data.change_status(request_action, function(result_code, result) {
-        if (result_code != 200 && result_code != 304) {
-          this.request_msg(result);
-        } else {
-          if (result.band_member) {
-            this.band_members.insertNew(result.band_member);
-          }
-
-          if (result.song_ratings) {
-            this.song_ratings.insertList(result.song_ratings);
-          }
-
-          this.request_msg('');
-        }
-      }.bind(this), event);
-    }
-  }.bind(this);
-*/
   this.testClick = function() {
     console.log('Test Click');
   };
@@ -533,6 +498,7 @@ Manager.prototype.createBandMember = function() {
     }]
   });
 
+/*
   this.band_member.otherPersons = ko.computed(function() {
     if (this.current_band()) {
       return this.current_band().otherPersons();
@@ -548,20 +514,19 @@ Manager.prototype.createBandMember = function() {
       return [];
     }
   }.bind(this)).extend({ throttle: 500 });
+*/
 
   this.band_member.add_member_form = {
     showForm: function(show_form_object, element) {
-      this.band_member.showForm(this.band_member, element);
-      this.band_member.form.row.band_id(this.current_band().id());
-      this.band_member.form.row.band_admin(false);
+      this.request.showForm(this.request, element, '/forms/band_member.html');
+      this.request.form.row.band_id(this.current_band().id());
     }.bind(this)
   };
 
   this.band_member.join_band_form = {
     showForm: function(show_form_object, element) {
-      this.band_member.showForm(this.band_member, element, '/forms/join_band.html');
-      this.band_member.form.row.person_id(this.current_person().id());
-      this.band_member.form.row.band_admin(false);
+      this.request.showForm(this.request, element, '/forms/join_band.html');
+      this.request.form.row.person_id(this.current_person().id());
     }.bind(this)
   };
 };
@@ -788,7 +753,7 @@ Manager.prototype.createRequest = function() {
       name: 'is_admin',
       compute: function(row) {
         var members = ko.utils.arrayFilter(row.person().bandMemberList(), function(member) {
-          return member.band_id() == row.bind_id() && member.band_admin();
+          return member.band_id() == row.band_id() && member.band_admin();
         });
         return members.length > 0;
       }.bind(this)
@@ -812,6 +777,33 @@ Manager.prototype.createRequest = function() {
       definition: {timestamp: 'desc'}
     }]
   });
+
+  this.request.applyRequestAction = function(row, event) {
+    var target = event.target;
+    var action = target.value;
+
+    if (action) {
+      if (action === 'delete') {
+        var del_row = this.list.get(row.id());
+        del_row.deleteRow(row, event, function(err) {
+          if (err) {
+            this.last_error = err;
+            target.value = '';
+          } else {
+            this.last_error = null;
+          }
+        }.bind(this));
+      } else {
+        this.modify(row, function(err, result) {
+          if (err) {
+            this.last_error = err;
+          } else {
+            this.last_error = null;
+          }
+        }.bind(this), [action]);
+      }
+    }
+  }.bind(this.request);
 };
 
 Manager.prototype.loadTables = function(cb) {

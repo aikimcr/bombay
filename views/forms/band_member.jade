@@ -13,9 +13,9 @@ div
       div.dialog_body
         div.title(data-bind="text: message")
         form(data-bind="submit: submit")
-          input(type="hidden", data-bind="value: row.band_id")
+          input(name="action", type="hidden", value="add_band_member")
           div(data-bind="searchableSelect: row.person_id, \
-                         optionsList: table.otherPersons, \
+                         optionsList: table.context_base.current_band().otherPersons, \
                          optionsValue: 'id', \
                          optionsText: 'full_name'")
 

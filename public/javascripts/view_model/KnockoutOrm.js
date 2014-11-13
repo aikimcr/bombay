@@ -10,6 +10,7 @@ orm.table = function(context_base, table_name, model_key, url, columns, computes
   this.joins = [];
   this.list = context_base[model_key + 's'];
   this.reftables = {};
+  this.last_error = null;
 
   Object.keys(this.columns).forEach(function(column_name) {
     var column_def = this.columns[column_name];
@@ -28,6 +29,7 @@ orm.table = function(context_base, table_name, model_key, url, columns, computes
 
 orm.table.prototype.dispose = function() {
   this.disposeForm();
+  this.last_error = null;
   this.reftables = null;
   this.list.dispose();
   delete context_base[this.model_key + 's'];
@@ -52,21 +54,53 @@ orm.table.prototype.deleteRowById = function(id) {
   return this.list.delete(id);
 };
 
-orm.table.prototype.create = function(data, callback) {
-  var url = this.url;
-  var svc = service.getInstance();
+orm.table.prototype.addOrUpdate = function(model, callback) {
+  var row = this.list.get(model.id);
 
-  var svc_data = {};
+  if (row) {
+    row.updateFromModel(model);
+  } else {
+    row = new orm.table.row(this, model);
 
-  Object.keys(this.columns).forEach(function(column_name) {
-    if (column_name in data) {
-      if (ko.isObservable(data[column_name])) {
-        svc_data[column_name] = data[column_name]();
+    try {
+      this.list.insert(row);
+    } catch(e) {
+      return callback(err, row);
+    }
+  }
+
+  return(null, row);
+};
+
+orm.table.prototype.handleSubkeys_ = function(result, callback) {
+  var result_err;
+  Object.keys(result).forEach(function(sub_model_key) {
+    if (result_err) return;
+    if (sub_model_key == this.model_key) return;
+    if (sub_model_key in this.context_base) {
+      var sub_table_name = this.context_base[sub_model_key].table_name;
+      if (ko.isObservable(sub_table_name)) sub_table_name = sub_table_name();
+      var sub_table = this.context_base[sub_table_name];
+
+      if (Array.isArray(result[sub_model_key])) {
+        result[sub_model_key].forEach(function(sub_model) {
+          sub_table.addOrUpdate(sub_model, function(err, row) {
+            result_err = err;
+          });
+        });
       } else {
-        svc_data[column_name];
+        sub_table.addOrUpdate(result[sub_model_key], function(err, row) {
+          result_err = err;
+        });
       }
     }
-  });
+  }.bind(this));
+
+  callback(result_err);
+};
+
+orm.table.prototype.buildSvcData_ = function(data) {
+  var svc_data = {};
 
   if (data['id']) {
     if (ko.isObservable(data['id'])) {
@@ -75,6 +109,37 @@ orm.table.prototype.create = function(data, callback) {
       svc_data['id'] = data['id'];
     }
   }
+
+  Object.keys(this.columns).forEach(function(column_name) {
+    if (column_name in data) {
+      var value;
+      if (ko.isObservable(data[column_name])) {
+        value = data[column_name]();
+      } else {
+        value = data[column_name];
+      }
+
+      if (value != null) svc_data[column_name] = value;
+    }
+  });
+
+  return svc_data;
+};
+
+orm.table.prototype.buildUrl_ = function(url_params) {
+  var url = this.url;
+
+  if (url_params) {
+    url = url + '/' + url_params.join('/');
+  }
+
+  return url;
+};
+
+orm.table.prototype.create = function(data, callback, url_params) {
+  var url = this.buildUrl_(url_params);
+  var svc = service.getInstance();
+  var svc_data = this.buildSvcData_(data);
 
   callback = callback || function(err, row) { if (err) throw err; };
 
@@ -89,26 +154,13 @@ orm.table.prototype.create = function(data, callback) {
         return callback(err, row);
       };
 
-      Object.keys(result).forEach(function(sub_model_key) {
-        if (sub_model_key == this.model_key) return;
-        if (sub_model_key in this.context_base) {
-          var sub_table_name = this.context_base[sub_model_key].table_name();
-          var sub_table = this.context_base[sub_table_name];
-          result[sub_model_key].forEach(function(sub_model) {
-            var sub_row = new orm.table.row(this, sub_model);
-
-            try {
-              this.list.insert(sub_row);
-            } catch (err) {
-              return callback(err, sub_row);
-            }
-          }.bind(sub_table));
-        }
-      }.bind(this));
-
-      return callback(null, row);
+      this.handleSubkeys_(result, function(err) {
+        if (err) return callback(err);
+        return callback(null, row);
+      });
     } else if (result_code == 304) {
       var row = this.list.get(result[this.model_key].id);
+      row.updateFromModel(result[this.model_key]);
       return callback(null, row);
     } else {
       return callback(result_code, result);
@@ -116,37 +168,21 @@ orm.table.prototype.create = function(data, callback) {
   }.bind(this), svc_data);
 };
 
-orm.table.prototype.modify = function(data, callback) {
+orm.table.prototype.modify = function(data, callback, url_params) {
   var svc = service.getInstance();
-  var url = this.url;
-  var svc_data = {};
-
-  if (ko.isObservable(data['id'])) {
-    svc_data['id'] = data['id']();
-  } else {
-    svc_data['id'] = data['id'];
-  }
-
-  Object.keys(this.columns).forEach(function(column_name) {
-    if (column_name in data) {
-      if (ko.isObservable(data[column_name])) {
-        svc_data[column_name] = data[column_name]();
-      } else {
-        svc_data[column_name] = data[column_name];
-      }
-    }
-  });
+  var url = this.buildUrl_(url_params);
+  var svc_data = this.buildSvcData_(data);
 
   svc.put(url, function(result_code, result) {
-    if (result_code == 200) {
+    if (result_code == 200 || result_code == 304) {
       var row = this.list.get(result[this.model_key].id);
-      Object.keys(this.columns).forEach(function(column_name) {
-        if (column_name in result[this.model_key] && result[this.model_key][column_name] !== row[column_name]()) {
-          if (result[this.model_key][column_name] == '' && row[column_name]() == null) return;
-          return row[column_name](result[this.model_key][column_name]);
-        }
-      }.bind(this));
-      callback(null, row);
+      row.updateFromModel(result[this.model_key]);
+      this.handleSubkeys_(result, function(err) {
+        if (err) return callback(err);
+        return (null, row);
+      });
+    } else {
+      return callback(result_code, result);
     }
   }.bind(this), svc_data);
 };
@@ -413,6 +449,15 @@ orm.table.row.prototype.dispose = function() {
   this.child_joins = null;
 }; // It's possible columns need to be disposed in a particular order.
 
+orm.table.row.prototype.updateFromModel = function(model) {
+  Object.keys(this.table.columns).forEach(function(column_name) {
+    if (column_name in model && model[column_name] !== this[column_name]()) {
+      if (model[column_name] == '' && this[column_name]() == null) return;
+      return this[column_name](model[column_name]);
+    }
+  }.bind(this));
+};
+
 orm.table.row.prototype.showForm = function(row, event, url) {
   this.table.form = new orm.table.form(this.table, url);
   this.table.form.show(event.pageX, event.pageY, this);
@@ -439,7 +484,11 @@ orm.table.row.prototype.modifyRow = function(row, event) {
       if (target.type === 'checkbox') value = target.checked;
 
       function handle_return(err, result) {
-        if (err) console.log(err.toString());//XXX Handle errors better.
+        if (err) {
+          this.table.last_error = err;
+        } else {
+          this.table.last_error = null;
+        }
       };
 
       var data = {id: row.id()};
@@ -449,15 +498,17 @@ orm.table.row.prototype.modifyRow = function(row, event) {
   }
 };
 
-orm.table.row.prototype.deleteRow = function(row, event) {
+orm.table.row.prototype.deleteRow = function(row, event, callback) {
   this.dialog = new orm.table.confirm_dialog('/confirm_dialog', this);
   this.dialog.show(event.pageX, event.pageY, function() {
     this.table.delete(this.id());
     this.dialog.dispose();
     this.dialog = null;
+    if (callback) callback(null);
   }.bind(this), function() {
     this.dialog.dispose();
     this.dialog = null;
+    if (callback) callback(new Error('Delete Cancelled'));
   }.bind(this));
 };
 
@@ -526,7 +577,15 @@ orm.table.form.prototype.submit = function(form) {
   if(this.row['id']()) {
     this.table.modify(this.row, handle_return.bind(this));
   } else {
-    this.table.create(this.row, handle_return.bind(this));
+    var url_params = Array.prototype.map.call(
+      this.form_element.querySelectorAll('input:not([data-bind])'),
+      function(target) {
+        var value = target.value;
+        if (target.type === 'checkbox') value = target.checked;
+        return value;
+      }
+    );
+    this.table.create(this.row, handle_return.bind(this), url_params);
   }
 };
 

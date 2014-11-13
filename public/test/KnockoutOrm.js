@@ -838,7 +838,8 @@ describe('Table Management', function() {
     table.list.insert({
       id: ko.observable(2),
       species: ko.observable('tilapia'),
-      count: ko.observable(1000)
+      count: ko.observable(1000),
+      child_joins: []
     });
     table.delete(2, function(result_code, result) {
       should.not.exist(result_code);
