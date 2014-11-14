@@ -9,13 +9,13 @@ block content
                           value: current_tab, \
                           optionsText: 'value_text'")
 
-    div.band_selector
+    div.band_selector(data-bind="if: current_person")
       div Current Band
       div
         select(data-bind="options: current_band_list, value: current_band, optionsText: 'name'")
 
-      div(data-bind="text: current_full_name")
-        //- button(data-bind="text: current_full_name, click: forms.edit_profile.show.bind(forms.edit_profile)")
+      div(data-bind="with: current_person")
+        button(data-bind="text: full_name, click: showForm")
 
     div.band_selector
       a(href="./logout") Logout

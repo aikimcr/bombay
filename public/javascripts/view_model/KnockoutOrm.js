@@ -179,7 +179,7 @@ orm.table.prototype.modify = function(data, callback, url_params) {
       row.updateFromModel(result[this.model_key]);
       this.handleSubkeys_(result, function(err) {
         if (err) return callback(err);
-        return (null, row);
+        return callback(null, row);
       });
     } else {
       return callback(result_code, result);
