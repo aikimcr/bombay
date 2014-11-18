@@ -49,7 +49,7 @@ div.app_context(id="artists", data-bind="visible: $root.current_tab().value == 5
 
           tbody(data-bind="foreach: artist.sort.getList")
             tr
-              td(data-bind="click: showForm") &#x270e;
+              td(class="edit_pencil", data-bind="click: showForm") &#x270e;
               td(data-bind="text: name")
               td(data-bind="text: songCount")
               td(data-bind="ifnot: songCount")

@@ -102,8 +102,6 @@ function Manager() {
   this.createRequest();
   this.createReport();
 
-  // XXX this.reports = new ReportList();
-
   this.tab_list = ko.computed(function() {
     var result = tab_list = [
       { value: 3, value_text: 'My Bands' },
@@ -125,28 +123,26 @@ function Manager() {
 
   this.current_tab = ko.observable(this.tab_list[0]);
 
-/*
-  this.current_reports = ko.computed(function() {
-    if (this.current_band() && this.current_band().id() > 0) {
-      var band_reports = this.reports.list()[this.current_band().id()] || ko.observableArray();
-      return band_reports().sort(function(a, b) {
-        if (! a.name().match(/_([0-9]+)\.html$/)) {
-          if (a.name() == b.name()) return 0;
-          return -1;
-        }
-        if (! b.name().match(/_([0-9]+)\.html$/)) {
-          if (a.name() == b.name()) return 0;
-          return 1;
-        }
-        if (a.name() > b.name()) return -1;
-        if (a.name() < b.name()) return 1;
-        return 0;
-      });
-    } else {
-      return [];
+  var person_menu = document.querySelector('#person_edit');
+  this.showPersonDropDown = function(row, event) {
+    var person_menu = document.querySelector('#person_edit');
+
+    var handlePersonMenuSelect = function(event) {
+      console.log(event);
+      person_menu.removeEventListener('select', handlePersonMenuSelect);
+
+      if (event.target.value == 'profile') {
+        row.showForm(row, event);
+      } else if (event.target.value == 'password') {
+        console.log('change password');
+      } else {
+        console.log('invalid selection');
+      }
     }
-  }.bind(this)).extend({ throttle: 50 });
-*/
+
+    person_menu.show(event);
+    person_menu.addEventListener('select', handlePersonMenuSelect);
+  }.bind(this);
 
   this.testClick = function() {
     console.log('Test Click');
@@ -328,6 +324,18 @@ Manager.prototype.createPersonTable = function() {
       definition: {email: 'desc'}
     }]
   });
+
+  this.person.edit_profile_form = {
+    showForm: function(show_form_object, element) {
+      this.current_person().showForm(this.current_person(), element, '/forms/person.html');
+    }.bind(this);
+  };
+
+  this.person.change_password_form = {
+    showForm: function(show_form_object, element) {
+      this.current_person().showForm(this.current_person(), element, '/forms/change_password.html');
+    }.bind(this);
+  };
 };
 
 Manager.prototype.createArtistTable = function() {
@@ -498,24 +506,6 @@ Manager.prototype.createBandMember = function() {
       }]
     }]
   });
-
-/*
-  this.band_member.otherPersons = ko.computed(function() {
-    if (this.current_band()) {
-      return this.current_band().otherPersons();
-    } else {
-      return [];
-    }
-  }.bind(this)).extend({ throttle: 500 });
-
-  this.band_member.otherBands = ko.computed(function() {
-    if (this.current_person()) {
-      return this.current_person().otherBands();
-    } else {
-      return [];
-    }
-  }.bind(this)).extend({ throttle: 500 });
-*/
 
   this.band_member.add_member_form = {
     showForm: function(show_form_object, element) {

@@ -36,8 +36,6 @@ ko.bindingHandlers.clickRating = {
         var index = getTargetValue(event);
         var observable = valueAccessor();
         observable(index);
-        //element.value = index;
-        //this.dispatchEvent(new Event('change'));
       }.bind(element));
     },
     update: function(element, valueAccessor, allBindings, viewModel, bindingContext) {

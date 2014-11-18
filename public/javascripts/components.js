@@ -330,3 +330,80 @@ ko.bindingHandlers.sourceList = {
     }
   }
 };
+
+function DropDownMenu(params, componentInfo) {
+  //this.date = ko.observable();
+  this.component_info = componentInfo;
+  this.top_element = this.component_info.element.querySelector('div.drop_down_menu');
+
+  Object.keys(params).forEach(function(value) {
+    if (value.match(/^\$/)) return;
+    var option_div = document.createElement('div');
+    var option_button = document.createElement('button');
+    option_button.setAttribute('value', value);
+    option_button.innerHTML = params[value];
+    option_div.appendChild(option_button);
+    this.top_element.appendChild(option_div);
+  }.bind(this));
+
+  var drop_down_element = this.component_info.element;
+
+  this.handleSelect = function(event) {
+    console.log(arguments);
+    drop_down_element.value = event.target.value;
+    drop_down_element.dispatchEvent(new Event('select'));
+    drop_down_element.style.display = 'none';
+  };
+
+  this.top_element.addEventListener('click', this.handleSelect.bind(this));
+
+  drop_down_element.show = function(event) {
+    this.top_element.style.top = event.pageY.toString() + 'px';
+    this.top_element.style.left = event.pageX.toString() + 'px';
+    drop_down_element.style.display = 'block';
+  }.bind(this);
+}
+
+var drop_down_menu = {
+  viewModel: {
+    createViewModel: function(params, componentInfo) {
+      return new DropDownMenu(params, componentInfo);
+    }
+  },
+  template: [
+    '<style>',
+    '  div.drop_down_menu {',
+    '    color: black;',
+    '    background-color: white;',
+    '    position: absolute;',
+    '    left: 0;',
+    '    top: 0;',
+    '    padding: 5px 10px 5px 10px;',
+    '    border-style: solid;',
+    '    border-color: black;',
+    '    border-width: thin;',
+    '    border-radius: 5px;',
+    '    display: inline-block;',
+    '  }',
+    '  div.drop_down_menu div {',
+    '    display: block',
+    '  }',
+    '  div.drop_down_menu td {',
+    '    background-color: grey;',
+    '    display: block;',
+    '    border-style: solid;',
+    '    border-color: white;',
+    '    border-width: thin;',
+    '    border-radius: 5px;',
+    '  }',
+    '  div.drop_down_menu button:hover {',
+    '    background-color: lightgrey;',
+    '    cursor: pointer;',
+    '  }',
+    '</style>',
+    '',
+    '<div class="drop_down_menu"></div>'
+  ].join(' ')
+};
+
+ko.components.register('drop-down-menu', drop_down_menu);

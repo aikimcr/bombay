@@ -15,7 +15,8 @@ block content
         select(data-bind="options: current_band_list, value: current_band, optionsText: 'name'")
 
       div(data-bind="with: current_person")
-        button(data-bind="text: full_name, click: showForm")
+        button(class="person_edit", data-bind="text: full_name, click: $root.showPersonDropDown")
+        drop-down-menu(id="person_edit", params="profile: 'Edit Profile', password: 'Change Password'")
 
     div.band_selector
       a(href="./logout") Logout
@@ -31,6 +32,5 @@ block content
     include tabs/dashboard.jade
 
   //- div.forms
-    //- include forms/edit_profile.jade
     //- include forms/change_password.jade
     //- include forms/create_rehearsal_plan.jade

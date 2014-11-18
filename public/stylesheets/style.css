@@ -1,3 +1,7 @@
+button:hover {
+  background-color: light-grey;
+  cursor: pointer;
+}
 body {
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
   background-color: #000;
@@ -55,6 +59,17 @@ body {
   text-align: left;
   display: inline-block;
 }
+.navigation div.person_edit {
+  background-color: #fff;
+  color: #000;
+  border-radius: 5px;
+}
+.navigation div.person_edit:hover {
+  cursor: pointer;
+}
+.navigation #person_edit {
+  display: none;
+}
 .band_selector {
   padding-bottom: 10px;
   display: inline-block;
@@ -107,6 +122,10 @@ body {
   color: #000;
   font-size: 20px;
   text-align: center;
+}
+.close_button:hover,
+.edit_button:hover {
+  cursor: pointer;
 }
 .control label {
   display: inline-block;
@@ -256,6 +275,9 @@ body {
 #confirm_dialog .dialog_background {
   z-index: 250;
 }
+.edit_pencil:hover {
+  cursor: pointer;
+}
 .dialog_background {
   width: 1200px;
   height: 800px;
@@ -358,12 +380,14 @@ body {
   background-size: 20px;
   background-color: #fff;
   color: #000;
+  cursor: pointer;
 }
 .rating_clicker:active {
   background-image: url("../images/green_star.png");
   background-size: 20px;
   background-color: #fff;
   color: #000;
+  cursor: pointer;
 }
 .rating_clicker_selected {
   background-image: url("../images/black_star.png");

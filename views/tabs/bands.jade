@@ -65,7 +65,7 @@ div.app_context(id="bands", data-bind="if: current_is_system_admin, visible: $ro
 
           tbody(data-bind="foreach: band.sort.getList")
             tr
-              td(data-bind="click: showForm") &#x270e;
+              td(class="edit_pencil", data-bind="click: showForm") &#x270e;
               td(data-bind="text: name")
               td(data-bind="text: bandMemberCount")
               td(data-bind="text: bandSongCount")
