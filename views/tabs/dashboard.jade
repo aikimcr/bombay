@@ -38,7 +38,7 @@ div.app_context(id="dashboard", data-bind="visible: $root.current_tab().value ==
             tr
               td
                 div
-                  select(data-bind="enable: actions_list().length, \
+                  select(url_param, data-bind="enable: actions_list().length, \
                                     options: actions_list, \
                                     optionsText: 'label', \
                                     optionsValue: 'value', \

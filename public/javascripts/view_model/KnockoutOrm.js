@@ -130,77 +130,6 @@ orm.table.prototype.buildSvcData_ = function(data, buildSvcData) {
   }
 };
 
-/*
-orm.table.prototype.buildUrl_ = function(form_element) {
-  var url = this.url;
-  var url_params = Array.prototype.map.call(
-    this.form_element.querySelectorAll('input:not([data-bind])'),
-    function(target) {
-      var value = target.value;
-      if (target.type === 'checkbox') value = target.checked;
-      return value;
-    }
-  );
-
-  if (url_params) {
-    url = url + '/' + url_params.join('/');
-  }
-
-  return url;
-};
-
-orm.table.prototype.create = function(data, callback, url_params, buildSvcData) {
-  var url = this.buildUrl_(url_params);
-  var svc = service.getInstance();
-  var svc_data = this.buildSvcData_(data, buildSvcData);
-
-  callback = callback || function(err, row) { if (err) throw err; };
-
-  svc.post(url, function(result_code, result) {
-    if (result_code == 200) {
-      var model = result[this.model_key];
-      var row = new orm.table.row(this, model);
-
-      try {
-        this.list.insert(row);
-      } catch (err) {
-        return callback(err, row);
-      };
-
-      this.handleSubkeys_(result, function(err) {
-        if (err) return callback(err);
-        return callback(null, row);
-      });
-    } else if (result_code == 304) {
-      var row = this.list.get(result[this.model_key].id);
-      row.updateFromModel(result[this.model_key]);
-      return callback(null, row);
-    } else {
-      return callback(result_code, result);
-    }
-  }.bind(this), svc_data);
-};
-
-orm.table.prototype.modify = function(data, callback, url_params, buildSvcData) {
-  var svc = service.getInstance();
-  var url = this.buildUrl_(url_params);
-  var svc_data = this.buildSvcData_(data, buildSvcData);
-
-  svc.put(url, function(result_code, result) {
-    if (result_code == 200 || result_code == 304) {
-      var row = this.list.get(result[this.model_key].id);
-      row.updateFromModel(result[this.model_key]);
-      this.handleSubkeys_(result, function(err) {
-        if (err) return callback(err);
-        return callback(null, row);
-      });
-    } else {
-      return callback(result_code, result);
-    }
-  }.bind(this), svc_data);
-};
-*/
-
 orm.table.prototype.delete = function(id, callback) {
   var svc = service.getInstance();
   var url = this.url + '?id=' + id;
@@ -259,6 +188,7 @@ orm.table.prototype.load = function(callback) {
 orm.table.prototype.showForm = function(table, event, form_url) {
   var url = form_url ? form_url : '/forms/' + table.table_name + '.html';
   this.form = new orm.form(url, table.columns);
+  this.form.table = table;
 
   this.form.on('show', function(form_element) {
     var d_body = form_element.querySelector('.dialog');
@@ -501,6 +431,7 @@ orm.table.row.prototype.updateFromModel = function(model) {
 orm.table.row.prototype.showForm = function(row, event, form_url) {
   var url = form_url ? form_url : '/forms/' + this.table.table_name + '.html';
   this.form = new orm.form(url, this.table.columns);
+  this.form.table = row.table;
 
   this.form.on('show', function(form_element) {
     var d_body = form_element.querySelector('.dialog');
@@ -536,6 +467,35 @@ orm.table.row.prototype.showForm = function(row, event, form_url) {
   this.form.show(this.table.url, 'Modify', row);
 };
 
+orm.table.row.prototype.modify = function(data, target) {
+  var form_element = target.form;
+  if(!form_element) form_element = target.parentElement;
+  var update_url = orm.form.build_update_url(this.table.url, form_element);
+  var request = Ajax.getInstance().getRequest(update_url, 'json');
+  var response = request.put(data).then(function(result) {
+    var last_err;
+    function handleErrors(err) {
+      if (err) {
+        last_err = err;
+        throw err;
+      }
+    }
+
+    var row_model = result[this.table.model_key];
+
+    try {
+      this.table.addOrUpdate(row_model, handleErrors.bind(this));
+    } catch (err) {
+      return handleErrors(err);
+    };
+
+    this.table.handleSubkeys_(result, handleErrors.bind(this));
+    return last_err == null;
+  }.bind(this)).fail(function(err) {
+    throw err;
+  }.bind(this));
+};
+
 orm.table.row.prototype.modifyRow = function(row, event) {
   var target = event.target;
   var tagname = event.target.tagName.toLowerCase();
@@ -556,17 +516,9 @@ orm.table.row.prototype.modifyRow = function(row, event) {
 
       if (target.type === 'checkbox') value = target.checked;
 
-      function handle_return(err, result) {
-        if (err) {
-          this.table.last_error = err;
-        } else {
-          this.table.last_error = null;
-        }
-      };
-
       var data = {id: row.id()};
       data[column_name] = value;
-      this.table.modify(data, handle_return.bind(this));
+      this.modify(data, target);
     }
   }
 };
@@ -602,85 +554,6 @@ orm.table.row.prototype.toString = function() {
     return col_vals.join(', ');
   }
 };
-
-/*
-// Forms
-orm.table.form = function(table, form_url) {
-  var url = form_url ? form_url : '/forms/' + this.table.table_name + '.html';
-  this.table = table;
-  this.table.form = new orm.form(url, this.table.columns);
-};
-
-orm.table.form.prototype.show = function(x, y, button_text, row, buildSvcData) {
-  this.form.on('show', function(form_element) {
-    var d_body = this.form_element.querySelector('.dialog');
-    d_body.style.top = y.toString() + 'px';
-    d_body.style.left = x.toString() + 'px';
-  });
-
-  this.form.on('dispose', function() {
-    this.form = null;
-  });
-
-  this.form.show(this.table.table_name, button_text, row, buildSvcData);
-
-
-  this.row = {};
-  this.buildSvcData = buildSvcData;
-
-  if (row) {
-    this.button_text = 'Update';
-    this.row['id'] = ko.observable(row['id']());
-    Object.keys(this.table.columns).forEach(function(column_name) {
-      this.row[column_name] = ko.observable(row[column_name]());
-    }.bind(this));
-  } else {
-    this.button_text = 'Add';
-    this.row['id'] = ko.observable();
-    Object.keys(this.table.columns).forEach(function(column_name) {
-      this.row[column_name] = ko.observable();
-    }.bind(this));
-  }
-
-  var url = this.url ? this.url : '/forms/' + this.table.table_name + '.html';
-  var request = Ajax.getInstance().getRequest(url, 'document');
-  request.get().then(function(form_html) {
-    this.form_element = form_html.body.removeChild(form_html.body.firstChild);
-    document.body.appendChild(this.form_element);
-    ko.applyBindings(this, this.form_element);
-    var d_body = this.form_element.querySelector('.dialog');
-    d_body.style.top = y.toString() + 'px';
-    d_body.style.left = x.toString() + 'px';
-  }.bind(this)).fail(function(err) {
-    throw err;
-  });
-};
-
-orm.table.form.prototype.submit = function(form) {
-  function handle_return(err, result) {
-    if (err) return this.message(err.toString());
-    return this.table.disposeForm();
-  };
-
-  if(this.row['id']()) {
-    this.table.modify(this.row, handle_return.bind(this), this.buildSvcData);
-  } else {
-    var url_params = Array.prototype.map.call(
-      this.form_element.querySelectorAll('input:not([data-bind])'),
-      function(target) {
-        var value = target.value;
-        if (target.type === 'checkbox') value = target.checked;
-        return value;
-      }
-    );
-    this.table.create(this.row, handle_return.bind(this), url_params, this.buildSvcData);
-  }
-};
-
-orm.table.form.prototype.dispose = function() {
-  document.body.removeChild(this.form_element);
-};
-*/
 
 orm.table.confirm_dialog = function(url, data) {
   this.url = url;

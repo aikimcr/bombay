@@ -16,6 +16,23 @@ orm.form = function(form_url, form_columns, opt_validate, opt_prepareData) {
   }
 };
 
+orm.form.build_update_url = function(url_base, form_element) {
+  var url_params = [];
+
+  if (form_element) {
+    url_params = Array.prototype.map.call(
+      form_element.querySelectorAll('[url_param]'),
+      function(target) {
+        var value = target.value;
+        if (target.type === 'checkbox') value = target.checked;
+        return value;
+      }
+    );
+  }
+
+  return url_base + '/' + url_params.join('/');
+}
+
 orm.form.prototype.on = function(eventType, eventHandler) {
   if (this.listeners[eventType]) {
     this.listeners[eventType].push(eventHandler);
@@ -52,10 +69,15 @@ orm.form.prototype.show = function(update_url_base, opt_button_text, opt_row) {
 
   var request = Ajax.getInstance().getRequest(this.form_url, 'document');
   request.get().then(function(form_html) {
-    this.form_element = form_html.body.removeChild(form_html.body.firstChild);
-    document.body.appendChild(this.form_element);
-    ko.applyBindings(this, this.form_element);
-    this.dispatch('show', this.form_element);
+    try {
+      this.form_element = form_html.body.removeChild(form_html.body.firstChild);
+      document.body.appendChild(this.form_element);
+      ko.applyBindings(this, this.form_element);
+      this.dispatch('show', this.form_element);
+    } catch(err) {
+      console.log(err);
+      throw(err);
+    };
   }.bind(this)).fail(function(err) {
     throw err;
   });
@@ -95,16 +117,7 @@ orm.form.prototype.submit = function(form) {
     return false;
   };
 
-  var url_params = Array.prototype.map.call(
-    this.form_element.querySelectorAll('input:not([data-bind])'),
-    function(target) {
-      var value = target.value;
-      if (target.type === 'checkbox') value = target.checked;
-      return value;
-    }
-  );
-
-  var update_url = this.update_url_base + '/' + url_params.join('/');
+  var update_url = orm.form.build_update_url(this.update_url_base, this.form_element);
 
   this.prepareData(this.row, Object.keys(this.form_columns), function(svc_data) {
     var request = Ajax.getInstance().getRequest(update_url, 'json');

@@ -752,10 +752,16 @@ Manager.prototype.createRequest = function() {
     }, {
       name: 'is_admin',
       compute: function(row) {
-        var members = ko.utils.arrayFilter(row.person().bandMemberList(), function(member) {
-          return member.band_id() == row.band_id() && member.band_admin();
-        });
-        return members.length > 0;
+        var person = row.person();
+
+        if (person) {
+          var members = ko.utils.arrayFilter(person.bandMemberList(), function(member) {
+            return member.band_id() == row.band_id() && member.band_admin();
+          });
+          return members.length > 0;
+        } else {
+          return false;
+        }
       }.bind(this)
     }, {
       name: 'actions_list',
@@ -794,13 +800,7 @@ Manager.prototype.createRequest = function() {
           }
         }.bind(this));
       } else {
-        this.modify(row, function(err, result) {
-          if (err) {
-            this.last_error = err;
-          } else {
-            this.last_error = null;
-          }
-        }.bind(this), [action]);
+        row.modify({id: row.id()}, target);
       }
     }
   }.bind(this.request);

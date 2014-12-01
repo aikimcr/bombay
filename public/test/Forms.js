@@ -1,4 +1,4 @@
-describe.only('Forms module testing', function() {
+describe('Forms module testing', function() {
   var template_err;
   var update_err;
   var template_stub;

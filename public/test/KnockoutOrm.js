@@ -777,63 +777,6 @@ describe('Table Management', function() {
     done();
   });
 
-  it('should call the create api', function(done) {
-    table.create({
-      species: ko.observable('trout'),
-      count: ko.observable(540),
-      description: ko.observable('Trout are plentiful')
-    }, function(result_code, result) {
-      should.not.exist(result_code);
-      should.exist(result);
-
-      result.should.have.property('id');
-      ko.isObservable(result.id).should.be.true;
-      result.id().should.equal(1);
-
-      result.should.have.property('species');
-      ko.isObservable(result.species).should.be.true;
-      result.species().should.equal('trout');
-
-      result.should.have.property('count');
-      ko.isObservable(result.count).should.be.true;
-      result.count().should.equal(540);
-
-      var list_row = table.list.get(1);
-      should.exist(list_row);
-
-      done();
-    });
-  });
-
-  it('should call the modify api', function(done) {
-    table.modify({
-      id: ko.observable(1),
-      species: ko.observable('salmon'),
-      count: ko.observable(542),
-      description: ko.observable('Trout are plentiful')
-    }, function(result_code, result) {
-      should.not.exist(result_code);
-      should.exist(result);
-
-      result.should.have.property('id');
-      ko.isObservable(result.id).should.be.true;
-      result.id().should.equal(1);
-
-      result.should.have.property('species');
-      ko.isObservable(result.species).should.be.true;
-      result.species().should.equal('salmon');
-
-      result.should.have.property('count');
-      ko.isObservable(result.count).should.be.true;
-      result.count().should.equal(542);
-
-      var list_row = table.list.get(1);
-      should.exist(list_row);
-
-      done();
-    });
-  });
-
   it('should call the delete api', function(done) {
     table.list.insert({
       id: ko.observable(2),
