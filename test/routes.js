@@ -49,18 +49,18 @@ describe('routes', function() {
     describe('#band', function() {
       it('should return all the bands, sorted by name', function(done) {
         var expected = [{
-	  id: 4, name: 'Jazz Wild'
+          id: 4, name: 'Jazz Wild'
         }, {
-	  id: 2, name: 'Live! Dressed! Girls!'
+          id: 2, name: 'Live! Dressed! Girls!'
         }, {
-	  id: 3, name: 'Sally Says Go'
+          id: 3, name: 'Sally Says Go'
         }, {
-	  id: 1, name: 'Wild At Heart'
+          id: 1, name: 'Wild At Heart'
         }];
         var res = {
           json: function(result_code, result) {
             test_util.check_list(result, expected, 'all_bands', ['id', 'name']);
-	    done();
+            done();
           }
         };
         routes.getBandTable(req, res);
@@ -72,7 +72,7 @@ describe('routes', function() {
         var res = {
           json: function(result_code, result) {
             test_util.check_item(result, expected, 'band', ['id', 'name']);
-	    done();
+            done();
           }
         };
         routes.getBandTable(req, res);
@@ -82,23 +82,23 @@ describe('routes', function() {
     describe('#person', function() {
       it('should return all the persons, sorted by full name', function(done) {
         var expected = [{
-	  id: 2,
-	  name: 'aposer',
-	  full_name: 'Alan Poser',
-	  email: 'aposer@wannabe.net',
-	  system_admin: false
+          id: 2,
+          name: 'aposer',
+          full_name: 'Alan Poser',
+          email: 'aposer@wannabe.net',
+          system_admin: false
         }, {
-	  id: 3,
-	  name: 'ddrums',
-	  full_name: 'Danny Drums',
-	  email: 'ddrums@musichero.foo',
-	  system_admin: false
+          id: 3,
+          name: 'ddrums',
+          full_name: 'Danny Drums',
+          email: 'ddrums@musichero.foo',
+          system_admin: false
         }, {
-	  id: 4,
-	  name: 'jguitar',
-	  full_name: 'Johnny Guitar',
-	  email: 'jguitar@musichero.foo',
-	  system_admin: false
+          id: 4,
+          name: 'jguitar',
+          full_name: 'Johnny Guitar',
+          email: 'jguitar@musichero.foo',
+          system_admin: false
         }, {
           id: 5,
           name: 'kkeys',
@@ -106,11 +106,11 @@ describe('routes', function() {
           email: 'kkeys@musichero.foo',
           system_admin: false
         }, {
-	  id: 1,
-	  name: 'admin',
-	  full_name: 'System Admin User',
-	  email: 'admin@allnightmusic.com',
-	  system_admin: true
+          id: 1,
+          name: 'admin',
+          full_name: 'System Admin User',
+          email: 'admin@allnightmusic.com',
+          system_admin: true
         }];
         var res = {
           json: function(result_code, result) {
@@ -118,7 +118,7 @@ describe('routes', function() {
             result.all_persons.forEach(function(person) {
               person.should.not.have.property('password');
             });
-	    done();
+            done();
           }
         };
         routes.getPersonTable(req, res);
@@ -126,18 +126,18 @@ describe('routes', function() {
 
       it('should return person with id 1', function(done) {
         var expected = {
-	  id: 1,
-	  name: 'admin',
-	  full_name: 'System Admin User',
-	  email: 'admin@allnightmusic.com',
-	  system_admin: true
+          id: 1,
+          name: 'admin',
+          full_name: 'System Admin User',
+          email: 'admin@allnightmusic.com',
+          system_admin: true
         };
         req.query.id = 1;
         var res = {
           json: function(result_code, result) {
             test_util.check_item(result, expected, 'person', ['id', 'name', 'full_name', 'email', 'system_admin']);
             result.person.should.not.have.property('password');
-	    done();
+            done();
           }
         };
         routes.getPersonTable(req, res);
@@ -147,20 +147,20 @@ describe('routes', function() {
     describe('#artist', function() {
       it('should return all the artists, sorted by name', function(done) {
         var expected = [{
-	  id: 1, name: 'AC/DC'
+          id: 1, name: 'AC/DC'
         }, {
-	  id: 5, name: 'David Bowie'
+          id: 5, name: 'David Bowie'
         }, {
-	  id: 3, name: 'Led Zeppelin'
+          id: 3, name: 'Led Zeppelin'
         }, {
-	  id: 4, name: 'The Beatles'
+          id: 4, name: 'The Beatles'
         }, {
-	  id: 2, name: 'ZZ Top'
+          id: 2, name: 'ZZ Top'
         }];
         var res = {
           json: function(result_code, result) {
             test_util.check_list(result, expected, 'all_artists', ['id', 'name']);
-	    done();
+            done();
           }
         };
         routes.getArtistTable(req, res);
@@ -172,7 +172,7 @@ describe('routes', function() {
         var res = {
           json: function(result_code, result) {
             test_util.check_item(result, expected, 'artist', ['id', 'name']);
-	    done();
+            done();
           }
         };
         routes.getArtistTable(req, res);
@@ -182,24 +182,24 @@ describe('routes', function() {
     describe('#song', function() {
       it('should return all the songs, sorted by name', function(done) {
         var expected = [{
-	  id: 6, name: 'Help', artist_id: 4
+          id: 6, name: 'Help', artist_id: 4
         }, {
-	  id: 5, name: 'I Wanna Hold Your Hand', artist_id: 4
+          id: 5, name: 'I Wanna Hold Your Hand', artist_id: 4
         }, {
-	  id: 4, name: 'Love Me Do', artist_id: 4
+          id: 4, name: 'Love Me Do', artist_id: 4
         }, {
-	  id: 2, name: 'Rebel, Rebel', artist_id: 5
+          id: 2, name: 'Rebel, Rebel', artist_id: 5
         }, {
-	  id: 1, name: 'Space Oddity', artist_id: 5
+          id: 1, name: 'Space Oddity', artist_id: 5
         }, {
-	  id: 7, name: 'Stairway To Heaven', artist_id: 3
+          id: 7, name: 'Stairway To Heaven', artist_id: 3
         }, {
-	  id: 3, name: 'You Shook Me All Night Long', artist_id: 1
+          id: 3, name: 'You Shook Me All Night Long', artist_id: 1
         }];
         var res = {
           json: function(result_code, result) {
             test_util.check_list(result, expected, 'all_songs', ['id', 'name', 'artist_id']);
-	    done();
+            done();
           }
         };
         routes.getSongTable(req, res);
@@ -211,7 +211,7 @@ describe('routes', function() {
         var res = {
           json: function(result_code, result) {
             test_util.check_item(result, expected, 'song', ['id', 'name', 'artist_id']);
-	    done();
+            done();
           }
         };
         routes.getSongTable(req, res);
@@ -221,22 +221,22 @@ describe('routes', function() {
     describe('#band_member', function() {
       it('should return all the band_members, sorted by band_id and person_id', function(done) {
         var expected = [{
-	  id: 1, band_id: 1, person_id: 1, band_admin: false
+          id: 1, band_id: 1, person_id: 1, band_admin: false
         }, {
-	  id: 5, band_id: 1, person_id: 3, band_admin: false
+          id: 5, band_id: 1, person_id: 3, band_admin: false
         }, {
-	  id: 2, band_id: 2, person_id: 1, band_admin: true
+          id: 2, band_id: 2, person_id: 1, band_admin: true
         }, {
-	  id: 3, band_id: 3, person_id: 2, band_admin: false
+          id: 3, band_id: 3, person_id: 2, band_admin: false
         }, {
           id: 6, band_id: 3, person_id: 5, band_admin: true
         }, {
-	  id: 4, band_id: 4, person_id: 2, band_admin: true
+          id: 4, band_id: 4, person_id: 2, band_admin: true
         }];
         var res = {
           json: function(result_code, result) {
             test_util.check_list(result, expected, 'all_band_members', ['id', 'band_id', 'person_id', 'band_admin']);
-	    done();
+            done();
           }
         };
         routes.getBandMemberTable(req, res);
@@ -248,7 +248,7 @@ describe('routes', function() {
         var res = {
           json: function(result_code, result) {
             test_util.check_item(result, expected, 'band_member', ['id', 'band_id', 'person_id', 'band_admin']);
-	    done();
+            done();
           }
         };
         routes.getBandMemberTable(req, res);
@@ -258,35 +258,35 @@ describe('routes', function() {
     describe('#band_song', function()  {
       it('should return all the band_songs, sorted by band_id and song_id', function(done) {
         var expected = [{
-	  id: 1,
+          id: 1,
           band_id: 1,
           song_id: 1,
           song_status: 4,
           primary_vocal_id: 1,
           secondary_vocal_id: null
         }, {
-	  id: 2,
+          id: 2,
           band_id: 1,
           song_id: 2,
           song_status: 2,
           primary_vocal_id: null,
           secondary_vocal_id: null
         }, {
-	  id: 3,
+          id: 3,
           band_id: 1,
           song_id: 3,
           song_status: 3,
           primary_vocal_id: 1,
           secondary_vocal_id: 2
         }, {
-	  id: 4,
+          id: 4,
           band_id: 1,
           song_id: 4,
           song_status: 1,
           primary_vocal_id: 1,
           secondary_vocal_id: null
         }, {
-	  id: 5,
+          id: 5,
           band_id: 1,
           song_id: 5,
           song_status: -1,
@@ -303,7 +303,7 @@ describe('routes', function() {
               'primary_vocal_id',
               'secondary_vocal_id'
             ]);
-	    done();
+            done();
           }
         };
         routes.getBandSongTable(req, res);
@@ -329,7 +329,7 @@ describe('routes', function() {
               'primary_vocal_id',
               'secondary_vocal_id'
             ]);
-	    done();
+            done();
           }
         };
         routes.getBandSongTable(req, res);
@@ -362,7 +362,7 @@ describe('routes', function() {
         var res = {
           json: function(result_code, result) {
             test_util.check_list(result, expected, 'all_song_ratings', ['id', 'band_member_id', 'band_song_id', 'rating']);
-	    done();
+            done();
           }
         };
         routes.getSongRatingTable(req, res);
@@ -374,7 +374,7 @@ describe('routes', function() {
         var res = {
           json: function(result_code, result) {
             test_util.check_item(result, expected, 'song_rating', ['id', 'band_member_id', 'band_song_id', 'rating']);
-	    done();
+            done();
           }
         };
         routes.getSongRatingTable(req, res);

@@ -135,6 +135,7 @@ function Manager() {
         row.showForm(row, event);
       } else if (event.target.value == 'password') {
         console.log('change password');
+        row.table.change_password_form.showForm(row, event);
       } else {
         console.log('invalid selection');
       }
@@ -328,13 +329,21 @@ Manager.prototype.createPersonTable = function() {
   this.person.edit_profile_form = {
     showForm: function(show_form_object, element) {
       this.current_person().showForm(this.current_person(), element, '/forms/person.html');
-    }.bind(this);
+    }.bind(this)
   };
 
   this.person.change_password_form = {
     showForm: function(show_form_object, element) {
-      this.current_person().showForm(this.current_person(), element, '/forms/change_password.html');
-    }.bind(this);
+      var row = {
+        id: ko.observable(this.current_person().id()),
+        old_password: ko.observable(),
+        new_password: ko.observable(),
+        password_confirm: ko.observable()
+      };
+      this.person.showForm(row, element, '/forms/change_password.html', function(data) {
+        console.log('svcdata passchg');
+      });
+    }.bind(this)
   };
 };
 

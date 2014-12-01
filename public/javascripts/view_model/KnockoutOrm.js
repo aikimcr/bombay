@@ -54,13 +54,13 @@ orm.table.prototype.deleteRowById = function(id) {
   return this.list.delete(id);
 };
 
-orm.table.prototype.addOrUpdate = function(model, callback) {
-  var row = this.list.get(model.id);
+orm.table.prototype.addOrUpdate = function(row_model, callback) {
+  var row = this.list.get(row_model.id);
 
   if (row) {
-    row.updateFromModel(model);
+    row.updateFromModel(row_model);
   } else {
-    row = new orm.table.row(this, model);
+    row = new orm.table.row(this, row_model);
 
     try {
       this.list.insert(row);
@@ -69,7 +69,7 @@ orm.table.prototype.addOrUpdate = function(model, callback) {
     }
   }
 
-  return(null, row);
+  return callback(null, row);
 };
 
 orm.table.prototype.handleSubkeys_ = function(result, callback) {
@@ -96,38 +96,51 @@ orm.table.prototype.handleSubkeys_ = function(result, callback) {
     }
   }.bind(this));
 
-  callback(result_err);
+  return callback(result_err);
 };
 
-orm.table.prototype.buildSvcData_ = function(data) {
-  var svc_data = {};
+orm.table.prototype.buildSvcData_ = function(data, buildSvcData) {
+  if (buildSvcData) {
+    return buildSvcData(data);
+  } else {
+    var svc_data = {};
 
-  if (data['id']) {
-    if (ko.isObservable(data['id'])) {
-      if (data['id']()) svc_data['id'] = data['id']();
-    } else {
-      svc_data['id'] = data['id'];
-    }
-  }
-
-  Object.keys(this.columns).forEach(function(column_name) {
-    if (column_name in data) {
-      var value;
-      if (ko.isObservable(data[column_name])) {
-        value = data[column_name]();
+    if (data['id']) {
+      if (ko.isObservable(data['id'])) {
+        if (data['id']()) svc_data['id'] = data['id']();
       } else {
-        value = data[column_name];
+        svc_data['id'] = data['id'];
       }
-
-      if (value != null) svc_data[column_name] = value;
     }
-  });
 
-  return svc_data;
+    Object.keys(this.columns).forEach(function(column_name) {
+      if (column_name in data) {
+        var value;
+        if (ko.isObservable(data[column_name])) {
+          value = data[column_name]();
+        } else {
+          value = data[column_name];
+        }
+
+        if (value != null) svc_data[column_name] = value;
+      }
+    });
+
+    return svc_data;
+  }
 };
 
-orm.table.prototype.buildUrl_ = function(url_params) {
+/*
+orm.table.prototype.buildUrl_ = function(form_element) {
   var url = this.url;
+  var url_params = Array.prototype.map.call(
+    this.form_element.querySelectorAll('input:not([data-bind])'),
+    function(target) {
+      var value = target.value;
+      if (target.type === 'checkbox') value = target.checked;
+      return value;
+    }
+  );
 
   if (url_params) {
     url = url + '/' + url_params.join('/');
@@ -136,10 +149,10 @@ orm.table.prototype.buildUrl_ = function(url_params) {
   return url;
 };
 
-orm.table.prototype.create = function(data, callback, url_params) {
+orm.table.prototype.create = function(data, callback, url_params, buildSvcData) {
   var url = this.buildUrl_(url_params);
   var svc = service.getInstance();
-  var svc_data = this.buildSvcData_(data);
+  var svc_data = this.buildSvcData_(data, buildSvcData);
 
   callback = callback || function(err, row) { if (err) throw err; };
 
@@ -168,10 +181,10 @@ orm.table.prototype.create = function(data, callback, url_params) {
   }.bind(this), svc_data);
 };
 
-orm.table.prototype.modify = function(data, callback, url_params) {
+orm.table.prototype.modify = function(data, callback, url_params, buildSvcData) {
   var svc = service.getInstance();
   var url = this.buildUrl_(url_params);
-  var svc_data = this.buildSvcData_(data);
+  var svc_data = this.buildSvcData_(data, buildSvcData);
 
   svc.put(url, function(result_code, result) {
     if (result_code == 200 || result_code == 304) {
@@ -186,6 +199,7 @@ orm.table.prototype.modify = function(data, callback, url_params) {
     }
   }.bind(this), svc_data);
 };
+*/
 
 orm.table.prototype.delete = function(id, callback) {
   var svc = service.getInstance();
@@ -242,16 +256,42 @@ orm.table.prototype.load = function(callback) {
   }.bind(this));
 };
 
-orm.table.prototype.showForm = function(table, event, url) {
-  this.form = new orm.table.form(table, url);
-  this.form.show(event.pageX, event.pageY);
-};
+orm.table.prototype.showForm = function(table, event, form_url) {
+  var url = form_url ? form_url : '/forms/' + table.table_name + '.html';
+  this.form = new orm.form(url, table.columns);
 
-orm.table.prototype.disposeForm = function() {
-  if (this.form) {
-    this.form.dispose();
+  this.form.on('show', function(form_element) {
+    var d_body = form_element.querySelector('.dialog');
+    d_body.style.top = event.pageY.toString() + 'px';
+    d_body.style.left = event.pageX.toString() + 'px';
+  }.bind(this));
+
+  this.form.on('dispose', function() {
     this.form = null;
+  }.bind(this));
+
+  var last_err;
+  function handleErrors(err) {
+    if (err) {
+      last_err = err;
+      this.form.setMessage(err.toString());
+    }
   }
+
+  this.form.on('update', function(result) {
+    var row_model = result[this.model_key];
+
+    try {
+      this.addOrUpdate(row_model, handleErrors.bind(this));
+    } catch (err) {
+      return handleErrors(err);
+    };
+
+    this.handleSubkeys_(result, handleErrors.bind(this));
+    return last_err == null;
+  }.bind(this));
+
+  this.form.show(this.url);
 };
 
 // View Model Row.
@@ -458,9 +498,42 @@ orm.table.row.prototype.updateFromModel = function(model) {
   }.bind(this));
 };
 
-orm.table.row.prototype.showForm = function(row, event, url) {
-  this.table.form = new orm.table.form(this.table, url);
-  this.table.form.show(event.pageX, event.pageY, this);
+orm.table.row.prototype.showForm = function(row, event, form_url) {
+  var url = form_url ? form_url : '/forms/' + this.table.table_name + '.html';
+  this.form = new orm.form(url, this.table.columns);
+
+  this.form.on('show', function(form_element) {
+    var d_body = form_element.querySelector('.dialog');
+    d_body.style.top = event.pageY.toString() + 'px';
+    d_body.style.left = event.pageX.toString() + 'px';
+  }.bind(this));
+
+  this.form.on('dispose', function() {
+    this.form = null;
+  }.bind(this));
+
+  var last_err;
+  function handleErrors(err) {
+    if (err) {
+      last_err = err;
+      this.form.setMessage(err.toString());
+    }
+  }
+
+  this.form.on('update', function(result) {
+    var row_model = result[this.table.model_key];
+
+    try {
+      this.table.addOrUpdate(row_model, handleErrors.bind(this));
+    } catch (err) {
+      return handleErrors(err);
+    };
+
+    this.table.handleSubkeys_(result, handleErrors.bind(this));
+    return last_err == null;
+  }.bind(this));
+
+  this.form.show(this.table.url, 'Modify', row);
 };
 
 orm.table.row.prototype.modifyRow = function(row, event) {
@@ -530,15 +603,30 @@ orm.table.row.prototype.toString = function() {
   }
 };
 
+/*
 // Forms
 orm.table.form = function(table, form_url) {
+  var url = form_url ? form_url : '/forms/' + this.table.table_name + '.html';
   this.table = table;
-  this.url = form_url;
-  this.message = ko.observable();
+  this.table.form = new orm.form(url, this.table.columns);
 };
 
-orm.table.form.prototype.show = function(x, y, row) {
+orm.table.form.prototype.show = function(x, y, button_text, row, buildSvcData) {
+  this.form.on('show', function(form_element) {
+    var d_body = this.form_element.querySelector('.dialog');
+    d_body.style.top = y.toString() + 'px';
+    d_body.style.left = x.toString() + 'px';
+  });
+
+  this.form.on('dispose', function() {
+    this.form = null;
+  });
+
+  this.form.show(this.table.table_name, button_text, row, buildSvcData);
+
+
   this.row = {};
+  this.buildSvcData = buildSvcData;
 
   if (row) {
     this.button_text = 'Update';
@@ -575,7 +663,7 @@ orm.table.form.prototype.submit = function(form) {
   };
 
   if(this.row['id']()) {
-    this.table.modify(this.row, handle_return.bind(this));
+    this.table.modify(this.row, handle_return.bind(this), this.buildSvcData);
   } else {
     var url_params = Array.prototype.map.call(
       this.form_element.querySelectorAll('input:not([data-bind])'),
@@ -585,13 +673,14 @@ orm.table.form.prototype.submit = function(form) {
         return value;
       }
     );
-    this.table.create(this.row, handle_return.bind(this), url_params);
+    this.table.create(this.row, handle_return.bind(this), url_params, this.buildSvcData);
   }
 };
 
 orm.table.form.prototype.dispose = function() {
   document.body.removeChild(this.form_element);
 };
+*/
 
 orm.table.confirm_dialog = function(url, data) {
   this.url = url;

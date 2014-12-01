@@ -3,8 +3,8 @@ div
     div.dialog
       div.title_bar
         div.title Song Editor
-        div.close_button(data-bind="with: table")
-          button.close_button(data-bind="click: disposeForm") X
+        div.close_button
+          button.close_button(data-bind="click: dispose") X
 
       div.control(data-bind="with: table.reftables.artist")
         button.edit_button(id="add_artists", data-bind="click: showForm") +

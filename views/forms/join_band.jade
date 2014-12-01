@@ -3,8 +3,8 @@ div
     div.dialog
       div.title_bar
         div.title Join Band
-        div.close_button(data-bind="with: table")
-          button.close_button(data-bind="click: disposeForm") X
+        div.close_button
+          button.close_button(data-bind="click: dispose") X
 
       div.control(data-bind="with: table.reftables.band")
         button.edit_button(id="add_bands", data-bind="click: showForm") +

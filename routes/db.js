@@ -269,7 +269,7 @@ exports.postBandSongTable = function(req, res) {
       var result = {};
       result.band_song = rows ? rows[0] : {};
       db_orm.SongRating.find({band_song_id: result.band_song.id}, function(err, ratings) {
-debugger;//XXX
+        debugger;//XXX
         if (err) {
           res.json(500, err);
         } else {
