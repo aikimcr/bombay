@@ -134,7 +134,6 @@ function Manager() {
       if (event.target.value == 'profile') {
         row.showForm(row, event);
       } else if (event.target.value == 'password') {
-        console.log('change password');
         row.table.change_password_form.showForm(row, event);
       } else {
         console.log('invalid selection');
@@ -327,22 +326,56 @@ Manager.prototype.createPersonTable = function() {
   });
 
   this.person.edit_profile_form = {
-    showForm: function(show_form_object, element) {
-      this.current_person().showForm(this.current_person(), element, '/forms/person.html');
+    showForm: function(show_form_object, event) {
+      this.current_person().showForm(this.current_person(), event, '/forms/person.html');
     }.bind(this)
   };
 
   this.person.change_password_form = {
-    showForm: function(show_form_object, element) {
+    showForm: function(show_form_object, event) {
       var row = {
-        id: ko.observable(this.current_person().id()),
+        id: ko.observable(show_form_object.id()),
         old_password: ko.observable(),
         new_password: ko.observable(),
-        password_confirm: ko.observable()
+        confirm_password: ko.observable()
       };
-      this.person.showForm(row, element, '/forms/change_password.html', function(data) {
-        console.log('svcdata passchg');
-      });
+      Object.keys(show_form_object.table.columns).forEach(function(column_name) {
+        row[column_name] = ko.observable(show_form_object[column_name]()); 
+      })
+      show_form_object.showForm(
+        row, event, '/forms/change_password.html',
+        function(form_element, form_columns, data) {
+          if (data.old_password() && data.old_password().length > 0) {
+            if (data.new_password() && data.new_password().length > 0) {
+              if (data.new_password() !== data.confirm_password()) {
+                this.form.setMessage('Passwords do not match');
+                return false;
+              }
+            } else {
+              this.form.setMessage('Please provide a new password');
+              return false;
+            }
+          } else {
+            this.form.setMessage('Please provide old password');
+            return false;
+          }
+          this.form.clearMessage();
+          return true;
+        }.bind(show_form_object), function(data, column_names, callback) {
+          var pk = document.querySelector('input[name="pubkey"]').value;
+          var ct = JSON.stringify([
+            data.old_password(),
+            data.new_password()
+          ]);
+          var encrypted_ct = util.encrypt(pk, ct);
+          callback({ id: data.id(), token: encrypted_ct });
+        },
+        {
+          old_password: 'string',
+          new_password: 'string',
+          confirm_password: 'string',
+        }
+      );
     }.bind(this)
   };
 };

@@ -391,7 +391,9 @@ app.get('/session_info', validation.requireLogin, route_db.getSessionInfo);
 // Forms
 app.get('/forms/:form_type', function(req, res) {
   var form_name = path.join('forms', req.params.form_type.replace(/\.html$/,''));//XXX
-  res.render(form_name);
+  var pem = bombay_util.get_pem_file('crypto/rsa_public.pem');
+  var base64_key = bombay_util.parse_pem(pem);
+  res.render(form_name, {pubkey: base64_key});
 });
 
 app.get('/confirm_dialog', function(req, res) {

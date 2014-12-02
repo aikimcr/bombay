@@ -332,7 +332,6 @@ ko.bindingHandlers.sourceList = {
 };
 
 function DropDownMenu(params, componentInfo) {
-  //this.date = ko.observable();
   this.component_info = componentInfo;
   this.top_element = this.component_info.element.querySelector('div.drop_down_menu');
 
@@ -351,7 +350,10 @@ function DropDownMenu(params, componentInfo) {
   this.handleSelect = function(event) {
     console.log(arguments);
     drop_down_element.value = event.target.value;
-    drop_down_element.dispatchEvent(new Event('select'));
+    var sel_evt = new Event('select');
+    sel_evt.pageX = event.pageX;
+    sel_evt.pageY = event.pageY;
+    drop_down_element.dispatchEvent(sel_evt);
     drop_down_element.style.display = 'none';
   };
 

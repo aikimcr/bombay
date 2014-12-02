@@ -185,9 +185,21 @@ orm.table.prototype.load = function(callback) {
   }.bind(this));
 };
 
-orm.table.prototype.showForm = function(table, event, form_url) {
+orm.table.prototype.showForm = function(table, event, form_url, opt_validate, opt_prepareData, opt_other_columns) {
   var url = form_url ? form_url : '/forms/' + table.table_name + '.html';
-  this.form = new orm.form(url, table.columns);
+  var columns = {}
+
+  Object.keys(this.columns).forEach(function(column_name) {
+    columns[column_name] = this.columns[column_name];
+  }.bind(this));
+
+  if (opt_other_columns) {
+    Object.keys(opt_other_columns).forEach(function(column_name) {
+      columns[column_name] = opt_other_columns[column_name];
+    });
+  }
+
+  this.form = new orm.form(url, columns, opt_validate, opt_prepareData);
   this.form.table = table;
 
   this.form.on('show', function(form_element) {
@@ -428,9 +440,21 @@ orm.table.row.prototype.updateFromModel = function(model) {
   }.bind(this));
 };
 
-orm.table.row.prototype.showForm = function(row, event, form_url) {
+orm.table.row.prototype.showForm = function(row, event, form_url, opt_validate, opt_prepareData, opt_other_columns) {
   var url = form_url ? form_url : '/forms/' + this.table.table_name + '.html';
-  this.form = new orm.form(url, this.table.columns);
+  var columns = {}
+
+  Object.keys(this.table.columns).forEach(function(column_name) {
+    columns[column_name] = this.table.columns[column_name];
+  }.bind(this));
+
+  if (opt_other_columns) {
+    Object.keys(opt_other_columns).forEach(function(column_name) {
+      columns[column_name] = opt_other_columns[column_name];
+    });
+  }
+
+  this.form = new orm.form(url, columns, opt_validate, opt_prepareData);
   this.form.table = row.table;
 
   this.form.on('show', function(form_element) {
