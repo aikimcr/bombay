@@ -101,6 +101,7 @@ function Manager() {
   this.createSongRating();
   this.createRequest();
   this.createReport();
+  this.createRehearsalPlan();
 
   this.tab_list = ko.computed(function() {
     var result = tab_list = [
@@ -550,15 +551,15 @@ Manager.prototype.createBandMember = function() {
   });
 
   this.band_member.add_member_form = {
-    showForm: function(show_form_object, element) {
-      this.request.showForm(this.request, element, '/forms/band_member.html');
+    showForm: function(show_form_object, event) {
+      this.request.showForm(this.request, event, '/forms/band_member.html');
       this.request.form.row.band_id(this.current_band().id());
     }.bind(this)
   };
 
   this.band_member.join_band_form = {
-    showForm: function(show_form_object, element) {
-      this.request.showForm(this.request, element, '/forms/join_band.html');
+    showForm: function(show_form_object, event) {
+      this.request.showForm(this.request, event, '/forms/join_band.html');
       this.request.form.row.person_id(this.current_person().id());
     }.bind(this)
   };
@@ -688,8 +689,8 @@ Manager.prototype.createBandSong = function() {
   }.bind(this)).extend({ throttle: 500 });
 
   this.band_song.add_song_form = {
-    showForm: function(show_form_object, element) {
-      this.band_song.showForm(this.band_song, element);
+    showForm: function(show_form_object, event) {
+      this.band_song.showForm(this.band_song, event);
       this.band_song.form.row.band_id(this.current_band().id());
       this.band_song.form.row.key_signature('');
       this.band_song.form.row.song_status(-1);
@@ -882,6 +883,204 @@ Manager.prototype.createReport = function() {
       label: 'Request Time (Hi-Lo)',
       definition: {timestamp: 'desc'}
     }]
+  });
+};
+
+Manager.CreatePlanForm = function(context_base) {
+  this.context_base = context_base;
+
+  this.handleEvent = function(e) {
+    if (e.type === 'change' && e.target.tagName.toLowerCase() === 'date-selector') {
+      var request = this.loadLists(e.target.value, this.context_base.current_band());
+      request.get()
+        .then(function(list_result) {
+          this.initializeLists(list_result);
+        }.bind(this))
+        .fail(function(err) {
+          throw err;
+        });
+    }
+  };
+};
+
+Manager.CreatePlanForm.prototype.showForm = function(show_form_object, event) {
+  // Knockout will call this with 'this' set to the Manager object
+  this.rehearsal_plan.form = new orm.form(
+    '/forms/create_rehearsal_plan.html',
+    {
+      rehearsal_date: {type: 'date'},
+      run_through_unselected: {type: 'array'},
+      run_through_selected: {type: 'array'},
+      learning_unselected: {type: 'array'},
+      learning_selected: {type: 'array'}
+    },
+    function(form_element, form_columns, data) {
+      return true;
+    }.bind(this),
+    function(data, column_names, callback) {
+      callback({
+        rehearsal_date: data.rehearsal_date().toISOString().substr(0, 10),
+        run_through_songs: this.mapSelectedSongs(data.run_through_selected()),
+        learning_songs: this.mapSelectedSongs(data.learning_selected())
+      });
+    }.bind(this.rehearsal_plan.create_plan_form)
+  );
+
+  this.rehearsal_plan.form.on('show', function(form_element) {
+    var request = this.rehearsal_plan.create_plan_form.loadLists(new Date(), this.current_band());
+    request.get()
+      .then(function(list_result) {
+        this.initializeLists(list_result);
+        this.dsel = form_element.querySelector('date-selector');
+        this.dsel.addEventListener('change', this);
+      }.bind(this.rehearsal_plan.create_plan_form))
+      .fail(function(err) {
+        throw err;
+      });
+  }.bind(this));
+
+  this.rehearsal_plan.form.on('update', function(result) {
+    console.log(result);//XXX
+  }.bind(this));
+
+  this.rehearsal_plan.form.on('dispose', function() {
+    this.dsel.removeEventListener('change', this);
+    desl = null;
+  }.bind(this.rehearsal_plan.create_plan_form));
+
+  this.rehearsal_plan.form.show('/plan', 'Create');
+};
+
+Manager.CreatePlanForm.prototype.loadLists = function(query_date, band) {
+    var query_date_str = query_date.toISOString().substr(0, 10);
+    var url = '/plan_lists?band_id=' +
+      band.id() +
+      '&rehearsal_date=' + query_date_str;
+
+    return Ajax.getInstance().getRequest(url, 'json');
+};
+
+Manager.CreatePlanForm.prototype.initializeLists = function(list_result) {
+  var form = this.context_base.rehearsal_plan.form;
+
+  var rehearsal_date = new Date();
+  var date_parts = list_result.rehearsal_date.substr(0, 10).split('-');
+  rehearsal_date.setFullYear(date_parts[0]);
+  rehearsal_date.setMonth(date_parts[1] - 1);
+  rehearsal_date.setDate(date_parts[2]);
+
+  form.row.rehearsal_date(rehearsal_date);
+  form.row.run_through_selected([]);
+  form.row.learning_selected([]);
+  form.row.run_through_unselected(
+    this.mapUnselectedSongs(list_result.run_through_songs)
+  );
+
+  form.row.learning_unselected(
+    this.mapUnselectedSongs(list_result.learning_songs)
+  );
+};
+
+Manager.CreatePlanForm.prototype.mapSelectedSongs = function(list) {
+  var sequence = 1;
+  var params = list.map(function (song) {
+    return {
+      band_song_id: song.value(),
+      sequence: sequence++
+    };
+  });
+  return JSON.stringify(params);
+};
+
+Manager.CreatePlanForm.prototype.mapUnselectedSongs = function(list) {
+  var sequence = 0;
+  return list.map(function(song) {
+    sequence++;
+    return {
+      sort_key: ko.observable(sequence),
+      value: ko.observable(song.band_song_id),
+      description: ko.computed(function() {
+        var display_date = song.last_rehearsal_date ?
+          new Date(song.last_rehearsal_date).toDateString() :
+          'Never';
+
+        var display_status = this.context_base.song_status_map.filter(function(map_row) {
+          return map_row.value == song.song_status;
+        })[0].value_text;
+
+        return '(' + sequence + ')' + song.song_name + ': ' + display_status + '(' + display_date + ')';
+      }.bind(this))
+    };
+  }.bind(this));
+};
+
+Manager.prototype.showCreatePlanForm_ = function(show_form_object, event) {
+};
+
+Manager.prototype.createRehearsalPlan = function() {
+  this.rehearsal_plan = orm.define(this, 'rehearsal_plan', {
+    rehearsal_date: {type: 'date'}
+  }, {
+/*
+    computes: [{
+    }],
+*/
+    filters: [{
+      name: 'max_rehearsal_run_through_count',
+      type: 'max',
+      column_name: 'rehearsalRunThroughCount'
+    }, {
+      name: 'min_rehearsal_run_through_count',
+      type: 'min',
+      column_name: 'rehearsalRunThroughCount'
+    }, {
+      name: 'max_rehearsal_learning_count',
+      type: 'max',
+      column_name: 'rehearsalLearningCount'
+    }, {
+      name: 'min_rehearsal_learning_count',
+      type: 'min',
+      column_name: 'rehearsalLearningCount'
+    }],
+    sort: [{
+      name: 'date_asc',
+      label: 'Rehearsal Date (Lo-Hi)',
+      definition: {rehearsal_date: 'asc'}
+    }, {
+      name: 'date_desc',
+      label: 'Rehearsal Date (Hi-Lo)',
+      definition: {rehearsal_date: 'desc'}
+    }]
+  });
+
+  this.rehearsal_plan.create_plan_form = new Manager.CreatePlanForm(this);
+};
+
+Manager.prototype.createRehearsalRunThrough = function() {
+  this.rehearsal_run_through = orm.define(this, 'rehearsal_run_through', {
+    rehearsal_plan_id: {type: 'reference', reference_table: this.rehearsal_plan},
+    sequence: {type: 'integer'},
+    band_song_id: {type: 'reference', reference_table: this.band_song}
+/*
+  }, {
+    computes: [],
+    filters: [],
+    sort: []
+*/
+  });
+};
+
+Manager.prototype.createRehearsalLearning = function() {
+  this.rehearsal_learning = orm.define(this, 'rehearsal_learning', {
+    rehearsal_plan_id: {type: 'reference', reference_table: this.rehearsal_plan},
+    sequence: {type: 'integer'},
+    band_song_id: {type: 'reference', reference_table: this.band_song}
+/*
+  }, {
+    computes: [],
+    filters: [],
+    sort: []
+*/
   });
 };
 

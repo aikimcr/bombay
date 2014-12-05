@@ -14,6 +14,7 @@ function ListSelector(params, componentInfo) {
     this.destination_list(this.component_info.element.value)
   }.bind(this));
 
+  // Handle someone changing the element value outside of the component.
   setInterval(function() {
     this.source_list(this.component_info.element.sourceList);
     this.destination_list(this.component_info.element.value)
@@ -126,7 +127,7 @@ ListSelector.prototype.moveList_ = function(source, destination, event, selector
 
   this.sortList_(source);
   this.sortList_(destination);
-  this.component_info.element.value = destination();
+  this.component_info.element.value = this.destination_list();
   this.component_info.element.dispatchEvent(new Event('change'));
 };
 
@@ -232,39 +233,64 @@ ko.components.register('list-selector', list_selector);
 function DateSelector(params, componentInfo) {
   this.date = ko.observable(new Date(componentInfo.element.value));
   this.component_info = componentInfo;
+  this.last_element_value = '';
 
   this.year = ko.computed({
     read: function() {
-      return this.date().getFullYear();
+      var value = this.date().getFullYear();
+
+      if (value && !isNaN(value)) {
+        return value;
+      } else {
+        return 2000;
+      }
     }.bind(this),
     write: function(value) {
-      this.date().setFullYear(value);
-      this.changeValue_();
+      if (value && !isNaN(value) && value != this.date().getFullYear()) {
+        this.date().setFullYear(value);
+        this.changeValue_();
+      }
     }.bind(this)
   });
 
   this.month = ko.computed({
     read: function() {
-      return this.date().getMonth() + 1;
+      var value = this.date().getMonth() + 1;
+
+      if (value && !isNaN(value)) {
+        return value;
+      } else {
+        return 1;
+      }
     }.bind(this),
     write: function(value) {
-      this.date().setMonth(value - 1);
-      this.changeValue_();
+      if (value && !isNaN(value) && value != (this.date().getMonth() + 1)) {
+        this.date().setMonth(value - 1);
+        this.changeValue_();
+      }
     }.bind(this)
   });
 
   this.day_of_month = ko.computed({
     read: function() {
-      return this.date().getDate();
+      var value = this.date().getDate();
+
+      if (value && !isNaN(value)) {
+        return value;
+      } else {
+        return 1;
+      }
     }.bind(this),
     write: function(value) {
-      this.date().setDate(value);
-      this.changeValue_();
+      if (value && !isNaN(value) && value != this.date().getDate()) {
+        this.date().setDate(value);
+        this.changeValue_();
+      }
     }.bind(this)
   });
 
   this.days_in_month = ko.computed(function() {
-    var work_date = new Date(this.date());
+    var work_date = isNaN(this.date().valueOf()) ? new Date() : new Date(this.date());
     work_date.setMonth(work_date.getMonth() + 1);
     work_date.setDate(0);
     var selector_list = [];
@@ -275,7 +301,13 @@ function DateSelector(params, componentInfo) {
   }.bind(this));
 
   setInterval(function() {
-    this.date(new Date(this.component_info.element.value));
+    if (this.component_info.element.value) {
+      if (this.component_info.element.value != this.last_element_value) {
+        // Try to avoid a lot of extra recalculations
+        this.last_element_value = this.component_info.element.value;
+        this.date(new Date(this.last_element_value));
+      }
+    }
   }.bind(this), 500);
 }
 
