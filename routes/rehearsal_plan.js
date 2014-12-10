@@ -51,6 +51,7 @@ exports.postPlan = function(req, res) {
   var learning_songs = JSON.parse(req.body.learning_songs);
 
   rehearsal_plan.save(
+    req.body.band_id,
     new Date(req.body.rehearsal_date),
     run_through_songs,
     learning_songs,

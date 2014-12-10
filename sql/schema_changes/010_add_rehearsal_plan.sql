@@ -2,7 +2,9 @@
 
 CREATE TABLE rehearsal_plan (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  rehearsal_date VARCHAR NOT NULL
+  band_id INTEGER NOT NULL,
+  rehearsal_date VARCHAR NOT NULL,
+  FOREIGN KEY (band_id) REFERENCES band(id) ON DELETE CASCADE
 );
 
 CREATE TABLE rehearsal_run_through (
@@ -37,4 +39,12 @@ BEGIN
   DELETE FROM song_rating WHERE song_rating.band_song_id = OLD.id;
   DELETE FROM rehearsal_run_through WHERE rehearsal_run_through.band_song_id = OLD.id;
   DELETE FROM rehearsal_learning WHERE rehearsal_learning.band_song_id = OLD.id;
+END;
+
+DROP TRIGGER IF EXISTS del_band;
+CREATE TRIGGER del_band BEFORE DELETE ON band FOR EACH ROW
+BEGIN
+  DELETE FROM rehearsal_plan WHERE band_id = OLD.id;
+  DELETE FROM band_song WHERE band_id = OLD.id;
+  DELETE FROM band_member WHERE band_id = OLD.id;
 END;

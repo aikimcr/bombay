@@ -948,7 +948,7 @@ Manager.CreatePlanForm.prototype.showForm = function(show_form_object, event) {
     desl = null;
   }.bind(this.rehearsal_plan.create_plan_form));
 
-  this.rehearsal_plan.form.show('/plan', 'Create');
+  this.rehearsal_plan.form.show('/rehearsal_plan', 'Create');
 };
 
 Manager.CreatePlanForm.prototype.loadLists = function(query_date, band) {
@@ -1095,6 +1095,7 @@ Manager.prototype.loadTables = function(cb) {
     .then(this.loadSongRatings_())
     .then(this.loadRequests_())
     .then(this.loadReports_())
+    .then(this.loadRehearsalPlan_())
     .then(cb)
     .done();
 };
@@ -1201,4 +1202,13 @@ Manager.prototype.loadReports_ = function() {
       return resolve(null, result);
     });
   }.bind(this));
+};
+
+Manager.prototype.loadRehearsalPlan_ = function() {
+  return Q.promise(function(resolve, reject, notify) {
+    this.rehearsal_plan.load(function(err, result) {
+      if (err) return reject(err, result);
+      return resolve(null, result);
+    });
+  }.bind(this))
 };

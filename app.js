@@ -328,8 +328,8 @@ app.put('/request/:action', validation.requireLogin, route_db.updateRequest);
 app.delete('/request', validation.requireLogin, route_db.deleteRequest);
 
 app.get('/plan_lists', validation.requireLogin, rehearsal_plan.getPlanLists);
-app.get('/plan', validation.requireLogin, rehearsal_plan.getPlan);
-app.post('/plan', validation.requireLogin, rehearsal_plan.postPlan);
+app.get('/rehearsal_plan', validation.requireLogin, rehearsal_plan.getPlan);
+app.post('/rehearsal_plan', validation.requireLogin, rehearsal_plan.postPlan);
 
 // Authentication handlers
 app.get('/login', login.login);

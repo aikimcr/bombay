@@ -218,7 +218,7 @@ describe('rehearsal_plan', function() {
 
     var old_rehearsal_date;
     var rehearsal_plan_id;
-    it('should save the plan', function(done) {
+    it('should save the plan(1)', function(done) {
       var run_through = run_through_list.splice(0, 5);
       var learning = learning_list.splice(0, 2);
       run_through_list = [{
@@ -322,7 +322,7 @@ describe('rehearsal_plan', function() {
       }];
       old_rehearsal_date = rehearsal_date;
 
-      rehearsal_plan.save(rehearsal_date, run_through, learning, function(err, plan_id) {
+      rehearsal_plan.save(1, rehearsal_date, run_through, learning, function(err, plan_id) {
         should.not.exist(err);
         should.exist(plan_id);
         rehearsal_plan_id = plan_id;
@@ -337,6 +337,18 @@ describe('rehearsal_plan', function() {
         plan.should.have.property('rehearsal_plan');
         plan.should.have.property('run_through_songs');
         plan.should.have.property('learning_songs');
+        done();
+      });
+    });
+
+    it('should get the plans by band_id', function(done) {
+      rehearsal_plan.getForBand(1, function(err, rows) {
+        should.not.exist(err);
+        should.exist(rows);
+        rows.length.should.equal(1);
+        rows[0].should.have.property('rehearsal_plan');
+        rows[0].should.have.property('run_through_songs');
+        rows[0].should.have.property('learning_songs');
         done();
       });
     });
@@ -366,7 +378,7 @@ describe('rehearsal_plan', function() {
       });
     });
 
-    it('should save the plan', function(done) {
+    it('should save the plan(2)', function(done) {
       var run_through = run_through_list.splice(0, 5);
       var learning = learning_list.splice(0, 2);
       run_through_list = [{
@@ -469,7 +481,7 @@ describe('rehearsal_plan', function() {
         score: 47.54887502163469
       }];
 
-      rehearsal_plan.save(rehearsal_date, run_through, learning, function(err) {
+      rehearsal_plan.save(1, rehearsal_date, run_through, learning, function(err) {
         should.not.exist(err);
         done();
       });
@@ -799,10 +811,11 @@ describe('rehearsal_plan', function() {
       rehearsal_plan_routes.getPlanLists(req, res);
     });
 
-    it('should save a plan', function(done) {
+    it('should save the plan(3)', function(done) {
       var run_through_sequence = 0;
       var learning_sequence = 0;
       req.body = {
+        band_id: 1,
         rehearsal_date: plan_lists.rehearsal_date,
         run_through_songs: JSON.stringify(plan_lists.run_through_songs.splice(0, 5).map(function(song) {
           
@@ -823,6 +836,7 @@ describe('rehearsal_plan', function() {
       var expected = {
         rehearsal_plan: {
           id: 1,
+          band_id: 1,
           rehearsal_date: req.body.rehearsal_date,
         },
         run_through_songs: [{
@@ -879,6 +893,134 @@ describe('rehearsal_plan', function() {
         done();
       };
       rehearsal_plan_routes.postPlan(req, res);
+    });
+
+    it('should get the rehearsal plan', function(done) {
+      req.query = {id: 1};
+      var expected = {
+        rehearsal_plan: {
+          id: 1,
+          band_id: 1,
+          rehearsal_date: '2014-06-01',
+        },
+        run_through_songs: [{
+          id: 1,
+          rehearsal_plan_id: 1,
+          band_song_id: 1,
+          sequence: 1
+        }, {
+          id: 2,
+          rehearsal_plan_id: 1,
+          band_song_id: 7,
+          sequence: 2
+        }, {
+          id: 3,
+          rehearsal_plan_id: 1,
+          band_song_id: 4,
+          sequence: 3
+        }, {
+          id: 4,
+          rehearsal_plan_id: 1,
+          band_song_id: 5,
+          sequence: 4
+        }, {
+          id: 5,
+          rehearsal_plan_id: 1,
+          band_song_id: 2,
+          sequence: 5
+        }],
+        learning_songs: [{
+          id: 1,
+          rehearsal_plan_id: 1,
+          band_song_id: 9,
+          sequence: 1
+        }, {
+          id: 2,
+          rehearsal_plan_id: 1,
+          band_song_id: 12,
+          sequence: 2
+        }]
+      };
+      res.json = function(result_code, result) {
+        should.exist(result_code);
+        result_code.should.eql(200);
+        should.exist(result);
+
+        var result_diff = diff(result, expected);
+
+        should.not.exist(result_diff, util.inspect({
+          got: result,
+          expected: expected,
+          diff: result_diff
+        }, {depth: 4}));
+        plan_lists = result;
+        done();
+      };
+      rehearsal_plan_routes.getPlan(req, res);
+    });
+
+    it('should get all the rehearsal plans for the band', function(done) {
+      req.query = {band_id: 1};
+      var expected = [{
+        rehearsal_plan: {
+          id: 1,
+          band_id: 1,
+          rehearsal_date: '2014-06-01',
+        },
+        run_through_songs: [{
+          id: 1,
+          rehearsal_plan_id: 1,
+          band_song_id: 1,
+          sequence: 1
+        }, {
+          id: 2,
+          rehearsal_plan_id: 1,
+          band_song_id: 7,
+          sequence: 2
+        }, {
+          id: 3,
+          rehearsal_plan_id: 1,
+          band_song_id: 4,
+          sequence: 3
+        }, {
+          id: 4,
+          rehearsal_plan_id: 1,
+          band_song_id: 5,
+          sequence: 4
+        }, {
+          id: 5,
+          rehearsal_plan_id: 1,
+          band_song_id: 2,
+          sequence: 5
+        }],
+        learning_songs: [{
+          id: 1,
+          rehearsal_plan_id: 1,
+          band_song_id: 9,
+          sequence: 1
+        }, {
+          id: 2,
+          rehearsal_plan_id: 1,
+          band_song_id: 12,
+          sequence: 2
+        }]
+      }];
+      res.json = function(result_code, result) {
+        should.exist(result_code);
+        result_code.should.eql(200);
+        should.exist(result);
+
+        var result_diff = diff(result, expected);
+
+        should.not.exist(result_diff, util.inspect({
+          got: result,
+          expected: expected,
+          diff: result_diff
+        }, {depth: 4}));
+        plan_lists = result;
+        done();
+      };
+      rehearsal_plan_routes.getPlan(req, res);
     });
   });
 });
