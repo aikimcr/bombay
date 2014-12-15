@@ -251,6 +251,32 @@ body {
 .display .dashboard_list {
   height: 275px;
 }
+table.song_list td {
+  vertical-align: top;
+  padding: 5px;
+}
+div.song_list {
+  margin: 5px;
+}
+div.song_list div.list_row {
+  border: thin solid #000;
+  border-radius: 10px;
+  padding: 5px;
+}
+div.song_list div.list_row > div:nth-child(odd) {
+  background-color: #ecedd3;
+}
+div.song_list div.list_row > div:nth-child(even) {
+  background-color: #fefeea;
+}
+div.song_list div.list_row > div > div {
+  display: inline-block;
+}
+div.song_list div.list_row > div > div:first-child {
+  width: 30px;
+  text-align: right;
+  padding-right: 5px;
+}
 #add_band_form .dialog_background {
   z-index: 200;
 }

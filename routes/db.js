@@ -19,7 +19,7 @@ function handleJSONResponse(res, err, result) {
   }
 }
 
-function getModel(res, model_name, row_id, sort, result_key, opt_row_transform) {
+exports.getModel = function(res, model_name, row_id, sort, result_key, opt_row_transform) {
   var row_transform = opt_row_transform || function(row) { return row; };
   var flatten = function(row) { return JSON.parse(JSON.stringify(row)); };
   if (row_id) {
@@ -53,7 +53,7 @@ function getPostData(model_name, options) {
   return data;
 }
 
-function postModel(res, model_name, options, result_key) {
+exports.postModel = function(res, model_name, options, result_key) {
   var data = getPostData(model_name, options);
   db_orm[model_name].create([data], function(err, rows) {
     var result = {};
@@ -62,7 +62,7 @@ function postModel(res, model_name, options, result_key) {
   });
 }
 
-function putModel(res, model_name, options, result_key) {
+exports.putModel = function(res, model_name, options, result_key) {
   var model = db_orm[model_name];
   model.get(options.id, function(err, row) {
     handleJSONResponse(res, err, function() {
@@ -90,7 +90,7 @@ function putModel(res, model_name, options, result_key) {
   });
 }
 
-function deleteModel(res, model_name, row_id, result_key) {
+exports.deleteModel = function(res, model_name, row_id, result_key) {
   db_orm[model_name].get(row_id, function(err, row) {
     handleJSONResponse(res, err, function() {
       row.remove(function(err) {
@@ -109,31 +109,31 @@ exports.getSessionInfo = function(req, res) {
   var user = JSON.parse(session.user);
   //console.log(user);
 
-  getModel(res, 'Person', user.id, 'full_name', 'person');
+  this.getModel(res, 'Person', user.id, 'full_name', 'person');
 };
 
 exports.getBandTable = function(req, res) {
   var band_id = req.params.id;
   if (!band_id) band_id = req.query.id;
-  getModel(res, 'Band', band_id, 'name', 'band');
+  this.getModel(res, 'Band', band_id, 'name', 'band');
 };
 
 exports.postBandTable = function(req, res) {
-  postModel(res, 'Band', req.body, 'band');
+  this.postModel(res, 'Band', req.body, 'band');
 };
 
 exports.putBandTable = function(req, res) {
-  putModel(res, 'Band', req.query, 'band');
+  this.putModel(res, 'Band', req.query, 'band');
 };
 
 exports.deleteBandTable = function(req, res) {
-  deleteModel(res, 'Band', req.query.id, 'band');
+  this.deleteModel(res, 'Band', req.query.id, 'band');
 };
 
 exports.getPersonTable = function(req, res) {
   var person_id = req.params.id;
   if (!person_id) person_id = req.query.id;
-  getModel(res, 'Person', person_id, 'full_name', 'person', function(row) {
+  this.getModel(res, 'Person', person_id, 'full_name', 'person', function(row) {
     delete row.password;
     return row;
   });
@@ -145,7 +145,7 @@ exports.postPersonTable = function(req, res) {
   req.body.password = util.encrypt(pem, password);
   req.body.system_admin = req.body.system_admin || false;
   req.body.session_expires = req.body.session_expires || 30;
-  postModel(res, 'Person', req.body, 'person');
+  this.postModel(res, 'Person', req.body, 'person');
 };
 
 exports.putPersonTable = function(req, res) {
@@ -192,72 +192,72 @@ exports.putPersonTable = function(req, res) {
       });
     });
   } else {
-    putModel(res, 'Person', req.query, 'person');
+    this.putModel(res, 'Person', req.query, 'person');
   }
 };
 
 exports.deletePersonTable = function(req, res) {
-  deleteModel(res, 'Person', req.query.id, 'person');
+  this.deleteModel(res, 'Person', req.query.id, 'person');
 };
 
 exports.getArtistTable = function(req, res) {
   var artist_id = req.params.id;
   if (!artist_id) artist_id = req.query.id;
-  getModel(res, 'Artist', artist_id, 'name', 'artist');
+  this.getModel(res, 'Artist', artist_id, 'name', 'artist');
 };
 
 exports.postArtistTable = function(req, res) {
-  postModel(res, 'Artist', req.body, 'artist');
+  this.postModel(res, 'Artist', req.body, 'artist');
 };
 
 exports.putArtistTable = function(req, res) {
-  putModel(res, 'Artist', req.query, 'artist');
+  this.putModel(res, 'Artist', req.query, 'artist');
 };
 
 exports.deleteArtistTable = function(req, res) {
-  deleteModel(res, 'Artist', req.query.id, 'artist');
+  this.deleteModel(res, 'Artist', req.query.id, 'artist');
 };
 
 exports.getSongTable = function(req, res) {
   var song_id = req.params.id;
   if (!song_id) song_id = req.query.id;
-  getModel(res, 'Song', song_id, 'name', 'song');
+  this.getModel(res, 'Song', song_id, 'name', 'song');
 };
 
 exports.postSongTable = function(req, res) {
-  postModel(res, 'Song', req.body, 'song');
+  this.postModel(res, 'Song', req.body, 'song');
 };
 
 exports.putSongTable = function(req, res) {
-  putModel(res, 'Song', req.query, 'song');
+  this.putModel(res, 'Song', req.query, 'song');
 };
 
 exports.deleteSongTable = function(req, res) {
-  deleteModel(res, 'Song', req.query.id, 'song');
+  this.deleteModel(res, 'Song', req.query.id, 'song');
 };
 
 exports.getBandMemberTable = function(req, res) {
   var band_member_id = req.params.id;
   if (!band_member_id) band_member_id = req.query.id;
-  getModel(res, 'BandMember', band_member_id, ['band_id', 'person_id'], 'band_member');
+  this.getModel(res, 'BandMember', band_member_id, ['band_id', 'person_id'], 'band_member');
 };
 
 exports.postBandMemberTable = function(req, res) {
-  postModel(res, 'BandMember', req.body, 'band_member');
+  this.postModel(res, 'BandMember', req.body, 'band_member');
 };
 
 exports.putBandMemberTable = function(req, res) {
-  putModel(res, 'BandMember', req.query, 'band_member');
+  this.putModel(res, 'BandMember', req.query, 'band_member');
 };
 
 exports.deleteBandMemberTable = function(req, res) {
-  deleteModel(res, 'BandMember', req.query.id, 'band_member');
+  this.deleteModel(res, 'BandMember', req.query.id, 'band_member');
 };
 
 exports.getBandSongTable = function(req, res) {
   var band_song_id = req.params.id;
   if (!band_song_id) band_song_id = req.query.id;
-  getModel(res, 'BandSong', band_song_id, ['band_id', 'song_id'], 'band_song');
+  this.getModel(res, 'BandSong', band_song_id, ['band_id', 'song_id'], 'band_song');
 };
 
 exports.postBandSongTable = function(req, res) {
@@ -282,30 +282,30 @@ exports.postBandSongTable = function(req, res) {
 };
 
 exports.putBandSongTable = function(req, res) {
-  putModel(res, 'BandSong', req.query, 'band_song');
+  this.putModel(res, 'BandSong', req.query, 'band_song');
 };
 
 exports.deleteBandSongTable = function(req, res) {
-  deleteModel(res, 'BandSong', req.query.id, 'band_song');
+  this.deleteModel(res, 'BandSong', req.query.id, 'band_song');
 };
 
 exports.getSongRatingTable = function(req, res) {
   var song_rating_id = req.params.id;
   if (!song_rating_id) song_rating_id = req.query.id;
-  getModel(res, 'SongRating', song_rating_id, ['band_member_id', 'band_song_id'], 'song_rating');
+  this.getModel(res, 'SongRating', song_rating_id, ['band_member_id', 'band_song_id'], 'song_rating');
 };
 
 exports.postSongRatingTable = function(req, res) {
-  postModel(res, 'SongRating', req.body, 'song_rating');
+  this.postModel(res, 'SongRating', req.body, 'song_rating');
 };
 
 exports.putSongRatingTable = function(req, res) {
   req.query.is_new = false;
-  putModel(res, 'SongRating', req.query, 'song_rating');
+  this.putModel(res, 'SongRating', req.query, 'song_rating');
 };
 
 exports.deleteSongRatingTable = function(req, res) {
-  deleteModel(res, 'SongRating', req.query.id, 'song_rating');
+  this.deleteModel(res, 'SongRating', req.query.id, 'song_rating');
 };
 
 // Requests
@@ -500,11 +500,11 @@ exports.deleteRequest = function(req, res) {
           if (err) {
             res.json(500, err);
           } else if (is_allowed(result, user, band_member)) {
-            deleteModel(res, 'Request', req.query.id, 'request');
+            this.deleteModel(res, 'Request', req.query.id, 'request');
           } else {
             res.json(403, 'Permission denied');
           }
-        });
+        }.bind(this));
       }
     });
   } else {

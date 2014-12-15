@@ -102,6 +102,8 @@ function Manager() {
   this.createRequest();
   this.createReport();
   this.createRehearsalPlan();
+  this.createRehearsalPlanRunThroughSong();
+  this.createRehearsalPlanLearningSong();
 
   this.tab_list = ko.computed(function() {
     var result = tab_list = [
@@ -919,6 +921,7 @@ Manager.CreatePlanForm.prototype.showForm = function(show_form_object, event) {
     }.bind(this),
     function(data, column_names, callback) {
       callback({
+        band_id: this.context_base.current_band().id(),
         rehearsal_date: data.rehearsal_date().toISOString().substr(0, 10),
         run_through_songs: this.mapSelectedSongs(data.run_through_selected()),
         learning_songs: this.mapSelectedSongs(data.learning_selected())
@@ -1019,6 +1022,7 @@ Manager.prototype.showCreatePlanForm_ = function(show_form_object, event) {
 
 Manager.prototype.createRehearsalPlan = function() {
   this.rehearsal_plan = orm.define(this, 'rehearsal_plan', {
+    band_id: {type: 'reference', reference_table: this.band},
     rehearsal_date: {type: 'date'}
   }, {
 /*
@@ -1026,21 +1030,21 @@ Manager.prototype.createRehearsalPlan = function() {
     }],
 */
     filters: [{
-      name: 'max_rehearsal_run_through_count',
+      name: 'max_rehearsal_plan_run_through_song_count',
       type: 'max',
-      column_name: 'rehearsalRunThroughCount'
+      column_name: 'rehearsalPlanRunThroughSongCount'
     }, {
-      name: 'min_rehearsal_run_through_count',
+      name: 'min_rehearsal_plan_run_through_song_count',
       type: 'min',
-      column_name: 'rehearsalRunThroughCount'
+      column_name: 'rehearsalPlanRunThroughSongCount'
     }, {
-      name: 'max_rehearsal_learning_count',
+      name: 'max_rehearsal_plan_learning_song_count',
       type: 'max',
-      column_name: 'rehearsalLearningCount'
+      column_name: 'rehearsalPlanLearningSongCount'
     }, {
-      name: 'min_rehearsal_learning_count',
+      name: 'min_rehearsal_plan_learning_song_count',
       type: 'min',
-      column_name: 'rehearsalLearningCount'
+      column_name: 'rehearsalPlanLearningSongCount'
     }],
     sort: [{
       name: 'date_asc',
@@ -1056,8 +1060,8 @@ Manager.prototype.createRehearsalPlan = function() {
   this.rehearsal_plan.create_plan_form = new Manager.CreatePlanForm(this);
 };
 
-Manager.prototype.createRehearsalRunThrough = function() {
-  this.rehearsal_run_through = orm.define(this, 'rehearsal_run_through', {
+Manager.prototype.createRehearsalPlanRunThroughSong = function() {
+  this.rehearsal_plan_run_through_song = orm.define(this, 'rehearsal_plan_run_through_song', {
     rehearsal_plan_id: {type: 'reference', reference_table: this.rehearsal_plan},
     sequence: {type: 'integer'},
     band_song_id: {type: 'reference', reference_table: this.band_song}
@@ -1070,8 +1074,8 @@ Manager.prototype.createRehearsalRunThrough = function() {
   });
 };
 
-Manager.prototype.createRehearsalLearning = function() {
-  this.rehearsal_learning = orm.define(this, 'rehearsal_learning', {
+Manager.prototype.createRehearsalPlanLearningSong = function() {
+  this.rehearsal_plan_learning_song = orm.define(this, 'rehearsal_plan_learning_song', {
     rehearsal_plan_id: {type: 'reference', reference_table: this.rehearsal_plan},
     sequence: {type: 'integer'},
     band_song_id: {type: 'reference', reference_table: this.band_song}
@@ -1096,6 +1100,8 @@ Manager.prototype.loadTables = function(cb) {
     .then(this.loadRequests_())
     .then(this.loadReports_())
     .then(this.loadRehearsalPlan_())
+    .then(this.loadRehearsalPlanRunThroughSongs_())
+    .then(this.loadRehearsalPlanLearningSongs_())
     .then(cb)
     .done();
 };
@@ -1207,6 +1213,24 @@ Manager.prototype.loadReports_ = function() {
 Manager.prototype.loadRehearsalPlan_ = function() {
   return Q.promise(function(resolve, reject, notify) {
     this.rehearsal_plan.load(function(err, result) {
+      if (err) return reject(err, result);
+      return resolve(null, result);
+    });
+  }.bind(this))
+};
+
+Manager.prototype.loadRehearsalPlanRunThroughSongs_ = function() {
+  return Q.promise(function(resolve, reject, notify) {
+    this.rehearsal_plan_run_through_song.load(function(err, result) {
+      if (err) return reject(err, result);
+      return resolve(null, result);
+    });
+  }.bind(this))
+};
+
+Manager.prototype.loadRehearsalPlanLearningSongs_ = function() {
+  return Q.promise(function(resolve, reject, notify) {
+    this.rehearsal_plan_learning_song.load(function(err, result) {
       if (err) return reject(err, result);
       return resolve(null, result);
     });

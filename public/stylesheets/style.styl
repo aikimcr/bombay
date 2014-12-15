@@ -280,6 +280,32 @@ body
   .dashboard_list
     height: 275px
 
+table.song_list td
+    vertical-align: top
+    padding: 5px
+
+div.song_list
+  margin: 5px
+
+  div.list_row
+    border: thin solid black
+    border-radius: 10px;
+    padding: 5px
+
+  div.list_row > div:nth-child(odd)
+    background-color: stripe-color-odd
+
+  div.list_row > div:nth-child(even)
+    background-color: stripe-color-even
+
+  div.list_row > div > div
+    display: inline-block
+
+  div.list_row > div > div:first-child
+    width: 30px;
+    text-align: right
+    padding-right: 5px
+
 // Dialog classes
 #add_band_form .dialog_background
   z-index: 200

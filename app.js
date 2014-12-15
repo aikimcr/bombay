@@ -212,124 +212,127 @@ if ('development' == app.get('env')) {
 app.get('/', validation.requireLogin, index.index);
 
 // Band
-app.get('/band', validation.requireLogin, route_db.getBandTable);
-app.post('/band', validation.requireLogin, route_db.postBandTable);
+app.get('/band', validation.requireLogin, route_db.getBandTable.bind(route_db));
+app.post('/band', validation.requireLogin, route_db.postBandTable.bind(route_db));
 app.put(
   '/band',
   validation.requireLogin,
   validation.requireBandAdmin,
-  route_db.putBandTable
+  route_db.putBandTable.bind(route_db)
 );
 app.delete(
   '/band',
   validation.requireLogin,
   validation.requireBandAdmin,
-  route_db.deleteBandTable
+  route_db.deleteBandTable.bind(route_db)
 );
 
 // Person
-app.get('/person', validation.requireLogin, route_db.getPersonTable);
-app.post('/person', validation.requireLogin, route_db.postPersonTable);
+app.get('/person', validation.requireLogin, route_db.getPersonTable.bind(route_db));
+app.post('/person', validation.requireLogin, route_db.postPersonTable.bind(route_db));
 app.put(
   '/person',
   validation.requireLogin,
   validation.requireSelfOrAdmin,
-  route_db.putPersonTable
+  route_db.putPersonTable.bind(route_db)
 );
 app.delete(
   '/person',
   validation.requireLogin,
   validation.requireSelfOrAdmin,
-  route_db.deletePersonTable
+  route_db.deletePersonTable.bind(route_db)
 );
 
 // Artist
-app.get('/artist', validation.requireLogin, route_db.getArtistTable);
-app.post('/artist', validation.requireLogin, route_db.postArtistTable);
-app.put('/artist', validation.requireLogin, route_db.putArtistTable);
+app.get('/artist', validation.requireLogin, route_db.getArtistTable.bind(route_db));
+app.post('/artist', validation.requireLogin, route_db.postArtistTable.bind(route_db));
+app.put('/artist', validation.requireLogin, route_db.putArtistTable.bind(route_db));
 app.delete(
   '/artist',
   validation.requireLogin,
   validation.requireSysAdmin,
-  route_db.deleteArtistTable
+  route_db.deleteArtistTable.bind(route_db)
 );
 
 // Song
-app.get('/song', validation.requireLogin, route_db.getSongTable);
-app.post('/song', validation.requireLogin, route_db.postSongTable);
-app.put('/song', validation.requireLogin, route_db.putSongTable);
+app.get('/song', validation.requireLogin, route_db.getSongTable.bind(route_db));
+app.post('/song', validation.requireLogin, route_db.postSongTable.bind(route_db));
+app.put('/song', validation.requireLogin, route_db.putSongTable.bind(route_db));
 app.delete(
   '/song',
   validation.requireLogin,
   validation.requireSysAdmin,
-  route_db.deleteSongTable
+  route_db.deleteSongTable.bind(route_db)
 );
 
 // BandMember
-app.get('/band_member', validation.requireLogin, route_db.getBandMemberTable);
+app.get('/band_member', validation.requireLogin, route_db.getBandMemberTable.bind(route_db));
 app.post(
   '/band_member',
   validation.requireSysAdmin,
-  route_db.postBandMemberTable
+  route_db.postBandMemberTable.bind(route_db)
 );
 app.put(
   '/band_member',
   validation.requireLogin,
   validation.requireSelfOrAdmin,
-  route_db.putBandMemberTable
+  route_db.putBandMemberTable.bind(route_db)
 );
 app.delete(
   '/band_member',
   validation.requireLogin,
   validation.requireSelfOrAdmin,
-  route_db.deleteBandMemberTable
+  route_db.deleteBandMemberTable.bind(route_db)
 );
 
 // BandSong
-app.get('/band_song', validation.requireLogin, route_db.getBandSongTable);
-app.post('/band_song', validation.requireLogin, route_db.postBandSongTable);
+app.get('/band_song', validation.requireLogin, route_db.getBandSongTable.bind(route_db));
+app.post('/band_song', validation.requireLogin, route_db.postBandSongTable.bind(route_db));
 app.put(
   '/band_song',
   validation.requireLogin,
   validation.requireBandAdmin,
-  route_db.putBandSongTable
+  route_db.putBandSongTable.bind(route_db)
 );
 app.delete(
   '/band_song',
   validation.requireLogin,
   validation.requireBandAdmin,
-  route_db.deleteBandSongTable
+  route_db.deleteBandSongTable.bind(route_db)
 );
 
 // SongRating
-app.get('/song_rating', validation.requireLogin, route_db.getSongRatingTable);
+app.get('/song_rating', validation.requireLogin, route_db.getSongRatingTable.bind(route_db));
 app.post(
   '/song_rating',
   validation.requireLogin,
   validation.requireSelfOrAdmin,
-  route_db.postSongRatingTable
+  route_db.postSongRatingTable.bind(route_db)
 );
 app.put(
   '/song_rating',
   validation.requireLogin,
   validation.requireSelfOrAdmin,
-  route_db.putSongRatingTable
+  route_db.putSongRatingTable.bind(route_db)
 );
 app.delete(
   '/song_rating',
   validation.requireLogin,
   validation.requireSelfOrAdmin,
-  route_db.deleteSongRatingTable
+  route_db.deleteSongRatingTable.bind(route_db)
 );
 
-app.get('/request', validation.requireLogin, route_db.getRequest);
-app.post('/request/:action', validation.requireLogin, route_db.createRequest);
-app.put('/request/:action', validation.requireLogin, route_db.updateRequest);
-app.delete('/request', validation.requireLogin, route_db.deleteRequest);
+app.get('/request', validation.requireLogin, route_db.getRequest.bind(route_db));
+app.post('/request/:action', validation.requireLogin, route_db.createRequest.bind(route_db));
+app.put('/request/:action', validation.requireLogin, route_db.updateRequest.bind(route_db));
+app.delete('/request', validation.requireLogin, route_db.deleteRequest.bind(route_db));
 
 app.get('/plan_lists', validation.requireLogin, rehearsal_plan.getPlanLists);
 app.get('/rehearsal_plan', validation.requireLogin, rehearsal_plan.getPlan);
 app.post('/rehearsal_plan', validation.requireLogin, rehearsal_plan.postPlan);
+
+app.get('/rehearsal_plan_run_through_song', validation.requireLogin, rehearsal_plan.getRunThroughSongs);
+app.get('/rehearsal_plan_learning_song', validation.requireLogin, rehearsal_plan.getLearningSongs);
 
 // Authentication handlers
 app.get('/login', login.login);
@@ -386,7 +389,7 @@ app.get('/logout', function(req, res) {
 });
 
 // SessionInfo
-app.get('/session_info', validation.requireLogin, route_db.getSessionInfo);
+app.get('/session_info', validation.requireLogin, route_db.getSessionInfo.bind(route_db));
 
 // Forms
 app.get('/forms/:form_type', function(req, res) {

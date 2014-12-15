@@ -335,20 +335,8 @@ describe('rehearsal_plan', function() {
         should.not.exist(err);
         should.exist(plan);
         plan.should.have.property('rehearsal_plan');
-        plan.should.have.property('run_through_songs');
-        plan.should.have.property('learning_songs');
-        done();
-      });
-    });
-
-    it('should get the plans by band_id', function(done) {
-      rehearsal_plan.getForBand(1, function(err, rows) {
-        should.not.exist(err);
-        should.exist(rows);
-        rows.length.should.equal(1);
-        rows[0].should.have.property('rehearsal_plan');
-        rows[0].should.have.property('run_through_songs');
-        rows[0].should.have.property('learning_songs');
+        plan.should.have.property('rehearsal_plan_run_through_songs');
+        plan.should.have.property('rehearsal_plan_learning_songs');
         done();
       });
     });
@@ -492,8 +480,8 @@ describe('rehearsal_plan', function() {
         should.not.exist(err);
         should.exist(plan);
         plan.should.have.property('rehearsal_plan');
-        plan.should.have.property('run_through_songs');
-        plan.should.have.property('learning_songs');
+        plan.should.have.property('rehearsal_plan_run_through_songs');
+        plan.should.have.property('rehearsal_plan_learning_songs');
         done();
       });
     });
@@ -839,7 +827,7 @@ describe('rehearsal_plan', function() {
           band_id: 1,
           rehearsal_date: req.body.rehearsal_date,
         },
-        run_through_songs: [{
+        rehearsal_plan_run_through_songs: [{
           id: 1,
           rehearsal_plan_id: 1,
           band_song_id: 1,
@@ -865,7 +853,7 @@ describe('rehearsal_plan', function() {
           band_song_id: 2,
           sequence: 5
         }],
-        learning_songs: [{
+        rehearsal_plan_learning_songs: [{
           id: 1,
           rehearsal_plan_id: 1,
           band_song_id: 9,
@@ -903,43 +891,6 @@ describe('rehearsal_plan', function() {
           band_id: 1,
           rehearsal_date: '2014-06-01',
         },
-        run_through_songs: [{
-          id: 1,
-          rehearsal_plan_id: 1,
-          band_song_id: 1,
-          sequence: 1
-        }, {
-          id: 2,
-          rehearsal_plan_id: 1,
-          band_song_id: 7,
-          sequence: 2
-        }, {
-          id: 3,
-          rehearsal_plan_id: 1,
-          band_song_id: 4,
-          sequence: 3
-        }, {
-          id: 4,
-          rehearsal_plan_id: 1,
-          band_song_id: 5,
-          sequence: 4
-        }, {
-          id: 5,
-          rehearsal_plan_id: 1,
-          band_song_id: 2,
-          sequence: 5
-        }],
-        learning_songs: [{
-          id: 1,
-          rehearsal_plan_id: 1,
-          band_song_id: 9,
-          sequence: 1
-        }, {
-          id: 2,
-          rehearsal_plan_id: 1,
-          band_song_id: 12,
-          sequence: 2
-        }]
       };
       res.json = function(result_code, result) {
         should.exist(result_code);
@@ -959,15 +910,9 @@ describe('rehearsal_plan', function() {
       rehearsal_plan_routes.getPlan(req, res);
     });
 
-    it('should get all the rehearsal plans for the band', function(done) {
-      req.query = {band_id: 1};
-      var expected = [{
-        rehearsal_plan: {
-          id: 1,
-          band_id: 1,
-          rehearsal_date: '2014-06-01',
-        },
-        run_through_songs: [{
+    it('should get the run through songs', function(done) {
+      var expected = {
+        all_rehearsal_plan_run_through_songs: [{
           id: 1,
           rehearsal_plan_id: 1,
           band_song_id: 1,
@@ -993,18 +938,7 @@ describe('rehearsal_plan', function() {
           band_song_id: 2,
           sequence: 5
         }],
-        learning_songs: [{
-          id: 1,
-          rehearsal_plan_id: 1,
-          band_song_id: 9,
-          sequence: 1
-        }, {
-          id: 2,
-          rehearsal_plan_id: 1,
-          band_song_id: 12,
-          sequence: 2
-        }]
-      }];
+      };
       res.json = function(result_code, result) {
         should.exist(result_code);
         result_code.should.eql(200);
@@ -1020,7 +954,39 @@ describe('rehearsal_plan', function() {
         plan_lists = result;
         done();
       };
-      rehearsal_plan_routes.getPlan(req, res);
+      rehearsal_plan_routes.getRunThroughSongs(req, res);
+    });
+
+    it('should get the learning songs', function(done) {
+      var expected = {
+        all_rehearsal_plan_learning_songs: [{
+          id: 1,
+          rehearsal_plan_id: 1,
+          band_song_id: 9,
+          sequence: 1
+        }, {
+          id: 2,
+          rehearsal_plan_id: 1,
+          band_song_id: 12,
+          sequence: 2
+        }]
+      };
+      res.json = function(result_code, result) {
+        should.exist(result_code);
+        result_code.should.eql(200);
+        should.exist(result);
+
+        var result_diff = diff(result, expected);
+
+        should.not.exist(result_diff, util.inspect({
+          got: result,
+          expected: expected,
+          diff: result_diff
+        }, {depth: 4}));
+        plan_lists = result;
+        done();
+      };
+      rehearsal_plan_routes.getLearningSongs(req, res);
     });
   });
 });
