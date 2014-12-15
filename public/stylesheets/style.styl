@@ -139,7 +139,7 @@ body
   padding: 10px
   overflow: hidden
 
-.close_button, .edit_button
+.close_button, .edit_button, .control_button
   display: inline-block
   border-style: solid
   border-color: main-border-color
@@ -153,8 +153,10 @@ body
   font-size: 20px
   text-align: center
 
-.close_button:hover, .edit_button:hover
+.close_button:hover, .edit_button:hover, .control_button:hover
   cursor: pointer
+  background-color: button-text-color
+  color: button-background-color
 
 .control label
   display: inline-block
@@ -165,6 +167,7 @@ body
   width: display-width
   display: block
   height: 35px
+  margin-top: 5px
 
 .display
   font-size: 120%
@@ -278,7 +281,12 @@ body
       border-right-width: 0
 
   .dashboard_list
-    height: 275px
+    height: inherit
+    max-height: container-height - 250px
+    margin-top: 20px
+
+.hidden
+  display: none
 
 table.song_list td
     vertical-align: top
@@ -300,6 +308,8 @@ div.song_list
 
   div.list_row > div > div
     display: inline-block
+    vertical-align: top
+    max-width: 380px
 
   div.list_row > div > div:first-child
     width: 30px;

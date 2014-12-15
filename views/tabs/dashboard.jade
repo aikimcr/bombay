@@ -23,8 +23,17 @@ div.app_context(id="dashboard", data-bind="visible: $root.current_tab().value ==
               td
                 div.filter
 
+      div.control
+        div.control_button(data-bind="click: $root.dashboard_click"
+                           name="requests") Requests
 
-      div.list.dashboard_list(data-bind="with: request")
+        div.control_button(data-bind="click: $root.dashboard_click"
+                           name="reports") Reports
+
+        div.control_button(data-bind="click: $root.dashboard_click"
+                           name="rehearsal_plans") Rehearsal Plans
+
+      div.list.dashboard_list(data-bind="with: request, css: { hidden: $root.dashboard_list() != 'requests' }")
         div.title Requests
         div.title(data-bind="text: last_error")
         table
@@ -54,7 +63,7 @@ div.app_context(id="dashboard", data-bind="visible: $root.current_tab().value ==
               td(data-bind="text: pretty_request_type")
               td(data-bind="text: pretty_status")
 
-      div.list.dashboard_list(data-bind="if: current_band")
+      div.list.dashboard_list(data-bind="if: current_band, css: { hidden: $root.dashboard_list() != 'reports' }")
         div.title Reports
         div.title(data-bind="text: report.last_error")
         table
@@ -70,7 +79,7 @@ div.app_context(id="dashboard", data-bind="visible: $root.current_tab().value ==
 
               td(data-bind="text: timestamp")
 
-      div.list.dashboard_list(data-bind="if: current_band")
+      div.list.dashboard_list(data-bind="if: current_band, css: { hidden: $root.dashboard_list() != 'rehearsal_plans' }")
         div.title Rehearsal Plans
         div.title(data-bind="text: rehearsal_plan.last_error")
         table.song_list
@@ -91,7 +100,7 @@ div.app_context(id="dashboard", data-bind="visible: $root.current_tab().value ==
                      div
                        div(data-bind="text: sequence")
                        div(data-bind="text: band_song().description")
-             
+           
                td
                  div.song_list
                    div.list_row(data-bind="foreach: rehearsalPlanLearningSongList.views.default.sort.getList")

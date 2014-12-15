@@ -147,6 +147,13 @@ function Manager() {
     person_menu.addEventListener('select', handlePersonMenuSelect);
   }.bind(this);
 
+  this.dashboard_list = ko.observable('');
+
+  this.dashboard_click = function(object, event) {
+    var target = event.target;
+    this.dashboard_list(target.attributes.getNamedItem('name').value);
+  }.bind(this);
+
   this.testClick = function() {
     console.log('Test Click');
   };
@@ -943,7 +950,14 @@ Manager.CreatePlanForm.prototype.showForm = function(show_form_object, event) {
   }.bind(this));
 
   this.rehearsal_plan.form.on('update', function(result) {
-    console.log(result);//XXX
+    var last_err;
+    this.rehearsal_plan.updateFromResult(result, function(err) {
+      if (err) {
+        last_err = err;
+        this.form.setMessage(err.toString());
+      }
+    }.bind(this.rehearsal_plan));
+    return last_err == null;
   }.bind(this));
 
   this.rehearsal_plan.form.on('dispose', function() {

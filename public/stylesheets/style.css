@@ -109,7 +109,8 @@ body {
   overflow: hidden;
 }
 .close_button,
-.edit_button {
+.edit_button,
+.control_button {
   display: inline-block;
   border-style: solid;
   border-color: #3f8c83;
@@ -124,8 +125,11 @@ body {
   text-align: center;
 }
 .close_button:hover,
-.edit_button:hover {
+.edit_button:hover,
+.control_button:hover {
   cursor: pointer;
+  background-color: #000;
+  color: #b8dfda;
 }
 .control label {
   display: inline-block;
@@ -135,6 +139,7 @@ body {
   width: 1100px;
   display: block;
   height: 35px;
+  margin-top: 5px;
 }
 .display {
   font-size: 120%;
@@ -249,7 +254,12 @@ body {
   border-right-width: 0;
 }
 .display .dashboard_list {
-  height: 275px;
+  height: inherit;
+  max-height: 550px;
+  margin-top: 20px;
+}
+.hidden {
+  display: none;
 }
 table.song_list td {
   vertical-align: top;
@@ -271,6 +281,8 @@ div.song_list div.list_row > div:nth-child(even) {
 }
 div.song_list div.list_row > div > div {
   display: inline-block;
+  vertical-align: top;
+  max-width: 380px;
 }
 div.song_list div.list_row > div > div:first-child {
   width: 30px;

@@ -185,6 +185,18 @@ orm.table.prototype.load = function(callback) {
   }.bind(this));
 };
 
+orm.table.prototype.updateFromResult = function(result, handleErrors) {
+  var row_model = result[this.model_key];
+
+  try {
+    this.addOrUpdate(row_model, handleErrors.bind(this));
+  } catch (err) {
+    return handleErrors(err);
+  };
+
+  this.handleSubkeys_(result, handleErrors.bind(this));
+};
+
 orm.table.prototype.showForm = function(table, event, form_url, opt_validate, opt_prepareData, opt_other_columns) {
   var url = form_url ? form_url : '/forms/' + table.table_name + '.html';
   var columns = {}
@@ -221,15 +233,7 @@ orm.table.prototype.showForm = function(table, event, form_url, opt_validate, op
   }
 
   this.form.on('update', function(result) {
-    var row_model = result[this.model_key];
-
-    try {
-      this.addOrUpdate(row_model, handleErrors.bind(this));
-    } catch (err) {
-      return handleErrors(err);
-    };
-
-    this.handleSubkeys_(result, handleErrors.bind(this));
+    this.updateFromResult(result, handleErrors.bind(this)).bind(this);
     return last_err == null;
   }.bind(this));
 
