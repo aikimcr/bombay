@@ -32,6 +32,7 @@ results
 build
 .grunt
 
+bower_components
 node_modules
 
 .svn
