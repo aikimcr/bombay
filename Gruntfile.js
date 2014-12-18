@@ -175,7 +175,9 @@ module.exports = function(grunt) {
     var done = this.async();
     grunt.log.writeln(this.target + ': ' + this.data.db_name + ', ' + this.data.schema);
 
-    if (!grunt.file.exists(this.data.db_name)) {
+    if (grunt.file.exists(this.data.db_name)) {
+      done();
+    } else {
       grunt.file.write(this.data.db_name, '');
       grunt.util.spawn({
         cmd: '/bin/chmod',
