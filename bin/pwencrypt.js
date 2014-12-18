@@ -1,8 +1,8 @@
 #! /usr/local/bin/node
 var util = require('util');
 
-var db_orm = require('./lib/db_orm');
-var bombay_util = require('./lib/util');
+var db_orm = require('../lib/db_orm');
+var bombay_util = require('../lib/util');
 
 var public_pem = bombay_util.get_public_pem();
 var private_pem = bombay_util.get_private_pem();
