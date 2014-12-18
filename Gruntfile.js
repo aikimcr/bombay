@@ -84,7 +84,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-bower-install-simple');
   grunt.loadNpmTasks('grunt-mkdir');
 
-  grunt.registerTask('build-sinon', function() {
+  grunt.registerTask('build_sinon', function() {
     var done = this.async();
     grunt.file.setBase('bower_components/sinon');
     grunt.util.spawn({
@@ -100,6 +100,7 @@ module.exports = function(grunt) {
           if (err) {
             grunt.fail.fatal('Got ' + err.toString() + ' doing build for sinon');
           } else if (code === 0) {
+            grunt.file.setBase('../..');
             done();
           } else {
             grunt.fail.fatal(result.toString());
@@ -161,7 +162,7 @@ module.exports = function(grunt) {
         grunt.fail.fatal('Failed to create "' + path + '"');
       }
 
-      grunt.task.run('crypto_files');
+      grunt.task.run('rsa_files');
     }
 
     if (!grunt.file.isDir(path)) {
@@ -233,6 +234,7 @@ module.exports = function(grunt) {
     var files = [
       'public/javascripts/lib/bower_lib.js',
       'public/test/lib/bower_lib.js',
+      'public/test/lib/bower_lib.css',
       'reports'
     ];
 
@@ -266,7 +268,7 @@ module.exports = function(grunt) {
   });
 
   grunt.registerTask('prodlib', ['bower-install-simple:prod']);
-  grunt.registerTask('devlib', ['bower-install-simple:dev']);
+  grunt.registerTask('devlib', ['bower-install-simple:dev', 'build_sinon']);
   grunt.registerTask('prodjs', ['bower_concat:prod']);
   grunt.registerTask('devjs', ['bower_concat:dev']);
 
