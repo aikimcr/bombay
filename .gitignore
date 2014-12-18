@@ -4,15 +4,10 @@ crypto/rsa_private.pem.old
 crypto/rsa_public.pem
 crypto/rsa_public.pem.old
 bombay.db
-bombay_test.db
-bombay_snapshot.db
-public/html
+
+db_backup
 public/javascripts/lib
-public/test/lib/chai.js
-public/test/lib/mocha.css
-public/test/lib/mocha.js
-public/test/lib/sinon.js
-public/test/lib/sinon-chai.js
+public/test/lib
 reports
 
 *~
@@ -34,6 +29,7 @@ build
 
 bower_components
 node_modules
+bower_lib.*
 
 .svn
 *db_bkup*

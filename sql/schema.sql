@@ -273,4 +273,7 @@ INSERT INTO schema_change (name, timestamp)
        VALUES ('Add New Flag to song_rating', datetime('now'));
 
 INSERT INTO schema_change (name, timestamp)
+       VALUES ('Add Session Expires to person', datetime('now'));
+
+INSERT INTO schema_change (name, timestamp)
        VALUES ('Add Rehearsal Plan', datetime('now'));

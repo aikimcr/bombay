@@ -1,7 +1,7 @@
 /*
  * Encryption methods;
  */
-var util = require('lib/util');
+var util = require('../lib/util');
 
 exports.encryption = function(req, res) {
   if (req.query.action == 'pubkey') {

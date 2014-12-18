@@ -13,15 +13,15 @@ var RememberMeStrategy = require('passport-remember-me').Strategy;
 var path = require('path');
 var util = require('util');
 
-var bombay_util = require('lib/util');
-var db_orm = require('lib/db_orm');
-var encryption = require('routes/encryption');
-var index = require('routes/index');
-var login = require('routes/login');
-var reports = require('routes/reports');
-var route_db = require('routes/db');
-var rehearsal_plan = require('routes/rehearsal_plan');
-var validation = require('routes/validation');
+var bombay_util = require('./lib/util');
+var db_orm = require('./lib/db_orm');
+var encryption = require('./routes/encryption');
+var index = require('./routes/index');
+var login = require('./routes/login');
+var reports = require('./routes/reports');
+var route_db = require('./routes/db');
+var rehearsal_plan = require('./routes/rehearsal_plan');
+var validation = require('./routes/validation');
 
 //var session_expires = 24 * 3600 * 1000;
 var session_expires = 20 * 60 * 1000;
@@ -29,19 +29,19 @@ var session_expires = 20 * 60 * 1000;
 passport.use(new LocalStrategy(
   function(username, password, done) {
     password = decodeURIComponent(password);
-    //console.log('check_credentials:' + username + ', ' + password);
+    console.log('check_credentials:' + username + ', ' + password);
 
     db_orm.Person.one({name: username}, function(err, person) {
       if (err) {
-        console.log('Failed login for ' + username + bombay_util.inspect(err));
+        console.log('Failed login for ' + username + util.inspect(err));
         return done(null, false, { message: 'Login Incorrect.'});
       } else if (person) {
         var pem = bombay_util.get_pem_file('crypto/rsa_private.pem');
-        //console.log(pem);
+        console.log(pem);
         var decrypt_password = password;
         var decrypt_person = person.password;
 
-        // console.log(decrypt_person + ', ' + decrypt_password);
+        console.log(decrypt_person + ', ' + decrypt_password);
         try {
           decrypt_password = base64_decode(bombay_util.decrypt(pem, password));
           decrypt_person = bombay_util.decrypt(pem, person.password);
@@ -49,7 +49,7 @@ passport.use(new LocalStrategy(
           console.log(e);
           return done(null, false, { message: 'Unable to decrypt passwords' });
         };
-        // console.log(decrypt_person + ', ' + decrypt_password);
+        console.log(decrypt_person + ', ' + decrypt_password);
         if (username == person.name && decrypt_password == decrypt_person) {
           console.log(username + ' logged in');
           return done(null, person);

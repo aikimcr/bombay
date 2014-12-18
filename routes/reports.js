@@ -5,9 +5,10 @@
 var fs = require('fs');
 var url = require('url');
 var path = require('path');
-var db_orm = require('lib/db_orm');
-var util = require('lib/util');
-var path_util = require('lib/path_util');
+
+var db_orm = require('../lib/db_orm');
+var util = require('../lib/util');
+var path_util = require('../lib/path_util');
 
 exports.getReports = function(req, res) {
   var user = util.getUser(req);

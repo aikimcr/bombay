@@ -43,12 +43,12 @@ div.app_context(id="band_songs", data-bind="visible: $root.current_tab().value =
                     div(data-bind="with: filters.min_song_status")
                       input(type="checkbox", data-bind="checked: active")
                       div.filter_label Min
-                      select(data-bind="value: filter_value, options: $root.song_status_map, optionsText: 'value_text', optionsValue: 'value'");
+                      select(data-bind="value: filter_value, options: $root.song_status_map, optionsText: 'value_text', optionsValue: 'value'")
 
                     div(data-bind="with: filters.max_song_status")
                       input(type="checkbox", data-bind="checked: active")
                       div.filter_label Max
-                      select(data-bind="value: filter_value, options: $root.song_status_map, optionsText: 'value_text', optionsValue: 'value'");
+                      select(data-bind="value: filter_value, options: $root.song_status_map, optionsText: 'value_text', optionsValue: 'value'")
 
                   div.filter
                     div.filter_title Average Rating

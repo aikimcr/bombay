@@ -27,13 +27,17 @@
     "base64": "*",
     "emailjs": "*",
     "orm": "*",
-    "q": "*"
+    "q": "1.1.2"
   },
   "devDependencies": {
     "grunt": "*",
     "grunt-bower-concat": "*",
     "grunt-bower-task": "*",
-    "grunt-bower-install-simple": "*"
+    "grunt-bower-install-simple": "*",
+    "grunt-bower-clean": "*",
+    "grunt-exec": "*",
+    "grunt-mkdir": "*",
+    "grunt-shell": "*"
   },
   "repository": {
     "type": "git",

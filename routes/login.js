@@ -2,7 +2,7 @@
 /*
  * GET Login
  */
-var util = require('lib/util');
+var util = require('../lib/util');
 
 exports.login = function(req, res) {
   var pem = util.get_pem_file('crypto/rsa_public.pem');

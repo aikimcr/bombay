@@ -4,8 +4,8 @@
 var fs = require('fs');
 
 // Bombay modules
-var util = require('lib/util');
-var path_util = require('lib/path_util');
+var util = require('../lib/util');
+var path_util = require('../lib/path_util');
 
 var public_pem = util.get_public_pem();
 var private_pem = util.get_private_pem();

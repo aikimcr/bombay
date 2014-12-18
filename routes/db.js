@@ -2,11 +2,12 @@
 /*
  * Database manipulation methods.
  */
-var db_orm = require('lib/db_orm');
-var constants = require('lib/constants');
-var util = require('lib/util');
-var request = require('lib/request');
 var base64_decode = require('base64').decode;
+
+var db_orm = require('../lib/db_orm');
+var constants = require('../lib/constants');
+var util = require('../lib/util');
+var request = require('../lib/request');
 
 function handleJSONResponse(res, err, result) {
   if(err) {

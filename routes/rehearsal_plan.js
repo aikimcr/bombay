@@ -1,8 +1,9 @@
 /*
  * Route handlers for rehearsal plans
  */
-var rehearsal_plan = require('lib/rehearsal_plan');
 var flow = require('flow');
+
+var rehearsal_plan = require('../lib/rehearsal_plan');
 var db_route = require('./db');
 
 exports.getPlanLists = flow.define(

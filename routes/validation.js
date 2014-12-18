@@ -3,7 +3,7 @@
  */
 var node_util = require('util');
 
-var db_orm = require('lib/db_orm');
+var db_orm = require('../lib/db_orm');
 
 var permission_error = 'Permission Denied';
 

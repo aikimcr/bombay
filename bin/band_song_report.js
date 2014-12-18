@@ -11,9 +11,9 @@ var flow = require('flow');
 var jade = require('jade');
 
 // Bombay packages
-var db_orm = require('lib/db_orm');
-var path_util = require('lib/path_util');
-var mail_util = require('lib/mail_util');
+var db_orm = require('../lib/db_orm');
+var path_util = require('../lib/path_util');
+var mail_util = require('../lib/mail_util');
 
 function flatten(err, rows, callback) {
   if (err) throw err;
