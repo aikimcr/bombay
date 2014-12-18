@@ -37,7 +37,8 @@
     "grunt-bower-clean": "*",
     "grunt-exec": "*",
     "grunt-mkdir": "*",
-    "grunt-shell": "*"
+    "grunt-shell": "*",
+    "should": "*"
   },
   "repository": {
     "type": "git",

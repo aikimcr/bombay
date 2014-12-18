@@ -106,7 +106,7 @@ function Manager() {
   this.createRehearsalPlanLearningSong();
 
   this.tab_list = ko.computed(function() {
-    var result = tab_list = [
+    var result = [
       { value: 3, value_text: 'My Bands' },
       { value: 4, value_text: 'Band Members' },
       { value: 5, value_text: 'Artists' },

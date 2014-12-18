@@ -6,7 +6,14 @@ module.exports = function(grunt) {
     bower: {
       install: {
         options: {
-          targetDir: './public/javascripts/lib'
+          targetDir: './public/javascripts/lib',
+          install: false
+        }
+      },
+      dev: {
+        options: {
+          targetDir: 'public/test/lib',
+          install: false
         }
       }
     },
@@ -41,7 +48,7 @@ module.exports = function(grunt) {
           'sinon-chai'
         ],
         mainFiles: {
-          sinon: 'sinon.js',
+          sinon: 'pkg/sinon.js',
           'sinon-chai': 'sinon-chai.js'
         }
       }
@@ -64,14 +71,6 @@ module.exports = function(grunt) {
         create: ['crypto']
       }
     },
-    shell: {
-      crypto_key: 'openssl genrsa -out ./crypto/rsa_private.pem',
-      options: {
-        env: {
-          PATH: '/bin:/usr/bin:/usr/local/bin'
-        }
-      }
-    },
     database: {
       bombay: {
         db_name: './bombay.db',
@@ -83,9 +82,34 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-bower-concat');
   grunt.loadNpmTasks('grunt-bower-task');
   grunt.loadNpmTasks('grunt-bower-install-simple');
-  grunt.loadNpmTasks('grunt-exec');
   grunt.loadNpmTasks('grunt-mkdir');
-  grunt.loadNpmTasks('grunt-shell');
+
+  grunt.registerTask('build-sinon', function() {
+    var done = this.async();
+    grunt.file.setBase('bower_components/sinon');
+    grunt.util.spawn({
+      cmd: 'npm',
+      args: ['install', '--save-dev']
+    }, function(err, result, code) {
+      if (err) {
+        grunt.fail.fatal('Got ' + err.toString() + ' doing npm install for sinon');
+      } else if (code === 0) {
+        grunt.util.spawn({
+          cmd: './build'
+        }, function(err, result, code) {
+          if (err) {
+            grunt.fail.fatal('Got ' + err.toString() + ' doing build for sinon');
+          } else if (code === 0) {
+            done();
+          } else {
+            grunt.fail.fatal(result.toString());
+          }
+        });
+      } else {
+        grunt.fail.fatal(result.toString());
+      }
+    });
+  });
 
   grunt.registerTask('rsa_files', function() {
     var done = this.async();
