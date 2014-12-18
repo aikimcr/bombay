@@ -29,7 +29,7 @@ var session_expires = 20 * 60 * 1000;
 passport.use(new LocalStrategy(
   function(username, password, done) {
     password = decodeURIComponent(password);
-    console.log('check_credentials:' + username + ', ' + password);
+    //console.log('check_credentials:' + username + ', ' + password);
 
     db_orm.Person.one({name: username}, function(err, person) {
       if (err) {
@@ -37,11 +37,11 @@ passport.use(new LocalStrategy(
         return done(null, false, { message: 'Login Incorrect.'});
       } else if (person) {
         var pem = bombay_util.get_pem_file('crypto/rsa_private.pem');
-        console.log(pem);
+        //console.log(pem);
         var decrypt_password = password;
         var decrypt_person = person.password;
 
-        console.log(decrypt_person + ', ' + decrypt_password);
+        //console.log(decrypt_person + ', ' + decrypt_password);
         try {
           decrypt_password = base64_decode(bombay_util.decrypt(pem, password));
           decrypt_person = bombay_util.decrypt(pem, person.password);
@@ -49,7 +49,7 @@ passport.use(new LocalStrategy(
           console.log(e);
           return done(null, false, { message: 'Unable to decrypt passwords' });
         };
-        console.log(decrypt_person + ', ' + decrypt_password);
+        //console.log(decrypt_person + ', ' + decrypt_password);
         if (username == person.name && decrypt_password == decrypt_person) {
           console.log(username + ' logged in');
           return done(null, person);
@@ -121,7 +121,7 @@ passport.use('remember-me', new RememberMeStrategy(
     db_orm.Session.one({session_token: token}, function(err, session) {
       if (err) {
         console.log('No session found\n' + util.inspect(err));
-        return done(null, false, { message: 'No Session found' });
+        return done(null, false, { message: 'No Session found (Error)' });
       } else if (session == null) {
         console.log('No session found');
         return done(null, false, { message: 'No Session found' });
@@ -194,7 +194,7 @@ app.use(express.methodOverride());
 app.use(express.cookieParser('Plover-Indy-Girlfriend-Dragon'));
 app.use(express.session({
   secret: 'Plover-Indy-Girlfriend-Dragon',
-  cookie: { maxAge: 10 * 1000 }, // Refresh the session every ten seconds
+  cookie: { maxAge: 60 * 1000 }, // Refresh the session every minute
 }));
 app.use(flash());
 app.use(passport.initialize());

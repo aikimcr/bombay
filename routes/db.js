@@ -26,15 +26,17 @@ exports.getModel = function(res, model_name, row_id, sort, result_key, opt_row_t
   if (row_id) {
     db_orm[model_name].get(row_id, function(err, row) {
       var result = {};
-      result[result_key] = row_transform(flatten(row));
+      if (!err) result[result_key] = row_transform(flatten(row));
       handleJSONResponse(res, err, result);
     });
   } else {
     db_orm[model_name].find(sort, function(err, rows) {
       var result = {};
-      result['all_' + result_key + 's'] = rows.map(function(row) {
-        return row_transform(flatten(row));
-      });
+      if (!err) {
+        result['all_' + result_key + 's'] = rows.map(function(row) {
+          return row_transform(flatten(row));
+        });
+      }
       handleJSONResponse(res, err, result);
     });
   }
@@ -507,7 +509,7 @@ exports.deleteRequest = function(req, res) {
           }
         }.bind(this));
       }
-    });
+    }.bind(this));
   } else {
     res.json(403, 'Not logged in');
   }
