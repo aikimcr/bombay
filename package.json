@@ -30,6 +30,7 @@
     "q": "1.1.2"
   },
   "devDependencies": {
+    "deep-diff": "*",
     "grunt": "*",
     "grunt-bower-concat": "*",
     "grunt-bower-task": "*",

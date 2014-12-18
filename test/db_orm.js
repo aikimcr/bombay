@@ -3,9 +3,9 @@ var should = require('should');
 var fs = require('fs');
 var sqlite3 = require('sqlite3');
 
-var test_util = require('test/lib/util');
+var test_util = require('./lib/util');
 
-var bombay_db = require('lib/db_orm');
+var bombay_db = require('../lib/db_orm');
 
 describe('db_orm', function() {
   describe('config', function() {

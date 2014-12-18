@@ -1,12 +1,12 @@
 var should = require('should');
 var util = require('util');
 var diff = require('deep-diff').diff;
-var db_orm = require('lib/db_orm');
 
-var test_util = require('test/lib/util');
+var test_util = require('./lib/util');
 
-var rehearsal_plan = require('lib/rehearsal_plan');
-var rehearsal_plan_routes = require('routes/rehearsal_plan');
+var db_orm = require('../lib/db_orm');
+var rehearsal_plan = require('../lib/rehearsal_plan');
+var rehearsal_plan_routes = require('../routes/rehearsal_plan');
 
 function artist_and_song_sql(sql, status_list, rating_list, artist_id, song_id, band_song_id) {
   var artist_name = util.format('Artist %d', artist_id);

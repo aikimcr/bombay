@@ -4,7 +4,7 @@
 var fs = require('fs');
 
 process.env.db_name = 'bombay_test.db';
-var db_orm = require('lib/db_orm');
+var db_orm = require('../../lib/db_orm');
 
 exports.resetDb = function(done) {
   var sql = fs.readFileSync('./sql/schema.sql', 'utf8');

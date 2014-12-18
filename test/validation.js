@@ -1,12 +1,12 @@
 var should = require('should');
 
 var fs = require('fs');
-var node_util = require('util');
+var util = require('util');
 
-var test_util = require('test/lib/util');
+var test_util = require('./lib/util');
 
-var validate = require('routes/validation');
-var db_orm = require('lib/db_orm');
+var db_orm = require('../lib/db_orm');
+var validate = require('../routes/validation');
 
 describe('validation', function() {
   var req;
@@ -31,7 +31,7 @@ describe('validation', function() {
   beforeEach(function(done) {
     res = {
       json: function(result) {
-        done('Attempt to return json result ' + node_util.inspect(result));
+        done('Attempt to return json result ' + util.inspect(result));
       },
       redirect: function(url) {
         done('Attempt to redirect to ' + url);

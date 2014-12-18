@@ -4,6 +4,7 @@ crypto/rsa_private.pem.old
 crypto/rsa_public.pem
 crypto/rsa_public.pem.old
 bombay.db
+bombay_test.db
 
 db_backup
 public/javascripts/lib

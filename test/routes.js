@@ -2,15 +2,14 @@ var should = require('should');
 var fs = require('fs');
 var base64_encode = require('base64').encode;
 
-var test_util = require('test/lib/util');
+var test_util = require('./lib/util');
 
-var db_orm = require('lib/db_orm');
-var constants = require('lib/constants');
-var encryption = require('routes/encryption');
-var request = require('lib/request');
-var routes = require('routes/db');
-var util = require('lib/util');
-var constants = require('lib/constants');
+var db_orm = require('../lib/db_orm');
+var constants = require('../lib/constants');
+var encryption = require('../routes/encryption');
+var request = require('../lib/request');
+var routes = require('../routes/db');
+var util = require('../lib/util');
 
 describe('routes', function() {
   before(function(done) { test_util.db.resetDb(done); });

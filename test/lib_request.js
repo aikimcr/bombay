@@ -3,12 +3,11 @@ var should = require('should');
 var fs = require('fs');
 var util = require('util');
 
-var test_util = require('test/lib/util');
+var test_util = require('./lib/util');
 
-var constants = require('lib/constants');
-var db_orm = require('lib/db_orm');
-
-var request = require('lib/request');
+var constants = require('../lib/constants');
+var db_orm = require('../lib/db_orm');
+var request = require('../lib/request');
 
 describe('manage_requests', function() {
   describe('make a request to join a band', function() {
