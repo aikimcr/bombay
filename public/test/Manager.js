@@ -218,19 +218,21 @@ describe('Instantiate Manager', function() {
       try {
         should.not.exist(err);
 
-        should.exist(manager.current_person());
-        should.exist(manager.current_band());
+        setTimeout(function() {
+          should.exist(manager.current_person());
+          should.exist(manager.current_band());
 
-        manager.band.list.list().length.should.be.greaterThan(0);
-        manager.person.list.list().length.should.be.greaterThan(0);
-        manager.artist.list.list().length.should.be.greaterThan(0);
-        manager.song.list.list().length.should.be.greaterThan(0);
-        manager.band_member.list.list().length.should.be.greaterThan(0);
-        manager.band_song.list.list().length.should.be.greaterThan(0);
-        manager.song_rating.list.list().length.should.be.greaterThan(0);
-        manager.request.list.list().length.should.be.greaterThan(0);
+          manager.band.list.list().length.should.be.greaterThan(0);
+          manager.person.list.list().length.should.be.greaterThan(0);
+          manager.artist.list.list().length.should.be.greaterThan(0);
+          manager.song.list.list().length.should.be.greaterThan(0);
+          manager.band_member.list.list().length.should.be.greaterThan(0);
+          manager.band_song.list.list().length.should.be.greaterThan(0);
+          manager.song_rating.list.list().length.should.be.greaterThan(0);
+          manager.request.list.list().length.should.be.greaterThan(0);
 
-        done();
+          done();
+        }, 501);
       } catch(err) {
         done(err);
       }

@@ -1158,14 +1158,20 @@ Manager.prototype.loadMembers_ = function() {
       if (err) return reject(err, result);
 
       if (result.length > 0) {
-        var memberships = this.current_person().bandMemberList();
+        var iv = setInterval(function() {
+          if (this.current_person()) {
+            var memberships = this.current_person().bandMemberList();
 
-        if (memberships.length > 0) {
-          this.current_band(this.band.list.get(memberships[0].band_id()));
-        }
+            if (memberships.length > 0) {
+              this.current_band(this.band.list.get(memberships[0].band_id()));
+            }
+            
+            clearInterval(iv);
+          }
+        }.bind(this), 500);
+        
+        return resolve(null, result);
       }
-
-      return resolve(null, result);
     }.bind(this));
   }.bind(this));
 };
