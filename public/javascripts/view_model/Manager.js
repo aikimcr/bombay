@@ -740,13 +740,13 @@ Manager.prototype.request_actions = function(row) {
   }];
 
   var is_originator = function() {
-    return (manager.current_person().system_admin() ||
+    return ((manager.current_person() && manager.current_person().system_admin()) ||
             (row.request_type() == constants.request_type.join_band && row.isSelf()) ||
             (row.request_type() == constants.request_type.add_band_member && row.isAdmin()));
   };
 
   var is_owner = function() {
-    return (manager.current_person().system_admin() ||
+    return ((manager.current_person() && manager.current_person().system_admin()) ||
             (row.request_type() == constants.request_type.join_band && row.isAdmin()) ||
             (row.request_type() == constants.request_type.add_band_member && row.isSelf()));
   };
