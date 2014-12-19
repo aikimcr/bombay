@@ -221,7 +221,8 @@ module.exports = function(grunt) {
     }
 
     grunt.util.spawn({
-      cmd: './bin/update_db.js',
+      cmd: 'node',
+      args: ['./bin/update_db.js'],
     }, function(err, result, code) {
       if (err) {
         grunt.fail.fatal('Got ' + err.toString() + ' updating the database schema');
