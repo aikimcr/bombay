@@ -3,12 +3,17 @@ node_js:
   - "0.10"
 
 before_install: 
-  - sudo apt-get install sqlite3
   - npm install -g grunt-cli
   - npm install -g bower
   - npm install -g mocha
   - npm install -g should
 
 install: npm install
-before_script: grunt dev
+before_script:
+  - pwd
+  - grunt dev
+
 script: npm test
+after_failure:
+  - pwd
+  - ls -l *
