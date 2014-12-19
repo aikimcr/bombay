@@ -1,4 +1,4 @@
-#! /usr/local/bin/node
+#! /usr/bin/node
 var util = require('util');
 
 var db_orm = require('../lib/db_orm');

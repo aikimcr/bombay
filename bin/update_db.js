@@ -1,4 +1,4 @@
-#! /usr/local/bin/node
+#! /usr/bin/node
 /*
  * Read schema changes and apply them to the database.
  **/

@@ -1,4 +1,4 @@
-#! /usr/local/bin/node
+#! /usr/bin/node
 
 // Node Standard includes
 var fs = require('fs');

@@ -1,4 +1,4 @@
-#! /usr/local/bin/node
+#! /usr/bin/node
 
 // Node standard modules
 var fs = require('fs');
