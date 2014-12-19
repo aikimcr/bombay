@@ -103,11 +103,11 @@ module.exports = function(grunt) {
             grunt.file.setBase('../..');
             done();
           } else {
-            grunt.fail.fatal(result.toString());
+            grunt.fail.fatal('build command failure ' + result.toString());
           }
         });
       } else {
-        grunt.fail.fatal(result.toString());
+        grunt.fail.fatal('npm install command failure ' + result.toString());
       }
     });
   });
@@ -143,11 +143,11 @@ module.exports = function(grunt) {
               //grunt.log.writeln(result.toString());
               done();
             } else {
-              grunt.fail.fatal(result.toString());
+              grunt.fail.fatal('openssl rsa command failure ' + result.toString());
             }
           });
       } else {
-        grunt.fail.fatal(result.toString());
+        grunt.fail.fatal('openssl genrsa command failure ' + result.toString());
       }
     });
   });
@@ -195,11 +195,11 @@ module.exports = function(grunt) {
             } else if (code === 0) {
               done();
             } else {
-              grunt.fail.fatal(result.toString());
+              grunt.fail.fatal('sqlite3 command failure ' + result.toString());
             }
           }.bind(this));
         } else {
-          grunt.fail.fatal(result.toString());
+          grunt.fail.fatal('chmod command failure ' + result.toString());
         }
       }.bind(this));
     }
@@ -207,6 +207,19 @@ module.exports = function(grunt) {
 
   grunt.registerTask('updatedb', function() {
     var done = this.async();
+    if (!grunt.file.exists('./bin/update_db.js')) {
+      grunt.util.spawn({
+        cmd: 'ls',
+        args: ['-l', '*']
+      }, function(err, result, code) {
+        grunt.fail.warn('No update_db.js found');
+        if (err) grunt.fail.warn(err.toString());
+        if (result) grunt.fail.warn(result.toString());
+        grunt.fail.warn('ls result code:' + code);
+        grunt.fail.fatal('No update_db.js found.');
+      });
+    }
+
     grunt.util.spawn({
       cmd: './bin/update_db.js',
     }, function(err, result, code) {
@@ -215,7 +228,7 @@ module.exports = function(grunt) {
       } else if (code === 0) {
         done();
       } else {
-        grunt.fail.fatal(result.toString());
+        grunt.fail.fatal('update_db command failure ' + result.toString());
       }
     });
   });
