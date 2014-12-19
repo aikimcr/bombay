@@ -11,6 +11,7 @@ before_install:
 install: npm install
 before_script:
   - pwd
+  - ls -l *
   - grunt dev
 
 script: npm test
