@@ -4,6 +4,8 @@ node_js:
 
 before-install: npm install -g grunt-cli
 before-install: npm install -g bower
+before-install: npm install -g mocha
+before-install: npm install -g should
 install: npm install
 before-script: grunt dev
 script: npm test
