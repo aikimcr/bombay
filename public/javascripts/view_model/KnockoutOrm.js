@@ -1,5 +1,7 @@
 function orm() { }
 
+orm.max_compute_rate = 500;
+
 // Table Management
 orm.table = function(context_base, table_name, model_key, url, columns, computes) {
   this.context_base = context_base;
@@ -262,7 +264,7 @@ orm.table.row = function(table, model) {
       var reference_table = column_def['reference_table'];
       this[reference_table.table_name] = ko.computed(function() {
         return reference_table.list.get(this[column_name]());
-      }.bind(this));
+      }.bind(this)).extend({rateLimit: orm.max_compute_rate, method: 'notifyWhenChangeStop'});
 
       var reference_row = reference_table.list.get(this[column_name]());
 
@@ -305,7 +307,7 @@ orm.table.row = function(table, model) {
           } else {
             throw new Error(this.table.table_name + ' has no parent ' + def.parent);
           }
-        }.bind(this));
+        }.bind(this)).extend({rateLimit: orm.max_compute_rate, method: 'notifyWhenChangeStop'});
       } else if ('sum' in def) {
         this[def.name] = ko.computed(function() {
           if (this[def.sum]) {
@@ -313,7 +315,7 @@ orm.table.row = function(table, model) {
           } else {
             return null;
           }
-        }.bind(this));
+        }.bind(this)).extend({rateLimit: orm.max_compute_rate, method: 'notifyWhenChangeStop'});
       } else if ('average' in def) {
         return this[def.name] = ko.computed(function() {
           if (this[def.average]) {
@@ -323,7 +325,7 @@ orm.table.row = function(table, model) {
           } else {
             return null;
           }
-        }.bind(this));
+        }.bind(this)).extend({rateLimit: orm.max_compute_rate, method: 'notifyWhenChangeStop'});
       } else if ('crossref' in def) {
         return this[def.name] = ko.computed(function() {
           if (this[def.details]) {
@@ -347,7 +349,7 @@ orm.table.row = function(table, model) {
           } else {
             return null;
           }
-        }.bind(this));
+        }.bind(this)).extend({rateLimit: orm.max_compute_rate, method: 'notifyWhenChangeStop'});
       } else if ('sub_join' in def) {
         return this[def.name] = ko.computed(function() {
           if (this[def.sub_join]) {
@@ -376,15 +378,15 @@ orm.table.row = function(table, model) {
           } else {
             return null;
           }
-        }.bind(this));
+        }.bind(this)).extend({rateLimit: orm.max_compute_rate, method: 'notifyWhenChangeStop'});
       } else if ('map' in def) {
         return this[def.name] = ko.computed(function() {
           return def.map[this[def.column_name]()];
-        }.bind(this));
+        }.bind(this)).extend({rateLimit: orm.max_compute_rate, method: 'notifyWhenChangeStop'});
       } else if ('compute' in def) {
         return this[def.name] = ko.computed(function() {
           return def.compute(this);
-        }.bind(this));
+        }.bind(this)).extend({rateLimit: orm.max_compute_rate, method: 'notifyWhenChangeStop'});
       }
     } catch (err) {
       var def_string = Object.keys(def).map(function(key) {
@@ -398,7 +400,7 @@ orm.table.row = function(table, model) {
 
   this.testBind = ko.computed(function() {
     return "YO! " + this.toString();
-  }.bind(this));
+  }.bind(this)).extend({rateLimit: orm.max_compute_rate, method: 'notifyWhenChangeStop'});
 };
 
 orm.table.row.prototype.addJoins = function(join_table, join_column) {
@@ -412,7 +414,7 @@ orm.table.row.prototype.addJoins = function(join_table, join_column) {
       return ko.utils.arrayFilter(join_table.list.list(), function(join_row) {
         return join_row[join_column]() == this.id();
       }.bind(this));
-    }.bind(this));
+    }.bind(this)).extend({rateLimit: orm.max_compute_rate, method: 'notifyWhenChangeStop'});
 
     this[accessor].views = {};
     Object.keys(join_table.views).forEach(function(view_name) {
@@ -427,7 +429,7 @@ orm.table.row.prototype.addJoins = function(join_table, join_column) {
   if (!this[counter]) {
     this[counter] = ko.computed(function() {
       return this[accessor]().length;
-    }.bind(this));
+    }.bind(this)).extend({rateLimit: orm.max_compute_rate, method: 'notifyWhenChangeStop'});
   }
 };
 
@@ -721,7 +723,7 @@ orm.table.list.sort = function(list) {
     } else {
       return this.list();
     }
-  }.bind(this));
+  }.bind(this)).extend({rateLimit: orm.max_compute_rate, method: 'notifyWhenChangeStop'});
 };
 
 orm.table.list.sort.prototype.addCompare = function(name, label, compare) {
@@ -778,7 +780,7 @@ orm.table.list.filter = function(list) {
     } else {
       return this.list();
     }
-  }.bind(this));
+  }.bind(this)).extend({rateLimit: orm.max_compute_rate, method: 'notifyWhenChangeStop'});
 };
 
 orm.table.list.filter.prototype.setCompare = function(filter_compare) {
@@ -874,7 +876,7 @@ orm.table.list.filter.columnFilterFactory = function(list, filter_type, column_n
         if (row_a.label > row_b.label) return 1;
         return 0;
       });
-    }.bind(this));
+    }.bind(this)).extend({rateLimit: orm.max_compute_rate, method: 'notifyWhenChangeStop'});
   } else if (filter_type === 'id') {
     filter.setCompare(function(column_name, item) {
       if (this.filter_value() == null || this.filter_value() === '') return true;
@@ -891,7 +893,7 @@ orm.table.list.filter.columnFilterFactory = function(list, filter_type, column_n
         if (row_a.label > row_b.label) return 1;
         return 0;
       });
-    }.bind(this));
+    }.bind(this)).extend({rateLimit: orm.max_compute_rate, method: 'notifyWhenChangeStop'});
   }
 
   return filter;

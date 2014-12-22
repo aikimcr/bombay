@@ -695,7 +695,7 @@ Manager.prototype.createBandSong = function() {
     } else {
       return [];
     }
-  }.bind(this)).extend({ throttle: 500 });
+  }.bind(this)).extend({rateLimit: orm.max_compute_rate, method: 'notifyWhenChangeStop'});
 
   this.band_song.add_song_form = {
     showForm: function(show_form_object, event) {
