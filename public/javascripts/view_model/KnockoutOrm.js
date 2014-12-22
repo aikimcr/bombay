@@ -233,7 +233,7 @@ orm.table.prototype.showForm = function(table, event, form_url, opt_validate, op
   }
 
   this.form.on('update', function(result) {
-    this.updateFromResult(result, handleErrors.bind(this)).bind(this);
+    this.updateFromResult(result, handleErrors.bind(this));
     return last_err == null;
   }.bind(this));
 

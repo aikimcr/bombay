@@ -13,7 +13,7 @@ div
       div.dialog_body(data-bind="if: table.context_base.current_person")
         div.title(data-bind="text: message")
         form(data-bind="submit: submit")
-          input(name="action", type="hidden", value="join_band")
+          input(name="action", url_param, type="hidden", value="join_band")
           div(data-bind="searchableSelect: row.band_id, \
                          optionsList: table.context_base.current_person().otherBands, \
                          optionsValue: 'id', \
