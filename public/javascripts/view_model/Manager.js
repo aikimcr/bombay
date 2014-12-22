@@ -434,13 +434,13 @@ Manager.prototype.createSongTable = function() {
     key_signature: {type: 'enum', value_map: this.key_signature_map}
   }, {
     filters: [{
-      name: 'max_band_count',
+      name: 'max_band_song_count',
       type: 'max',
-      column_name: 'bandCount'
+      column_name: 'bandSongCount'
     }, {
-      name: 'min_band_count',
+      name: 'min_band_song_count',
       type: 'min',
-      column_name: 'bandCount'
+      column_name: 'bandSongCount'
     }, {
       name: 'artist_id',
       type: 'id',

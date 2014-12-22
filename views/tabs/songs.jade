@@ -40,12 +40,12 @@ div.app_context(id="songs", data-bind="visible: $root.current_tab().value == 6")
 
                   div.filter
                     div.filter_title Band Count
-                    div(data-bind="with: filters.min_band_count")
+                    div(data-bind="with: filters.min_band_song_count")
                       input(type="checkbox", data-bind="checked: active")
                       div.filter_label Min
                       input(type="number", inputmode="numeric", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
 
-                    div(data-bind="with: filters.max_band_count")
+                    div(data-bind="with: filters.max_band_song_count")
                       input(type="checkbox", data-bind="checked: active")
                       div.filter_label Max
                       input(type="number", inputmode="numeric", data-bind="value: filter_value, valueUpdate: 'afterkeydown'")
